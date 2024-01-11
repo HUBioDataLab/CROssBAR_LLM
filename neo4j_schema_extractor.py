@@ -62,7 +62,7 @@ def create_graph_schema_variables(URI: str, user: str, password: str, db_name: s
         node_results_filtered = [_dict for _dict in node_results if _dict["labels"] in selected_nodes]
 
         # relation type filtering
-        records, _, _ = driver.execute_query(rel_query, database_="crossbar")  
+        records, _, _ = driver.execute_query(rel_query, database_=db_name)  
         edge_results_filtered = []
         to_be_replaced = ["(", ")", ":", "[", "]", ">", "<"]
         for res in records:        
@@ -78,7 +78,7 @@ def create_graph_schema_variables(URI: str, user: str, password: str, db_name: s
                 edge_results_filtered.append(res.values()[0])
 
         # relation property filtering
-        records, _, _ = driver.execute_query(rel_properties_query, database_="crossbar")
+        records, _, _ = driver.execute_query(rel_properties_query, database_=db_name)
 
         edge_properties_results_filtered = []
         for res in records:
