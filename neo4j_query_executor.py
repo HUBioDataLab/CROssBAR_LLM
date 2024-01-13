@@ -1,5 +1,9 @@
 import neo4j
 
+from pydantic import validate_call
+
+
+@validate_call
 def execute(URI: str, user: str, password: str, db_name: str, 
             query: str, top_k: int | None):
     
