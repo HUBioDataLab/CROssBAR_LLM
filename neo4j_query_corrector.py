@@ -1,7 +1,10 @@
 import re
 from collections import namedtuple
 
+from pydantic import validate_call
 
+
+@validate_call
 def extract_cypher(text: str) -> str:
     """Extract Cypher code from a text.
 
@@ -19,12 +22,9 @@ def extract_cypher(text: str) -> str:
 
     return matches[0] if matches else text
 
-
-import re
-from collections import namedtuple
-
 Schema = namedtuple("Schema", ["left_node", "relation", "right_node"])
 
+@validate_call
 def load_schemas(str_schemas: str) -> list[Schema]:
     """
     Args:
@@ -238,10 +238,10 @@ class QueryCorrector:
 
 
 # PREPARE EDGE SCHEMA
-    
-def correct_query(query: str, edge_schema) -> str:
+@validate_call
+def correct_query(query: str, edge_schema: list) -> str:
     query = extract_cypher(query.strip("\n"))
-
+    
     str_schemas = ""
     to_be_replaced = ["(", ")", ":", "[", "]", ">", "<"]
     for e in edge_schema:
@@ -254,7 +254,6 @@ def correct_query(query: str, edge_schema) -> str:
 
         add =", ("+", ".join(splitted_corrected)+")"
         str_schemas += add
-
 
     schemas = load_schemas(str_schemas.strip(",").strip())
     query_corrector = QueryCorrector(schemas)
