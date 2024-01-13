@@ -1,16 +1,9 @@
 import neo4j
 from functools import cache
 
-from timeit import default_timer as timer
+from pydantic import validate_call
 
-def timer_func(func):
-    def wrapper(*args, **kwargs):
-        t1 = timer()
-        result = func(*args, **kwargs)
-        t2 = timer()
-        print(f'{func.__name__}() executed in {(t2-t1):.6f}s')
-        return result
-    return wrapper
+from utils import timer_func
 
 node_properties_query = """
 CALL apoc.meta.data()
@@ -37,9 +30,10 @@ UNWIND other AS other_node
 RETURN "(:" + label + ")-[:" + property + "]->(:" + toString(other_node) + ")" AS output
 """
 
+@validate_call
 @timer_func
 @cache
-def create_graph_schema_variables(URI: str, user: str, password: str, db_name: str):
+def create_graph_schema_variables(URI: str, user: str, password: str, db_name: str) -> dict[str, list]:
     AUTH = (user, password)
 
     with neo4j.GraphDatabase.driver(URI, auth=AUTH) as driver:
