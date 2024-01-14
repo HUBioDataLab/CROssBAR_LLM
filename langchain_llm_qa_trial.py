@@ -2,8 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # Import required modules for Neo4J connection and schema extraction
-from neo4j_schema_extractor import create_graph_schema_variables
-from neo4j_query_executor import execute
+from neo4j_query_executor_extractor import Neo4jGraphHelper
 
 # Import the Language Model wrappers for OpenAI and Google Generative AI
 from langchain.llms import OpenAI
@@ -40,26 +39,16 @@ class Neo4JConnection:
     It encapsulates the connection details and provides methods to interact with the database.
     """
     def __init__(self, user: str, password: str, db_name: str):
-        self.uri: str = "neo4j://localhost:7687"  # URI for Neo4J database
-        self.user = user
-        self.password = password
-        self.db_name = db_name
-        self.schema = self._create_schema()  # Automatically create the schema on initialization
+        self.graph_helper = Neo4jGraphHelper("neo4j://localhost:7687", user, password, db_name)
+        self.schema = self.graph_helper.create_graph_schema_variables()
 
-    def _create_schema(self) -> dict[str, list]:
-        """
-        Private method to create the graph schema variables.
-        This is done once during initialization.
-        """
-        return create_graph_schema_variables(URI=self.uri, user=self.user, password=self.password, db_name=self.db_name)
-    
     @validate_call
     def execute_query(self, query: str, top_k: int = 5) -> list:
         """
         Method to execute a given Cypher query against the Neo4J database.
         It returns the top k results.
         """
-        return execute(URI=self.uri, user=self.user, password=self.password, db_name=self.db_name, query=query, top_k=top_k)
+        return self.graph_helper.execute(query, top_k)
 
 class OpenAILanguageModel:
     """
