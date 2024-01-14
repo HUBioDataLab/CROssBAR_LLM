@@ -1,0 +1,8 @@
+Questions
+What proteins does the drug named Caffeine target?
+Which Gene is related to Disease named psoriasis?
+Which proteins are targeted by more than one drugs and more than one compounds?
+Return the names of diseases that are mentioned at least 3 source databases and have disgenet score bigger than 0.7
+Which proteins that are mentioned in at least 2 databases and have intact score bigger than or equal to 0.3 are interacting with protein named synaptotagmin-like protein 4
+Which proteins are involved in biological processes that have abbreviation of traceable author statement evidence code in their relationships
+Tell me which diseases are related to gene that is regulated by gene named ALX4
