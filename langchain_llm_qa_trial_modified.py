@@ -16,7 +16,10 @@ from qa_templates import CYPHER_GENERATION_PROMPT, CYPHER_OUTPUT_PARSER_PROMPT
 
 from pydantic import BaseModel, validate_call
 
-from typing import Any, Union
+from typing import Literal, Union
+
+import pandas as pd
+import numpy as np
 
 
 class Config(BaseModel):
@@ -43,7 +46,7 @@ class Neo4JConnection:
         self.db_name = db_name
         self.schema = self._create_schema()  # Automatically create the schema on initialization
 
-    def _create_schema(self):
+    def _create_schema(self) -> dict[str, list]:
         """
         Private method to create the graph schema variables.
         This is done once during initialization.
@@ -51,7 +54,7 @@ class Neo4JConnection:
         return create_graph_schema_variables(URI=self.uri, user=self.user, password=self.password, db_name=self.db_name)
     
     @validate_call
-    def execute_query(self, query: str, top_k: int = 5):
+    def execute_query(self, query: str, top_k: int = 5) -> list:
         """
         Method to execute a given Cypher query against the Neo4J database.
         It returns the top k results.
@@ -89,7 +92,7 @@ class QueryChain:
         self.schema = schema
 
     @validate_call
-    def run_chain(self, question: str):
+    def run_chain(self, question: str) -> str:
         """
         Executes the query chain: generates a query, corrects it, and returns the corrected query.
         """
@@ -104,6 +107,67 @@ class QueryChain:
 
         return corrected_query
     
+
+class RunPipeline:
+
+    def __init__(self, llm_type: Literal["openai", "gemini"] = None):
+        
+        self.config: Config = Config()
+        self.neo4j_connection: Neo4JConnection = Neo4JConnection(self.config.neo4j_usr, 
+                                                                 self.config.neo4j_password, 
+                                                                 self.config.neo4j_db_name)
+        
+        llm_type = llm_type or str(input("Which model (openai / gemini):\n"))
+        
+        if llm_type == "openai":
+            self.llm = OpenAILanguageModel(self.config.openai_api_key).llm
+        elif llm_type == "gemini":
+            self.llm = GoogleGenerativeLanguageModel(self.config.gemini_api_key).llm
+        else:
+            raise ValueError("Unsupported Language Model Type")
+        
+        # define outputs list
+        self.outputs = []
+        
+    @validate_call
+    def run(self, question: str, reset_llm_type: bool = False,
+            llm_type: Literal["openai", "gemini"] = None) -> str:
+
+        if reset_llm_type:
+            self.reset_llm_type(llm_type=llm_type)   
+
+        query_chain: QueryChain = QueryChain(llm=self.llm, schema = self.neo4j_connection.schema)
+
+        corrected_query = query_chain.run_chain(question)
+
+        result = self.neo4j_connection.execute_query(corrected_query)
+
+        final_output = query_chain.qa_chain.run(output=result, input_question=question)
+
+        # add outputs of all steps to a list
+        self.outputs.append((query_chain.generated_query, 
+                          corrected_query,
+                          result,
+                          final_output))
+        
+        return final_output
+    
+    def create_dataframe_from_outputs(self) -> pd.DataFrame:
+        df = pd.DataFrame(self.outputs, columns=["Generated Query", "Corrected Query",
+                                            "Query Result", "Natural Language Answer"])
+        df.replace("", np.nan, inplace=True)
+
+        return df
+    
+    @validate_call
+    def reset_llm_type(self, llm_type: Literal["openai", "gemini"] = None) -> None:
+        if llm_type == "openai":
+            self.llm = OpenAILanguageModel(self.config.openai_api_key).llm
+        elif llm_type == "gemini":
+            self.llm = GoogleGenerativeLanguageModel(self.config.gemini_api_key).llm
+        else:
+            raise ValueError("Unsupported Language Model Type")
+
 
 def main():
     """
@@ -129,7 +193,7 @@ def main():
         raise ValueError("Unsupported Language Model Type")
 
     query_chain = QueryChain(llm=llm, schema=neo4j_connection.schema)
-    question = "Which genes are related to Disease named psoriasis?"
+    question = "What proteins does the drug named Caffeine target?"
     corrected_query = query_chain.run_chain(question)
     
     # Print the generated query
