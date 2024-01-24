@@ -1,5 +1,7 @@
 import os
+import logging
 from dotenv import load_dotenv
+from datetime import datetime
 
 # Import required modules for Neo4J connection and schema extraction
 from neo4j_query_executor_extractor import Neo4jGraphHelper
@@ -19,6 +21,15 @@ from typing import Literal, Union
 
 import pandas as pd
 import numpy as np
+
+
+# Get current date for log filename
+current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+log_filename = f"query_log_{current_date}.log"
+
+# Configure logging with the date-based filename
+logging.basicConfig(filename=log_filename, level=logging.INFO, 
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class Config(BaseModel):
@@ -79,6 +90,7 @@ class QueryChain:
         self.cypher_chain = LLMChain(llm=llm, prompt=CYPHER_GENERATION_PROMPT, verbose = verbose)
         self.qa_chain = LLMChain(llm=llm, prompt=CYPHER_OUTPUT_PARSER_PROMPT, verbose = verbose)
         self.schema = schema
+        self.verbose = verbose
 
     @validate_call
     def run_chain(self, question: str) -> str:
@@ -93,6 +105,10 @@ class QueryChain:
         
 
         corrected_query = correct_query(query=self.generated_query, edge_schema=self.schema["edges"])
+
+        # Logging generated and corrected queries
+        logging.info(f"Generated Query: {self.generated_query}")
+        logging.info(f"Corrected Query: {corrected_query}")
 
         return corrected_query
     
@@ -125,13 +141,20 @@ class RunPipeline:
         if reset_llm_type:
             self.reset_llm_type(llm_type=llm_type)   
 
+        logging.info(f"Selected Language Model: {self.llm.model_name}")
+        logging.info(f"Question: {question}")
+
         query_chain: QueryChain = QueryChain(llm=self.llm, schema = self.neo4j_connection.schema)
 
         corrected_query = query_chain.run_chain(question)
 
         result = self.neo4j_connection.execute_query(corrected_query)
 
+        logging.info(f"Query Result: {result}")
+
         final_output = query_chain.qa_chain.run(output=result, input_question=question)
+
+        logging.info(f"Natural Language Answer: {final_output}")
 
         # add outputs of all steps to a list
         self.outputs.append((query_chain.generated_query, 
@@ -163,43 +186,23 @@ def main():
     Main function to execute the flow of operations.
     It initializes all necessary classes and executes the query generation, execution, and parsing process.
     """
-    # ANSI color codes for text formatting
-    ANSI_CYAN = '\033[96m'
-    ANSI_GREEN = '\033[92m'
-    ANSI_YELLOW = '\033[93m'
-    ANSI_RESET = '\033[0m'
-
-    config = Config()
-    neo4j_connection = Neo4JConnection(config.neo4j_usr, config.neo4j_password, config.neo4j_db_name)
-
-    llm_type = input("Which model (openai / gemini):\n")
-    llm = None
-    if llm_type == "openai":
-        llm = OpenAILanguageModel(config.openai_api_key).llm
-    elif llm_type == "gemini":
-        llm = GoogleGenerativeLanguageModel(config.gemini_api_key).llm
-    else:
-        raise ValueError("Unsupported Language Model Type")
-
-    query_chain = QueryChain(llm=llm, schema=neo4j_connection.schema)
-    question = "What proteins does the drug named Caffeine target?"
-    corrected_query = query_chain.run_chain(question)
     
-    # Print the generated query
-    print(f"{ANSI_CYAN}Generated Query:{ANSI_RESET} {query_chain.generated_query}\n")
+    logging.info("Starting the pipeline...")
+    try:
+        pipeline = RunPipeline()
 
-    # Print the generated query
-    print(f"{ANSI_CYAN}Corrected Query:{ANSI_RESET} {corrected_query}\n")
+        question = str(input("Enter a question:\n"))
+
+        final_output = pipeline.run(question=question)
+
+        print(final_output)
+
+        logging.info("Pipeline finished successfully.")
     
-    result = neo4j_connection.execute_query(corrected_query)
-
-    # Print the query result
-    print(f"{ANSI_GREEN}Query Result:{ANSI_RESET} {result}\n")
-
-    final_output = query_chain.qa_chain.run(output=result, input_question=question)
-
-    # Print the final output in natural language
-    print(f"{ANSI_YELLOW}Natural Language Answer:{ANSI_RESET} {final_output}\n")
+    except Exception as e:
+        logging.error(f"Error in pipeline: {e}")
+        raise e
+    
 
 if __name__ == "__main__":
     main()
