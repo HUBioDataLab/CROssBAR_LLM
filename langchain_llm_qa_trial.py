@@ -123,8 +123,7 @@ class RunPipeline:
         self.config: Config = Config()
         self.neo4j_connection: Neo4JConnection = Neo4JConnection(self.config.neo4j_usr, 
                                                                  self.config.neo4j_password, 
-                                                                 self.config.neo4j_db_name,
-                                                                 verbose=self.verbose)
+                                                                 self.config.neo4j_db_name)
         
         llm_type = llm_type or str(input("Which model (openai / gemini):\n"))
         
