@@ -23,13 +23,13 @@ import pandas as pd
 import numpy as np
 
 
-# Get current date for log filename
-current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-log_filename = f"query_log_{current_date}.log"
-
-# Configure logging with the date-based filename
-logging.basicConfig(filename=log_filename, level=logging.INFO, 
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+def configure_logging(verbose=False, log_filename="query_log.log"):
+    log_handlers = [logging.FileHandler(log_filename)]
+    if verbose:
+        log_handlers.append(logging.StreamHandler())
+    
+    logging.basicConfig(handlers=log_handlers, level=logging.INFO, 
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class Config(BaseModel):
@@ -59,7 +59,9 @@ class Neo4JConnection:
         Method to execute a given Cypher query against the Neo4J database.
         It returns the top k results.
         """
-        return self.graph_helper.execute(query, top_k)
+        results = self.graph_helper.execute(query, top_k)
+
+        return results
 
 class OpenAILanguageModel:
     """
@@ -115,12 +117,14 @@ class QueryChain:
 
 class RunPipeline:
 
-    def __init__(self, llm_type: Literal["openai", "gemini"] = None):
+    def __init__(self, llm_type: Literal["openai", "gemini"] = None, verbose: bool = False):
         
+        self.verbose = verbose
         self.config: Config = Config()
         self.neo4j_connection: Neo4JConnection = Neo4JConnection(self.config.neo4j_usr, 
                                                                  self.config.neo4j_password, 
-                                                                 self.config.neo4j_db_name)
+                                                                 self.config.neo4j_db_name,
+                                                                 verbose=self.verbose)
         
         llm_type = llm_type or str(input("Which model (openai / gemini):\n"))
         
@@ -186,10 +190,17 @@ def main():
     Main function to execute the flow of operations.
     It initializes all necessary classes and executes the query generation, execution, and parsing process.
     """
+
+    current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    log_filename = f"query_log_{current_date}.log"
+
+    verbose_input = input("Enable verbose mode? (yes/no):\n").lower() == 'yes'
+    configure_logging(verbose=verbose_input, log_filename=log_filename)
     
     logging.info("Starting the pipeline...")
+
     try:
-        pipeline = RunPipeline()
+        pipeline = RunPipeline(verbose=verbose_input)
 
         question = str(input("Enter a question:\n"))
 
