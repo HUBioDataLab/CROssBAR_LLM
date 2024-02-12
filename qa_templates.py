@@ -75,7 +75,9 @@ CYPHER_OUTPUT_PARSER_TEMPLATE = """Task:Parse output of Cypher statement to natu
 given question in order to answer it.
 Instructions:
 Output is formatted as list of dictionaries. You will parse them into natural language text based
-on given question.
+on given question. If the generated ouput is empty, then create an error message that says
+'Sorry, the generated Cypher query returned nothing. Please try again with a different version of question.'
+
 Example:
     Cypher Output: [{{'p.node_name': 'ITPR2'}}, {{'p.node_name': 'ITPR3'}}, {{'p.node_name': 'PDE1A'}}]
     Question: What proteins does the drug named Caffeine target?
@@ -88,4 +90,46 @@ Cypher Output:
 Question: 
 {input_question}"""
 
-CYPHER_OUTPUT_PARSER_PROMPT = PromptTemplate(input_variables=["output", "input_question"], template=CYPHER_OUTPUT_PARSER_TEMPLATE)
+CYPHER_OUTPUT_PARSER_PROMPT = PromptTemplate(input_variables=["output", "input_question"], 
+                                             template=CYPHER_OUTPUT_PARSER_TEMPLATE)
+
+
+
+QUESTION_GENERATOR_TEMPLATE = """
+Task: You will generate question types to be translated from text into Cypher query language according to the 
+given neo4j graph database schema. Create a wide variety of questions from provided schema. Use only the schema given to you
+for question generation. Make questions as diverse as possible.
+For some of questions I will provide you schematic representation of question. ∧ symbol means conjunction of paths at shared node type.
+Create following type of questions:
+- Property questions -> From the given type of node and relationship properties create diverse set of questions
+- One-hop questions
+- Two hop questions
+- Three hop questions
+- Counter questions
+- Questions that use and/or/both
+- (node type 1) -> (node type 2) -> (node type 3) ∧ (node type 4) -> (node type 5) -> (node type 3)
+For this given path ask questions about node type 3 or its properties
+- (node type 1) -> (node type 2) - [relation type 1]-> (node type 3) ∧ (node type 4) -> (node type 5) -[relation type 2]-> (node type 3)
+For this given path ask questions about relation type 1 properties or relation type 2 properties
+- (node type 1) -> (node type 2) -> (node type 3) ∧ (node type 4) -> (node type 5) -> (node type 3) ∧ (node type 3) -> (node type 6)
+For this given path ask questions about node type 6 or its properties
+- (node type 1) -> (node type 2) -> (node type 3) ∧ (node type 4) -> (node type 5) -> (node type 3) ∧ (node type 7) -> (node type 8) -> (node type 6) ∧ (node type 3) -> (node type 6)
+For this given path ask questions about node type 6 or its properties
+
+Create 10 questions for each category. Use the provided information in the schema. DO NOT CREATE SAME TYPE OF QUESTIONS. MAKE THEM DIFFERENT.
+
+In the provided schema you will get node and relationship types along with their properties. Here is the schema:
+Nodes:
+{node_types}
+Node properties:
+{node_properties}
+Relationship properties:
+{edge_properties}
+Relationships:
+{edges}
+"""
+
+QUESTION_GENERATOR_PROMPT = PromptTemplate(
+    input_variables=["node_types", "node_properties", "edge_properties", "edges", "question"], 
+    template=QUESTION_GENERATOR_TEMPLATE
+)
