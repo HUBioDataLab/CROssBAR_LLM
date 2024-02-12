@@ -28,12 +28,11 @@ RETURN "(:" + label + ")-[:" + property + "]->(:" + toString(other_node) + ")" A
 """
 
 class Neo4jGraphHelper:
-    def __init__(self, URI, user, password, db_name):
+    def __init__(self, URI: str, user: str, password: str, db_name: str):
         self.URI = URI
         self.AUTH = (user, password)
         self.db_name = db_name
 
-    @validate_call
     @timer_func
     @cache
     def create_graph_schema_variables(self):
@@ -79,7 +78,7 @@ class Neo4jGraphHelper:
         }
 
     @validate_call
-    def execute(self, query, top_k=None):
+    def execute(self, query: str, top_k: int = 5):
         with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
             records, _, _ = driver.execute_query(query, database_=self.db_name)
             results = [res.data() for index, res in enumerate(records) if not top_k or index < top_k]
