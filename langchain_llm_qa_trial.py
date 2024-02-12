@@ -59,9 +59,7 @@ class Neo4JConnection:
         Method to execute a given Cypher query against the Neo4J database.
         It returns the top k results.
         """
-        results = self.graph_helper.execute(query, top_k)
-
-        return results
+        return self.graph_helper.execute(query, top_k)
 
 class OpenAILanguageModel:
     """
@@ -138,7 +136,9 @@ class RunPipeline:
         self.outputs = []
         
     @validate_call
-    def run(self, question: str, reset_llm_type: bool = False,
+    def run(self, 
+            question: str, 
+            reset_llm_type: bool = False,
             llm_type: Literal["openai", "gemini"] = None) -> str:
 
         if reset_llm_type:
@@ -166,6 +166,47 @@ class RunPipeline:
                           final_output))
         
         return final_output
+    @validate_call
+    def run_without_errors(self,
+                           question: str, 
+                           reset_llm_type: bool = False,
+                           llm_type: Literal["openai", "gemini"] = None) -> str:
+        
+        if reset_llm_type:
+            self.reset_llm_type(llm_type=llm_type)
+
+        logging.info(f"Selected Language Model: {self.llm.model_name}")
+        logging.info(f"Question: {question}")
+
+        query_chain: QueryChain = QueryChain(llm=self.llm, schema = self.neo4j_connection.schema)
+
+        corrected_query = query_chain.run_chain(question)
+
+        if not corrected_query:
+            self.outputs.append((query_chain.generated_query, "", "", ""))
+            return None
+
+        try:
+            result = self.neo4j_connection.execute_query(corrected_query)
+            logging.info(f"Query Result: {result}")
+        except Exception as e:
+            logging.info(f"An error occurred trying to execute the query: {e}")
+            self.outputs.append((query_chain.generated_query, corrected_query, "", ""))
+            return None
+
+        final_output = query_chain.qa_chain.run(output=result, input_question=question)
+
+        logging.info(f"Natural Language Answer: {final_output}")
+
+        # add outputs of all steps to a list
+        self.outputs.append((query_chain.generated_query, 
+                          corrected_query,
+                          result,
+                          final_output))
+        
+        return final_output
+
+        
     
     def create_dataframe_from_outputs(self) -> pd.DataFrame:
         df = pd.DataFrame(self.outputs, columns=["Generated Query", "Corrected Query",
