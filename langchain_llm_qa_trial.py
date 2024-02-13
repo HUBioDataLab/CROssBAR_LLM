@@ -54,7 +54,7 @@ class Neo4JConnection:
         self.schema = self.graph_helper.create_graph_schema_variables()
 
     @validate_call
-    def execute_query(self, query: str, top_k: int = 5) -> list:
+    def execute_query(self, query: str, top_k: int = 6) -> list:
         """
         Method to execute a given Cypher query against the Neo4J database.
         It returns the top k results.
@@ -69,7 +69,7 @@ class OpenAILanguageModel:
     def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
         self.model_name = model_name or "gpt-3.5-turbo-instruct"
         self.temperature = temperature or 0
-        self.llm = OpenAI(openai_api_key=api_key, model_name=self.model_name, temperature=self.temperature)
+        self.llm = OpenAI(api_key=api_key, model_name=self.model_name, temperature=self.temperature, request_timeout=600)
 
 class GoogleGenerativeLanguageModel:
     """
@@ -86,14 +86,18 @@ class QueryChain:
     QueryChain class to handle the generation, correction, and parsing of Cypher queries using language models.
     It encapsulates the entire process as a single chain of operations.
     """
-    def __init__(self, llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel], schema, verbose: bool = False):
-        self.cypher_chain = LLMChain(llm=llm, prompt=CYPHER_GENERATION_PROMPT, verbose = verbose)
-        self.qa_chain = LLMChain(llm=llm, prompt=CYPHER_OUTPUT_PARSER_PROMPT, verbose = verbose)
+    def __init__(self, 
+                 cypher_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel],
+                 qa_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel],
+                 schema: dict, 
+                 verbose: bool = False):
+        self.cypher_chain = LLMChain(llm=cypher_llm, prompt=CYPHER_GENERATION_PROMPT, verbose = verbose)
+        self.qa_chain = LLMChain(llm=qa_llm, prompt=CYPHER_OUTPUT_PARSER_PROMPT, verbose = verbose)
         self.schema = schema
         self.verbose = verbose
 
     @validate_call
-    def run_chain(self, question: str) -> str:
+    def run_cypher_chain(self, question: str) -> str:
         """
         Executes the query chain: generates a query, corrects it, and returns the corrected query.
         """
@@ -101,7 +105,7 @@ class QueryChain:
                                                 node_properties=self.schema["node_properties"], 
                                                 edge_properties=self.schema["edge_properties"],
                                                 edges=self.schema["edges"], 
-                                                question=question)
+                                                question=question).strip().strip("\n").replace("cypher","").strip("`")
         
 
         corrected_query = correct_query(query=self.generated_query, edge_schema=self.schema["edges"])
@@ -115,47 +119,94 @@ class QueryChain:
 
 class RunPipeline:
 
-    def __init__(self, llm_type: Literal["openai", "gemini"] = None, verbose: bool = False):
+    def __init__(self,
+                 model_name = Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]],
+                 verbose: bool = False,
+                 top_k: int = 5):
         
         self.verbose = verbose
+        self.top_k = top_k
         self.config: Config = Config()
         self.neo4j_connection: Neo4JConnection = Neo4JConnection(self.config.neo4j_usr, 
                                                                  self.config.neo4j_password, 
                                                                  self.config.neo4j_db_name)
         
-        llm_type = llm_type or str(input("Which model (openai / gemini):\n"))
-        
-        if llm_type == "openai":
-            self.llm = OpenAILanguageModel(self.config.openai_api_key).llm
-        elif llm_type == "gemini":
-            self.llm = GoogleGenerativeLanguageModel(self.config.gemini_api_key).llm
-        else:
-            raise ValueError("Unsupported Language Model Type")
-        
+        # define llm type(s)
+        self.define_llm(model_name)
+
         # define outputs list
         self.outputs = []
+
+    def define_llm(self, model_name):
+
+        google_llm_models = ["gemini-pro"]            
+        openai_llm_models = [
+                "gpt-3.5-turbo-instruct",
+                "gpt-3.5-turbo-1106",
+                "gpt-3.5-turbo",
+                "gpt-3.5-turbo-0125",
+                "gpt-4-0125-preview",
+                "gpt-4-turbo-preview",
+                "gpt-4-1106-preview",
+            ]
+        
+        if isinstance(model_name, (dict, list)):
+            
+            if len(model_name) != 2:
+                raise ValueError("Length of `model_name` must be 2")
+
+            if isinstance(model_name, list):
+                model_name = dict(zip(["cypher_llm_model", "qa_llm_model"], model_name))
+
+            self.llm = {}
+            for model_type, model_name in model_name.items():
+                if model_type == "cypher_llm_model":
+                    if model_name in openai_llm_models:
+                        self.llm["cypher_llm"] = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name["cypher_llm_model"]).llm
+                    elif model_name in google_llm_models:
+                        self.llm["cypher_llm"] = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name["cypher_llm_model"]).llm
+                    else:
+                        raise ValueError("Unsupported Language Model Name")
+                elif model_name in openai_llm_models:
+                    self.llm["qa_llm"] = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name["qa_llm_model"]).llm
+                elif model_name in google_llm_models:
+                    self.llm["qa_llm"] = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name["qa_llm_model"]).llm
+                else:
+                    raise ValueError("Unsupported Language Model Name")
+
+        elif model_name in google_llm_models:
+            self.llm = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name).llm
+        elif model_name in openai_llm_models:
+            self.llm = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name).llm
+        else:
+            raise ValueError("Unsupported Language Model Name")
         
     @validate_call
     def run(self, 
             question: str, 
             reset_llm_type: bool = False,
-            llm_type: Literal["openai", "gemini"] = None) -> str:
+            model_name: Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]] = None) -> str:
 
         if reset_llm_type:
-            self.reset_llm_type(llm_type=llm_type)   
+            self.define_llm(model_name=model_name)   
 
-        logging.info(f"Selected Language Model: {self.llm.model_name}")
+        logging.info(
+            f"Selected Language Model(s): {list(self.llm.values()) if isinstance(self.llm, dict) else self.llm}"
+        )
         logging.info(f"Question: {question}")
 
-        query_chain: QueryChain = QueryChain(llm=self.llm, schema = self.neo4j_connection.schema)
+        if isinstance(self.llm, dict):
+            query_chain: QueryChain = QueryChain(cypher_llm=self.llm["cypher_llm"], qa_llm=self.llm["qa_llm"], schema = self.neo4j_connection.schema)
+        else:
+            query_chain: QueryChain = QueryChain(cypher_llm=self.llm, qa_llm=self.llm, schema = self.neo4j_connection.schema)
 
-        corrected_query = query_chain.run_chain(question)
+        corrected_query = query_chain.run_cypher_chain(question)
 
-        result = self.neo4j_connection.execute_query(corrected_query)
+        result = self.neo4j_connection.execute_query(corrected_query, top_k=self.top_k)
 
         logging.info(f"Query Result: {result}")
 
-        final_output = query_chain.qa_chain.run(output=result, input_question=question)
+        final_output = query_chain.qa_chain.run(output=result, input_question=question).strip("\n")
 
         logging.info(f"Natural Language Answer: {final_output}")
 
@@ -164,37 +215,42 @@ class RunPipeline:
                           corrected_query,
                           result,
                           final_output))
-        
+
         return final_output
     @validate_call
     def run_without_errors(self,
                            question: str, 
                            reset_llm_type: bool = False,
-                           llm_type: Literal["openai", "gemini"] = None) -> str:
+                           model_name: Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]] = None) -> str:
         
         if reset_llm_type:
-            self.reset_llm_type(llm_type=llm_type)
+            self.define_llm(model_name=model_name)
 
-        logging.info(f"Selected Language Model: {self.llm.model_name}")
+        logging.info(
+            f"Selected Language Model(s): {list(self.llm.values()) if isinstance(self.llm, dict) else self.llm}"
+        )
         logging.info(f"Question: {question}")
 
-        query_chain: QueryChain = QueryChain(llm=self.llm, schema = self.neo4j_connection.schema)
+        if isinstance(self.llm, dict):
+            query_chain: QueryChain = QueryChain(cypher_llm=self.llm["cypher_llm"], qa_llm=self.llm["qa_llm"], schema = self.neo4j_connection.schema)
+        else:
+            query_chain: QueryChain = QueryChain(cypher_llm=self.llm, qa_llm=self.llm, schema = self.neo4j_connection.schema)
 
-        corrected_query = query_chain.run_chain(question)
+        corrected_query = query_chain.run_cypher_chain(question)
 
         if not corrected_query:
             self.outputs.append((query_chain.generated_query, "", "", ""))
             return None
 
         try:
-            result = self.neo4j_connection.execute_query(corrected_query)
+            result = self.neo4j_connection.execute_query(corrected_query, top_k=self.top_k)
             logging.info(f"Query Result: {result}")
         except Exception as e:
             logging.info(f"An error occurred trying to execute the query: {e}")
             self.outputs.append((query_chain.generated_query, corrected_query, "", ""))
             return None
 
-        final_output = query_chain.qa_chain.run(output=result, input_question=question)
+        final_output = query_chain.qa_chain.run(output=result, input_question=question).strip("\n")
 
         logging.info(f"Natural Language Answer: {final_output}")
 
@@ -205,24 +261,12 @@ class RunPipeline:
                           final_output))
         
         return final_output
-
-        
     
     def create_dataframe_from_outputs(self) -> pd.DataFrame:
         df = pd.DataFrame(self.outputs, columns=["Generated Query", "Corrected Query",
                                             "Query Result", "Natural Language Answer"])
-        df.replace("", np.nan, inplace=True)
 
-        return df
-    
-    @validate_call
-    def reset_llm_type(self, llm_type: Literal["openai", "gemini"] = None) -> None:
-        if llm_type == "openai":
-            self.llm = OpenAILanguageModel(self.config.openai_api_key).llm
-        elif llm_type == "gemini":
-            self.llm = GoogleGenerativeLanguageModel(self.config.gemini_api_key).llm
-        else:
-            raise ValueError("Unsupported Language Model Type")
+        return df.replace("", np.nan)
 
 
 def main():
