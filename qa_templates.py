@@ -33,7 +33,7 @@ The question is:
 {question}
 """
 
-CYPHER_GENERATION_TEMPLATE_DENEME = """Task:Generate Cypher statement to query a graph database.
+CYPHER_GENERATION_TEMPLATE_TRIAL = """Task:Generate Cypher statement to query a graph database.
 Instructions:
 Use only the provided relationship types and properties in the schema.
 Do not use any other relationship types or properties that are not provided.
@@ -54,7 +54,7 @@ Note: SmallMolecule means drug and MolecularMixture means compound.
 Examples: Here are a few examples of generated Cypher statements for particular questions:
 
 # How many diseases are related to gene with id of ncbigene:23612?
-MATCH (:Gene {{id:"ncbigene:23612"}})-[irt:Gene_is_related_to_disease]->(:Disease)
+MATCH (:Gene {{id:"ncbigene:23612"}})-[irt:Gene_is_related_to_disease]-(:Disease)
 RETURN count(irt) AS numberOfDiseases
 
 # "Which proteins that are mentioned in at least 2 databases and have intact score bigger than or equal to 0.3 are interacting with protein named synaptotagmin-like protein 4? Return the names and ids of proteins"
@@ -68,15 +68,16 @@ The question is:
 
 CYPHER_GENERATION_PROMPT = PromptTemplate(
     input_variables=["node_types", "node_properties", "edge_properties", "edges", "question",], 
-    template=CYPHER_GENERATION_TEMPLATE_DENEME
+    template=CYPHER_GENERATION_TEMPLATE
 )
 
 CYPHER_OUTPUT_PARSER_TEMPLATE = """Task:Parse output of Cypher statement to natural language text based on
 given question in order to answer it.
 Instructions:
 Output is formatted as list of dictionaries. You will parse them into natural language text based
-on given question. If the generated ouput is empty, then create an error message that says
+on given question. If the provided ouput is empty, then create an error message that says
 'Sorry, the generated Cypher query returned nothing. Please try again with a different version of question.'
+Do not say this message unless provided output is really empty
 
 Example:
     Cypher Output: [{{'p.node_name': 'ITPR2'}}, {{'p.node_name': 'ITPR3'}}, {{'p.node_name': 'PDE1A'}}]
