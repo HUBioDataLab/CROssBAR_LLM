@@ -2,7 +2,7 @@ Questions
 What proteins does the drug named Caffeine target?
 Which Gene is related to Disease named psoriasis?
 Which proteins are targeted by more than one drugs and more than one compounds?
-Return the names of diseases that are mentioned at least 3 source databases and have disgenet score bigger than 0.7.
+Return the names of diseases that are associated with other diseases and are mentioned at least 3 source databases and have disgenet gene disease score bigger than 0.7.
 Which proteins that are mentioned in at least 2 databases and have intact score bigger than or equal to 0.3 are interacting with protein named synaptotagmin-like protein 4.
 Which proteins are involved in biological processes that have abbreviation of traceable author statement evidence code in their relationships.
 Tell me which diseases are related to gene that is regulated by gene named ALX4.
@@ -17,3 +17,14 @@ Provide the name of the pathway in which the protein with id 'uniprot:Q9H553' ta
 What is the target of the drug with zinc id 'ZINC000004811698' and has phenotype associated with that target?
 Provide the name of the disease associated with the gene with id 'ncbigene:89941' and the gene ortholog to that gene.
 What is the name of the disease associated with the gene with id 'ncbigene:23336', the phenotype associated with that disease, and the pathway in which that disease modulates?
+How many domains does the protein with id 'uniprot:Q92736' have?
+What is the total number of diseases associated with the Somatic mosaicism phenotype?
+Which organism does the protein with id 'uniprot:P42336' belong to and what domains does it have?
+List the gene names and ensembl gene ids of the Gene with id 'ncbigene:10333' and the total count of biological processes it's encoded protein is involved in.
+Which enzymes does the protein with id 'uniprot:P14780' catalyzes and what protein domains does it have, and in which molecular function is it enable?
+List 5 random small molecules with their CAS number and groups.
+Find the name and synonyms of a side effect with id 'meddra:10023461'.
+Find all side effects of a drug with inchikey 'VTMVHDZWSFQSQP-VBNZEHGJSA-N'.
+Which proteins are encoded by genes related to a disease and interact with proteins with length greater than 200?
+Which proteins are encoded by genes related to a disease and interact with proteins with length greater than 200 and have mentioned in at least 2 source databases?
+Find all small molecules that decrease the expression of genes related to Duchenne and Becker muscular dystrophy.
