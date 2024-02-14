@@ -187,7 +187,7 @@ class RunPipeline:
             raise ValueError("Unsupported Language Model Name")
         
     @validate_call
-    def run(self, 
+    def run_for_query(self, 
             question: str, 
             reset_llm_type: bool = False,
             model_name: Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]] = None) -> str:
@@ -207,21 +207,28 @@ class RunPipeline:
 
         corrected_query = query_chain.run_cypher_chain(question)
 
-        result = self.neo4j_connection.execute_query(corrected_query, top_k=self.top_k)
+        return corrected_query
+    
+    def execute_query(self, query: str, question: str, model_name, reset_llm_type) -> list:
+        result = self.neo4j_connection.execute_query(query, top_k=self.top_k)
+
+        if reset_llm_type:
+            self.define_llm(model_name=model_name)
 
         logging.info(f"Query Result: {result}")
+
+        if isinstance(self.llm, dict):
+            query_chain: QueryChain = QueryChain(cypher_llm=self.llm["cypher_llm"], qa_llm=self.llm["qa_llm"], schema = self.neo4j_connection.schema)
+        else:
+            query_chain: QueryChain = QueryChain(cypher_llm=self.llm, qa_llm=self.llm, schema = self.neo4j_connection.schema)
 
         final_output = query_chain.qa_chain.run(output=result, input_question=question).strip("\n")
 
         logging.info(f"{final_output}")
 
-        # add outputs of all steps to a list
-        self.outputs.append((query_chain.generated_query, 
-                          corrected_query,
-                          result,
-                          final_output))
-
         return final_output
+        
+
     @validate_call
     def run_without_errors(self,
                            question: str, 
