@@ -1,10 +1,15 @@
-import os
+import os, sys
 import logging
 from dotenv import load_dotenv
 from datetime import datetime
 
+# Import path
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
 # Import required modules for Neo4J connection and schema extraction
-from neo4j_query_executor_extractor import Neo4jGraphHelper
+from CROssBARLLM.neo4j_query_executor_extractor import Neo4jGraphHelper
 
 # Import the Language Model wrappers for OpenAI and Google Generative AI
 from langchain.llms import OpenAI
@@ -12,8 +17,8 @@ from langchain_google_genai import GoogleGenerativeAI
 
 # Import LLMChain for handling the sequence of language model operations
 from langchain.chains import LLMChain
-from neo4j_query_corrector import correct_query
-from qa_templates import CYPHER_GENERATION_PROMPT, CYPHER_OUTPUT_PARSER_PROMPT
+from CROssBARLLM.neo4j_query_corrector import correct_query
+from CROssBARLLM.qa_templates import CYPHER_GENERATION_PROMPT, CYPHER_OUTPUT_PARSER_PROMPT
 
 from pydantic import BaseModel, validate_call
 
@@ -208,7 +213,7 @@ class RunPipeline:
 
         final_output = query_chain.qa_chain.run(output=result, input_question=question).strip("\n")
 
-        logging.info(f"Natural Language Answer: {final_output}")
+        logging.info(f"{final_output}")
 
         # add outputs of all steps to a list
         self.outputs.append((query_chain.generated_query, 
@@ -252,7 +257,7 @@ class RunPipeline:
 
         final_output = query_chain.qa_chain.run(output=result, input_question=question).strip("\n")
 
-        logging.info(f"Natural Language Answer: {final_output}")
+        logging.info(f"{final_output}")
 
         # add outputs of all steps to a list
         self.outputs.append((query_chain.generated_query, 
@@ -284,7 +289,7 @@ def main():
     logging.info("Starting the pipeline...")
 
     try:
-        pipeline = RunPipeline(verbose=verbose_input)
+        pipeline = RunPipeline(verbose=verbose_input, model_name="gpt-3.5-turbo-instruct")
 
         question = str(input("Enter a question:\n"))
 
