@@ -213,7 +213,7 @@ class RunPipeline:
 
         return corrected_query
     
-    def execute_query(self, query: str, question: str, model_name, reset_llm_typ, api_key: str = None) -> str:
+    def execute_query(self, query: str, question: str, model_name, reset_llm_type, api_key: str = None) -> str:
         result = self.neo4j_connection.execute_query(query, top_k=self.top_k)
 
         if reset_llm_type:
