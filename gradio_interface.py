@@ -38,7 +38,7 @@ def run_natural(query: str, question: str, llm_type, verbose_mode: bool, api_key
 
     # Run the pipeline
     try:
-        response = rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+        response, result = rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
@@ -48,7 +48,7 @@ def run_natural(query: str, question: str, llm_type, verbose_mode: bool, api_key
         with open(log_filename, 'r') as file:
             verbose_output = file.read()
 
-    return response, verbose_output
+    return response, verbose_output, result
 
 def generate_and_run(question: str, llm_type, verbose_mode: bool, api_key=None) -> str:
     logging.info("Processing question...")
@@ -62,7 +62,7 @@ def generate_and_run(question: str, llm_type, verbose_mode: bool, api_key=None) 
 
     # Run the pipeline
     try:
-        response = rp.execute_query(query=response, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+        response, result = rp.execute_query(query=response, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
@@ -72,7 +72,7 @@ def generate_and_run(question: str, llm_type, verbose_mode: bool, api_key=None) 
         with open(log_filename, 'r') as file:
             verbose_output = file.read()
 
-    return response, verbose_output
+    return response, verbose_output, result
 
 
 with gr.Blocks() as interface:
@@ -97,11 +97,12 @@ with gr.Blocks() as interface:
 
     natural = gr.Textbox(label="Natural Language Answer")
     verbose_output = gr.Textbox(label="Verbose Output", visible=True)
+    query_output = gr.Textbox(label="Query Output")
 
 
     run_query_button.click(run_query, inputs=[question, llm_type, openai_api_key], outputs=[query])
-    run_natural_button.click(run_natural, inputs=[query, question, llm_type, verbose_mode, openai_api_key], outputs=[natural, verbose_output])
-    generate_and_run_button.click(generate_and_run, inputs=[question, llm_type, verbose_mode, openai_api_key], outputs=[natural, verbose_output])
+    run_natural_button.click(run_natural, inputs=[query, question, llm_type, verbose_mode, openai_api_key], outputs=[natural, verbose_output, query_output])
+    generate_and_run_button.click(generate_and_run, inputs=[question, llm_type, verbose_mode, openai_api_key], outputs=[natural, verbose_output, query_output])
 
 interface.launch()
 

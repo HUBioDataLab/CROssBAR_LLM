@@ -230,7 +230,7 @@ class RunPipeline:
 
         logging.info(f"{final_output}")
 
-        return final_output
+        return final_output, result
         
 
     @validate_call
