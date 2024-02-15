@@ -127,7 +127,7 @@ class RunPipeline:
     def __init__(self,
                  model_name = Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]],
                  verbose: bool = False,
-                 top_k: int = 5):
+                 top_k: int = 5,):
         
         self.verbose = verbose
         self.top_k = top_k
@@ -190,7 +190,11 @@ class RunPipeline:
     def run_for_query(self, 
             question: str, 
             reset_llm_type: bool = False,
-            model_name: Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]] = None) -> str:
+            model_name: Union[str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]] = None,
+            api_key: str = None) -> str:
+        
+        if api_key:
+            self.config.openai_api_key = api_key
 
         if reset_llm_type:
             self.define_llm(model_name=model_name)   
@@ -209,7 +213,7 @@ class RunPipeline:
 
         return corrected_query
     
-    def execute_query(self, query: str, question: str, model_name, reset_llm_type) -> list:
+    def execute_query(self, query: str, question: str, model_name, reset_llm_typ, api_key: str = None) -> str:
         result = self.neo4j_connection.execute_query(query, top_k=self.top_k)
 
         if reset_llm_type:

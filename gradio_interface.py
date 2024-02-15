@@ -20,12 +20,12 @@ logging.basicConfig(handlers=log_handlers, level=logging.INFO,
 rp = RunPipeline(verbose=False, model_name="gpt-3.5-turbo-instruct")  # Assuming default verbose is False
 
 
-def run_query(question: str, llm_type) -> str:
+def run_query(question: str, llm_type, api_key=None) -> str:
     logging.info("Processing question...")
 
     # Run the pipeline
     try:
-        response = rp.run_for_query(question, model_name=llm_type, reset_llm_type=True)
+        response = rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
@@ -33,12 +33,12 @@ def run_query(question: str, llm_type) -> str:
     return response
 
 
-def run_natural(query: str, question: str, llm_type, verbose_mode: bool) -> str:
+def run_natural(query: str, question: str, llm_type, verbose_mode: bool, api_key=None) -> str:
     logging.info("Processing question...")
 
     # Run the pipeline
     try:
-        response = rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True)
+        response = rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
@@ -50,14 +50,41 @@ def run_natural(query: str, question: str, llm_type, verbose_mode: bool) -> str:
 
     return response, verbose_output
 
+def generate_and_run(question: str, llm_type, verbose_mode: bool, api_key=None) -> str:
+    logging.info("Processing question...")
+
+    # Run the pipeline
+    try:
+        response = rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+    except Exception as e:
+        logging.error(f"Error in pipeline: {e}")
+        raise e
+
+    # Run the pipeline
+    try:
+        response = rp.execute_query(query=response, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+    except Exception as e:
+        logging.error(f"Error in pipeline: {e}")
+        raise e
+    
+    verbose_output = ""
+    if verbose_mode:
+        with open(log_filename, 'r') as file:
+            verbose_output = file.read()
+
+    return response, verbose_output
+
+
 with gr.Blocks() as interface:
     with gr.Column():
 
         question = gr.Textbox(label="Question")
         llm_type = gr.Dropdown(["gpt-3.5-turbo-instruct", "gemini-pro"], label="LLM Type", value="gpt-3.5-turbo-instruct")
+        openai_api_key = gr.Textbox(label="OpenAI API Key", placeholder="Enter your OpenAI API Key here")
 
     with gr.Row():
-        run_query_button = gr.Button("Generate Query", variant="primary")
+        run_query_button = gr.Button("Generate Query", variant="secondary")
+        generate_and_run_button = gr.Button("Generate and Run Query", variant="primary")
         clear_question = gr.ClearButton(question, value="Clear Question")
         
     with gr.Column():    
@@ -69,11 +96,12 @@ with gr.Blocks() as interface:
         clear_query = gr.ClearButton(query, value="Clear Query")
 
     natural = gr.Textbox(label="Natural Language Answer")
-    verbose_output = gr.Textbox(label="Verbose Output", visible=False)
+    verbose_output = gr.Textbox(label="Verbose Output", visible=True)
 
 
-    run_query_button.click(run_query, inputs=[question, llm_type], outputs=[query])
-    run_natural_button.click(run_natural, inputs=[query, question, llm_type, verbose_mode], outputs=[natural, verbose_output])
+    run_query_button.click(run_query, inputs=[question, llm_type, openai_api_key], outputs=[query])
+    run_natural_button.click(run_natural, inputs=[query, question, llm_type, verbose_mode, openai_api_key], outputs=[natural, verbose_output])
+    generate_and_run_button.click(generate_and_run, inputs=[question, llm_type, verbose_mode, openai_api_key], outputs=[natural, verbose_output])
 
 interface.launch()
 
