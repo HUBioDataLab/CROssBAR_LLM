@@ -16,18 +16,29 @@ Relationships:
 {edges}
 Note: Do not include any explanations or apologies in your responses.
 Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
-Do not include any text except the generated Cypher statement.
+Do not add any directionality to generated Cypher query.
+Do not include any text except the generated Cypher query.
 Note: SmallMolecule means drug and MolecularMixture means compound
 Examples: Here are a few examples of generated Cypher statements for particular questions:
 
 # How many diseases are related to gene with id of ncbigene:23612?
-MATCH (:Gene {{id:"ncbigene:23612"}})-[irt:Gene_is_related_to_disease]->(:Disease)
+MATCH (:Gene {{id:"ncbigene:23612"}})-[irt:Gene_is_related_to_disease]-(:Disease)
 RETURN count(irt) AS numberOfDiseases
 
 # "Which proteins that are mentioned in at least 2 databases and have intact score bigger than or equal to 0.3 are interacting with protein named synaptotagmin-like protein 4? Return the names and ids of proteins"
 MATCH (p1:Protein)-[ppi:Interacts_With]-(p2:Protein)
 WHERE "Synaptotagmin-like protein 4" in p1.protein_names AND size(ppi.source) >= 2 and ppi.intact_score >= 0.3
 RETURN p2.protein_names, p2.id
+
+# Which proteins are encoded by genes related to a disease and interact with proteins with length greater than 200 and have mentioned in at least 2 source databases?
+MATCH (p1:Protein)-[:Encodes]-(:Gene)-[:Gene_is_related_to_disease]-(:Disease), (p1)-[ppi:Interacts_With]-(p2:Protein)
+WHERE p2.length > 200 AND size(ppi.source) >= 2
+RETURN DISTINCT p1.protein_names, p1.id
+
+# Which diseases are related to gene that is regulated by gene named ALX4. Return the path.
+MATCH path=(dis:Disease)-[:Gene_is_related_to_disease]-(:Gene)-[:Gene_regulates_gene]-(reg:Gene)
+WHERE "ALX4" IN reg.genes
+RETURN path
 
 The question is:
 {question}
