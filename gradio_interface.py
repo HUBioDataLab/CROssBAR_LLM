@@ -88,7 +88,7 @@ with gr.Blocks() as interface:
         clear_question = gr.ClearButton(question, value="Clear Question")
         
     with gr.Column():    
-        query_textbox = gr.Textbox(label="Generted Query", interactive=True)
+        query_textbox = gr.Textbox(label="Generated Query", interactive=True)
         verbose_mode = gr.Checkbox(label="Enable verbose mode")
 
     with gr.Row():
