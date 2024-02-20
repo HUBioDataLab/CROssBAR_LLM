@@ -2,12 +2,11 @@ Questions
 What proteins does the drug named Caffeine target?
 Which Gene is related to Disease named psoriasis?
 Which proteins are targeted by more than one drugs and more than one compounds?
-Return the names of diseases that are associated with other diseases and are mentioned at least 3 source databases and have disgenet gene disease score bigger than 0.7.
+Return the names of diseases that are associated with diseases and are mentioned at least 2 source databases and have disgenet gene disease score bigger than 0.7 in their relationships.
 Which proteins that are mentioned in at least 2 databases and have intact score bigger than or equal to 0.3 are interacting with protein named synaptotagmin-like protein 4.
 Which proteins are involved in biological processes that have abbreviation of traceable author statement evidence code in their relationships.
-Tell me which diseases are related to gene that is regulated by gene named ALX4.
-Tell me which pathways targeted by drugs and have proteins participants with length greater than or equal to 300.
-What are the protein_names and length of the Protein with id 'uniprot:Q92600'?
+Tell me which pathways have target of drugs and have proteins participants with length greater than or equal to 300.
+What are the protein names and length of the Protein with id 'uniprot:Q92600'?
 What are the groups and atc codes of the drug with id 'drugbank:DB01348'?
 What is the type and full molecular weight of the Compound with id 'chembl:CHEMBL3695451'?
 Provide the name and synonyms of the phenotype with id 'hp:0009986'.
@@ -21,10 +20,13 @@ How many domains does the protein with id 'uniprot:Q92736' have?
 What is the total number of diseases associated with the Somatic mosaicism phenotype?
 Which organism does the protein with id 'uniprot:P42336' belong to and what domains does it have?
 List the gene names and ensembl gene ids of the Gene with id 'ncbigene:10333' and the total count of biological processes it's encoded protein is involved in.
-Which enzymes does the protein with id 'uniprot:P14780' catalyzes and what protein domains does it have, and in which molecular function is it enable?
+Which reactions does the protein with id 'uniprot:P14780' catalyzes and what protein domains does it have, and in which molecular function is it enable?
 List 5 random small molecules with their CAS number and groups.
 Find the name and synonyms of a side effect with id 'meddra:10023461'.
 Find all side effects of a drug with inchikey 'VTMVHDZWSFQSQP-VBNZEHGJSA-N'.
-Which proteins are encoded by genes related to a disease and interact with proteins with length greater than 200?
-Which proteins are encoded by genes related to a disease and interact with proteins with length greater than 200 and have mentioned in at least 2 source databases?
 Find all small molecules that decrease the expression of genes related to Duchenne and Becker muscular dystrophy.
+Which side effects are caused by drugs that target proteins involved in the chemical synaptic transmission biological process?
+What biological processes negatively regulates biological processes that involves protein encoded by a gene with 'ncbigene:336' id?
+Which drugs target proteins part of pathways modulated by primary myelofibrosis disease and which diseases treated by these drugs?
+What diseases are associated with diseases that are comorbid with diseases treated by drugs targeting protein with id 'uniprot:P21728'?
+Find all proteins that interact with proteins with mass bigger than 10000 that are targets of compounds targeting proteins involved in regulation of cytokinesis biological process.
