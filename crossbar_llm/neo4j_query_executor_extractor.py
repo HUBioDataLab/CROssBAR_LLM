@@ -4,7 +4,7 @@ import json
 import re
 
 from pydantic import validate_call
-from CROssBARLLM.utils import timer_func
+from crossbar_llm.utils import timer_func
 
 node_properties_query = """
 CALL apoc.meta.data()

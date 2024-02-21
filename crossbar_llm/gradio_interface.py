@@ -7,7 +7,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from CROssBARLLM.langchain_llm_qa_trial import RunPipeline
+from crossbar_llm.langchain_llm_qa_trial import RunPipeline
 
 # Initialize logging
 current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")

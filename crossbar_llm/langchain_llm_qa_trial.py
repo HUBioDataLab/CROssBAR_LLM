@@ -9,7 +9,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 # Import required modules for Neo4J connection and schema extraction
-from CROssBARLLM.neo4j_query_executor_extractor import Neo4jGraphHelper
+from crossbar_llm.neo4j_query_executor_extractor import Neo4jGraphHelper
 
 # Import the Language Model wrappers for OpenAI and Google Generative AI
 from langchain.llms import OpenAI
@@ -17,8 +17,8 @@ from langchain_google_genai import GoogleGenerativeAI
 
 # Import LLMChain for handling the sequence of language model operations
 from langchain.chains import LLMChain
-from CROssBARLLM.neo4j_query_corrector import correct_query
-from CROssBARLLM.qa_templates import CYPHER_GENERATION_PROMPT, CYPHER_OUTPUT_PARSER_PROMPT
+from crossbar_llm.neo4j_query_corrector import correct_query
+from crossbar_llm.qa_templates import CYPHER_GENERATION_PROMPT, CYPHER_OUTPUT_PARSER_PROMPT
 
 from pydantic import BaseModel, validate_call
 
