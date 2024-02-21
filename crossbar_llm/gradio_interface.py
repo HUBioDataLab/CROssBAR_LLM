@@ -83,8 +83,8 @@ with gr.Blocks() as interface:
         openai_api_key = gr.Textbox(label="OpenAI API Key", placeholder="Enter your OpenAI API Key here")
 
     with gr.Row():
-        run_query_button = gr.Button("Generate Query", variant="secondary")
-        generate_and_run_button = gr.Button("Generate and Run Query", variant="primary")
+        generate_and_run_button = gr.Button("Generate and Run Cypher Query", variant="primary")
+        run_query_button = gr.Button("Generate Cypher Query", variant="secondary")
         clear_question = gr.ClearButton(question, value="Clear Question")
         
     with gr.Column():    
@@ -92,12 +92,12 @@ with gr.Blocks() as interface:
         verbose_mode = gr.Checkbox(label="Enable verbose mode")
 
     with gr.Row():
-        run_natural_button = gr.Button("Get Natural Language Answer", variant="primary")
+        run_natural_button = gr.Button("Run Cypher Query", variant="primary")
         clear_query = gr.ClearButton(query_textbox, value="Clear Query")
 
     natural = gr.Textbox(label="Natural Language Answer")
-    verbose_output = gr.Textbox(label="Verbose Output", visible=True)
     query_output = gr.Textbox(label="Query Output")
+    verbose_output = gr.Textbox(label="Verbose Output", visible=True)
 
 
     run_query_button.click(run_query, inputs=[question, llm_type, openai_api_key], outputs=[query_textbox])
