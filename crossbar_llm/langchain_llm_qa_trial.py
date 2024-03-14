@@ -14,6 +14,7 @@ from crossbar_llm.neo4j_query_executor_extractor import Neo4jGraphHelper
 # Import the Language Model wrappers for OpenAI and Google Generative AI
 from langchain.chat_models import ChatOpenAI
 from langchain_google_genai import GoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
 
 # Import LLMChain for handling the sequence of language model operations
 from langchain.chains import LLMChain
@@ -45,6 +46,7 @@ class Config(BaseModel):
     load_dotenv()
     openai_api_key: str = os.getenv("MY_OPENAI_API_KEY")
     gemini_api_key: str = os.getenv("GEMINI_API_KEY")
+    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY")
     neo4j_usr: str = os.getenv("NEO4J_USER")
     neo4j_password: str = os.getenv("NEO4J_PASSWORD")
     neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
@@ -86,14 +88,24 @@ class GoogleGenerativeLanguageModel:
         self.temperature = temperature or 0
         self.llm = GoogleGenerativeAI(google_api_key = api_key, model = self.model_name, temparature = self.temperature)
 
+class AnthropicLanguageModel:
+    """
+    AnthropicLanguageModel class for interacting with Anthropic's language models.
+    It initializes the model with given API key and specified parameters.
+    """
+    def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
+        self.model_name = model_name or "claude-3-opus-20240229"
+        self.temperature = temperature or 0
+        self.llm = ChatAnthropic(anthropic_api_key=api_key, model_name=self.model_name, temperature=self.temperature)
+
 class QueryChain:
     """
     QueryChain class to handle the generation, correction, and parsing of Cypher queries using language models.
     It encapsulates the entire process as a single chain of operations.
     """
     def __init__(self, 
-                 cypher_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel],
-                 qa_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel],
+                 cypher_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel, AnthropicLanguageModel],
+                 qa_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel, AnthropicLanguageModel],
                  schema: dict, 
                  verbose: bool = False):
         self.cypher_chain = LLMChain(llm=cypher_llm, prompt=CYPHER_GENERATION_PROMPT, verbose = verbose)
@@ -156,6 +168,14 @@ class RunPipeline:
                 "gpt-4-32k-0613",
                 "gpt-4-0613",
             ]
+        antrophic_llm_models = [
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+                "claude-2.1",
+                "claude-2.0",
+                "claude-instant-1.2",
+            ]
         
         if isinstance(model_name, (dict, list)):
             
@@ -172,12 +192,16 @@ class RunPipeline:
                         self.llm["cypher_llm"] = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name["cypher_llm_model"]).llm
                     elif model_name in google_llm_models:
                         self.llm["cypher_llm"] = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name["cypher_llm_model"]).llm
+                    elif model_name in antrophic_llm_models:
+                        self.llm["cypher_llm"] = AnthropicLanguageModel(self.config.anthropic_api_key, model_name=model_name["cypher_llm_model"]).llm
                     else:
                         raise ValueError("Unsupported Language Model Name")
                 elif model_name in openai_llm_models:
                     self.llm["qa_llm"] = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name["qa_llm_model"]).llm
                 elif model_name in google_llm_models:
                     self.llm["qa_llm"] = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name["qa_llm_model"]).llm
+                elif model_name in antrophic_llm_models:
+                    self.llm["qa_llm"] = AnthropicLanguageModel(self.config.anthropic_api_key, model_name=model_name["qa_llm_model"]).llm
                 else:
                     raise ValueError("Unsupported Language Model Name")
 
@@ -185,6 +209,8 @@ class RunPipeline:
             self.llm = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name).llm
         elif model_name in openai_llm_models:
             self.llm = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name).llm
+        elif model_name in antrophic_llm_models:
+            self.llm = AnthropicLanguageModel(self.config.anthropic_api_key, model_name=model_name).llm
         else:
             raise ValueError("Unsupported Language Model Name")
         
