@@ -101,6 +101,6 @@ class Neo4jGraphHelper:
             query = query.strip().strip("\n") + f" LIMIT {top_k}"
 
         with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
-            records, _, _ = driver.execute_query(query, database_=self.db_name)
+            records, _, _ = driver.execute_query(query, database_=self.db_name, routing_="r")
             results = [res.data() for index, res in enumerate(records) if top_k and index <= top_k]
         return results
