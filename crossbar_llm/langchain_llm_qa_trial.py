@@ -12,7 +12,7 @@ sys.path.append(parent_dir)
 from crossbar_llm.neo4j_query_executor_extractor import Neo4jGraphHelper
 
 # Import the Language Model wrappers for OpenAI and Google Generative AI
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import OpenAI
 from langchain_google_genai import GoogleGenerativeAI
 from langchain_anthropic import ChatAnthropic
 
@@ -76,7 +76,7 @@ class OpenAILanguageModel:
     def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
         self.model_name = model_name or "gpt-3.5-turbo-instruct"
         self.temperature = temperature or 0
-        self.llm = ChatOpenAI(api_key=api_key, model_name=self.model_name, temperature=self.temperature, request_timeout=600)
+        self.llm = OpenAI(api_key=api_key, model_name=self.model_name, temperature=self.temperature, request_timeout=600)
 
 class GoogleGenerativeLanguageModel:
     """

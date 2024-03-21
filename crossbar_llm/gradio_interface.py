@@ -98,7 +98,7 @@ with gr.Blocks(css=css) as interface:
         gr.Markdown("## CROssBAR LLM Query Interface")
         gr.Markdown("### Ask natural language question here (check below for examples)")
         question = gr.Textbox(label="Question (Please enter your natural language query here using clear and plain English)", elem_id="question_box")
-        query_llm_type = gr.Dropdown(["gpt-3.5-turbo-instruct", "gemini-pro", "claude-3-opus-20240229"], label="LLM choice (Select the large language model to be utilised for processing your query from the dropdown menu)", value="gpt-3.5-turbo-instruct")
+        query_llm_type = gr.Dropdown(["gpt-3.5-turbo-instruct", "gemini-pro", "claude-3-opus-20240229", "gpt-3.5-turbo"], label="LLM choice (Select the large language model to be utilised for processing your query from the dropdown menu)", value="gpt-3.5-turbo")
         openai_api_key = gr.Textbox(label="OpenAI API key (If you choose any of the GPT models, you are required to enter your key to run the query)", placeholder="Enter your OpenAI API Key here")
 
     with gr.Row():
