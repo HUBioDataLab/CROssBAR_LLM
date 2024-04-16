@@ -86,9 +86,7 @@ CYPHER_OUTPUT_PARSER_TEMPLATE = """Task:Parse output of Cypher statement to natu
 given question in order to answer it.
 Instructions:
 Output is formatted as list of dictionaries. You will parse them into natural language text based
-on given question. If the provided ouput is empty, then create an error message that says
-'Sorry, the generated Cypher query returned nothing. Please try again with a different version of question.'
-Do not say this message unless provided output is really empty
+on given question. 
 
 Example:
     Cypher Output: [{{'p.node_name': 'ITPR2'}}, {{'p.node_name': 'ITPR3'}}, {{'p.node_name': 'PDE1A'}}]

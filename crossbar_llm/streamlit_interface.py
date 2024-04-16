@@ -16,9 +16,7 @@ logging.basicConfig(filename=log_filename, level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Initialize the pipeline once
-rp = RunPipeline(verbose=False, model_name="gpt-3.5-turbo-instruct")  # Assuming default verbose is False
-
-# Define your functions here as before: run_query, run_natural, generate_and_run
+rp = RunPipeline(verbose=False, model_name="gpt-3.5-turbo")  # Assuming default verbose is False
 
 def run_query(question: str, llm_type, api_key=None) -> str:
     logging.info("Processing question...")
@@ -73,14 +71,14 @@ def generate_and_run(question: str, llm_type, verbose_mode: bool, api_key=None) 
         with open(log_filename, 'r') as file:
             verbose_output = file.read()
 
-    return response, verbose_output, result
+    return response, verbose_output, result, query
 
 st.title("CROssBAR LLM Query Interface")
 st.markdown("### Ask a natural language question here (check below for examples)")
 
 with st.form("query_form"):
     question = st.text_input("Question (Please enter your natural language query here using clear and plain English)", "")
-    query_llm_type = st.selectbox("LLM choice (Select the large language model to be utilized for processing your query from the dropdown menu)", ["gpt-3.5-turbo-instruct", "gemini-pro", "claude-3-opus-20240229"])
+    query_llm_type = st.selectbox("LLM choice (Select the large language model to be utilized for processing your query from the dropdown menu)", ["gpt-3.5-turbo-0125", "gemini-pro", "claude-3-opus-20240229"])
     openai_api_key = st.text_input("OpenAI API key (If you choose any of the GPT models, you are required to enter your key to run the query)", "")
     verbose_mode = st.checkbox("Enable verbose mode (Check this box to obtain detailed information about the LLM and DB runs including error logs, context for the query and the response)")
     generate_button = st.form_submit_button("Generate and Run Cypher Query")
@@ -91,4 +89,3 @@ if generate_button:
     st.text_area("Natural language answer", response, height=100)
     if verbose_mode:
         st.text_area("Verbose output", verbose_output, height=100)
-
