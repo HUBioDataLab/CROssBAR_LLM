@@ -156,7 +156,10 @@ class RunPipeline:
 
     def define_llm(self, model_name):
 
-        google_llm_models = ["gemini-pro"]            
+        google_llm_models = [
+            "gemini-pro",
+            "gemini-1.5-pro-latest"
+            ]            
         openai_llm_models = [
                 "gpt-3.5-turbo-instruct",
                 "gpt-3.5-turbo-1106",
