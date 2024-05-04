@@ -90,77 +90,127 @@ examples = [
     {"label": "Targets of Caffeine", "question": "What proteins does the drug named Caffeine target?", "model": "gemini-1.5-pro-latest", "verbose": False}
 ]
 
-selected_example = st.selectbox("Choose an example to run:", options=[ex['label'] for ex in examples])
+model_choices = ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229"]
+st.session_state.selected_example = st.selectbox("Choose an example to run:", 
+                                                options=[ex['label'] for ex in examples],
+                                                index=None)
 
-if st.button("Run Selected Example"):
-    example = next(ex for ex in examples if ex['label'] == selected_example)
-    st.subheader("Question:")
-    st.write(example['question'])
-    st.subheader("LLM for Query Generation:")
-    st.write(example['model'])
-
-    response, verbose_output, result, query = generate_and_run(example['question'], example['model'], example['verbose'], "")
-    st.subheader("Generated Cypher Query:")
-    st.code(query, language="cypher")
-    st.subheader("Natural Language Answer:")
-    st.write(response)
-    if example['verbose']:
-        st.subheader("Verbose Output:")
-        st.code(verbose_output, language="log")
-
+if st.session_state.selected_example:
+    example = next(ex for ex in examples if ex['label'] == st.session_state.selected_example)
+    st.session_state.example_question = example['question']
+    st.session_state.example_model_index = model_choices.index(example['model'])
+    
+else:
+    st.session_state.example_question = None
+    st.session_state.example_model_index = None
 
 # Input form
 with st.form("query_form"):
-    question = st.text_area("Question", None, placeholder="Enter your natural language query here using clear and plain English", height=100, help="Please be as specific as possible for better results.")
-    query_llm_type = st.selectbox("LLM for Query Generation", ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229"], index=0, help="Choose the LLM to generate the Cypher query.")
+
+    question = st.text_area("Question*",
+                            st.session_state.example_question,
+                            placeholder="Enter your natural language query here using clear and plain English", 
+                            height=100, 
+                            help="Please be as specific as possible for better results. *Required field.")
+    query_llm_type = st.selectbox("LLM for Query Generation*", 
+                                ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229"], 
+                                index=st.session_state.example_model_index, 
+                                help="Choose the LLM to generate the Cypher query. *Required field."
+                                )
     openai_api_key = st.text_input("OpenAI API Key (for GPT models)", type="password", help="Enter your OpenAI API key if you choose a GPT model.")
     verbose_mode = st.checkbox("Enable Verbose Mode", help="Show detailed logs and intermediate steps.")
     # Button container
     button_container = st.container()
-    col1, col2 = button_container.columns(2)
+    col1, col2, col3 = button_container.columns(3)
 
-    with col1:
-        generate_and_run_button = st.form_submit_button("Generate & Run Query", help="Click to process your query and get results.", type="primary")
-    with col2:
-        generate_query_button = st.form_submit_button("Generate Cypher Query", help="Click to generate the Cypher query only.")
-
-if generate_and_run_button:
-    response, verbose_output, result, query = generate_and_run(question, query_llm_type, verbose_mode, openai_api_key)
-    
-    # Output areas with styling
-    st.subheader("Generated Cypher Query:")
-    st.code(query, language="cypher")
-
-    st.subheader("Raw Query Output:")
-    st.code(str(result))
-    
-    st.subheader("Natural Language Answer:")
-    st.write(fix_markdown(response))
-    
-    if verbose_mode:
-        st.subheader("Verbose Output:")
-        st.code(verbose_output, language="log")
-
-elif generate_query_button:
-    query = run_query(question, query_llm_type, openai_api_key)
-
-    # Use st.session_state to persist the generated query
+    if 'generate_and_run_submitted' not in st.session_state:
+        st.session_state.generate_and_run_submitted = False
+    if 'generate_query_submitted' not in st.session_state:
+        st.session_state.generate_query_submitted = False
+    if 'run_query_submitted' not in st.session_state:
+        st.session_state.run_query_submitted = False
     if "generated_query" not in st.session_state:
-        st.session_state.generated_query = query
+        st.session_state.generated_query = None
+    
+    with col1:
+        if st.form_submit_button("Generate & Run Query", help="Click to process your query and get results.", type="primary"):
+            st.session_state.generate_and_run_submitted = True
+            st.session_state.generate_query_submitted = False
+            st.session_state.run_query_submitted = False
+    with col2:
+        if st.form_submit_button("Generate Cypher Query", help="Click to generate the Cypher query only."):
+            st.session_state.generate_query_submitted = True
+            st.session_state.generate_and_run_submitted = False
+            st.session_state.run_query_submitted = False
+    with col3:
+        if st.form_submit_button("Run Generated Query", help="Click to run the generated Cypher query."):
+            st.session_state.run_query_submitted = True
+            st.session_state.generate_query_submitted = False
+            st.session_state.generate_and_run_submitted = False
 
-    # Display the generated query with the code editor
-    st.subheader("Generated Cypher Query:")
-    edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
+if st.session_state.generate_and_run_submitted:
+    if question and query_llm_type:
+        with st.spinner('Generating and Running Query...'):
+            response, verbose_output, result, query = generate_and_run(question, 
+                                                                    query_llm_type, 
+                                                                    verbose_mode, 
+                                                                    openai_api_key)
+        
+        # Output areas with styling
+        st.subheader("Generated Cypher Query:")
+        st.code(query, language="cypher")
 
-    if st.button("Run Cypher Query"):
-        response, verbose_output, result = run_natural(edited_query, question, query_llm_type, verbose_mode, openai_api_key)
+        st.subheader("Raw Query Output:")
+        st.code(str(result))
+        
         st.subheader("Natural Language Answer:")
-        st.write(response)
-
+        st.write(fix_markdown(response))
+        
         if verbose_mode:
             st.subheader("Verbose Output:")
             st.code(verbose_output, language="log")
-
-
+        
+    else:
+        st.warning("Please make sure to fill in all the required fields before submitting the form.")
+    st.session_state.generate_and_run_submitted = False
     
+if st.session_state.generate_query_submitted:
+    if question and query_llm_type:
+        with st.spinner('Generating Cypher Query..'):
+            generated_query = run_query(question, 
+                            query_llm_type, 
+                            openai_api_key)
 
+        # Use st.session_state to persist the generated query
+        st.session_state.generated_query = generated_query
+
+        # Display the generated query with the code editor
+        st.subheader("Generated Cypher Query:")
+        st.code(st.session_state.generated_query, language="cypher")
+        # edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
+        # st.code(str(edited_query))
+    else:
+        st.warning("Please make sure to fill in all the required fields before submitting the form.")
+    st.session_state.generate_query_submitted = False
+
+if st.session_state.run_query_submitted:
+    if st.session_state.generated_query: 
+        with st.spinner('Running Cypher Query...'):
+                response, verbose_output, result = run_natural(st.session_state.generated_query, 
+                                                            question, 
+                                                            query_llm_type, 
+                                                            verbose_mode, 
+                                                            openai_api_key)
+                
+                st.subheader("Generated Cypher Query:")
+                st.code(st.session_state.generated_query, language="cypher")
+                st.subheader("Natural Language Answer:")
+                st.write(response)
+                
+                if verbose_mode:
+                    st.subheader("Verbose Output:")
+                    st.code(verbose_output, language="log")
+    else:
+        st.warning("Please make sure the Cypher query is generated using 'Generate Cypher Query' button before running it.")
+    st.session_state.run_query_submitted = False
+    st.session_state.generated_query = None
