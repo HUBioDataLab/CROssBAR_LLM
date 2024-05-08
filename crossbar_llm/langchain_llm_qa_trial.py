@@ -15,6 +15,8 @@ from crossbar_llm.neo4j_query_executor_extractor import Neo4jGraphHelper
 from langchain.chat_models import ChatOpenAI
 from langchain_google_genai import GoogleGenerativeAI
 from langchain_anthropic import ChatAnthropic
+from langchain_groq import ChatGroq
+from langchain_community.llms import Replicate
 
 # Import LLMChain for handling the sequence of language model operations
 from langchain.chains import LLMChain
@@ -47,6 +49,8 @@ class Config(BaseModel):
     openai_api_key: str = os.getenv("MY_OPENAI_API_KEY")
     gemini_api_key: str = os.getenv("GEMINI_API_KEY")
     anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY")
+    groq_api_key: str = os.getenv("GROQ_API_KEY")
+    replicate_api_key: str = os.getenv("REPLICATE_API_KEY")
     neo4j_usr: str = os.getenv("NEO4J_USER")
     neo4j_password: str = os.getenv("NEO4J_PASSWORD")
     neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
@@ -98,14 +102,33 @@ class AnthropicLanguageModel:
         self.temperature = temperature or 0
         self.llm = ChatAnthropic(anthropic_api_key=api_key, model_name=self.model_name, temperature=self.temperature)
 
+class GroqLanguageModel:
+    """
+    GroqLanguageModel class for interacting with Groq's language models.
+    It initializes the model with given API key and specified parameters.
+    """
+    def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
+        self.model_name = model_name or "llama3-70b-8192"
+        self.temperature = temperature or 0
+        self.llm = ChatGroq(groq_api_key=api_key, model_name=self.model_name, temperature=self.temperature)
+
+class ReplicateLanguageModel:
+    """
+    ReplicateLanguageModel class for interacting with Replicate's language models.
+    It initializes the model with given API key and specified parameters.
+    """
+    def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
+        self.model_name = model_name or "replicate-1.0"
+        self.temperature = temperature or 0
+        self.llm = Replicate(replicate_api_key=api_key, model_name=self.model_name, temperature=self.temperature)
 class QueryChain:
     """
     QueryChain class to handle the generation, correction, and parsing of Cypher queries using language models.
     It encapsulates the entire process as a single chain of operations.
     """
     def __init__(self, 
-                 cypher_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel, AnthropicLanguageModel],
-                 qa_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel, AnthropicLanguageModel],
+                 cypher_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel, AnthropicLanguageModel, GroqLanguageModel, ReplicateLanguageModel],
+                 qa_llm: Union[OpenAILanguageModel, GoogleGenerativeLanguageModel, AnthropicLanguageModel, GroqLanguageModel, ReplicateLanguageModel],
                  schema: dict, 
                  verbose: bool = False):
         self.cypher_chain = LLMChain(llm=cypher_llm, prompt=CYPHER_GENERATION_PROMPT, verbose = verbose)
@@ -180,6 +203,14 @@ class RunPipeline:
                 "claude-2.0",
                 "claude-instant-1.2",
             ]
+        groq_llm_models = [
+                "llama3-8b-8192",
+                "llama3-70b-8192",
+                "mixtral-8x7b-32768",
+                "gemma-7b-it",
+            ]
+
+
         
         if isinstance(model_name, (dict, list)):
             
@@ -198,6 +229,8 @@ class RunPipeline:
                         self.llm["cypher_llm"] = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name["cypher_llm_model"]).llm
                     elif model_name in antrophic_llm_models:
                         self.llm["cypher_llm"] = AnthropicLanguageModel(self.config.anthropic_api_key, model_name=model_name["cypher_llm_model"]).llm
+                    elif model_name in groq_llm_models:
+                        self.llm["cypher_llm"] = GroqLanguageModel(self.config.groq_api_key, model_name=model_name["cypher_llm_model"]).llm
                     else:
                         raise ValueError("Unsupported Language Model Name")
                 elif model_name in openai_llm_models:
@@ -206,6 +239,8 @@ class RunPipeline:
                     self.llm["qa_llm"] = GoogleGenerativeLanguageModel(self.config.gemini_api_key, model_name=model_name["qa_llm_model"]).llm
                 elif model_name in antrophic_llm_models:
                     self.llm["qa_llm"] = AnthropicLanguageModel(self.config.anthropic_api_key, model_name=model_name["qa_llm_model"]).llm
+                elif model_name in groq_llm_models:
+                    self.llm["qa_llm"] = GroqLanguageModel(self.config.groq_api_key, model_name=model_name["qa_llm_model"]).llm
                 else:
                     raise ValueError("Unsupported Language Model Name")
 
@@ -215,6 +250,8 @@ class RunPipeline:
             self.llm = OpenAILanguageModel(self.config.openai_api_key, model_name=model_name).llm
         elif model_name in antrophic_llm_models:
             self.llm = AnthropicLanguageModel(self.config.anthropic_api_key, model_name=model_name).llm
+        elif model_name in groq_llm_models:
+            self.llm = GroqLanguageModel(self.config.groq_api_key, model_name=model_name).llm
         else:
             raise ValueError("Unsupported Language Model Name")
         
