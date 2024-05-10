@@ -1,5 +1,6 @@
 import streamlit as st
 from code_editor import code_editor
+from streamlit_ace import st_ace
 import sys, os, logging
 from datetime import datetime
 
@@ -12,8 +13,8 @@ from crossbar_llm.langchain_llm_qa_trial import RunPipeline
 
 
 def initialize_logging():
-    if 'log_filename' not in st.session_state or not os.path.exists(st.session_state.log_filename):
-        current_date = datetime.now().strftime("%Y-%m-%d-%H")
+    if 'log_filename' not in st.session_state:
+        current_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         st.session_state.log_filename = f"query_log_{current_date}.log"
         logging.basicConfig(filename=st.session_state.log_filename, level=logging.INFO,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -113,7 +114,7 @@ with st.form("query_form"):
                             height=100, 
                             help="Please be as specific as possible for better results. *Required field.")
     query_llm_type = st.selectbox("LLM for Query Generation*", 
-                                ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229"], 
+                                ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229", "llama3-70b-8192", "mixtral-8x7b-32768"], 
                                 index=st.session_state.example_model_index, 
                                 help="Choose the LLM to generate the Cypher query. *Required field."
                                 )
@@ -181,12 +182,11 @@ if st.session_state.generate_query_submitted:
                             query_llm_type, 
                             openai_api_key)
 
-        # Use st.session_state to persist the generated query
-        st.session_state.generated_query = generated_query
+
 
         # Display the generated query with the code editor
         st.subheader("Generated Cypher Query:")
-        st.code(st.session_state.generated_query, language="cypher")
+        st.session_state.generated_query = st.text_area("You can edit",generated_query)
         # edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
         # st.code(str(edited_query))
     else:
@@ -204,6 +204,10 @@ if st.session_state.run_query_submitted:
                 
                 st.subheader("Generated Cypher Query:")
                 st.code(st.session_state.generated_query, language="cypher")
+
+                st.subheader("Raw Query Output:")
+                st.code(str(result))
+
                 st.subheader("Natural Language Answer:")
                 st.write(response)
                 
