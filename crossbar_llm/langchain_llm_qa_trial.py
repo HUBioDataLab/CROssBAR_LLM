@@ -11,8 +11,8 @@ sys.path.append(parent_dir)
 # Import required modules for Neo4J connection and schema extraction
 from crossbar_llm.neo4j_query_executor_extractor import Neo4jGraphHelper
 
-# Import the Language Model wrappers for OpenAI and Google Generative AI
-from langchain.chat_models import ChatOpenAI
+# Import the Language Model wrappers
+from langchain_community.chat_models import ChatOpenAI
 from langchain_google_genai import GoogleGenerativeAI
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
