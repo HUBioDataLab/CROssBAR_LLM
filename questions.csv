@@ -30,3 +30,5 @@ What biological processes negatively regulates biological processes that involve
 Which drugs target proteins part of pathways modulated by primary myelofibrosis disease and which diseases treated by these drugs?
 What diseases are associated with diseases that are comorbid with diseases treated by drugs targeting protein with id 'uniprot:P21728'?
 Find all proteins that interact with proteins with mass bigger than 10000 that are targets of compounds targeting proteins involved in regulation of cytokinesis biological process.
+Which drugs could be used to treat hyperthyroidism disease based on the shared proteins between the disease and potential drugs?
+Convert the ENST00000292114.8 ensembl transcript id to official gene symbol.
