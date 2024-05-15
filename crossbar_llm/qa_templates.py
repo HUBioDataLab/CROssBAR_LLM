@@ -18,6 +18,8 @@ Note: Do not include any explanations or apologies in your responses.
 Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
 Do not add any directionality to generated Cypher query.
 Do not include any text except the generated Cypher query.
+Do not make up node types, edge types or their properties that do not exist in the provided schema. Use your internal knowledge to map question to node types, edge types or their properties in the provided schema.
+Do not change given biological entity names in question. Use it as is.
 Note: SmallMolecule means drug and MolecularMixture means compound
 Examples: Here are a few examples of generated Cypher statements for particular questions:
 
@@ -39,6 +41,11 @@ RETURN DISTINCT p1.protein_names, p1.id
 MATCH path=(dis:Disease)-[:Gene_is_related_to_disease]-(:Gene)-[:Gene_regulates_gene]-(reg:Gene)
 WHERE "ALX4" IN reg.genes
 RETURN path
+
+# Convert 51545 kegg id to entrez id (in other words, ncbi gene id).
+MATCH (g:Gene)
+WHERE "51545" IN g.kegg
+RETURN g.id AS entrez_id
 
 The question is:
 {question}
@@ -95,6 +102,8 @@ Example:
 
 Note: Do not include every field of dictionary, return fields matching the question. Priotrize dictionary fields that have name of entity.
 Note: Do not delete curies
+Note: Do not print intermediate steps just give natural language answer
+
 Cypher Output: 
 {output}
 Question: 
