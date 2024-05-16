@@ -14,7 +14,7 @@ from crossbar_llm.langchain_llm_qa_trial import RunPipeline
 
 def initialize_logging():
     if 'log_filename' not in st.session_state:
-        current_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
         st.session_state.log_filename = f"query_log_{current_date}.log"
         logging.basicConfig(filename=st.session_state.log_filename, level=logging.INFO,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -118,7 +118,7 @@ with st.form("query_form"):
                                 index=st.session_state.example_model_index, 
                                 help="Choose the LLM to generate the Cypher query. *Required field."
                                 )
-    openai_api_key = st.text_input("OpenAI API Key (for GPT models)", type="password", help="Enter your OpenAI API key if you choose a GPT model.")
+    llm_api_key = st.text_input("API Key for LLM", type="password", help="Enter your API key if you choose paid model.")
     verbose_mode = st.checkbox("Enable Verbose Mode", help="Show detailed logs and intermediate steps.")
     # Button container
     button_container = st.container()
@@ -155,7 +155,7 @@ if st.session_state.generate_and_run_submitted:
             response, verbose_output, result, query = generate_and_run(question, 
                                                                     query_llm_type, 
                                                                     verbose_mode, 
-                                                                    openai_api_key)
+                                                                    llm_api_key)
         
         # Output areas with styling
         st.subheader("Generated Cypher Query:")
@@ -180,7 +180,7 @@ if st.session_state.generate_query_submitted:
         with st.spinner('Generating Cypher Query..'):
             generated_query = run_query(question, 
                             query_llm_type, 
-                            openai_api_key)
+                            llm_api_key)
 
 
 
@@ -200,7 +200,7 @@ if st.session_state.run_query_submitted:
                                                             question, 
                                                             query_llm_type, 
                                                             verbose_mode, 
-                                                            openai_api_key)
+                                                            llm_api_key)
                 
                 st.subheader("Generated Cypher Query:")
                 st.code(st.session_state.generated_query, language="cypher")

@@ -264,6 +264,13 @@ class RunPipeline:
         
         if api_key:
             self.config.openai_api_key = api_key
+            self.config.gemini_api_key = api_key
+            self.config.anthropic_api_key = api_key
+            self.config.groq_api_key = api_key
+            self.config.replicate_api_key = api_key
+
+        else:
+            self.config = Config()
 
         if reset_llm_type:
             self.define_llm(model_name=model_name)   
@@ -284,6 +291,15 @@ class RunPipeline:
     
     def execute_query(self, query: str, question: str, model_name, reset_llm_type, api_key: str = None) -> str:
         result = self.neo4j_connection.execute_query(query, top_k=self.top_k)
+
+        if api_key:
+            self.config.openai_api_key = api_key
+            self.config.gemini_api_key = api_key
+            self.config.anthropic_api_key = api_key
+            self.config.groq_api_key = api_key
+            self.config.replicate_api_key = api_key
+        else:
+            self.config = Config()
 
         if reset_llm_type:
             self.define_llm(model_name=model_name)
