@@ -186,7 +186,7 @@ if st.session_state.generate_query_submitted:
 
         # Display the generated query with the code editor
         st.subheader("Generated Cypher Query:")
-        st.session_state.generated_query = st.text_area("You can edit",generated_query)
+        st.text_area("You can edit the generated query below:", value=generated_query, key="generated_query")
         # edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
         # st.code(str(edited_query))
     else:
