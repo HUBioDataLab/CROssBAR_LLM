@@ -1,0 +1,9 @@
+# Cache
+**/__pycache__/
+
+# Secrets
+.env
+
+# Byproducts
+query_log*.log
+graph_schema.json
