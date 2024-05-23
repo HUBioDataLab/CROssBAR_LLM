@@ -12,7 +12,7 @@ First, ensure that you have `poetry` installed on your system.
 poetry --version
 ```
 
-If it's not installed, install via `pip':
+If it's not installed, install via `pip`:
 
 ```prompt
 pip install -U poetry
@@ -24,7 +24,7 @@ To install the package:
 poetry install
 ```
 
-To get into the poetry virtual env:
+To get into the `poetry` virtual env:
 
 ```prompt
 poetry shell
