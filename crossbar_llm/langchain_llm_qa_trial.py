@@ -54,14 +54,15 @@ class Config(BaseModel):
     neo4j_usr: str = os.getenv("NEO4J_USER")
     neo4j_password: str = os.getenv("NEO4J_PASSWORD")
     neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
+    neo4j_uri: str = os.getenv("NEO4J_URI")
 
 class Neo4JConnection:
     """
     Neo4JConnection class to handle interactions with a Neo4J database.
     It encapsulates the connection details and provides methods to interact with the database.
     """
-    def __init__(self, user: str, password: str, db_name: str):
-        self.graph_helper = Neo4jGraphHelper("neo4j://localhost:7687", user, password, db_name)
+    def __init__(self, user: str, password: str, db_name: str, uri: str):
+        self.graph_helper = Neo4jGraphHelper(uri, user, password, db_name)
         self.schema = self.graph_helper.create_graph_schema_variables()
 
     @validate_call
@@ -169,7 +170,8 @@ class RunPipeline:
         self.config: Config = Config()
         self.neo4j_connection: Neo4JConnection = Neo4JConnection(self.config.neo4j_usr, 
                                                                  self.config.neo4j_password, 
-                                                                 self.config.neo4j_db_name)
+                                                                 self.config.neo4j_db_name,
+                                                                 self.config.neo4j_uri)
         
         # define llm type(s)
         self.define_llm(model_name)
