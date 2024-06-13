@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from code_editor import code_editor
 from streamlit_ace import st_ace
 import sys, os, logging
@@ -105,14 +106,143 @@ else:
     st.session_state.example_question = None
     st.session_state.example_model_index = None
 
+# Auto-complete words
+autocomplete_words = ["Proteins", "Drug", "Caffeine", "targets", "Gene", "Disease", "psoriasis"]
+
 # Input form
 with st.form("query_form"):
 
-    question = st.text_area("Question*",
-                            st.session_state.example_question,
-                            placeholder="Enter your natural language query here using clear and plain English", 
-                            height=100, 
-                            help="Please be as specific as possible for better results. *Required field.")
+    # Placeholder for the JavaScript code
+    components.html(
+        f"""
+        <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
+        <script>
+        const suggestions = {autocomplete_words};
+        const fuse = new Fuse(suggestions, {{
+          includeScore: true,
+          threshold: 0.3
+        }});
+        function autocomplete(inp) {{
+          let currentFocus;
+          inp.addEventListener("input", function(e) {{
+              let a, b, i, val = this.value.split(" ").pop();
+              closeAllLists();
+              if (!val) {{ return false; }}
+              currentFocus = -1;
+              a = document.createElement("DIV");
+              a.setAttribute("id", this.id + "autocomplete-list");
+              a.setAttribute("class", "autocomplete-items");
+              this.parentNode.appendChild(a);
+              const results = fuse.search(val);
+              for (i = 0; i < results.length; i++) {{
+                if (results[i].score <= 0.3) {{
+                  b = document.createElement("DIV");
+                  b.innerHTML = "<strong>" + results[i].item.substr(0, val.length) + "</strong>";
+                  b.innerHTML += results[i].item.substr(val.length);
+                  b.innerHTML += "<input type='hidden' value='" + results[i].item + "'>";
+                  b.addEventListener("click", function(e) {{
+                      let words = inp.value.split(" ");
+                      words.pop();
+                      words.push(this.getElementsByTagName("input")[0].value);
+                      inp.value = words.join(" ");
+                      closeAllLists();
+                  }});
+                  a.appendChild(b);
+                }}
+              }}
+          }});
+          inp.addEventListener("keydown", function(e) {{
+              let x = document.getElementById(this.id + "autocomplete-list");
+              if (x) x = x.getElementsByTagName("div");
+              if (e.keyCode == 40) {{
+                currentFocus++;
+                addActive(x);
+              }} else if (e.keyCode == 38) {{
+                currentFocus--;
+                addActive(x);
+              }} else if (e.keyCode == 13) {{
+                e.preventDefault();
+                if (currentFocus > -1) {{
+                  if (x) x[currentFocus].click();
+                }}
+              }}
+          }});
+          function addActive(x) {{
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            x[currentFocus].classList.add("autocomplete-active");
+          }}
+          function removeActive(x) {{
+            for (let i = 0; i < x.length; i++) {{
+              x[i].classList.remove("autocomplete-active");
+            }}
+          }}
+          function closeAllLists(elmnt) {{
+            const x = document.getElementsByClassName("autocomplete-items");
+            for (let i = 0; i < x.length; i++) {{
+              if (elmnt != x[i] && elmnt != inp) {{
+                x[i].parentNode.removeChild(x[i]);
+              }}
+            }}
+          }}
+          document.addEventListener("click", function (e) {{
+              closeAllLists(e.target);
+          }});
+        }}
+        </script>
+        <style>
+        .autocomplete {{
+          position: relative;
+          display: inline-block;
+          width: 100%;
+        }}
+        .autocomplete input {{
+          width: 100%;
+          padding: 10px;
+          font-size: 16px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-sizing: border-box;
+        }}
+        .autocomplete-items {{
+          position: absolute;
+          border: 1px solid #d4d4d4;
+          border-bottom: none;
+          border-top: none;
+          z-index: 99;
+          top: 100%;
+          left: 0;
+          right: 0;
+          overflow-x: hidden;
+          background-color: #fff;
+        }}
+        .autocomplete-items div {{
+          padding: 10px;
+          cursor: pointer;
+          background-color: #fff;
+          border-bottom: 1px solid #d4d4d4;
+        }}
+        .autocomplete-items div:hover {{
+          background-color: #e9e9e9;
+        }}
+        .autocomplete-active {{
+          background-color: DodgerBlue !important;
+          color: #ffffff;
+        }}
+        </style>
+        <div class="autocomplete">
+          <input id="question_input" type="text" name="question" placeholder="Enter your natural language query here using clear and plain English">
+        </div>
+        <script>
+        autocomplete(document.getElementById("question_input"));
+        </script>
+        """,
+        height=200,
+    )
+
     query_llm_type = st.selectbox("LLM for Query Generation*", 
                                 ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229", "llama3-70b-8192", "mixtral-8x7b-32768"], 
                                 index=st.session_state.example_model_index, 
