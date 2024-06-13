@@ -186,7 +186,7 @@ if st.session_state.generate_query_submitted:
 
         # Display the generated query with the code editor
         st.subheader("Generated Cypher Query:")
-        st.text_area("You can edit the generated query below:", value=generated_query, key="generated_query")
+        st.text_area("You can edit the generated query below:", value=generated_query, key="edited_query")
         # edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
         # st.code(str(edited_query))
     else:
@@ -194,9 +194,9 @@ if st.session_state.generate_query_submitted:
     st.session_state.generate_query_submitted = False
 
 if st.session_state.run_query_submitted:
-    if st.session_state.generated_query: 
+    if st.session_state.edited_query: 
         with st.spinner('Running Cypher Query...'):
-                response, verbose_output, result = run_natural(st.session_state.generated_query, 
+                response, verbose_output, result = run_natural(st.session_state.edited_query, 
                                                             question, 
                                                             query_llm_type, 
                                                             verbose_mode, 
@@ -217,4 +217,4 @@ if st.session_state.run_query_submitted:
     else:
         st.warning("Please make sure the Cypher query is generated using 'Generate Cypher Query' button before running it.")
     st.session_state.run_query_submitted = False
-    st.session_state.generated_query = None
+    st.session_state.edited_query = None
