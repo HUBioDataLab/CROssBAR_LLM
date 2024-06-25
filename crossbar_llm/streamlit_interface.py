@@ -106,8 +106,13 @@ else:
     st.session_state.example_question = None
     st.session_state.example_model_index = None
 
-# Auto-complete words
-autocomplete_words = ["Proteins", "Drug", "Caffeine", "targets", "Gene", "Disease", "psoriasis"]
+# Get autocomplete words from all text files under folder query_db
+autocomplete_words = []
+for root, dirs, files in os.walk("query_db"):
+    for file in files:
+        if file.endswith(".txt"):
+            with open(os.path.join(root, file), "r") as f:
+                autocomplete_words.extend(f.read().splitlines())
 
 # Input form
 with st.form("query_form"):
@@ -122,10 +127,23 @@ with st.form("query_form"):
           includeScore: true,
           threshold: 0.3
         }});
+
+        function debounce(func, wait) {{
+          let timeout;
+          return function(...args) {{
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+          }};
+        }}
+
         function autocomplete(inp) {{
           let currentFocus;
-          inp.addEventListener("input", function(e) {{
+          inp.addEventListener("input", debounce(function(e) {{
               let a, b, i, val = this.value.split(" ").pop();
+              if (val.length < 3) {{
+                closeAllLists();
+                return false;
+              }}
               closeAllLists();
               if (!val) {{ return false; }}
               currentFocus = -1;
@@ -133,7 +151,7 @@ with st.form("query_form"):
               a.setAttribute("id", this.id + "autocomplete-list");
               a.setAttribute("class", "autocomplete-items");
               this.parentNode.appendChild(a);
-              const results = fuse.search(val);
+              const results = fuse.search(val).slice(0, 10); // Limit results to 10 items
               for (i = 0; i < results.length; i++) {{
                 if (results[i].score <= 0.3) {{
                   b = document.createElement("DIV");
@@ -150,7 +168,8 @@ with st.form("query_form"):
                   a.appendChild(b);
                 }}
               }}
-          }});
+          }}, 300)); // Debounce with a delay of 300ms
+
           inp.addEventListener("keydown", function(e) {{
               let x = document.getElementById(this.id + "autocomplete-list");
               if (x) x = x.getElementsByTagName("div");
@@ -167,6 +186,7 @@ with st.form("query_form"):
                 }}
               }}
           }});
+
           function addActive(x) {{
             if (!x) return false;
             removeActive(x);
@@ -174,11 +194,13 @@ with st.form("query_form"):
             if (currentFocus < 0) currentFocus = (x.length - 1);
             x[currentFocus].classList.add("autocomplete-active");
           }}
+
           function removeActive(x) {{
             for (let i = 0; i < x.length; i++) {{
               x[i].classList.remove("autocomplete-active");
             }}
           }}
+
           function closeAllLists(elmnt) {{
             const x = document.getElementsByClassName("autocomplete-items");
             for (let i = 0; i < x.length; i++) {{
@@ -187,6 +209,7 @@ with st.form("query_form"):
               }}
             }}
           }}
+
           document.addEventListener("click", function (e) {{
               closeAllLists(e.target);
           }});
@@ -242,6 +265,7 @@ with st.form("query_form"):
         """,
         height=200,
     )
+
 
     query_llm_type = st.selectbox("LLM for Query Generation*", 
                                 ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229", "llama3-70b-8192", "mixtral-8x7b-32768"], 
