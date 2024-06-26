@@ -136,6 +136,14 @@ with st.form("query_form"):
           }};
         }}
 
+        function updateHiddenInput(value) {{
+            const hiddenInput = window.parent.document.querySelector('input[type="password"]');
+            if (hiddenInput) {{
+                hiddenInput.value = value;
+                hiddenInput.dispatchEvent(new Event('input', {{ bubbles: true }}));
+            }}
+        }}
+
         function autocomplete(inp) {{
           let currentFocus;
           inp.addEventListener("input", debounce(function(e) {{
@@ -168,6 +176,7 @@ with st.form("query_form"):
                   a.appendChild(b);
                 }}
               }}
+              updateHiddenInput(this.value);
           }}, 300)); // Debounce with a delay of 300ms
 
           inp.addEventListener("keydown", function(e) {{
@@ -185,6 +194,7 @@ with st.form("query_form"):
                   if (x) x[currentFocus].click();
                 }}
               }}
+              updateHiddenInput(this.value);
           }});
 
           function addActive(x) {{
@@ -265,6 +275,7 @@ with st.form("query_form"):
         """,
         height=200,
     )
+    question = st.text_input("Hidden Question Input", key="hidden_question", type="password")
 
 
     query_llm_type = st.selectbox("LLM for Query Generation*", 
@@ -304,6 +315,7 @@ with st.form("query_form"):
             st.session_state.generate_and_run_submitted = False
 
 if st.session_state.generate_and_run_submitted:
+    question = st.session_state.hidden_question
     if question and query_llm_type:
         with st.spinner('Generating and Running Query...'):
             response, verbose_output, result, query = generate_and_run(question, 
@@ -330,6 +342,7 @@ if st.session_state.generate_and_run_submitted:
     st.session_state.generate_and_run_submitted = False
     
 if st.session_state.generate_query_submitted:
+    question = st.session_state.hidden_question
     if question and query_llm_type:
         with st.spinner('Generating Cypher Query..'):
             generated_query = run_query(question, 
@@ -348,6 +361,7 @@ if st.session_state.generate_query_submitted:
     st.session_state.generate_query_submitted = False
 
 if st.session_state.run_query_submitted:
+    question = st.session_state.hidden_question
     if st.session_state.edited_query: 
         with st.spinner('Running Cypher Query...'):
                 response, verbose_output, result = run_natural(st.session_state.edited_query, 
