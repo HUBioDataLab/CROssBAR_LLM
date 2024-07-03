@@ -4,6 +4,7 @@ from code_editor import code_editor
 from streamlit_ace import st_ace
 import sys, os, logging
 from datetime import datetime
+from crossbar_llm.st_components.autocomplete import st_keyup
 
 # Import path
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -118,165 +119,7 @@ for root, dirs, files in os.walk("query_db"):
 with st.form("query_form"):
 
     # Placeholder for the JavaScript code
-    components.html(
-        f"""
-        <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
-        <script>
-        const suggestions = {autocomplete_words};
-        const fuse = new Fuse(suggestions, {{
-          includeScore: true,
-          threshold: 0.3
-        }});
-
-        function debounce(func, wait) {{
-          let timeout;
-          return function(...args) {{
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-          }};
-        }}
-
-        function updateHiddenInput(value) {{
-            const hiddenInput = window.parent.document.querySelector('input[type="password"]');
-            if (hiddenInput) {{
-                hiddenInput.value = value;
-                hiddenInput.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            }}
-        }}
-
-        function autocomplete(inp) {{
-          let currentFocus;
-          inp.addEventListener("input", debounce(function(e) {{
-              let a, b, i, val = this.value.split(" ").pop();
-              if (val.length < 3) {{
-                closeAllLists();
-                return false;
-              }}
-              closeAllLists();
-              if (!val) {{ return false; }}
-              currentFocus = -1;
-              a = document.createElement("DIV");
-              a.setAttribute("id", this.id + "autocomplete-list");
-              a.setAttribute("class", "autocomplete-items");
-              this.parentNode.appendChild(a);
-              const results = fuse.search(val).slice(0, 10); // Limit results to 10 items
-              for (i = 0; i < results.length; i++) {{
-                if (results[i].score <= 0.3) {{
-                  b = document.createElement("DIV");
-                  b.innerHTML = "<strong>" + results[i].item.substr(0, val.length) + "</strong>";
-                  b.innerHTML += results[i].item.substr(val.length);
-                  b.innerHTML += "<input type='hidden' value='" + results[i].item + "'>";
-                  b.addEventListener("click", function(e) {{
-                      let words = inp.value.split(" ");
-                      words.pop();
-                      words.push(this.getElementsByTagName("input")[0].value);
-                      inp.value = words.join(" ");
-                      closeAllLists();
-                  }});
-                  a.appendChild(b);
-                }}
-              }}
-              updateHiddenInput(this.value);
-          }}, 300)); // Debounce with a delay of 300ms
-
-          inp.addEventListener("keydown", function(e) {{
-              let x = document.getElementById(this.id + "autocomplete-list");
-              if (x) x = x.getElementsByTagName("div");
-              if (e.keyCode == 40) {{
-                currentFocus++;
-                addActive(x);
-              }} else if (e.keyCode == 38) {{
-                currentFocus--;
-                addActive(x);
-              }} else if (e.keyCode == 13) {{
-                e.preventDefault();
-                if (currentFocus > -1) {{
-                  if (x) x[currentFocus].click();
-                }}
-              }}
-              updateHiddenInput(this.value);
-          }});
-
-          function addActive(x) {{
-            if (!x) return false;
-            removeActive(x);
-            if (currentFocus >= x.length) currentFocus = 0;
-            if (currentFocus < 0) currentFocus = (x.length - 1);
-            x[currentFocus].classList.add("autocomplete-active");
-          }}
-
-          function removeActive(x) {{
-            for (let i = 0; i < x.length; i++) {{
-              x[i].classList.remove("autocomplete-active");
-            }}
-          }}
-
-          function closeAllLists(elmnt) {{
-            const x = document.getElementsByClassName("autocomplete-items");
-            for (let i = 0; i < x.length; i++) {{
-              if (elmnt != x[i] && elmnt != inp) {{
-                x[i].parentNode.removeChild(x[i]);
-              }}
-            }}
-          }}
-
-          document.addEventListener("click", function (e) {{
-              closeAllLists(e.target);
-          }});
-        }}
-        </script>
-        <style>
-        .autocomplete {{
-          position: relative;
-          display: inline-block;
-          width: 100%;
-        }}
-        .autocomplete input {{
-          width: 100%;
-          padding: 10px;
-          font-size: 16px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          box-sizing: border-box;
-        }}
-        .autocomplete-items {{
-          position: absolute;
-          border: 1px solid #d4d4d4;
-          border-bottom: none;
-          border-top: none;
-          z-index: 99;
-          top: 100%;
-          left: 0;
-          right: 0;
-          overflow-x: hidden;
-          background-color: #fff;
-        }}
-        .autocomplete-items div {{
-          padding: 10px;
-          cursor: pointer;
-          background-color: #fff;
-          border-bottom: 1px solid #d4d4d4;
-        }}
-        .autocomplete-items div:hover {{
-          background-color: #e9e9e9;
-        }}
-        .autocomplete-active {{
-          background-color: DodgerBlue !important;
-          color: #ffffff;
-        }}
-        </style>
-        <div class="autocomplete">
-          <input id="question_input" type="text" name="question" placeholder="Enter your natural language query here using clear and plain English">
-        </div>
-        <script>
-        autocomplete(document.getElementById("question_input"));
-        </script>
-        """,
-        height=200,
-    )
-    question = st.text_input("Hidden Question Input", key="hidden_question", type="password")
-
+    question = st_keyup("Question", key="question")
 
     query_llm_type = st.selectbox("LLM for Query Generation*", 
                                 ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229", "llama3-70b-8192", "mixtral-8x7b-32768"], 
@@ -315,7 +158,7 @@ with st.form("query_form"):
             st.session_state.generate_and_run_submitted = False
 
 if st.session_state.generate_and_run_submitted:
-    question = st.session_state.hidden_question
+    question = st.session_state.question
     if question and query_llm_type:
         with st.spinner('Generating and Running Query...'):
             response, verbose_output, result, query = generate_and_run(question, 
@@ -342,7 +185,7 @@ if st.session_state.generate_and_run_submitted:
     st.session_state.generate_and_run_submitted = False
     
 if st.session_state.generate_query_submitted:
-    question = st.session_state.hidden_question
+    question = st.session_state.question
     if question and query_llm_type:
         with st.spinner('Generating Cypher Query..'):
             generated_query = run_query(question, 
@@ -361,7 +204,7 @@ if st.session_state.generate_query_submitted:
     st.session_state.generate_query_submitted = False
 
 if st.session_state.run_query_submitted:
-    question = st.session_state.hidden_question
+    question = st.session_state.question
     if st.session_state.edited_query: 
         with st.spinner('Running Cypher Query...'):
                 response, verbose_output, result = run_natural(st.session_state.edited_query, 
