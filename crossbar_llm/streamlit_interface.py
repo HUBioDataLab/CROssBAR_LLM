@@ -91,7 +91,34 @@ examples = [
     {"label": "Targets of Caffeine", "question": "What proteins does the drug named Caffeine target?", "model": "gemini-1.5-pro-latest", "verbose": False}
 ]
 
-model_choices = ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229"]
+model_choices = [
+    "gemini-pro",
+    "gemini-1.5-pro-latest",
+    "gpt-3.5-turbo-instruct",
+    "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-0125",
+    "gpt-4-0125-preview",
+    "gpt-4-turbo",
+    "gpt-4-turbo-preview",
+    "gpt-4-1106-preview",
+    "gpt-4-32k-0613",
+    "gpt-4-0613",
+    "gpt-3.5-turbo-16k",
+    "gpt-4o",
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-3-5-sonnet-20240620",
+    "claude-2.1",
+    "claude-2.0",
+    "claude-instant-1.2",
+    "llama3-8b-8192",
+    "llama3-70b-8192",
+    "mixtral-8x7b-32768",
+    "gemma-7b-it",
+    "gemma2-9b-it",
+]
 st.session_state.selected_example = st.selectbox("Choose an example to run:", 
                                                 options=[ex['label'] for ex in examples],
                                                 index=None)
@@ -114,7 +141,7 @@ with st.form("query_form"):
                             height=100, 
                             help="Please be as specific as possible for better results. *Required field.")
     query_llm_type = st.selectbox("LLM for Query Generation*", 
-                                ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229", "llama3-70b-8192", "mixtral-8x7b-32768"], 
+                                model_choices, 
                                 index=st.session_state.example_model_index, 
                                 help="Choose the LLM to generate the Cypher query. *Required field."
                                 )

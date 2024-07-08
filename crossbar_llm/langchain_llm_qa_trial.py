@@ -191,16 +191,19 @@ class RunPipeline:
                 "gpt-3.5-turbo",
                 "gpt-3.5-turbo-0125",
                 "gpt-4-0125-preview",
+                "gpt-4-turbo",
                 "gpt-4-turbo-preview",
                 "gpt-4-1106-preview",
                 "gpt-4-32k-0613",
                 "gpt-4-0613",
-                "gpt-3.5-turbo-16k"
+                "gpt-3.5-turbo-16k",
+                "gpt-4o",
             ]
         antrophic_llm_models = [
                 "claude-3-opus-20240229",
                 "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307",
+                "claude-3-5-sonnet-20240620",
                 "claude-2.1",
                 "claude-2.0",
                 "claude-instant-1.2",
@@ -210,6 +213,7 @@ class RunPipeline:
                 "llama3-70b-8192",
                 "mixtral-8x7b-32768",
                 "gemma-7b-it",
+                "gemma2-9b-it",
             ]
 
 
