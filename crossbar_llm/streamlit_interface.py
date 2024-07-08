@@ -93,7 +93,35 @@ examples = [
     {"label": "Targets of Caffeine", "question": "What proteins does the drug named Caffeine target?", "model": "gemini-1.5-pro-latest", "verbose": False}
 ]
 
-model_choices = ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229"]
+model_choices = [
+    "gemini-pro",
+    "gemini-1.5-pro-latest",
+    "gemini-1.5-flash-latest",
+    "gpt-3.5-turbo-instruct",
+    "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-0125",
+    "gpt-4-0125-preview",
+    "gpt-4-turbo",
+    "gpt-4-turbo-preview",
+    "gpt-4-1106-preview",
+    "gpt-4-32k-0613",
+    "gpt-4-0613",
+    "gpt-3.5-turbo-16k",
+    "gpt-4o",
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-3-5-sonnet-20240620",
+    "claude-2.1",
+    "claude-2.0",
+    "claude-instant-1.2",
+    "llama3-8b-8192",
+    "llama3-70b-8192",
+    "mixtral-8x7b-32768",
+    "gemma-7b-it",
+    "gemma2-9b-it",
+]
 st.session_state.selected_example = st.selectbox("Choose an example to run:", 
                                                 options=[ex['label'] for ex in examples],
                                                 index=None)
@@ -107,7 +135,16 @@ else:
     st.session_state.example_question = None
     st.session_state.example_model_index = None
 
-# Get autocomplete words from all text files under folder query_db
+tab1, tab2 = st.tabs(["LLM Query", "Vector File Upload"])
+
+
+def query_interface(file_upload=False):
+    form_name = ""
+    if file_upload:
+        form_name = "query_form_file"
+    else:
+        form_name = "query_form"
+    # Get autocomplete words from all text files under folder query_db
 autocomplete_words = []
 for root, dirs, files in os.walk("query_db"):
     for file in files:
@@ -116,116 +153,124 @@ for root, dirs, files in os.walk("query_db"):
                 autocomplete_words.extend(f.read().splitlines())
 
 # Input form
-with st.form("query_form"):
+    with st.form(form_name):
 
-    # Placeholder for the JavaScript code
-    question = st_keyup("Question", key="question")
+        question = st.text_area("Question*",
+                                st.session_state.example_question,
+                                placeholder="Enter your natural language query here using clear and plain English", 
+                                height=100, 
+                                help="Please be as specific as possible for better results. *Required field.")
+        query_llm_type = st.selectbox("LLM for Query Generation*", 
+                                    model_choices, 
+                                    index=st.session_state.example_model_index, 
+                                    help="Choose the LLM to generate the Cypher query. *Required field."
+                                    )
+        llm_api_key = st.text_input("API Key for LLM", type="password", help="Enter your API key if you choose paid model.")
+        limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], help="Select the number of elements to limit the query return.", index=2)
+        verbose_mode = st.checkbox("Enable Verbose Mode", help="Show detailed logs and intermediate steps.")
+        
+        if file_upload:
+            vector_file = st.file_uploader("Upload Vector File", type=["csv", "json", "parquet", "txt"], help="Upload your vector file here.")
 
-    query_llm_type = st.selectbox("LLM for Query Generation*", 
-                                ["gpt-3.5-turbo-0125", "gemini-1.5-pro-latest", "claude-3-opus-20240229", "llama3-70b-8192", "mixtral-8x7b-32768"], 
-                                index=st.session_state.example_model_index, 
-                                help="Choose the LLM to generate the Cypher query. *Required field."
-                                )
-    llm_api_key = st.text_input("API Key for LLM", type="password", help="Enter your API key if you choose paid model.")
-    verbose_mode = st.checkbox("Enable Verbose Mode", help="Show detailed logs and intermediate steps.")
-    # Button container
-    button_container = st.container()
-    col1, col2, col3 = button_container.columns(3)
+        # Button container
+        button_container = st.container()
+        col1, col2, col3 = button_container.columns(3)
 
-    if 'generate_and_run_submitted' not in st.session_state:
+        if 'generate_and_run_submitted' not in st.session_state:
+            st.session_state.generate_and_run_submitted = False
+        if 'generate_query_submitted' not in st.session_state:
+            st.session_state.generate_query_submitted = False
+        if 'run_query_submitted' not in st.session_state:
+            st.session_state.run_query_submitted = False
+        if "generated_query" not in st.session_state:
+            st.session_state.generated_query = None
+        
+        with col1:
+            if st.form_submit_button("Generate & Run Query", help="Click to process your query and get results.", type="primary"):
+                st.session_state.generate_and_run_submitted = True
+                st.session_state.generate_query_submitted = False
+                st.session_state.run_query_submitted = False
+        with col2:
+            if st.form_submit_button("Generate Cypher Query", help="Click to generate the Cypher query only."):
+                st.session_state.generate_query_submitted = True
+                st.session_state.generate_and_run_submitted = False
+                st.session_state.run_query_submitted = False
+        with col3:
+            if st.form_submit_button("Run Generated Query", help="Click to run the generated Cypher query."):
+                st.session_state.run_query_submitted = True
+                st.session_state.generate_query_submitted = False
+                st.session_state.generate_and_run_submitted = False
+
+    if st.session_state.generate_and_run_submitted:
+        if question and query_llm_type:
+            with st.spinner('Generating and Running Query...'):
+                response, verbose_output, result, query = generate_and_run(question, 
+                                                                        query_llm_type, 
+                                                                        verbose_mode, 
+                                                                        llm_api_key)
+            
+            # Output areas with styling
+            st.subheader("Generated Cypher Query:")
+            st.code(query, language="cypher")
+
+            st.subheader("Raw Query Output:")
+            st.code(str(result))
+            
+            st.subheader("Natural Language Answer:")
+            st.write(fix_markdown(response))
+            
+            if verbose_mode:
+                st.subheader("Verbose Output:")
+                st.code(verbose_output, language="log")
+            
+        else:
+            st.warning("Please make sure to fill in all the required fields before submitting the form.")
         st.session_state.generate_and_run_submitted = False
-    if 'generate_query_submitted' not in st.session_state:
-        st.session_state.generate_query_submitted = False
-    if 'run_query_submitted' not in st.session_state:
+    
+    if st.session_state.generate_query_submitted:
+      if question and query_llm_type:
+          with st.spinner('Generating Cypher Query..'):
+              generated_query = run_query(question, 
+                              query_llm_type, 
+                              llm_api_key)
+
+          # Display the generated query with the code editor
+          st.subheader("Generated Cypher Query:")
+          st.text_area("You can edit the generated query below:", value=generated_query, key="edited_query")
+          # edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
+          # st.code(str(edited_query))
+      else:
+          st.warning("Please make sure to fill in all the required fields before submitting the form.")
+      st.session_state.generate_query_submitted = False
+
+    if st.session_state.run_query_submitted:
+        if st.session_state.edited_query: 
+            with st.spinner('Running Cypher Query...'):
+                    response, verbose_output, result = run_natural(st.session_state.edited_query, 
+                                                                question, 
+                                                                query_llm_type, 
+                                                                verbose_mode, 
+                                                                llm_api_key)
+                    
+                    st.subheader("Generated Cypher Query:")
+                    st.code(st.session_state.generated_query, language="cypher")
+
+                    st.subheader("Raw Query Output:")
+                    st.code(str(result))
+
+                    st.subheader("Natural Language Answer:")
+                    st.write(response)
+                    
+                    if verbose_mode:
+                        st.subheader("Verbose Output:")
+                        st.code(verbose_output, language="log")
+        else:
+            st.warning("Please make sure the Cypher query is generated using 'Generate Cypher Query' button before running it.")
         st.session_state.run_query_submitted = False
-    if "generated_query" not in st.session_state:
-        st.session_state.generated_query = None
-    
-    with col1:
-        if st.form_submit_button("Generate & Run Query", help="Click to process your query and get results.", type="primary"):
-            st.session_state.generate_and_run_submitted = True
-            st.session_state.generate_query_submitted = False
-            st.session_state.run_query_submitted = False
-    with col2:
-        if st.form_submit_button("Generate Cypher Query", help="Click to generate the Cypher query only."):
-            st.session_state.generate_query_submitted = True
-            st.session_state.generate_and_run_submitted = False
-            st.session_state.run_query_submitted = False
-    with col3:
-        if st.form_submit_button("Run Generated Query", help="Click to run the generated Cypher query."):
-            st.session_state.run_query_submitted = True
-            st.session_state.generate_query_submitted = False
-            st.session_state.generate_and_run_submitted = False
+        st.session_state.edited_query = None
+      
+with tab1:
+    query_interface(file_upload=False)
 
-if st.session_state.generate_and_run_submitted:
-    question = st.session_state.question
-    if question and query_llm_type:
-        with st.spinner('Generating and Running Query...'):
-            response, verbose_output, result, query = generate_and_run(question, 
-                                                                    query_llm_type, 
-                                                                    verbose_mode, 
-                                                                    llm_api_key)
-        
-        # Output areas with styling
-        st.subheader("Generated Cypher Query:")
-        st.code(query, language="cypher")
-
-        st.subheader("Raw Query Output:")
-        st.code(str(result))
-        
-        st.subheader("Natural Language Answer:")
-        st.write(fix_markdown(response))
-        
-        if verbose_mode:
-            st.subheader("Verbose Output:")
-            st.code(verbose_output, language="log")
-        
-    else:
-        st.warning("Please make sure to fill in all the required fields before submitting the form.")
-    st.session_state.generate_and_run_submitted = False
-    
-if st.session_state.generate_query_submitted:
-    question = st.session_state.question
-    if question and query_llm_type:
-        with st.spinner('Generating Cypher Query..'):
-            generated_query = run_query(question, 
-                            query_llm_type, 
-                            llm_api_key)
-
-
-
-        # Display the generated query with the code editor
-        st.subheader("Generated Cypher Query:")
-        st.text_area("You can edit the generated query below:", value=generated_query, key="edited_query")
-        # edited_query = code_editor(st.session_state.generated_query, lang="cypher", key="cypher_editor")
-        # st.code(str(edited_query))
-    else:
-        st.warning("Please make sure to fill in all the required fields before submitting the form.")
-    st.session_state.generate_query_submitted = False
-
-if st.session_state.run_query_submitted:
-    question = st.session_state.question
-    if st.session_state.edited_query: 
-        with st.spinner('Running Cypher Query...'):
-                response, verbose_output, result = run_natural(st.session_state.edited_query, 
-                                                            question, 
-                                                            query_llm_type, 
-                                                            verbose_mode, 
-                                                            llm_api_key)
-                
-                st.subheader("Generated Cypher Query:")
-                st.code(st.session_state.generated_query, language="cypher")
-
-                st.subheader("Raw Query Output:")
-                st.code(str(result))
-
-                st.subheader("Natural Language Answer:")
-                st.write(response)
-                
-                if verbose_mode:
-                    st.subheader("Verbose Output:")
-                    st.code(verbose_output, language="log")
-    else:
-        st.warning("Please make sure the Cypher query is generated using 'Generate Cypher Query' button before running it.")
-    st.session_state.run_query_submitted = False
-    st.session_state.edited_query = None
+with tab2:
+    query_interface(file_upload=True)
