@@ -144,15 +144,16 @@ def query_interface(file_upload=False):
         form_name = "query_form_file"
     else:
         form_name = "query_form"
+        
     # Get autocomplete words from all text files under folder query_db
-autocomplete_words = []
-for root, dirs, files in os.walk("query_db"):
-    for file in files:
-        if file.endswith(".txt"):
-            with open(os.path.join(root, file), "r") as f:
-                autocomplete_words.extend(f.read().splitlines())
+    autocomplete_words = []
+    for root, dirs, files in os.walk("query_db"):
+        for file in files:
+            if file.endswith(".txt"):
+                with open(os.path.join(root, file), "r") as f:
+                    autocomplete_words.extend(f.read().splitlines())
 
-# Input form
+    # Input form
     with st.form(form_name):
 
         question = st.text_area("Question*",
