@@ -1,7 +1,5 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from code_editor import code_editor
-from streamlit_ace import st_ace
 import sys, os, logging
 from datetime import datetime
 from crossbar_llm.st_components.autocomplete import st_keyup
