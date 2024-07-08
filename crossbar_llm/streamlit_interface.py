@@ -94,6 +94,7 @@ examples = [
 model_choices = [
     "gemini-pro",
     "gemini-1.5-pro-latest",
+    "gemini-1.5-flash-latest",
     "gpt-3.5-turbo-instruct",
     "gpt-3.5-turbo-1106",
     "gpt-3.5-turbo",

@@ -183,7 +183,8 @@ class RunPipeline:
 
         google_llm_models = [
             "gemini-pro",
-            "gemini-1.5-pro-latest"
+            "gemini-1.5-pro-latest",
+            "gemini-1.5-flash-latest",
             ]            
         openai_llm_models = [
                 "gpt-3.5-turbo-instruct",
