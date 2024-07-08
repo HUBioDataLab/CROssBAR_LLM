@@ -147,6 +147,7 @@ with st.form("query_form"):
                                 help="Choose the LLM to generate the Cypher query. *Required field."
                                 )
     llm_api_key = st.text_input("API Key for LLM", type="password", help="Enter your API key if you choose paid model.")
+    limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], help="Select the number of elements to limit the query return.", index=2)
     verbose_mode = st.checkbox("Enable Verbose Mode", help="Show detailed logs and intermediate steps.")
     # Button container
     button_container = st.container()
