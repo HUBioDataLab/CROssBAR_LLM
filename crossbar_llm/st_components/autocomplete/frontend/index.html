@@ -1,34 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autocomplete</title>
-    <script src="./streamlit-component-lib.js"></script>
-    <script src="./main.js"></script>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-
-  <body>
-    <div class="st-element-container">
-      <div class="st-row-widget">
-        <label class="st-label" , id="label" for="text_input">
-          <div class="st-label-div">
-            <p>This is a label</p>
-          </div>
-        </label>
-        <div class="st-input-div1">
-          <div class="st-input-div2">
-            <input
-              class="st-input-box"
-              type="text"
-              name="text_input"
-              id="input_box"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
+  <title>Autocomplete Component</title>
+</head>
+<body>
+  <label id="label"></label>
+  <div class="autocomplete">
+    <input type="text" id="input_box" placeholder="Enter your natural language query here using clear and plain English" />
+    <div id="autocomplete-items" class="autocomplete-items"></div>
+  </div>
+  <script src="streamlit-component-lib.js"></script>
+  <script src="main.js"></script>
+</body>
 </html>

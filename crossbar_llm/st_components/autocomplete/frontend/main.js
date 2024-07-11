@@ -1,43 +1,86 @@
-// The `Streamlit` object exists because our html file includes
-// `streamlit-component-lib.js`.
-// If you get an error about "Streamlit" not being defined, that
-// means you're missing that file.
-
 function sendValue(value) {
   Streamlit.setComponentValue(value);
 }
 
-/**
- * The component's render function. This will be called immediately after
- * the component is initially loaded, and then again every time the
- * component gets new data from Python.
- */
-function onRender(event) {
-  // Only run the render code the first time the component is loaded.
-  if (!window.rendered) {
-    // Grab the label and default value that the user specified
-    const { label, value } = event.detail.args;
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
 
-    // Set the label text to be what the user specified
+function onRender(event) {
+  if (!window.rendered) {
+    const { label, value, suggestions } = event.detail.args;
+
+    console.log("Suggestions received: ", suggestions);  // Debug log
+
+    const fuse = new Fuse(suggestions, {
+      includeScore: true,
+      threshold: 0.3,
+      shouldSort: true,
+      distance: 100,
+    });
+
     const label_el = document.getElementById("label");
     label_el.innerText = label;
 
-    // Set the default value to be what the user specified
     const input = document.getElementById("input_box");
     if (value) {
       input.value = value;
     }
 
-    // On the keyup event, send the new value to Python
-    input.onkeyup = (event) => sendValue(event.target.value);
+    input.addEventListener("input", debounce(function (e) {
+      sendValue(e.target.value);
+      const lastWord = e.target.value.split(" ").pop(); // Get the last word
+      autocomplete(lastWord);
+    }, 300));
+
+    function autocomplete(val) {
+      let a, b, i;
+      closeAllLists();
+      if (!val) { return false; }
+      a = document.createElement("DIV");
+      a.setAttribute("id", "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      input.parentNode.appendChild(a);
+      const results = fuse.search(val).slice(0, 20);
+      console.log("Autocomplete results: ", results);  // Debug log
+      for (i = 0; i < results.length; i++) {
+        b = document.createElement("DIV");
+        b.innerHTML = "<strong>" + results[i].item.substr(0, val.length) + "</strong>";
+        b.innerHTML += results[i].item.substr(val.length);
+        b.innerHTML += "<input type='hidden' value='" + results[i].item + "'>";
+        b.addEventListener("click", function (e) {
+          const words = input.value.split(" ");
+          words.pop(); // Remove the last word
+          words.push(this.getElementsByTagName("input")[0].value);
+          input.value = words.join(" ");
+          sendValue(input.value);
+          closeAllLists();
+        });
+        a.appendChild(b);
+      }
+    }
+
+    function closeAllLists(elmnt) {
+      const x = document.getElementsByClassName("autocomplete-items");
+      for (let i = 0; i < x.length; i++) {
+        if (elmnt != x[i] && elmnt != input) {
+          x[i].parentNode.removeChild(x[i]);
+        }
+      }
+    }
+
+    document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+    });
 
     window.rendered = true;
   }
 }
 
-// Render the component whenever python send a "render event"
 Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender);
-// Tell Streamlit that the component is ready to receive events
 Streamlit.setComponentReady();
-// Render with the correct height, if this is a fixed-height component
-Streamlit.setFrameHeight(100);
+Streamlit.setFrameHeight(200);
