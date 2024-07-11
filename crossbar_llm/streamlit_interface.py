@@ -140,25 +140,15 @@ def query_interface(file_upload=False):
     form_name = ""
     if file_upload:
         form_name = "query_form_file"
+        question_name = "question_file"
     else:
         form_name = "query_form"
-        
-    # Get autocomplete words from all text files under folder query_db
-    autocomplete_words = []
-    for root, dirs, files in os.walk("query_db"):
-        for file in files:
-            if file.endswith(".txt"):
-                with open(os.path.join(root, file), "r") as f:
-                    autocomplete_words.extend(f.read().splitlines())
+        question_name = "question"
 
     # Input form
     with st.form(form_name):
 
-        question = st.text_area("Question*",
-                                st.session_state.example_question,
-                                placeholder="Enter your natural language query here using clear and plain English", 
-                                height=100, 
-                                help="Please be as specific as possible for better results. *Required field.")
+        question = st_keyup("Enter your question here", default=st.session_state.example_question, key=question_name)
         query_llm_type = st.selectbox("LLM for Query Generation*", 
                                     model_choices, 
                                     index=st.session_state.example_model_index, 
