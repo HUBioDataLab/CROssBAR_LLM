@@ -37,4 +37,15 @@ Does 'Mesalazine' is used for treatment of 'Crohn disease'?
 From the given list, which gene(s) is associated with both 'vitamin D deficiency' and 'glioblastoma'? Given list is: MAML2, TERT, NPHS2, NLRP3
 How many proteins does 'Homo sapiens (Human)' contain?
 Which pathway has protein that is targeted by both compound with id 'chembl:CHEMBL99830' and 'Cannabidiol' drug, and is modulated by disease 'congenital stationary night blindness'?
-What is the average disgenet gene disease score of gene with 'RXRA' symbol in gene-disease relationship edges and what is the average pchembl value of drugs targeting the protein of this gene?
+What is the average disgenet gene disease score of gene with 'RXRA' symbol in gene-disease relationship edges and what is the average pchembl value of drugs targeting the protein of this gene? Round to three decimal points.
+Find genes that are regulated by 'FOXA1' gene and is orthologous to 'ABCB1' gene.
+What are the differences between 'Williams syndrome' disease and 'pantothenate kinase-associated neurodegeneration' disease in terms of associated phenotypes?
+Identify unique drugs that downregulate genes related to 'kidney Wilms tumor' but upregulate genes which its protein involved in 'homologous chromosome orientation in meiotic metaphase I'.
+What are the potential drug interactions that have synergy in their interaction type for medications used to treat 'ovarian hyperstimulation syndrome' disease.
+What are the cellular components localize proteins targeted by 'Tacrolimus' drug.
+What are the shared distinct reactions of proteins that are both targeted by 'Benzoyl peroxide' drug and associated with phenotypes linked to 'Floating-Harbor syndrome'?
+Return proteins that are part of 'acyl-CoA ceramide synthase complex' cellular component, involved in 'ceramide biosynthetic process' biological process, and have domains that enable 'sphingosine N-acyltransferase activity' molecular function.
+What are the common side effects of drugs that interact with 'Cefradine' drug and target proteins involved in 'Platelet activation' pathway?
+Identify proteins that are encoded by gene regulated by 'NFKB1' gene, take part in 'Endocytosis' pathway, and are targeted by drugs used to treat diseases comorbid with 'osteoporosis' disease.
+What is the SMILES notation for 'Farampator' drug?
+In which organism(s) is 'ABC-family proteins mediated transport' pathway found?
