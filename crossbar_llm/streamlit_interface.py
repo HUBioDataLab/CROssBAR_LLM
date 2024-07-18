@@ -2,6 +2,7 @@ import streamlit as st
 import sys, os, logging
 from datetime import datetime
 import pandas as pd
+import numpy as np
 import plotly.express as px
 from crossbar_llm.st_components.autocomplete import st_keyup
 from crossbar_llm.langchain_llm_qa_trial import RunPipeline
@@ -160,7 +161,12 @@ def add_recent_query(query, query_type):
         "type": query_type
     })
 
-
+def convert_vector_file_to_np(file):
+    if file.name.endswith(".csv"):
+        df = pd.read_csv(file)
+        return df.to_numpy()
+    elif file.name.endswith(".npy"):
+        return np.load(file)
 
 
 tab1, tab2 = st.tabs(["LLM Query", "Vector File Upload"])
@@ -199,7 +205,12 @@ def query_interface(file_upload=False):
                     embedding_type = st.selectbox("Select Embedding Type", options=embedding_options, key="embedding_type", help="Choose the specific embedding type for this category.")
                 else:
                     embedding_type = st.text_input("Embedding Type", value=embedding_options, disabled=True, key="embedding_type_input", help="The embedding type for this category.")
-        
+
+            if vector_file:
+                vector_data = convert_vector_file_to_np(vector_file)
+                st.write(f"Vector data shape: {vector_data.shape}")
+
+
         col1_1, col1_2, col1_3 = st.columns(3)
         with col1_1:
             if st.button("Generate & Run Query", key=f"gen_run{'_file' if file_upload else ''}", help="Click to process your query and get results.", type="primary"):
