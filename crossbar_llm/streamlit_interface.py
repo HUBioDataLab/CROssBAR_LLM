@@ -109,14 +109,14 @@ examples = [
         "question": "Which Gene is related to Disease named psoriasis?",
         "model": "gemini-1.5-pro-latest",
         "verbose": False,
-        "limit": 5
+        "limit": 10
     },
     {
         "label": "Targets of Caffeine",
         "question": "What proteins does the drug named Caffeine target?",
         "model": "gemini-1.5-pro-latest",
         "verbose": False,
-        "limit": 5
+        "limit": 10
     }
 ]
 
@@ -184,12 +184,12 @@ def query_interface(file_upload=False):
                 question = st.text_input("Enter your question here", value=example["question"], placeholder=example["question"],key=f"question_unchange{'_file' if file_upload else ''}")
                 query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, index=model_choices.index(example["model"]), key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
                 limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
-                limit_query_return = st.selectbox("Limit query return", options=limit_options, index=limit_options.index(example["limit"]), key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses DFS traversal, so some nodes may not be reached.")
+                limit_query_return = st.selectbox("Limit query return", options=limit_options, index=limit_options.index(example["limit"]), key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.")
                 verbose_mode = st.checkbox("Enable Verbose Mode", value=example["verbose"], key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
         else:
             question = st_keyup("Enter your question here", key=f"question{'_file' if file_upload else ''}")
             query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
-            limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses DFS traversal, so some nodes may not be reached.", index=2)
+            limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.", index=3)
             verbose_mode = st.checkbox("Enable Verbose Mode", key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
         
         llm_api_key = st.text_input("API Key for LLM", type="password", key=f"api_key{'_file' if file_upload else ''}", help="Enter your API key if you choose a paid model.")
@@ -238,15 +238,16 @@ def query_interface(file_upload=False):
             node_counts = st.session_state.latest_values["node_counts"]
             relationship_counts = st.session_state.latest_values["relationship_counts"]
 
-        st.write("Top 5 Relationship Types:")
-        fig2 = px.pie(values=list(relationship_counts.values()), names=list(relationship_counts.keys()))
-        st.plotly_chart(fig2, use_container_width=True)
+        with st.expander("Top 5 Relationship Types", expanded=True):
+            fig2 = px.pie(values=list(relationship_counts.values()), names=list(relationship_counts.keys()))
+            st.plotly_chart(fig2, use_container_width=True)
         
-        total_nodes = sum(node_counts.values())
-        total_relationships = sum(relationship_counts.values())
-        
-        st.metric("Total Nodes", f"{total_nodes:,}")
-        st.metric("Total Relationships", f"{total_relationships:,}")
+        with st.expander("Node and Relationship Counts", expanded=True):
+            total_nodes = sum(node_counts.values())
+            total_relationships = sum(relationship_counts.values())
+            
+            st.metric("Total Nodes", f"{total_nodes:,}")
+            st.metric("Total Relationships", f"{total_relationships:,}")
 
     
     if st.session_state.get('generate_and_run_submitted', False):
