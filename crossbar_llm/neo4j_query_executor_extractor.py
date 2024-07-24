@@ -22,6 +22,14 @@ WITH label AS nodeLabels, collect({property:property, type:type}) AS properties
 RETURN {type: nodeLabels, properties: properties} AS output
 """
 
+node_query = """
+CALL apoc.meta.data()
+YIELD label, other, elementType, type, property
+WHERE NOT type = "RELATIONSHIP" AND elementType = "node"
+WITH collect(distinct label) AS nodeLabels
+RETURN {labels: nodeLabels} AS output
+"""
+
 rel_query = """
 CALL apoc.meta.data()
 YIELD label, other, elementType, type, property
@@ -31,10 +39,22 @@ RETURN "(:" + label + ")-[:" + property + "]->(:" + toString(other_node) + ")" A
 """
 
 class Neo4jGraphHelper:
-    def __init__(self, URI: str, user: str, password: str, db_name: str):
+    def __init__(self, URI: str, user: str, password: str, db_name: str, reset_schema: bool,
+                 create_vector_indexes: bool,
+                 delete_vector_indexes: bool = False):
         self.URI = URI
         self.AUTH = (user, password)
         self.db_name = db_name
+
+        if reset_schema:
+            self.reset_db_schema()
+
+        if create_vector_indexes:
+            self.create_vector_indexes()
+        
+        if delete_vector_indexes:
+            self.delete_vector_indexes()
+
 
     @timer_func
     def create_graph_schema_variables(self):
@@ -46,40 +66,28 @@ class Neo4jGraphHelper:
             with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
                 # Node property filtering
                 records, _, _ = driver.execute_query(node_properties_query, database_=self.db_name)
-                node_results = [res["output"] for res in records]
+                node_property_results = [res["output"] for res in records]
 
-                selected_nodes = ["SideEffect", "EcNumber", "Phenotype", "Pathway", "MolecularMixture", "SmallMolecule", 
-                                "MolecularFunction", "BiologicalProcess", "CellularComponent", "Gene", "Protein", 
-                                "Disease", "OrganismTaxon", "ProteinDomain"]
-
-                for n in node_results:
+                for n in node_property_results:
                     n["properties"] = [prop for prop in n["properties"] if prop["property"] != "preferred_id"]
 
-                node_results_filtered = [n for n in node_results if n["labels"] in selected_nodes]
+                # Node type selection
+                records, _, _ = driver.execute_query(node_query, database_=self.db_name)
+                node_results_filtered = [res["output"] for res in records]
 
                 # Relation type filtering
                 records, _, _ = driver.execute_query(rel_query, database_=self.db_name)
                 edge_results_filtered = []
-                to_be_replaced = ["(", ")", ":", "[", "]", ">", "<"]
-                for res in records:        
-                    splitted = res.values()[0].split("-")
-                    splitted_corrected = []
-                    for i in splitted:
-                        for j in to_be_replaced:
-                            i = i.replace(j, "")
-                        splitted_corrected.append(i)
-
-
-                    if splitted_corrected[0] in selected_nodes and splitted_corrected[2] in selected_nodes:
-                        edge_results_filtered.append(res.values()[0])
+                for res in records:
+                    edge_results_filtered.append(res.values()[0])
 
                 # Relation property filtering
                 records, _, _ = driver.execute_query(rel_properties_query, database_=self.db_name)
                 edge_properties_results_filtered = [res.values()[0] for res in records]
 
             schema = {
-                "nodes": selected_nodes,
-                "node_properties": node_results_filtered,
+                "nodes": node_results_filtered,
+                "node_properties": node_property_results,
                 "edges": edge_results_filtered,
                 "edge_properties": edge_properties_results_filtered
             }
@@ -90,6 +98,11 @@ class Neo4jGraphHelper:
 
 
             return schema
+        
+    def reset_db_schema(self) -> None:
+        file_path = os.path.join(os.getcwd(), "graph_schema.json")
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
     @validate_call
     def execute(self, query: str, top_k: int = 5):
@@ -103,4 +116,74 @@ class Neo4jGraphHelper:
         with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
             records, _, _ = driver.execute_query(query, database_=self.db_name, routing_="r")
             results = [res.data() for index, res in enumerate(records) if top_k and index <= top_k]
+            
         return results
+    
+    @validate_call
+    def create_vector_indexes(self, similarity_function: str = "cosine") -> bool:
+
+        node_label_to_vector_index_names = {"SmallMolecule":"SelformerEmbeddings", "Protein":["Prott5Embeddings", "Esm2Embeddings"], 
+                                        "GOTerm":"Anc2vecEmbeddings", "Phenotype":"CadaEmbeddings", "Disease":"Doc2vecEmbeddings", 
+                                        "ProteinDomain":"Dom2vecEmbeddings", "EcNumber":"RxnfpEmbeddings", "Pathway":"BiokeenEmbeddings"}
+
+        node_label_to_property = {"Protein":["prott5_embedding", "esm2_embedding"], "ProteinDomain":"dom2vec_embedding",
+                                "GOTerm":"anc2vec_embedding", "SmallMolecule":"selformer_embedding", "Disease":"doc2vec_embedding",
+                                "Phenotype":"cada_embedding", "Pathway":"biokeen_embedding", "EcNumber":"rxnfp_embedding"}
+        
+        vector_index_name_to_property = {"Prott5Embeddings":"prott5_embedding", "Esm2Embeddings":"esm2_embedding"}
+
+        property_to_vector_size = {"prott5_embedding":1024, "esm2_embedding":1280, "dom2vec_embedding":50, 
+                                "anc2vec_embedding":200, "selformer_embedding":768, "doc2vec_embedding":100,
+                                "cada_embedding":160, "biokeen_embedding":200, "rxnfp_embedding":256}
+        
+        with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
+
+            for node_label, vector_index_name in node_label_to_vector_index_names.items():
+                if isinstance(vector_index_name, str):
+                    query = f"""
+                    CREATE VECTOR INDEX {vector_index_name} IF NOT EXISTS
+                    FOR (m:{node_label})
+                    ON m.{node_label_to_property[node_label]}
+                    OPTIONS {{indexConfig: {{
+                    `vector.dimensions`: {property_to_vector_size[node_label_to_property[node_label]]},
+                    `vector.similarity_function`: '{similarity_function}'
+                    }}}}
+                    """
+                    _, _, _ = driver.execute_query(query, database_=self.db_name, routing_="w")
+                    
+                else:                
+                    for n in vector_index_name:
+                        query = f"""
+                        CREATE VECTOR INDEX {n} IF NOT EXISTS
+                        FOR (m:{node_label})
+                        ON m.{vector_index_name_to_property[n]}
+                        OPTIONS {{indexConfig: {{
+                        `vector.dimensions`: {property_to_vector_size[vector_index_name_to_property[n]]},
+                        `vector.similarity_function`: '{similarity_function}'
+                        }}}}
+                        """
+                        _, _, _ = driver.execute_query(query, database_=self.db_name, routing_="w")
+
+        return True
+    
+    def delete_vector_indexes(self) -> bool:
+        with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
+            query = """
+            SHOW VECTOR INDEXES YIELD name
+            RETURN *
+            """
+            records, _, _ = driver.execute_query(query, database_=self.db_name, routing_="r")
+
+            indexes = []
+            for res in records:
+                indexes.append(res.data()["name"])
+
+            
+            for vector_index in indexes:
+                query = f"""
+                DROP INDEX {vector_index}
+                """
+                _, _, _ = driver.execute_query(query, database_=self.db_name, routing_="w")
+
+        
+        return True
