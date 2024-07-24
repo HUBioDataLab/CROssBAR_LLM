@@ -195,9 +195,7 @@ class QueryChain:
         """
         Executes the query chain: generates a query, corrects it, and returns the corrected query.
         """
-        print(question)
-        print(vector_index)
-        print("embedding:", embedding)
+
         if self.search_type == "db_search":
             self.generated_query = self.cypher_chain.run(node_types=self.schema["nodes"], 
                                                     node_properties=self.schema["node_properties"], 
@@ -224,7 +222,6 @@ class QueryChain:
             
             self.generated_query = self.generated_query.format(user_input=embedding)
 
-        print("generated_query:", self.generated_query)
         corrected_query = correct_query(query=self.generated_query, edge_schema=self.schema["edges"])
         
         self.generated_queries.append(corrected_query)
@@ -304,7 +301,10 @@ class RunPipeline:
             "codestral:latest",
             "llama3:instruct",
             "tomasonjo/codestral-text2cypher:latest",
-            "tomasonjo/llama3-text2cypher-demo:latest"
+            "tomasonjo/llama3-text2cypher-demo:latest",
+            "llama3.1:8b",
+            "qwen2:7b-instruct",
+            "gemma2:latest",
         ]
 
 
