@@ -134,14 +134,14 @@ model_choices = [
 ]
 
 node_label_to_vector_index_names = {
-    "SmallMolecule": "SelformerEmbeddings",
-    "Protein": ["Prott5Embeddings", "Esm2Embeddings"],
-    "GOTerm": 'Anc2vecEmbeddings',
-    'Phenotype': 'CadaEmbeddings',
-    'Disease': 'Doc2vecEmbeddings',
-    "ProteinDomain": 'Dom2vecEmbeddings',
-    'EcNumber': 'RxnfpEmbeddings',
-    'Pathway': 'BiokeenEmbeddings'
+    "SmallMolecule": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
+    "Protein": ["[Prott5](https://arxiv.org/abs/2007.06225)", "[Esm2Embeddings](https://www.biorxiv.org/content/10.1101/2022.07.20.500902v3)"],
+    "GOTerm": '[Anc2vec](https://academic.oup.com/bib/article/23/2/bbac003/6523148)',
+    'Phenotype': '[Cada(https://academic.oup.com/nargab/article/3/3/lqab078/6363753)',
+    'Disease': '[Doc2vec](https://academic.oup.com/bioinformatics/article/37/2/236/5877941)',
+    "ProteinDomain": '[Dom2vec](https://www.mdpi.com/1999-4893/14/1/28)',
+    'EcNumber': '[Rxnfp](https://www.nature.com/articles/s42256-020-00284-w)',
+    'Pathway': '[Biokeen](https://www.biorxiv.org/content/10.1101/631812v1)'
 }
 
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
@@ -202,9 +202,10 @@ def query_interface(file_upload=False):
             if vector_category:
                 embedding_options = node_label_to_vector_index_names[vector_category]
                 if isinstance(embedding_options, list):
-                    embedding_type = st.selectbox("Select Embedding Type", options=embedding_options, key="embedding_type", help="Choose the specific embedding type for this category.")
+                    embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
+                    st.markdown(f"Embedding paper: {[option for option in embedding_options if embedding_type in option][0]}")
                 else:
-                    embedding_type = st.text_input("Embedding Type", value=embedding_options, disabled=True, key="embedding_type_input", help="The embedding type for this category.")
+                    st.markdown(f"Embedding Type: {embedding_options}")
 
             if vector_file:
                 vector_data = convert_vector_file_to_np(vector_file)
