@@ -43,6 +43,9 @@ To use this package, ensure that you have `.env` file present in the root folder
 ```env
 OPENAI_API_KEY="sk-************************************************"
 GEMINI_API_KEY="AI*****************-**-******-*********"
+ANTHROPIC_API_KEY="sk-ant-***-***********************-****"
+GROQ_API_KEY="gsk_****************************************"
+REPLICATE_API_KEY="***************************************"
 NEO4J_USER="user"
 NEO4J_PASSWORD="password"
 NEO4J_DB_NAME="neo4j"
