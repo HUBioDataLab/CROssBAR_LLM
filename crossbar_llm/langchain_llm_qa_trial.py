@@ -186,7 +186,7 @@ class QueryChain:
 
 
 
-    @timeout(300)
+    @timeout(180)
     @validate_call
     def run_cypher_chain(self, 
                          question: str, 
