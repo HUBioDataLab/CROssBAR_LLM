@@ -41,7 +41,7 @@ pip install -r requirements.txt
 To use this package, ensure that you have `.env` file present in the root folder of it. You should use the template below:
 
 ```env
-MY_OPENAI_API_KEY="sk-************************************************"
+OPENAI_API_KEY="sk-************************************************"
 GEMINI_API_KEY="AI*****************-**-******-*********"
 NEO4J_USER="user"
 NEO4J_PASSWORD="password"
