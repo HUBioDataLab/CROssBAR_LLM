@@ -167,9 +167,16 @@ def add_recent_query(query, query_type):
 def convert_vector_file_to_np(file):
     if file.name.endswith(".csv"):
         df = pd.read_csv(file)
-        return df.to_numpy()
+        if df.shape[1] > 1:
+            raise ValueError("The CSV file should contain only one column (one array). Multiple columns detected.")
+        return df.to_numpy().flatten()
     elif file.name.endswith(".npy"):
-        return np.load(file)
+        arr = np.load(file, allow_pickle=True)
+        if arr.ndim > 1:
+            raise ValueError("The NPY file should contain only one array. Multiple arrays or a multi-dimensional array detected.")
+        return arr.flatten()
+    else:
+        raise ValueError("Unsupported file format. Please upload a CSV or NPY file.")
 
 
 tab1, tab2 = st.tabs(["LLM Query", "Vector File Upload"])
@@ -206,13 +213,16 @@ def query_interface(file_upload=False):
                 embedding_options = node_label_to_vector_index_names[vector_category]
                 if isinstance(embedding_options, list):
                     embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
-                    st.markdown(f"Embedding paper: {[option for option in embedding_options if embedding_type in option][0]}")
+                    st.markdown(f"Article of the Embedding Methodology: {[option for option in embedding_options if embedding_type in option][0]}")
                 else:
                     st.markdown(f"Embedding Type: {embedding_options}")
 
             if vector_file:
-                vector_data = convert_vector_file_to_np(vector_file)
-                st.write(f"Vector data shape: {vector_data.shape}")
+                try:
+                    vector_data = convert_vector_file_to_np(vector_file)
+                    st.write(f"Vector data shape: {vector_data.shape}")
+                except ValueError as e:
+                    st.error(f"Error processing vector file: {str(e)}")
 
 
         col1_1, col1_2, col1_3 = st.columns(3)
