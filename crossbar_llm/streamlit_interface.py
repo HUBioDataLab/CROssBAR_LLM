@@ -36,16 +36,20 @@ if 'first_run' not in st.session_state:
     st.session_state.first_run = True
 
 # Main query functions
-def run_query(question: str, llm_type, top_k, api_key=None) -> str:
+def run_query(question: str, llm_type, top_k, vector_index=None, embedding=None, api_key=None) -> str:
     logging.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
-        return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+        if vector_index:
+            return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
+        else:
+            return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
 
-def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, api_key=None):
+def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, vector_index=None, embedding=None, api_key=None):
     logging.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
@@ -59,11 +63,14 @@ def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, 
         logging.error(f"Error in pipeline: {e}")
         raise e
 
-def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, api_key=None):
+def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_index=None, embedding=None, api_key=None):
     logging.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
-        query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+        if vector_index:
+            query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
+        else:
+            query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
         response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
         verbose_output = ""
         if verbose_mode:
@@ -77,17 +84,27 @@ def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, api_key
 def get_neo4j_statistics():
     driver = neo4j.GraphDatabase.driver("bolt://localhost:7687", auth=(neo4j_user, neo4j_password))
     with driver.session() as session:
+        # Get individual label counts
+        result = session.run("""
+        MATCH (n)
+        UNWIND labels(n) AS label
+        WITH label, count(n) AS count
+        RETURN label, count
+        ORDER BY count DESC
+        LIMIT 5
+        """)
+        top_5_labels = {row["label"]: row["count"] for row in result}
+        
+        # Get label combination counts
         result = session.run("""
         MATCH (n)
         WITH labels(n) AS labels, count(n) AS count
         RETURN labels, count
         ORDER BY count DESC
-        LIMIT 5
         """)
-        node_counts = {", ".join(row["labels"]): row["count"] for row in result}
-        # If node has less then 50, then it will not be shown in the graph
-        node_counts = {k: v for k, v in node_counts.items() if v > 50}
+        node_counts = {tuple(row["labels"]): row["count"] for row in result}
         
+        # Get relationship counts
         result = session.run("""
         MATCH ()-[r]->()
         WITH type(r) AS type, count(r) AS count
@@ -98,7 +115,9 @@ def get_neo4j_statistics():
         relationship_counts = {row["type"]: row["count"] for row in result}
     
     driver.close()
-    return node_counts, relationship_counts
+    return top_5_labels, node_counts, relationship_counts
+
+
 
 # Streamlit UI
 st.title("CROssBAR LLM Query Interface")
@@ -138,7 +157,7 @@ model_choices = [
 
 node_label_to_vector_index_names = {
     "SmallMolecule": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
-    "Protein": ["[Prott5](https://arxiv.org/abs/2007.06225)", "[Esm2Embeddings](https://www.biorxiv.org/content/10.1101/2022.07.20.500902v3)"],
+    "Protein": ["[Prott5](https://arxiv.org/abs/2007.06225)", "[Esm2](https://www.biorxiv.org/content/10.1101/2022.07.20.500902v3)"],
     "GOTerm": '[Anc2vec](https://academic.oup.com/bib/article/23/2/bbac003/6523148)',
     'Phenotype': '[Cada](https://academic.oup.com/nargab/article/3/3/lqab078/6363753)',
     'Disease': '[Doc2vec](https://academic.oup.com/bioinformatics/article/37/2/236/5877941)',
@@ -215,6 +234,7 @@ def query_interface(file_upload=False):
                     embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
                     st.markdown(f"Article of the Embedding Methodology: {[option for option in embedding_options if embedding_type in option][0]}")
                 else:
+                    embedding_type = embedding_options.split(']')[0][1:]
                     st.markdown(f"Embedding Type: {embedding_options}")
 
             if vector_file:
@@ -241,16 +261,22 @@ def query_interface(file_upload=False):
     with col2:
         st.subheader("Database Statistics")
         if st.session_state.first_run:
-            node_counts, relationship_counts = get_neo4j_statistics()
+            top_5_labels, node_counts, relationship_counts = get_neo4j_statistics()
             st.session_state.first_run = False
             st.session_state.latest_values = {
+                "top_5_labels": top_5_labels,
                 "node_counts": node_counts,
                 "relationship_counts": relationship_counts
             }
 
         if not st.session_state.first_run:
+            top_5_labels = st.session_state.latest_values["top_5_labels"]
             node_counts = st.session_state.latest_values["node_counts"]
             relationship_counts = st.session_state.latest_values["relationship_counts"]
+
+        with st.expander("Top 5 Node Labels", expanded=True):
+            fig1 = px.pie(values=list(top_5_labels.values()), names=list(top_5_labels.keys()))
+            st.plotly_chart(fig1, use_container_width=True)
 
         with st.expander("Top 5 Relationship Types", expanded=True):
             fig2 = px.pie(values=list(relationship_counts.values()), names=list(relationship_counts.keys()))
@@ -262,18 +288,23 @@ def query_interface(file_upload=False):
             
             st.metric("Total Nodes", f"{total_nodes:,}")
             st.metric("Total Relationships", f"{total_relationships:,}")
+            
+            st.subheader("Detailed Node Statistics")
+            node_df = pd.DataFrame([(', '.join(labels), count) for labels, count in node_counts.items()], columns=['Labels', 'Count'])
+            node_df = node_df.sort_values('Count', ascending=False)
+            st.dataframe(node_df)
+
+
 
     
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
             with st.spinner('Generating and Running Query...'):
-                response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, llm_api_key)
-            
-            if file_upload and vector_file and vector_category:
-                st.subheader("Uploaded Vector File Information:")
-                st.write(f"Category: {vector_category}")
-                st.write(f"Embedding Type: {embedding_type}")
-                st.write(f"File Name: {vector_file.name}")
+                if file_upload and vector_file and vector_category:
+                    vector_index = f"{embedding_type}Embeddings"
+                    response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key, vector_index=vector_index, embedding=vector_data)
+                else:
+                    response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
             
             st.subheader("Generated Cypher Query:")
             st.code(query, language="cypher")
@@ -294,7 +325,12 @@ def query_interface(file_upload=False):
     if st.session_state.get('generate_query_submitted', False):
         if question and query_llm_type:
             with st.spinner('Generating Cypher Query...'):
-                generated_query = run_query(question, query_llm_type, limit_query_return,llm_api_key)
+                if file_upload and vector_file and vector_category:
+                    vector_index = f"{embedding_type}Embeddings"
+                    generated_query = run_query(question, query_llm_type, limit_query_return, vector_index=vector_index, embedding=vector_data, api_key=llm_api_key)
+                else:
+                    generated_query = run_query(question, query_llm_type, limit_query_return, api_key=llm_api_key)
+    
             st.subheader("Generated Cypher Query:")
             st.text_area("You can edit the generated query below:", value=generated_query, key="edited_query", height=150)
         else:
@@ -304,8 +340,12 @@ def query_interface(file_upload=False):
     if st.session_state.get('run_query_submitted', False):
         if 'edited_query' in st.session_state and st.session_state.edited_query:
             with st.spinner('Running Cypher Query...'):
-                response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return,verbose_mode, llm_api_key)
-            
+                if file_upload and vector_file and vector_category:
+                    vector_index = f"{embedding_type}Embeddings"
+                    response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return, verbose_mode, vector_index=vector_index, embedding=vector_data, api_key=llm_api_key)
+                else:
+                    response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
+
             st.subheader("Raw Query Output:")
             st.code(str(result))
             
