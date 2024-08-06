@@ -6,6 +6,8 @@ import numpy as np
 import plotly.express as px
 from crossbar_llm.st_components.autocomplete import st_keyup
 from crossbar_llm.langchain_llm_qa_trial import RunPipeline
+import io
+from contextlib import redirect_stdout
 
 # Setup
 st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
@@ -15,11 +17,14 @@ sys.path.append(parent_dir)
 
 # Logging setup
 def initialize_logging():
-    if 'log_filename' not in st.session_state:
-        current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        st.session_state.log_filename = f"query_log_{current_date}.log"
-        logging.basicConfig(filename=st.session_state.log_filename, level=logging.INFO,
-                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    if 'log_stream' not in st.session_state:
+        st.session_state.log_stream = io.StringIO()
+        handler = logging.StreamHandler(st.session_state.log_stream)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+        logging.getLogger().setLevel(logging.INFO)
 
 initialize_logging()
 
@@ -52,12 +57,15 @@ def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, 
     logging.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
-        response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
-        verbose_output = ""
-        if verbose_mode:
-            with open(st.session_state.log_filename, 'r') as file:
-                verbose_output = file.read()
-        return response, verbose_output, result
+        verbose_output = st.empty()
+        def update_verbose():
+            if verbose_mode:
+                verbose_output.code(st.session_state.log_stream.getvalue(), language="log")
+        with redirect_stdout(st.session_state.log_stream):
+            response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+            update_verbose()
+        
+        return response, st.session_state.log_stream.getvalue(), result
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
@@ -66,19 +74,27 @@ def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_
     logging.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
-        if vector_index:
-            query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
-        else:
-            query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
-        response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
-        verbose_output = ""
-        if verbose_mode:
-            with open(st.session_state.log_filename, 'r') as file:
-                verbose_output = file.read()
-        return response, verbose_output, result, query
+        verbose_output = st.empty()
+        
+        def update_verbose():
+            if verbose_mode:
+                verbose_output.code(st.session_state.log_stream.getvalue(), language="log")
+        
+        with redirect_stdout(st.session_state.log_stream):
+            if vector_index:
+                query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
+            else:
+                query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+            update_verbose()
+            
+            response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+            update_verbose()
+        
+        return response, st.session_state.log_stream.getvalue(), result, query
     except Exception as e:
         logging.error(f"Error in pipeline: {e}")
         raise e
+
     
 
 # Streamlit UI
