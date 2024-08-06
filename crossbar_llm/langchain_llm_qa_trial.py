@@ -17,6 +17,7 @@ from langchain_google_genai import GoogleGenerativeAI
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
 from langchain_community.llms import Replicate, Ollama
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain.chains import LLMChain
 
 from crossbar_llm.neo4j_query_corrector import correct_query
@@ -54,6 +55,7 @@ class Config(BaseModel):
     anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY")
     groq_api_key: str = os.getenv("GROQ_API_KEY")
     replicate_api_key: str = os.getenv("REPLICATE_API_KEY")
+    nvidia_api_key: str = os.getenv("NVIDIA_API_KEY")
     neo4j_usr: str = os.getenv("NEO4J_USER")
     neo4j_password: str = os.getenv("NEO4J_PASSWORD")
     neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
@@ -148,6 +150,16 @@ class OllamaLanguageModel:
         self.temperature = temperature or 0
         self.llm = Ollama(model=self.model_name, temperature=self.temperature, timeout=300)
 
+class NVIDIALanguageModel:
+    """
+    NVIDIALanguageModel class for interacting with NVIDIA's language models.
+    It initializes the model with given API key and specified parameters.
+    """
+    def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
+        self.model_name = model_name or "meta/llama-3.1-405b-instruct"
+        self.temperature = temperature or 0
+        self.llm = ChatNVIDIA(api_key=api_key, model=self.model_name, temperature=self.temperature)
+
 class QueryChain:
     """
     QueryChain class to handle the generation, correction, and parsing of Cypher queries using language models.
@@ -159,13 +171,15 @@ class QueryChain:
                                    AnthropicLanguageModel, 
                                    GroqLanguageModel, 
                                    ReplicateLanguageModel,
-                                   OllamaLanguageModel],
+                                   OllamaLanguageModel,
+                                   NVIDIALanguageModel],
                  qa_llm: Union[OpenAILanguageModel, 
                                GoogleGenerativeLanguageModel, 
                                AnthropicLanguageModel, 
                                GroqLanguageModel, 
                                ReplicateLanguageModel,
-                               OllamaLanguageModel],
+                               OllamaLanguageModel,
+                               NVIDIALanguageModel],
                  schema: dict, 
                  verbose: bool = False,
                  search_type: Literal["vector_search", "db_search"] = "db_search",
@@ -308,6 +322,14 @@ class RunPipeline:
             "gemma2:latest",
         ]
 
+        nvidia_llm_models = [
+            "meta/llama-3.1-405b-instruct",
+            "meta/llama-3.1-8b-instruct",
+            "nv-mistralai/mistral-nemo-12b-instruct",
+            "mistralai/mixtral-8x22b-instruct-v0.1",
+        ]
+
+
 
         
         if isinstance(model_name, (dict, list)):
@@ -331,6 +353,8 @@ class RunPipeline:
                         self.llm["cypher_llm"] = GroqLanguageModel(self.config.groq_api_key, model_name=model_name["cypher_llm_model"]).llm
                     elif model_name in ollama_llm_models:
                         self.llm["cypher_llm"] = OllamaLanguageModel(model_name=model_name["cypher_llm_model"]).llm
+                    elif model_name in nvidia_llm_models:
+                        self.llm["cypher_llm"] = NVIDIALanguageModel(self.config.nvidia_api_key, model_name=model_name["cypher_llm_model"]).llm
                     else:
                         raise ValueError("Unsupported Language Model Name")
                 elif model_name in openai_llm_models:
@@ -343,6 +367,8 @@ class RunPipeline:
                     self.llm["qa_llm"] = GroqLanguageModel(self.config.groq_api_key, model_name=model_name["qa_llm_model"]).llm
                 elif model_name in ollama_llm_models:
                     self.llm["qa_llm"] = OllamaLanguageModel(model_name=model_name["qa_llm_model"]).llm
+                elif model_name in nvidia_llm_models:
+                    self.llm["qa_llm"] = NVIDIALanguageModel(self.config.nvidia_api_key, model_name=model_name["qa_llm_model"]).llm
                 else:
                     raise ValueError("Unsupported Language Model Name")
 
@@ -356,6 +382,8 @@ class RunPipeline:
             self.llm = GroqLanguageModel(self.config.groq_api_key, model_name=model_name).llm
         elif model_name in ollama_llm_models:
             self.llm = OllamaLanguageModel(model_name=model_name).llm
+        elif model_name in nvidia_llm_models:
+            self.llm = NVIDIALanguageModel(self.config.nvidia_api_key, model_name=model_name).llm
         else:
             raise ValueError("Unsupported Language Model Name")
         
