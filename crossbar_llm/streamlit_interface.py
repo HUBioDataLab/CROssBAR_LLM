@@ -3,7 +3,6 @@ import sys, os, logging
 from datetime import datetime
 import pandas as pd
 import numpy as np
-import plotly.express as px
 from crossbar_llm.st_components.autocomplete import st_keyup
 from crossbar_llm.langchain_llm_qa_trial import RunPipeline
 from logging.handlers import RotatingFileHandler
