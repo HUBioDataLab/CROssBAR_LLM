@@ -17,11 +17,9 @@ neo4j = "^5.20.0"
 numpy = "^1.26.4"
 openai = "^1.30.2"
 pandas = "^2.2.2"
-pydantic = "^2.7.1"
+pydantic = "2.7.4"
 python-dotenv = "^1.0.1"
 streamlit = "^1.35.0"
-streamlit-ace = "^0.1.1"
-streamlit-code-editor = "^0.1.14"
 langchain-nvidia-ai-endpoints = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
