@@ -6,6 +6,7 @@ import numpy as np
 import plotly.express as px
 from crossbar_llm.st_components.autocomplete import st_keyup
 from crossbar_llm.langchain_llm_qa_trial import RunPipeline
+from logging.handlers import RotatingFileHandler
 import io
 from contextlib import redirect_stdout
 
@@ -15,16 +16,35 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
+def setup_file_logging():
+    # Make log file name based on current date
+    log_file = f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log"
+    file_handler = RotatingFileHandler(log_file, maxBytes=10*1024*1024, backupCount=5)
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    return file_handler
+
+
 # Logging setup
 def initialize_logging():
     if 'log_stream' not in st.session_state:
         st.session_state.log_stream = io.StringIO()
-        handler = logging.StreamHandler(st.session_state.log_stream)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        logging.getLogger().addHandler(handler)
-        logging.getLogger().setLevel(logging.INFO)
+        
+        # Console handler (for verbose mode)
+        console_handler = logging.StreamHandler(st.session_state.log_stream)
+        console_handler.setLevel(logging.INFO)
+        console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(console_formatter)
+        
+        # File handler
+        file_handler = setup_file_logging()
+        
+        # Root logger setup
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.INFO)
+        root_logger.addHandler(console_handler)
+        root_logger.addHandler(file_handler)
 
 initialize_logging()
 
@@ -41,7 +61,10 @@ if 'first_run' not in st.session_state:
 
 # Main query functions
 def run_query(question: str, llm_type, top_k, vector_index=None, embedding=None, api_key=None) -> str:
-    logging.info("Processing question...")
+    logger = logging.getLogger(__name__)
+    st.session_state.log_stream.seek(0)
+    st.session_state.log_stream.truncate()
+    logger.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
         if vector_index:
@@ -50,11 +73,14 @@ def run_query(question: str, llm_type, top_k, vector_index=None, embedding=None,
             return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
 
     except Exception as e:
-        logging.error(f"Error in pipeline: {e}")
+        logger.error(f"Error in pipeline: {e}")
         raise e
 
 def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, vector_index=None, embedding=None, api_key=None):
-    logging.info("Processing question...")
+    logger = logging.getLogger(__name__)
+    st.session_state.log_stream.seek(0)
+    st.session_state.log_stream.truncate()
+    logger.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
         verbose_output = st.empty()
@@ -67,11 +93,14 @@ def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, 
         
         return response, st.session_state.log_stream.getvalue(), result
     except Exception as e:
-        logging.error(f"Error in pipeline: {e}")
+        logger.error(f"Error in pipeline: {e}")
         raise e
 
 def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_index=None, embedding=None, api_key=None):
-    logging.info("Processing question...")
+    logger = logging.getLogger(__name__)
+    st.session_state.log_stream.seek(0)
+    st.session_state.log_stream.truncate()
+    logger.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
         verbose_output = st.empty()
@@ -92,7 +121,7 @@ def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_
         
         return response, st.session_state.log_stream.getvalue(), result, query
     except Exception as e:
-        logging.error(f"Error in pipeline: {e}")
+        logger.error(f"Error in pipeline: {e}")
         raise e
 
     
