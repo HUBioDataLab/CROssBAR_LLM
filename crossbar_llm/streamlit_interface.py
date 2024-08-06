@@ -81,43 +81,6 @@ def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_
         logging.error(f"Error in pipeline: {e}")
         raise e
     
-def get_neo4j_statistics():
-    driver = neo4j.GraphDatabase.driver("bolt://localhost:7687", auth=(neo4j_user, neo4j_password))
-    with driver.session() as session:
-        # Get individual label counts
-        result = session.run("""
-        MATCH (n)
-        UNWIND labels(n) AS label
-        WITH label, count(n) AS count
-        RETURN label, count
-        ORDER BY count DESC
-        LIMIT 5
-        """)
-        top_5_labels = {row["label"]: row["count"] for row in result}
-        
-        # Get label combination counts
-        result = session.run("""
-        MATCH (n)
-        WITH labels(n) AS labels, count(n) AS count
-        RETURN labels, count
-        ORDER BY count DESC
-        """)
-        node_counts = {tuple(row["labels"]): row["count"] for row in result}
-        
-        # Get relationship counts
-        result = session.run("""
-        MATCH ()-[r]->()
-        WITH type(r) AS type, count(r) AS count
-        RETURN type, count
-        ORDER BY count DESC
-        LIMIT 5
-        """)
-        relationship_counts = {row["type"]: row["count"] for row in result}
-    
-    driver.close()
-    return top_5_labels, node_counts, relationship_counts
-
-
 
 # Streamlit UI
 st.title("CROssBAR LLM Query Interface")
@@ -258,45 +221,6 @@ def query_interface(file_upload=False):
             if st.button("Run Generated Query", key=f"run_generated{'_file' if file_upload else ''}", help="Click to run the generated Cypher query."):
                 st.session_state.run_query_submitted = True
 
-    with col2:
-        st.subheader("Database Statistics")
-        if st.session_state.first_run:
-            top_5_labels, node_counts, relationship_counts = get_neo4j_statistics()
-            st.session_state.first_run = False
-            st.session_state.latest_values = {
-                "top_5_labels": top_5_labels,
-                "node_counts": node_counts,
-                "relationship_counts": relationship_counts
-            }
-
-        if not st.session_state.first_run:
-            top_5_labels = st.session_state.latest_values["top_5_labels"]
-            node_counts = st.session_state.latest_values["node_counts"]
-            relationship_counts = st.session_state.latest_values["relationship_counts"]
-
-        with st.expander("Top 5 Node Labels", expanded=True):
-            fig1 = px.pie(values=list(top_5_labels.values()), names=list(top_5_labels.keys()))
-            st.plotly_chart(fig1, use_container_width=True)
-
-        with st.expander("Top 5 Relationship Types", expanded=True):
-            fig2 = px.pie(values=list(relationship_counts.values()), names=list(relationship_counts.keys()))
-            st.plotly_chart(fig2, use_container_width=True)
-        
-        with st.expander("Node and Relationship Counts", expanded=True):
-            total_nodes = sum(node_counts.values())
-            total_relationships = sum(relationship_counts.values())
-            
-            st.metric("Total Nodes", f"{total_nodes:,}")
-            st.metric("Total Relationships", f"{total_relationships:,}")
-            
-            st.subheader("Detailed Node Statistics")
-            node_df = pd.DataFrame([(', '.join(labels), count) for labels, count in node_counts.items()], columns=['Labels', 'Count'])
-            node_df = node_df.sort_values('Count', ascending=False)
-            st.dataframe(node_df)
-
-
-
-    
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
             with st.spinner('Generating and Running Query...'):
