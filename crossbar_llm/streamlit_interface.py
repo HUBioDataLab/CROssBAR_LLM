@@ -6,7 +6,6 @@ import numpy as np
 import plotly.express as px
 from crossbar_llm.st_components.autocomplete import st_keyup
 from crossbar_llm.langchain_llm_qa_trial import RunPipeline
-import neo4j
 
 # Setup
 st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
@@ -164,62 +163,60 @@ def convert_vector_file_to_np(file):
 tab1, tab2 = st.tabs(["LLM Query", "Vector File Upload"])
 
 def query_interface(file_upload=False):
-    col1, col2 = st.columns([2, 1])
     
-    with col1:
-        st.subheader("Query Input")
-        example_labels = ["Select an example - or Write Your Own Query"] + [ex["label"] for ex in examples]
-        selected_example = st.selectbox("Choose an example question", options=example_labels, key=f"example{'_file' if file_upload else ''}")
+    st.subheader("Query Input")
+    example_labels = ["Select an example - or Write Your Own Query"] + [ex["label"] for ex in examples]
+    selected_example = st.selectbox("Choose an example question", options=example_labels, key=f"example{'_file' if file_upload else ''}")
 
-        if selected_example != "Select an example - or Write Your Own Query":
-                example = next(ex for ex in examples if ex["label"] == selected_example)
-                question = st.text_input("Enter your question here", value=example["question"], placeholder=example["question"],key=f"question_unchange{'_file' if file_upload else ''}")
-                query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, index=model_choices.index(example["model"]), key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
-                limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
-                limit_query_return = st.selectbox("Limit query return", options=limit_options, index=limit_options.index(example["limit"]), key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.")
-                verbose_mode = st.checkbox("Enable Verbose Mode", value=example["verbose"], key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
-        else:
-            question = st_keyup("Enter your question here", key=f"question{'_file' if file_upload else ''}")
-            query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
-            limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.", index=3)
-            verbose_mode = st.checkbox("Enable Verbose Mode", key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
+    if selected_example != "Select an example - or Write Your Own Query":
+            example = next(ex for ex in examples if ex["label"] == selected_example)
+            question = st.text_input("Enter your question here", value=example["question"], placeholder=example["question"],key=f"question_unchange{'_file' if file_upload else ''}")
+            query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, index=model_choices.index(example["model"]), key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
+            limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
+            limit_query_return = st.selectbox("Limit query return", options=limit_options, index=limit_options.index(example["limit"]), key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.")
+            verbose_mode = st.checkbox("Enable Verbose Mode", value=example["verbose"], key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
+    else:
+        question = st_keyup("Enter your question here", key=f"question{'_file' if file_upload else ''}")
+        query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
+        limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.", index=3)
+        verbose_mode = st.checkbox("Enable Verbose Mode", key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
+    
+    llm_api_key = st.text_input("API Key for LLM", type="password", key=f"api_key{'_file' if file_upload else ''}", help="Enter your API key if you choose a paid model.")
+    
+
+    if file_upload:
+        vector_file = st.file_uploader("Upload Vector File", type=["csv", "npy"], help="Upload your vector file here.")
+        vector_category = st.selectbox("Select Vector Category", options=list(node_label_to_vector_index_names.keys()), key="vector_category", help="Choose the category of the uploaded vector.")
         
-        llm_api_key = st.text_input("API Key for LLM", type="password", key=f"api_key{'_file' if file_upload else ''}", help="Enter your API key if you choose a paid model.")
-        
+        if vector_category:
+            embedding_options = node_label_to_vector_index_names[vector_category]
+            if isinstance(embedding_options, list):
+                embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
+                st.markdown(f"Article of the Embedding Methodology: {[option for option in embedding_options if embedding_type in option][0]}")
+            else:
+                embedding_type = embedding_options.split(']')[0][1:]
+                st.markdown(f"Embedding Type: {embedding_options}")
 
-        if file_upload:
-            vector_file = st.file_uploader("Upload Vector File", type=["csv", "npy"], help="Upload your vector file here.")
-            vector_category = st.selectbox("Select Vector Category", options=list(node_label_to_vector_index_names.keys()), key="vector_category", help="Choose the category of the uploaded vector.")
-            
-            if vector_category:
-                embedding_options = node_label_to_vector_index_names[vector_category]
-                if isinstance(embedding_options, list):
-                    embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
-                    st.markdown(f"Article of the Embedding Methodology: {[option for option in embedding_options if embedding_type in option][0]}")
-                else:
-                    embedding_type = embedding_options.split(']')[0][1:]
-                    st.markdown(f"Embedding Type: {embedding_options}")
-
-            if vector_file:
-                try:
-                    vector_data = convert_vector_file_to_np(vector_file)
-                    st.write(f"Vector data shape: {vector_data.shape}")
-                except ValueError as e:
-                    st.error(f"Error processing vector file: {str(e)}")
+        if vector_file:
+            try:
+                vector_data = convert_vector_file_to_np(vector_file)
+                st.write(f"Vector data shape: {vector_data.shape}")
+            except ValueError as e:
+                st.error(f"Error processing vector file: {str(e)}")
 
 
-        col1_1, col1_2, col1_3 = st.columns(3)
-        with col1_1:
-            if st.button("Generate & Run Query", key=f"gen_run{'_file' if file_upload else ''}", help="Click to process your query and get results.", type="primary"):
-                add_recent_query(question, "Generate & Run")
-                st.session_state.generate_and_run_submitted = True
-        with col1_2:
-            if st.button("Generate Cypher Query", key=f"gen_cypher{'_file' if file_upload else ''}", help="Click to generate the Cypher query only."):
-                add_recent_query(question, "Generate Query")
-                st.session_state.generate_query_submitted = True
-        with col1_3:
-            if st.button("Run Generated Query", key=f"run_generated{'_file' if file_upload else ''}", help="Click to run the generated Cypher query."):
-                st.session_state.run_query_submitted = True
+    col1_1, col1_2, col1_3 = st.columns(3)
+    with col1_1:
+        if st.button("Generate & Run Query", key=f"gen_run{'_file' if file_upload else ''}", help="Click to process your query and get results.", type="primary"):
+            add_recent_query(question, "Generate & Run")
+            st.session_state.generate_and_run_submitted = True
+    with col1_2:
+        if st.button("Generate Cypher Query", key=f"gen_cypher{'_file' if file_upload else ''}", help="Click to generate the Cypher query only."):
+            add_recent_query(question, "Generate Query")
+            st.session_state.generate_query_submitted = True
+    with col1_3:
+        if st.button("Run Generated Query", key=f"run_generated{'_file' if file_upload else ''}", help="Click to run the generated Cypher query."):
+            st.session_state.run_query_submitted = True
 
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
