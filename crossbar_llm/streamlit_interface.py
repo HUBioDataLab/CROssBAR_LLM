@@ -281,9 +281,6 @@ def query_interface(file_upload=False):
             st.subheader("Natural Language Answer:")
             st.write(fix_markdown(response))
             
-            if verbose_mode:
-                st.subheader("Verbose Output:")
-                st.code(verbose_output, language="log")
         else:
             st.warning("Please make sure to fill in all the required fields before submitting the form.")
         st.session_state.generate_and_run_submitted = False
@@ -318,9 +315,6 @@ def query_interface(file_upload=False):
             st.subheader("Natural Language Answer:")
             st.write(fix_markdown(response))
             
-            if verbose_mode:
-                st.subheader("Verbose Output:")
-                st.code(verbose_output, language="log")
         else:
             st.warning("Please generate a Cypher query first before running it.")
         st.session_state.run_query_submitted = False
