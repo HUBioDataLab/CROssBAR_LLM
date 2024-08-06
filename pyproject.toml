@@ -6,7 +6,7 @@ authors = ["Melih DARCAN <57872471+MelihDarcanxyz@users.noreply.github.com>"]
 license = "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
 
 [tool.poetry.dependencies]
-python = "==3.10.*"
+python = "3.10.*"
 
 langchain = "^0.2.1"
 langchain-anthropic = "^0.1.13"
@@ -17,7 +17,7 @@ neo4j = "^5.20.0"
 numpy = "^1.26.4"
 openai = "^1.30.2"
 pandas = "^2.2.2"
-pydantic = "2.7.1"
+pydantic = "^2.7.1"
 python-dotenv = "^1.0.1"
 streamlit = "^1.35.0"
 langchain-nvidia-ai-endpoints = "^0.2.0"
