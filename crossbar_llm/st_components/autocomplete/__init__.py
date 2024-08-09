@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+import pickle
 
 import streamlit.components.v1 as components
 import os
@@ -13,13 +13,23 @@ _component_func = components.declare_component(
 
 @st.cache_data
 def get_suggestions_from_files(directory):
-    suggestions = []
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".txt"):
-                with open(os.path.join(root, file), "r") as f:
-                    suggestions.extend(f.read().splitlines())
-    return suggestions
+    pickle_file = "./suggestions.pkl"
+
+    if os.path.exists(pickle_file):
+        # If pickle file exists, load suggestions from it
+        with open(pickle_file, "rb") as f:
+            return pickle.load(f)
+    else:
+        suggestions = []
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.endswith(".txt"):
+                    with open(os.path.join(root, file), "r") as f:
+                        suggestions.extend(f.read().splitlines())
+        
+        with open(pickle_file, "wb") as f:
+            pickle.dump(suggestions, f)
+        return suggestions
 
 
 # Create the python function that will be called
