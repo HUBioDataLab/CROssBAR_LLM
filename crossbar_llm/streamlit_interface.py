@@ -132,14 +132,14 @@ examples = [
     {
         "label": "Gene related to Psoriasis",
         "question": "Which Gene is related to Disease named psoriasis?",
-        "model": "gemini-1.5-pro-latest",
+        "model": "gpt-4o-mini",
         "verbose": False,
         "limit": 10
     },
     {
         "label": "Targets of Caffeine",
         "question": "What proteins does the drug named Caffeine target?",
-        "model": "gemini-1.5-pro-latest",
+        "model": "gpt-4o-mini",
         "verbose": False,
         "limit": 10
     }
