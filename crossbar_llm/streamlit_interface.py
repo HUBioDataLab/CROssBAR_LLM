@@ -8,6 +8,9 @@ from crossbar_llm.langchain_llm_qa_trial import RunPipeline
 from logging.handlers import RotatingFileHandler
 import io
 from contextlib import redirect_stdout
+import neo4j
+import pickle
+import plotly.express as px
 
 # Setup
 st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
@@ -204,64 +207,155 @@ def convert_vector_file_to_np(file):
     else:
         raise ValueError("Unsupported file format. Please upload a CSV or NPY file.")
 
+def get_neo4j_statistics():
+    pkl_file = 'neo4j_statistics.pkl'
+    
+    # Check if the pickle file exists
+    if os.path.exists(pkl_file):
+        # Load statistics from the pickle file
+        with open(pkl_file, 'rb') as f:
+            return pickle.load(f)
+    
+    # If the file doesn't exist, query Neo4j and create the file
+    driver = neo4j.GraphDatabase.driver("bolt://localhost:7687", auth=(neo4j_user, neo4j_password))
+    with driver.session() as session:
+        # Get individual label counts
+        result = session.run("""
+        MATCH (n)
+        UNWIND labels(n) AS label
+        WITH label, count(n) AS count
+        RETURN label, count
+        ORDER BY count DESC
+        LIMIT 5
+        """)
+        top_5_labels = {row["label"]: row["count"] for row in result}
+        
+        # Get label combination counts
+        result = session.run("""
+        MATCH (n)
+        WITH labels(n) AS labels, count(n) AS count
+        RETURN labels, count
+        ORDER BY count DESC
+        """)
+        node_counts = {tuple(row["labels"]): row["count"] for row in result}
+        
+        # Get relationship counts
+        result = session.run("""
+        MATCH ()-[r]->()
+        WITH type(r) AS type, count(r) AS count
+        RETURN type, count
+        ORDER BY count DESC
+        LIMIT 5
+        """)
+        relationship_counts = {row["type"]: row["count"] for row in result}
+    
+    driver.close()
+    
+    # Store the results in a tuple
+    statistics = (top_5_labels, node_counts, relationship_counts)
+    
+    # Save the statistics to a pickle file
+    with open(pkl_file, 'wb') as f:
+        pickle.dump(statistics, f)
+    
+    return statistics
 
 tab1, tab2 = st.tabs(["LLM Query", "Vector File Upload"])
 
 def query_interface(file_upload=False):
-    
-    st.subheader("Query Input")
-    example_labels = ["Select an example - or Write Your Own Query"] + [ex["label"] for ex in examples]
-    selected_example = st.selectbox("Choose an example question", options=example_labels, key=f"example{'_file' if file_upload else ''}")
 
-    if selected_example != "Select an example - or Write Your Own Query":
-            example = next(ex for ex in examples if ex["label"] == selected_example)
-            question = st.text_input("Enter your question here", value=example["question"], placeholder=example["question"],key=f"question_unchange{'_file' if file_upload else ''}")
-            query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, index=model_choices.index(example["model"]), key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
-            limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
-            limit_query_return = st.selectbox("Limit query return", options=limit_options, index=limit_options.index(example["limit"]), key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.")
-            verbose_mode = st.checkbox("Enable Verbose Mode", value=example["verbose"], key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
-    else:
-        question = st_keyup("Enter your question here", key=f"question{'_file' if file_upload else ''}")
-        query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
-        limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.", index=3)
-        verbose_mode = st.checkbox("Enable Verbose Mode", key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
+    col1, col2 = st.columns([2, 1])
     
-    llm_api_key = st.text_input("API Key for LLM", type="password", key=f"api_key{'_file' if file_upload else ''}", help="Enter your API key if you choose a paid model.")
-    
+    with col1:
+        st.subheader("Query Input")
+        example_labels = ["Select an example - or Write Your Own Query"] + [ex["label"] for ex in examples]
+        selected_example = st.selectbox("Choose an example question", options=example_labels, key=f"example{'_file' if file_upload else ''}")
 
-    if file_upload:
-        vector_file = st.file_uploader("Upload Vector File", type=["csv", "npy"], help="Upload your vector file here.")
-        vector_category = st.selectbox("Select Vector Category", options=list(node_label_to_vector_index_names.keys()), key="vector_category", help="Choose the category of the uploaded vector.")
+        if selected_example != "Select an example - or Write Your Own Query":
+                example = next(ex for ex in examples if ex["label"] == selected_example)
+                question = st.text_input("Enter your question here", value=example["question"], placeholder=example["question"],key=f"question_unchange{'_file' if file_upload else ''}")
+                query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, index=model_choices.index(example["model"]), key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
+                limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
+                limit_query_return = st.selectbox("Limit query return", options=limit_options, index=limit_options.index(example["limit"]), key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.")
+                verbose_mode = st.checkbox("Enable Verbose Mode", value=example["verbose"], key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
+        else:
+            question = st_keyup("Enter your question here", key=f"question{'_file' if file_upload else ''}")
+            query_llm_type = st.selectbox("LLM for Query Generation*", model_choices, key=f"llm_type{'_file' if file_upload else ''}", help="Choose the LLM to generate the Cypher query. *Required field.")
+            limit_query_return = st.selectbox("Limit query return", options=[1, 3, 5, 10, 15, 20, 50, 100], key=f"limit_return{'_file' if file_upload else ''}", help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.", index=3)
+            verbose_mode = st.checkbox("Enable Verbose Mode", key=f"verbose{'_file' if file_upload else ''}", help="Show detailed logs and intermediate steps.")
         
-        if vector_category:
-            embedding_options = node_label_to_vector_index_names[vector_category]
-            if isinstance(embedding_options, list):
-                embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
-                st.markdown(f"Article of the Embedding Methodology: {[option for option in embedding_options if embedding_type in option][0]}")
-            else:
-                embedding_type = embedding_options.split(']')[0][1:]
-                st.markdown(f"Embedding Type: {embedding_options}")
+        llm_api_key = st.text_input("API Key for LLM", type="password", key=f"api_key{'_file' if file_upload else ''}", help="Enter your API key if you choose a paid model.")
+        
 
-        if vector_file:
-            try:
-                vector_data = convert_vector_file_to_np(vector_file)
-                st.write(f"Vector data shape: {vector_data.shape}")
-            except ValueError as e:
-                st.error(f"Error processing vector file: {str(e)}")
+        if file_upload:
+            vector_file = st.file_uploader("Upload Vector File", type=["csv", "npy"], help="Upload your vector file here.")
+            vector_category = st.selectbox("Select Vector Category", options=list(node_label_to_vector_index_names.keys()), key="vector_category", help="Choose the category of the uploaded vector.")
+            
+            if vector_category:
+                embedding_options = node_label_to_vector_index_names[vector_category]
+                if isinstance(embedding_options, list):
+                    embedding_type = st.selectbox("Select Embedding Type", options=[option.split(']')[0][1:] for option in embedding_options], key="embedding_type", help="Choose the specific embedding type for this category.")
+                    st.markdown(f"Article of the Embedding Methodology: {[option for option in embedding_options if embedding_type in option][0]}")
+                else:
+                    embedding_type = embedding_options.split(']')[0][1:]
+                    st.markdown(f"Embedding Type: {embedding_options}")
+
+            if vector_file:
+                try:
+                    vector_data = convert_vector_file_to_np(vector_file)
+                    st.write(f"Vector data shape: {vector_data.shape}")
+                except ValueError as e:
+                    st.error(f"Error processing vector file: {str(e)}")
 
 
-    col1_1, col1_2, col1_3 = st.columns(3)
-    with col1_1:
-        if st.button("Generate & Run Query", key=f"gen_run{'_file' if file_upload else ''}", help="Click to process your query and get results.", type="primary"):
-            add_recent_query(question, "Generate & Run")
-            st.session_state.generate_and_run_submitted = True
-    with col1_2:
-        if st.button("Generate Cypher Query", key=f"gen_cypher{'_file' if file_upload else ''}", help="Click to generate the Cypher query only."):
-            add_recent_query(question, "Generate Query")
-            st.session_state.generate_query_submitted = True
-    with col1_3:
-        if st.button("Run Generated Query", key=f"run_generated{'_file' if file_upload else ''}", help="Click to run the generated Cypher query."):
-            st.session_state.run_query_submitted = True
+        col1_1, col1_2, col1_3 = st.columns(3)
+        with col1_1:
+            if st.button("Generate & Run Query", key=f"gen_run{'_file' if file_upload else ''}", help="Click to process your query and get results.", type="primary"):
+                add_recent_query(question, "Generate & Run")
+                st.session_state.generate_and_run_submitted = True
+        with col1_2:
+            if st.button("Generate Cypher Query", key=f"gen_cypher{'_file' if file_upload else ''}", help="Click to generate the Cypher query only."):
+                add_recent_query(question, "Generate Query")
+                st.session_state.generate_query_submitted = True
+        with col1_3:
+            if st.button("Run Generated Query", key=f"run_generated{'_file' if file_upload else ''}", help="Click to run the generated Cypher query."):
+                st.session_state.run_query_submitted = True
+
+    with col2:
+        st.subheader("Database Statistics")
+        if st.session_state.first_run:
+            top_5_labels, node_counts, relationship_counts = get_neo4j_statistics()
+            st.session_state.first_run = False
+            st.session_state.latest_values = {
+                "top_5_labels": top_5_labels,
+                "node_counts": node_counts,
+                "relationship_counts": relationship_counts
+            }
+
+        if not st.session_state.first_run:
+            top_5_labels = st.session_state.latest_values["top_5_labels"]
+            node_counts = st.session_state.latest_values["node_counts"]
+            relationship_counts = st.session_state.latest_values["relationship_counts"]
+
+        with st.expander("Top 5 Node Labels", expanded=True):
+            fig1 = px.pie(values=list(top_5_labels.values()), names=list(top_5_labels.keys()))
+            st.plotly_chart(fig1, use_container_width=True)
+
+        with st.expander("Top 5 Relationship Types", expanded=True):
+            fig2 = px.pie(values=list(relationship_counts.values()), names=list(relationship_counts.keys()))
+            st.plotly_chart(fig2, use_container_width=True)
+        
+        with st.expander("Node and Relationship Counts", expanded=True):
+            total_nodes = sum(node_counts.values())
+            total_relationships = sum(relationship_counts.values())
+            
+            st.metric("Total Nodes", f"{total_nodes:,}")
+            st.metric("Total Relationships", f"{total_relationships:,}")
+            
+            st.subheader("Detailed Node Statistics")
+            node_df = pd.DataFrame([(', '.join(labels), count) for labels, count in node_counts.items()], columns=['Labels', 'Count'])
+            node_df = node_df.sort_values('Count', ascending=False)
+            st.dataframe(node_df)
 
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
