@@ -23,8 +23,6 @@ function onRender(event) {
       distance: 100,
     });
 
-    const label_el = document.getElementById("label");
-    label_el.innerText = label;
 
     const input = document.getElementById("input_box");
     if (value) {

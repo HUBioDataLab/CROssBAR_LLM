@@ -3,10 +3,14 @@ import sys, os, logging
 from datetime import datetime
 import pandas as pd
 import numpy as np
-import plotly.express as px
 from crossbar_llm.st_components.autocomplete import st_keyup
 from crossbar_llm.langchain_llm_qa_trial import RunPipeline
+from logging.handlers import RotatingFileHandler
+import io
+from contextlib import redirect_stdout
 import neo4j
+import pickle
+import plotly.express as px
 
 # Setup
 st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
@@ -14,13 +18,35 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
+def setup_file_logging():
+    # Make log file name based on current date
+    log_file = f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.log"
+    file_handler = RotatingFileHandler(log_file, maxBytes=10*1024*1024, backupCount=5)
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    return file_handler
+
+
 # Logging setup
 def initialize_logging():
-    if 'log_filename' not in st.session_state:
-        current_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        st.session_state.log_filename = f"query_log_{current_date}.log"
-        logging.basicConfig(filename=st.session_state.log_filename, level=logging.INFO,
-                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    if 'log_stream' not in st.session_state:
+        st.session_state.log_stream = io.StringIO()
+        
+        # Console handler (for verbose mode)
+        console_handler = logging.StreamHandler(st.session_state.log_stream)
+        console_handler.setLevel(logging.INFO)
+        console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(console_formatter)
+        
+        # File handler
+        file_handler = setup_file_logging()
+        
+        # Root logger setup
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.INFO)
+        root_logger.addHandler(console_handler)
+        root_logger.addHandler(file_handler)
 
 initialize_logging()
 
@@ -37,7 +63,10 @@ if 'first_run' not in st.session_state:
 
 # Main query functions
 def run_query(question: str, llm_type, top_k, vector_index=None, embedding=None, api_key=None) -> str:
-    logging.info("Processing question...")
+    logger = logging.getLogger(__name__)
+    st.session_state.log_stream.seek(0)
+    st.session_state.log_stream.truncate()
+    logger.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
         if vector_index:
@@ -46,78 +75,58 @@ def run_query(question: str, llm_type, top_k, vector_index=None, embedding=None,
             return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
 
     except Exception as e:
-        logging.error(f"Error in pipeline: {e}")
+        logger.error(f"Error in pipeline: {e}")
         raise e
 
 def run_natural(query: str, question: str, llm_type, top_k, verbose_mode: bool, vector_index=None, embedding=None, api_key=None):
-    logging.info("Processing question...")
+    logger = logging.getLogger(__name__)
+    st.session_state.log_stream.seek(0)
+    st.session_state.log_stream.truncate()
+    logger.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
-        response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
-        verbose_output = ""
-        if verbose_mode:
-            with open(st.session_state.log_filename, 'r') as file:
-                verbose_output = file.read()
-        return response, verbose_output, result
+        verbose_output = st.empty()
+        def update_verbose():
+            if verbose_mode:
+                verbose_output.code(st.session_state.log_stream.getvalue(), language="log")
+        with redirect_stdout(st.session_state.log_stream):
+            response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+            update_verbose()
+        
+        return response, st.session_state.log_stream.getvalue(), result
     except Exception as e:
-        logging.error(f"Error in pipeline: {e}")
+        logger.error(f"Error in pipeline: {e}")
         raise e
 
 def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_index=None, embedding=None, api_key=None):
-    logging.info("Processing question...")
+    logger = logging.getLogger(__name__)
+    st.session_state.log_stream.seek(0)
+    st.session_state.log_stream.truncate()
+    logger.info("Processing question...")
     try:
         st.session_state.rp.top_k = top_k
-        if vector_index:
-            query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
-        else:
-            query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
-        response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
-        verbose_output = ""
-        if verbose_mode:
-            with open(st.session_state.log_filename, 'r') as file:
-                verbose_output = file.read()
-        return response, verbose_output, result, query
+        verbose_output = st.empty()
+        
+        def update_verbose():
+            if verbose_mode:
+                verbose_output.code(st.session_state.log_stream.getvalue(), language="log")
+        
+        with redirect_stdout(st.session_state.log_stream):
+            if vector_index:
+                query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
+            else:
+                query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+            update_verbose()
+            
+            response, result = st.session_state.rp.execute_query(query=query, question=question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
+            update_verbose()
+        
+        return response, st.session_state.log_stream.getvalue(), result, query
     except Exception as e:
-        logging.error(f"Error in pipeline: {e}")
+        logger.error(f"Error in pipeline: {e}")
         raise e
-    
-def get_neo4j_statistics():
-    driver = neo4j.GraphDatabase.driver("bolt://localhost:7687", auth=(neo4j_user, neo4j_password))
-    with driver.session() as session:
-        # Get individual label counts
-        result = session.run("""
-        MATCH (n)
-        UNWIND labels(n) AS label
-        WITH label, count(n) AS count
-        RETURN label, count
-        ORDER BY count DESC
-        LIMIT 5
-        """)
-        top_5_labels = {row["label"]: row["count"] for row in result}
-        
-        # Get label combination counts
-        result = session.run("""
-        MATCH (n)
-        WITH labels(n) AS labels, count(n) AS count
-        RETURN labels, count
-        ORDER BY count DESC
-        """)
-        node_counts = {tuple(row["labels"]): row["count"] for row in result}
-        
-        # Get relationship counts
-        result = session.run("""
-        MATCH ()-[r]->()
-        WITH type(r) AS type, count(r) AS count
-        RETURN type, count
-        ORDER BY count DESC
-        LIMIT 5
-        """)
-        relationship_counts = {row["type"]: row["count"] for row in result}
-    
-    driver.close()
-    return top_5_labels, node_counts, relationship_counts
 
-
+    
 
 # Streamlit UI
 st.title("CROssBAR LLM Query Interface")
@@ -126,14 +135,14 @@ examples = [
     {
         "label": "Gene related to Psoriasis",
         "question": "Which Gene is related to Disease named psoriasis?",
-        "model": "gemini-1.5-pro-latest",
+        "model": "gpt-4o-mini",
         "verbose": False,
         "limit": 10
     },
     {
         "label": "Targets of Caffeine",
         "question": "What proteins does the drug named Caffeine target?",
-        "model": "gemini-1.5-pro-latest",
+        "model": "gpt-4o-mini",
         "verbose": False,
         "limit": 10
     }
@@ -152,7 +161,8 @@ model_choices = [
     "gemma-7b-it", "gemma2-9b-it",
     "codestral:latest", "llama3:instruct", "tomasonjo/codestral-text2cypher:latest",
     "tomasonjo/llama3-text2cypher-demo:latest", "llama3.1:8b", "qwen2:7b-instruct",
-    "gemma2:latest",
+    "gemma2:latest", 
+    "meta/llama-3.1-405b-instruct", "meta/llama-3.1-8b-instruct", "nv-mistralai/mistral-nemo-12b-instruct","mistralai/mixtral-8x22b-instruct-v0.1",
 ]
 
 node_label_to_vector_index_names = {
@@ -197,10 +207,63 @@ def convert_vector_file_to_np(file):
     else:
         raise ValueError("Unsupported file format. Please upload a CSV or NPY file.")
 
+def get_neo4j_statistics():
+    pkl_file = 'neo4j_statistics.pkl'
+    
+    # Check if the pickle file exists
+    if os.path.exists(pkl_file):
+        # Load statistics from the pickle file
+        with open(pkl_file, 'rb') as f:
+            return pickle.load(f)
+    
+    # If the file doesn't exist, query Neo4j and create the file
+    driver = neo4j.GraphDatabase.driver("bolt://localhost:7687", auth=(neo4j_user, neo4j_password))
+    with driver.session() as session:
+        # Get individual label counts
+        result = session.run("""
+        MATCH (n)
+        UNWIND labels(n) AS label
+        WITH label, count(n) AS count
+        RETURN label, count
+        ORDER BY count DESC
+        LIMIT 5
+        """)
+        top_5_labels = {row["label"]: row["count"] for row in result}
+        
+        # Get label combination counts
+        result = session.run("""
+        MATCH (n)
+        WITH labels(n) AS labels, count(n) AS count
+        RETURN labels, count
+        ORDER BY count DESC
+        """)
+        node_counts = {tuple(row["labels"]): row["count"] for row in result}
+        
+        # Get relationship counts
+        result = session.run("""
+        MATCH ()-[r]->()
+        WITH type(r) AS type, count(r) AS count
+        RETURN type, count
+        ORDER BY count DESC
+        LIMIT 5
+        """)
+        relationship_counts = {row["type"]: row["count"] for row in result}
+    
+    driver.close()
+    
+    # Store the results in a tuple
+    statistics = (top_5_labels, node_counts, relationship_counts)
+    
+    # Save the statistics to a pickle file
+    with open(pkl_file, 'wb') as f:
+        pickle.dump(statistics, f)
+    
+    return statistics
 
 tab1, tab2 = st.tabs(["LLM Query", "Vector File Upload"])
 
 def query_interface(file_upload=False):
+
     col1, col2 = st.columns([2, 1])
     
     with col1:
@@ -294,9 +357,6 @@ def query_interface(file_upload=False):
             node_df = node_df.sort_values('Count', ascending=False)
             st.dataframe(node_df)
 
-
-
-    
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
             with st.spinner('Generating and Running Query...'):
@@ -315,9 +375,6 @@ def query_interface(file_upload=False):
             st.subheader("Natural Language Answer:")
             st.write(fix_markdown(response))
             
-            if verbose_mode:
-                st.subheader("Verbose Output:")
-                st.code(verbose_output, language="log")
         else:
             st.warning("Please make sure to fill in all the required fields before submitting the form.")
         st.session_state.generate_and_run_submitted = False
@@ -352,9 +409,6 @@ def query_interface(file_upload=False):
             st.subheader("Natural Language Answer:")
             st.write(fix_markdown(response))
             
-            if verbose_mode:
-                st.subheader("Verbose Output:")
-                st.code(verbose_output, language="log")
         else:
             st.warning("Please generate a Cypher query first before running it.")
         st.session_state.run_query_submitted = False
