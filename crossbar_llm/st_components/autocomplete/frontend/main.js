@@ -33,7 +33,7 @@ function onRender(event) {
       sendValue(e.target.value);
       const lastWord = e.target.value.split(" ").pop(); // Get the last word
       autocomplete(lastWord);
-    }, 300));
+    }, 500));
 
     function autocomplete(val) {
       let a, b, i;
