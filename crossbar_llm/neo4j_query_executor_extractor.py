@@ -124,17 +124,20 @@ class Neo4jGraphHelper:
 
         node_label_to_vector_index_names = {"SmallMolecule":"SelformerEmbeddings", "Protein":["Prott5Embeddings", "Esm2Embeddings"], 
                                         "GOTerm":"Anc2vecEmbeddings", "Phenotype":"CadaEmbeddings", "Disease":"Doc2vecEmbeddings", 
-                                        "ProteinDomain":"Dom2vecEmbeddings", "EcNumber":"RxnfpEmbeddings", "Pathway":"BiokeenEmbeddings"}
+                                        "ProteinDomain":"Dom2vecEmbeddings", "EcNumber":"RxnfpEmbeddings", "Pathway":"BiokeenEmbeddings",
+                                        "Gene":"NtEmbeddings"}
 
         node_label_to_property = {"Protein":["prott5_embedding", "esm2_embedding"], "ProteinDomain":"dom2vec_embedding",
                                 "GOTerm":"anc2vec_embedding", "SmallMolecule":"selformer_embedding", "Disease":"doc2vec_embedding",
-                                "Phenotype":"cada_embedding", "Pathway":"biokeen_embedding", "EcNumber":"rxnfp_embedding"}
+                                "Phenotype":"cada_embedding", "Pathway":"biokeen_embedding", "EcNumber":"rxnfp_embedding",
+                                "Gene":"nt_embedding"}
         
         vector_index_name_to_property = {"Prott5Embeddings":"prott5_embedding", "Esm2Embeddings":"esm2_embedding"}
 
         property_to_vector_size = {"prott5_embedding":1024, "esm2_embedding":1280, "dom2vec_embedding":50, 
                                 "anc2vec_embedding":200, "selformer_embedding":768, "doc2vec_embedding":100,
-                                "cada_embedding":160, "biokeen_embedding":200, "rxnfp_embedding":256}
+                                "cada_embedding":160, "biokeen_embedding":200, "rxnfp_embedding":256,
+                                "nt_embedding":2560}
         
         with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
 
