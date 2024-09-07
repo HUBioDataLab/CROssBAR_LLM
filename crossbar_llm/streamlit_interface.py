@@ -70,8 +70,10 @@ def run_query(question: str, llm_type, top_k, vector_index=None, embedding=None,
     try:
         st.session_state.rp.top_k = top_k
         if vector_index:
+            st.session_state.rp.search_type = "vector_search"
             return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
         else:
+            st.session_state.rp.search_type = "db_search"
             return st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
 
     except Exception as e:
@@ -113,8 +115,10 @@ def generate_and_run(question: str, llm_type, top_k, verbose_mode: bool, vector_
         
         with redirect_stdout(st.session_state.log_stream):
             if vector_index:
+                st.session_state.rp.search_type = "vector_search"
                 query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key, vector_index=vector_index, embedding=embedding)
             else:
+                st.session_state.rp.search_type = "db_search"
                 query = st.session_state.rp.run_for_query(question, model_name=llm_type, reset_llm_type=True, api_key=api_key)
             update_verbose()
             
@@ -359,21 +363,25 @@ def query_interface(file_upload=False):
 
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
-            with st.spinner('Generating and Running Query...'):
-                if file_upload and vector_file and vector_category:
-                    vector_index = f"{embedding_type}Embeddings"
-                    response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key, vector_index=vector_index, embedding=vector_data)
-                else:
-                    response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
-            
-            st.subheader("Generated Cypher Query:")
-            st.code(query, language="cypher")
-            
-            st.subheader("Raw Query Output:")
-            st.code(str(result))
-            
-            st.subheader("Natural Language Answer:")
-            st.write(fix_markdown(response))
+            try:
+                with st.spinner('Generating and Running Query...'):
+                    if file_upload and vector_file and vector_category:
+                        vector_index = f"{embedding_type}Embeddings"
+                        response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key, vector_index=vector_index, embedding=vector_data)
+                    else:
+                        response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
+                
+                st.subheader("Generated Cypher Query:")
+                st.code(query, language="cypher")
+                
+                st.subheader("Raw Query Output:")
+                st.code(str(result))
+                
+                st.subheader("Natural Language Answer:")
+                st.write(fix_markdown(response))
+            except Exception as e:
+                st.error(f"Error processing query: {str(e)}")
+                st.stop()
             
         else:
             st.warning("Please make sure to fill in all the required fields before submitting the form.")
