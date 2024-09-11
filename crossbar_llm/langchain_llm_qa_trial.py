@@ -107,7 +107,7 @@ class GoogleGenerativeLanguageModel:
     It initializes the model with given API key and specified parameters.
     """
     def __init__(self, api_key: str, model_name: str = None, temperature: float | int = None):
-        self.model_name = model_name or "gemini-pro"
+        self.model_name = model_name or "gemini-1.5-pro-latest"
         self.temperature = temperature or 0
         self.llm = GoogleGenerativeAI(google_api_key = api_key, model = self.model_name, temparature = self.temperature, request_timeout=600)
 
@@ -215,7 +215,8 @@ class QueryChain:
                                                     node_properties=self.schema["node_properties"], 
                                                     edge_properties=self.schema["edge_properties"],
                                                     edges=self.schema["edges"], 
-                                                    question=question).strip().strip("\n").replace("cypher","").strip("`")
+                                                    question=question).strip().strip("\n").replace("cypher","").strip("`").replace("''","'").replace('""','"')
+            
         
         elif self.search_type == "vector_search" and embedding is None:
             self.generated_query = self.cypher_chain.run(node_types=self.schema["nodes"], 
@@ -223,7 +224,7 @@ class QueryChain:
                                                     edge_properties=self.schema["edge_properties"],
                                                     edges=self.schema["edges"], 
                                                     question=question,
-                                                    vector_index=vector_index).strip().strip("\n").replace("cypher","").strip("`")
+                                                    vector_index=vector_index).strip().strip("\n").replace("cypher","").strip("`").replace("''","'").replace('""','"')
         
         elif self.search_type == "vector_search" and embedding is not None:
 
@@ -232,7 +233,7 @@ class QueryChain:
                                                     edge_properties=self.schema["edge_properties"],
                                                     edges=self.schema["edges"], 
                                                     question=question,
-                                                    vector_index=vector_index).strip().strip("\n").replace("cypher","").strip("`")
+                                                    vector_index=vector_index).strip().strip("\n").replace("cypher","").strip("`").replace("''","'").replace('""','"')
             
             self.generated_query = self.generated_query.format(user_input=embedding)
 
@@ -324,9 +325,12 @@ class RunPipeline:
 
         nvidia_llm_models = [
             "meta/llama-3.1-405b-instruct",
+            "meta/llama-3.1-70b-instruct",
             "meta/llama-3.1-8b-instruct",
             "nv-mistralai/mistral-nemo-12b-instruct",
             "mistralai/mixtral-8x22b-instruct-v0.1",
+            "mistralai/mistral-large-2-instruct",
+            "nvidia/nemotron-4-340b-instruct",
         ]
 
 
