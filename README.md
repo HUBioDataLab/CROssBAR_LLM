@@ -44,6 +44,7 @@ To use this package, ensure that you have `.env` file present in the root folder
 OPENAI_API_KEY="sk-************************************************"
 GEMINI_API_KEY="AI*****************-**-******-*********"
 ANTHROPIC_API_KEY="sk-ant-***-***********************-****"
+NVIDIA_API_KEY="nvapi-************************************"
 GROQ_API_KEY="gsk_****************************************"
 REPLICATE_API_KEY="***************************************"
 NEO4J_USER="user"
