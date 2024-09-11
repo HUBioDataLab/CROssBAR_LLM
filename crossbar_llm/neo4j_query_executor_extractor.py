@@ -113,11 +113,35 @@ class Neo4jGraphHelper:
         else:
             query = query.strip().strip("\n") + f" LIMIT {top_k}"
 
+        
         with neo4j.GraphDatabase.driver(self.URI, auth=self.AUTH) as driver:
             records, _, _ = driver.execute_query(query, database_=self.db_name, routing_="r")
-            results = [res.data() for index, res in enumerate(records) if top_k and index <= top_k]
+            if not records:
+                return "Given cypher query did not return any result"
+            
+            results = []
+            for index, res in enumerate(records):
+                data = res.data()
+                data = self.remove_embedding_attribute(data)
+                results.append(data)
+
+                if top_k and index > top_k:
+                    break
+
             
         return results
+    
+    def remove_embedding_attribute(self, data: dict) -> dict:
+
+        for k, v in data.items():
+            if "embedding" in k:
+                del data[k]
+            
+            elif isinstance(v, dict):
+                data[k] = self.remove_embedding_attribute(v)
+        
+        return data
+
     
     @validate_call
     def create_vector_indexes(self, similarity_function: str = "cosine") -> bool:
@@ -190,3 +214,5 @@ class Neo4jGraphHelper:
 
         
         return True
+
+
