@@ -314,17 +314,24 @@ def query_interface(file_upload=False):
 
 
         col1_1, col1_2, col1_3 = st.columns(3)
+        
+        if 'error_occurred' not in st.session_state:
+            st.session_state.error_occurred = False
+
         with col1_1:
             if st.button("Generate & Run Query", key=f"gen_run{'_file' if file_upload else ''}", help="Click to process your query and get results.", type="primary"):
                 add_recent_query(question, "Generate & Run")
                 st.session_state.generate_and_run_submitted = True
+                st.session_state.error_occurred = False
         with col1_2:
             if st.button("Generate Cypher Query", key=f"gen_cypher{'_file' if file_upload else ''}", help="Click to generate the Cypher query only."):
                 add_recent_query(question, "Generate Query")
                 st.session_state.generate_query_submitted = True
+                st.session_state.error_occurred = False
         with col1_3:
             if st.button("Run Generated Query", key=f"run_generated{'_file' if file_upload else ''}", help="Click to run the generated Cypher query."):
                 st.session_state.run_query_submitted = True
+                st.session_state.error_occurred = False
 
     with col2:
         st.subheader("Database Statistics")
@@ -364,25 +371,29 @@ def query_interface(file_upload=False):
 
     if st.session_state.get('generate_and_run_submitted', False):
         if question and query_llm_type:
-            try:
-                with st.spinner('Generating and Running Query...'):
-                    if file_upload and vector_file and vector_category:
-                        vector_index = f"{embedding_type}Embeddings"
-                        response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key, vector_index=vector_index, embedding=vector_data)
-                    else:
-                        response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
-                
-                st.subheader("Generated Cypher Query:")
-                st.code(query, language="cypher")
-                
-                st.subheader("Raw Query Output:")
-                st.code(str(result))
-                
-                st.subheader("Natural Language Answer:")
-                st.write(fix_markdown(response))
-            except Exception as e:
-                st.error(f"Error processing query: {str(e)}")
-                st.stop()
+            if not st.session_state.error_occurred:
+                try:
+                    with st.spinner('Generating and Running Query...'):
+                        if file_upload and vector_file and vector_category:
+                            vector_index = f"{embedding_type}Embeddings"
+                            response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key, vector_index=vector_index, embedding=vector_data)
+                        else:
+                            response, verbose_output, result, query = generate_and_run(question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
+                    
+                    st.subheader("Generated Cypher Query:")
+                    st.code(query, language="cypher")
+                    
+                    st.subheader("Raw Query Output:")
+                    st.code(str(result))
+                    
+                    st.subheader("Natural Language Answer:")
+                    st.write(fix_markdown(response))
+                except Exception as e:
+                    st.error(f"Error processing query: {str(e)}")
+                    st.session_state.error_occurred = True
+                    st.stop()
+            else:
+                st.warning("An error occured, please click the run button again.")
             
         else:
             st.warning("Please make sure to fill in all the required fields before submitting the form.")
@@ -390,33 +401,39 @@ def query_interface(file_upload=False):
     
     if st.session_state.get('generate_query_submitted', False):
         if question and query_llm_type:
-            with st.spinner('Generating Cypher Query...'):
-                if file_upload and vector_file and vector_category:
-                    vector_index = f"{embedding_type}Embeddings"
-                    generated_query = run_query(question, query_llm_type, limit_query_return, vector_index=vector_index, embedding=vector_data, api_key=llm_api_key)
-                else:
-                    generated_query = run_query(question, query_llm_type, limit_query_return, api_key=llm_api_key)
-    
-            st.subheader("Generated Cypher Query:")
-            st.text_area("You can edit the generated query below:", value=generated_query, key="edited_query", height=150)
+            if not st.session_state.error_occurred:
+                with st.spinner('Generating Cypher Query...'):
+                    if file_upload and vector_file and vector_category:
+                        vector_index = f"{embedding_type}Embeddings"
+                        generated_query = run_query(question, query_llm_type, limit_query_return, vector_index=vector_index, embedding=vector_data, api_key=llm_api_key)
+                    else:
+                        generated_query = run_query(question, query_llm_type, limit_query_return, api_key=llm_api_key)
+        
+                st.subheader("Generated Cypher Query:")
+                st.text_area("You can edit the generated query below:", value=generated_query, key="edited_query", height=150)
+            else:
+                st.warning("An error occured, please click the run button again.")
         else:
             st.warning("Please make sure to fill in all the required fields before generating the query.")
         st.session_state.generate_query_submitted = False
     
     if st.session_state.get('run_query_submitted', False):
         if 'edited_query' in st.session_state and st.session_state.edited_query:
-            with st.spinner('Running Cypher Query...'):
-                if file_upload and vector_file and vector_category:
-                    vector_index = f"{embedding_type}Embeddings"
-                    response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return, verbose_mode, vector_index=vector_index, embedding=vector_data, api_key=llm_api_key)
-                else:
-                    response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
+            if not st.session_state.error_occurred:
+                with st.spinner('Running Cypher Query...'):
+                    if file_upload and vector_file and vector_category:
+                        vector_index = f"{embedding_type}Embeddings"
+                        response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return, verbose_mode, vector_index=vector_index, embedding=vector_data, api_key=llm_api_key)
+                    else:
+                        response, verbose_output, result = run_natural(st.session_state.edited_query, question, query_llm_type, limit_query_return, verbose_mode, api_key=llm_api_key)
 
-            st.subheader("Raw Query Output:")
-            st.code(str(result))
-            
-            st.subheader("Natural Language Answer:")
-            st.write(fix_markdown(response))
+                st.subheader("Raw Query Output:")
+                st.code(str(result))
+                
+                st.subheader("Natural Language Answer:")
+                st.write(fix_markdown(response))
+            else:
+                st.warning("An error occured, please click the run button again.")
             
         else:
             st.warning("Please generate a Cypher query first before running it.")
