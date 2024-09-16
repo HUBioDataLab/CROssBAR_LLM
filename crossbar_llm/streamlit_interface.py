@@ -167,6 +167,7 @@ model_choices = [
     "tomasonjo/llama3-text2cypher-demo:latest", "llama3.1:8b", "qwen2:7b-instruct",
     "gemma2:latest", 
     "meta/llama-3.1-405b-instruct", "meta/llama-3.1-8b-instruct", "nv-mistralai/mistral-nemo-12b-instruct","mistralai/mixtral-8x22b-instruct-v0.1",
+    "mistralai/mistral-large-2-instruct", "nvidia/nemotron-4-340b-instruct",
 ]
 
 node_label_to_vector_index_names = {
