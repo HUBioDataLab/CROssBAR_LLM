@@ -172,8 +172,13 @@ model_choices = [
 
 node_label_to_vector_index_names = {
     "SmallMolecule": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
+    "Drug": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
+    "Compound": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
     "Protein": ["[Prott5](https://arxiv.org/abs/2007.06225)", "[Esm2](https://www.biorxiv.org/content/10.1101/2022.07.20.500902v3)"],
     "GOTerm": '[Anc2vec](https://academic.oup.com/bib/article/23/2/bbac003/6523148)',
+    "CellularComponent": '[Anc2vec](https://academic.oup.com/bib/article/23/2/bbac003/6523148)',
+    "BiologicalProcess": '[Anc2vec](https://academic.oup.com/bib/article/23/2/bbac003/6523148)',
+    "MolecularFunction": '[Anc2vec](https://academic.oup.com/bib/article/23/2/bbac003/6523148)',
     'Phenotype': '[Cada](https://academic.oup.com/nargab/article/3/3/lqab078/6363753)',
     'Disease': '[Doc2vec](https://academic.oup.com/bioinformatics/article/37/2/236/5877941)',
     "ProteinDomain": '[Dom2vec](https://www.mdpi.com/1999-4893/14/1/28)',
