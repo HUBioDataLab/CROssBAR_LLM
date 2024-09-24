@@ -6,7 +6,7 @@ authors = ["Melih DARCAN <57872471+MelihDarcanxyz@users.noreply.github.com>"]
 license = "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
 
 [tool.poetry.dependencies]
-python = "3.10.*"
+python = ">=3.10, <3.11"
 
 langchain = "^0.2.1"
 langchain-anthropic = "^0.1.13"
@@ -24,6 +24,7 @@ langchain-nvidia-ai-endpoints = "^0.2.0"
 wrapt-timeout-decorator = "^1.5.1"
 langchain-openai = "^0.1.20"
 plotly = "^5.23.0"
+streamlit-textcomplete = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
 
