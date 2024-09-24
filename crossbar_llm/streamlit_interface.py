@@ -414,58 +414,62 @@ def query_interface(file_upload=False):
             key=f"example{'_file' if file_upload else ''}",
         )
 
+        question_params = {
+            "label": "Enter you question here",
+            "value": "",
+            "placeholder": None,
+            "key": f"question{'_file' if file_upload else ''}"
+        }
+
+        query_llm_type_params = {
+            "label": "LLM for Query Generation*",
+            "options": model_choices,
+            "index": 0,
+            "key": f"llm_type{'_file' if file_upload else ''}",
+            "help": "Choose the LLM to generate the Cypher query. *Required field.",
+        }
+
+        limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
+        limit_query_return_params = {
+            "label": "Limit query return",
+            "options": limit_options,
+            "index": 3,
+            "key": f"limit_return{'_file' if file_upload else ''}",
+            "help": "Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.",
+        }
+
+        verbose_mode_params = {
+            "label":  "Enable Verbose Mode",
+            "value": False,
+            "key": f"verbose{'_file' if file_upload else ''}",
+            "help": "Show detailed logs and intermediate steps."
+        }
+
         if selected_example != "Select an example - or Write Your Own Query":
             example = next(ex for ex in examples if ex["label"] == selected_example)
-            question = st.text_input(
-                "Enter your question here",
-                value=example["question"],
-                placeholder=example["question"],
-                key=f"question_unchange{'_file' if file_upload else ''}",
-            )
-            query_llm_type = st.selectbox(
-                "LLM for Query Generation*",
-                model_choices,
-                index=model_choices.index(example["model"]),
-                key=f"llm_type{'_file' if file_upload else ''}",
-                help="Choose the LLM to generate the Cypher query. *Required field.",
-            )
-            limit_options = [1, 3, 5, 10, 15, 20, 50, 100]
-            limit_query_return = st.selectbox(
-                "Limit query return",
-                options=limit_options,
-                index=limit_options.index(example["limit"]),
-                key=f"limit_return{'_file' if file_upload else ''}",
-                help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.",
-            )
-            verbose_mode = st.checkbox(
-                "Enable Verbose Mode",
-                value=example["verbose"],
-                key=f"verbose{'_file' if file_upload else ''}",
-                help="Show detailed logs and intermediate steps.",
-            )
-        else:
-            question = st_keyup(
-                "Enter your question here",
-                key=f"question{'_file' if file_upload else ''}",
-            )
-            query_llm_type = st.selectbox(
-                "LLM for Query Generation*",
-                model_choices,
-                key=f"llm_type{'_file' if file_upload else ''}",
-                help="Choose the LLM to generate the Cypher query. *Required field.",
-            )
-            limit_query_return = st.selectbox(
-                "Limit query return",
-                options=[1, 3, 5, 10, 15, 20, 50, 100],
-                key=f"limit_return{'_file' if file_upload else ''}",
-                help="Select the number of elements to limit the query return. Attention: Query execution uses Depth First Search (DFS) traversal, so some nodes may not be reached.",
-                index=3,
-            )
-            verbose_mode = st.checkbox(
-                "Enable Verbose Mode",
-                key=f"verbose{'_file' if file_upload else ''}",
-                help="Show detailed logs and intermediate steps.",
-            )
+
+            question_params.update({
+                "value": example["question"],
+                "placeholder": example["question"],
+                "key": f"question_unchange{'_file' if file_upload else ''}"
+            })
+
+            query_llm_type_params.update({
+                "index": model_choices.index(example["model"])
+            })
+
+            limit_query_return_params.update({
+                "index": limit_options.index(example["limit"]),
+            })
+
+            verbose_mode_params.update({
+                "value": example["verbose"],
+            })
+        
+        question = st.text_input(**question_params)
+        query_llm_type = st.selectbox(**query_llm_type_params)
+        limit_query_return = st.selectbox(**limit_query_return_params)
+        verbose_mode = st.checkbox(**verbose_mode_params)
 
         llm_api_key = st.text_input(
             "API Key for LLM",
