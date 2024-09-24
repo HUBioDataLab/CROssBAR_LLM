@@ -9,3 +9,5 @@
 # Byproducts
 query_log*.log
 graph_schema.json
+*.log
+*.pkl
