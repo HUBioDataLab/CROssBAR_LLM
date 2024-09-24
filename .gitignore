@@ -1,9 +1,11 @@
 # Cache
 **/__pycache__/
+**/.mypy_cache/
 
 # Secrets
 .env
 .venv
+
 # Byproducts
 query_log*.log
 graph_schema.json
