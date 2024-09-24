@@ -20,13 +20,16 @@ def get_suggestions_from_files(directory):
         with open(pickle_file, "rb") as f:
             return pickle.load(f)
     else:
-        suggestions = []
+        suggestions = set()
         for root, dirs, files in os.walk(directory):
             for file in files:
                 if file.endswith(".txt"):
                     with open(os.path.join(root, file), "r") as f:
-                        suggestions.extend(f.read().splitlines())
+                        suggestions.update(f.read().splitlines())
         
+        # to make it pickle serializable
+        suggestions = list(suggestions)
+
         with open(pickle_file, "wb") as f:
             pickle.dump(suggestions, f)
         return suggestions
