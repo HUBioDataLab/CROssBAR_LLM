@@ -12,6 +12,8 @@ import neo4j
 import pickle
 import plotly.express as px
 
+from textcomplete import textcomplete, StrategyProps, TextcompleteResult
+
 examples = [
     {
         "label": "Gene related to Psoriasis",
@@ -92,8 +94,53 @@ node_label_to_vector_index_names = {
     "Pathway": "[Biokeen](https://www.biorxiv.org/content/10.1101/631812v1)",
 }
 
+# DATA RULES
+# `name` should be underscored and lower case version of `value`
+
+autocomplete_strategies = [
+    StrategyProps(
+        id="proteins",
+        match="\\B@pt_(\\w*)",
+        data=[
+            {"name": "akt_1", "value": "AKT 1"},
+            {"name": "app", "value": "APP"},
+            {"name": "xyz_abc", "value": "Xyz ABC 123"},
+        ],
+        comparator_keys=["name", "value"],
+        replace="([protein]) => `${protein}`",
+        template="""(protein) => `${protein['value']} :${protein['name']}`""",
+    ),
+    StrategyProps(
+        id="pathways",
+        match="\\B@pw_(\\w*)",
+        data=[
+            {"name": "pw_1", "value": "PW 1"},
+            {"name": "bpp", "value": "BPP"},
+            {"name": "xyz_bbc", "value": "Xyz BBC 123"},
+        ],
+        comparator_keys=["name", "value"],
+        replace="([pathway]) => `${pathway}`",
+        template="""(pathway) => `${pathway['value']} :${pathway['name']}`""",
+    ),
+    StrategyProps(
+        id="biological process",
+        match="\\B@bp_(\\w*)",
+        data=[
+            {"name": "bp_1", "value": "BP 1"},
+            {"name": "cpp", "value": "CPP"},
+            {"name": "xyz_cbc", "value": "Xyz CBC 123"},
+        ],
+        comparator_keys=["name", "value"],
+        replace="([biologicalProcess]) => `${biologicalProcess}`",
+        template="""(biologicalProcess) => `${biologicalProcess['value']} :${biologicalProcess['name']}`""",
+    ),
+]
+
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
 neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
+
+if "txt" not in st.session_state:
+    st.session_state["txt"] = "Enter your question here"
 
 
 def main():
@@ -125,6 +172,14 @@ def main():
 
     with tab2:
         query_interface(file_upload=True)
+    
+    textcomplete(
+        area_label="Enter your question here",
+        strategies=autocomplete_strategies,
+        on_select=on_select,
+        max_count=5,
+        stop_enter_propagation=True,
+    )
 
     st.sidebar.title("About CROssBAR LLM Query Interface")
     st.sidebar.write("""
@@ -415,10 +470,11 @@ def query_interface(file_upload=False):
         )
 
         question_params = {
-            "label": "Enter you question here",
-            "value": "",
+            "label": "Enter your question here",
+            "value": st.session_state.txt,
             "placeholder": None,
-            "key": f"question{'_file' if file_upload else ''}"
+            "key": f"question{'_file' if file_upload else ''}",
+            "on_change": on_change
         }
 
         query_llm_type_params = {
@@ -439,34 +495,42 @@ def query_interface(file_upload=False):
         }
 
         verbose_mode_params = {
-            "label":  "Enable Verbose Mode",
+            "label": "Enable Verbose Mode",
             "value": False,
             "key": f"verbose{'_file' if file_upload else ''}",
-            "help": "Show detailed logs and intermediate steps."
+            "help": "Show detailed logs and intermediate steps.",
         }
 
         if selected_example != "Select an example - or Write Your Own Query":
             example = next(ex for ex in examples if ex["label"] == selected_example)
 
-            question_params.update({
-                "value": example["question"],
-                "placeholder": example["question"],
-                "key": f"question_unchange{'_file' if file_upload else ''}"
-            })
+            question_params.update(
+                {
+                    "value": example["question"],
+                    "placeholder": example["question"],
+                    "key": f"question_unchange{'_file' if file_upload else ''}",
+                }
+            )
 
-            query_llm_type_params.update({
-                "index": model_choices.index(example["model"])
-            })
+            query_llm_type_params.update(
+                {
+                    "index": model_choices.index(example["model"]),
+                }
+            )
 
-            limit_query_return_params.update({
-                "index": limit_options.index(example["limit"]),
-            })
+            limit_query_return_params.update(
+                {
+                    "index": limit_options.index(example["limit"]),
+                }
+            )
 
-            verbose_mode_params.update({
-                "value": example["verbose"],
-            })
-        
-        question = st.text_input(**question_params)
+            verbose_mode_params.update(
+                {
+                    "value": example["verbose"],
+                }
+            )
+
+        question = st.text_area(**question_params)
         query_llm_type = st.selectbox(**query_llm_type_params)
         limit_query_return = st.selectbox(**limit_query_return_params)
         verbose_mode = st.checkbox(**verbose_mode_params)
@@ -718,6 +782,15 @@ def query_interface(file_upload=False):
     recent_queries = st.session_state.recent_queries
     st.table(pd.DataFrame(recent_queries))
 
+def on_select(textcomplete_result: TextcompleteResult):
+    searchResult = textcomplete_result.get("searchResult", "")
+    text = textcomplete_result.get("text", "")
+    print(searchResult, text)
+    st.session_state["txt"] = text
+
+def on_change():
+    #dummy
+    print(st.session_state["txt"])
 
 if __name__ == "__main__":
     main()
