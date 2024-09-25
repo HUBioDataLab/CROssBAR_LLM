@@ -1,5 +1,10 @@
 import streamlit as st
 import sys, os, logging
+
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -13,6 +18,26 @@ import pickle
 import plotly.express as px
 
 from textcomplete import textcomplete, StrategyProps, TextcompleteResult
+
+st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
+
+if "getComps" not in st.session_state:
+    st.session_state.getComps = True
+
+if st.session_state.getComps:
+    with open('suggestions.pkl', 'rb') as f:
+        compounds_data = pickle.load(f)
+
+    compounds_data_processed = [
+        {'name': compound.lower().replace(' ', '_'), 'value': compound}
+        for compound in compounds_data
+    ]
+
+    st.session_state.compound_data = compounds_data_processed
+    st.session_state.getComps = False
+
+if not st.session_state.getComps:
+    compounds_data_processed = st.session_state.compound_data
 
 examples = [
     {
@@ -94,47 +119,14 @@ node_label_to_vector_index_names = {
     "Pathway": "[Biokeen](https://www.biorxiv.org/content/10.1101/631812v1)",
 }
 
-# DATA RULES
-# `name` should be underscored and lower case version of `value`
-
-autocomplete_strategies = [
-    StrategyProps(
-        id="proteins",
-        match="\\B@pt_(\\w*)",
-        data=[
-            {"name": "akt_1", "value": "AKT 1"},
-            {"name": "app", "value": "APP"},
-            {"name": "xyz_abc", "value": "Xyz ABC 123"},
-        ],
-        comparator_keys=["name", "value"],
-        replace="([protein]) => `${protein}`",
-        template="""(protein) => `${protein['value']} :${protein['name']}`""",
-    ),
-    StrategyProps(
-        id="pathways",
-        match="\\B@pw_(\\w*)",
-        data=[
-            {"name": "pw_1", "value": "PW 1"},
-            {"name": "bpp", "value": "BPP"},
-            {"name": "xyz_bbc", "value": "Xyz BBC 123"},
-        ],
-        comparator_keys=["name", "value"],
-        replace="([pathway]) => `${pathway}`",
-        template="""(pathway) => `${pathway['value']} :${pathway['name']}`""",
-    ),
-    StrategyProps(
-        id="biological process",
-        match="\\B@bp_(\\w*)",
-        data=[
-            {"name": "bp_1", "value": "BP 1"},
-            {"name": "cpp", "value": "CPP"},
-            {"name": "xyz_cbc", "value": "Xyz CBC 123"},
-        ],
-        comparator_keys=["name", "value"],
-        replace="([biologicalProcess]) => `${biologicalProcess}`",
-        template="""(biologicalProcess) => `${biologicalProcess['value']} :${biologicalProcess['name']}`""",
-    ),
-]
+autocomplete_strategy = StrategyProps(
+    id="compounds",
+    match="\\B@(\\w*)",
+    data=compounds_data_processed,
+    comparator_keys=["name", "value"],
+    replace="(item) => `${item['value']}`",
+    template="(item) => `${item['value']} : ${item['name']}`",
+)
 
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
 neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
@@ -144,12 +136,6 @@ if "txt" not in st.session_state:
 
 
 def main():
-    # Setup
-    st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    parent_dir = os.path.dirname(current_dir)
-    sys.path.append(parent_dir)
-
     initialize_logging()
 
     # Initialize RunPipeline
@@ -175,9 +161,9 @@ def main():
     
     textcomplete(
         area_label="Enter your question here",
-        strategies=autocomplete_strategies,
+        strategies=[autocomplete_strategy],
         on_select=on_select,
-        max_count=5,
+        max_count=10,
         stop_enter_propagation=True,
     )
 
@@ -471,8 +457,8 @@ def query_interface(file_upload=False):
 
         question_params = {
             "label": "Enter your question here",
-            "value": st.session_state.txt,
-            "placeholder": None,
+            "value": None,
+            "placeholder": st.session_state.txt,
             "key": f"question{'_file' if file_upload else ''}",
             "on_change": on_change
         }
@@ -480,7 +466,7 @@ def query_interface(file_upload=False):
         query_llm_type_params = {
             "label": "LLM for Query Generation*",
             "options": model_choices,
-            "index": 0,
+            "index": 15,
             "key": f"llm_type{'_file' if file_upload else ''}",
             "help": "Choose the LLM to generate the Cypher query. *Required field.",
         }
