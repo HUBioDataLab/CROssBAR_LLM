@@ -28,6 +28,11 @@ streamlit-textcomplete = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
 
+[tool.poetry-auto-export]
+output = "requirements.txt"
+without_hashes = true
+without = ["dev"]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
