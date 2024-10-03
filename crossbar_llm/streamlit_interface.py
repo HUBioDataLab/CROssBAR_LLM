@@ -95,6 +95,7 @@ node_label_to_vector_index_names = {
 }
 
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
+neo4j_uri = os.getenv("NEO4J_URI", "neo4j")
 neo4j_password = os.getenv("MY_NEO4J_PASSWORD", "password")
 
 
@@ -359,7 +360,7 @@ def get_neo4j_statistics():
 
     # If the file doesn't exist, query Neo4j and create the file
     driver = neo4j.GraphDatabase.driver(
-        "bolt://localhost:7687", auth=(neo4j_user, neo4j_password)
+        neo4j_uri, auth=(neo4j_user, neo4j_password)
     )
     with driver.session() as session:
         # Get individual label counts
