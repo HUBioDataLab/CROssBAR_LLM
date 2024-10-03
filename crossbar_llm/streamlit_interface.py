@@ -95,7 +95,7 @@ node_label_to_vector_index_names = {
 }
 
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
-neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
+neo4j_password = os.getenv("MY_NEO4J_PASSWORD", "password")
 
 
 def main():
