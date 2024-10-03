@@ -1,16 +1,22 @@
-import streamlit as st
-import sys, os, logging
-from datetime import datetime
-import pandas as pd
-import numpy as np
-from crossbar_llm.st_components.autocomplete import st_keyup
-from crossbar_llm.langchain_llm_qa_trial import RunPipeline
-from logging.handlers import RotatingFileHandler
+import pathlib
+import sys
+
+sys.path.insert(0, pathlib.Path(__file__).parent().parent().absolute())
+
 import io
-from contextlib import redirect_stdout
-import neo4j
+import logging
+import os
 import pickle
+from contextlib import redirect_stdout
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
+
+import neo4j
+import numpy as np
+import pandas as pd
 import plotly.express as px
+import streamlit as st
+from crossbar_llm.langchain_llm_qa_trial import RunPipeline
 
 examples = [
     {
@@ -127,7 +133,8 @@ def main():
         query_interface(file_upload=True)
 
     st.sidebar.title("About CROssBAR LLM Query Interface")
-    st.sidebar.write("""
+    st.sidebar.write(
+        """
     This tool allows you to generate and run Cypher queries for Neo4j using various LLM models. 
     You can analyze individual inputs or upload vector files for batch processing.
 
@@ -139,7 +146,8 @@ def main():
     - Query statistics and recent query history
 
     Use this tool to interact with the CROssBAR knowledge graph database and explore the data in a user-friendly manner.
-    """)
+    """
+    )
 
 
 def setup_file_logging():
@@ -359,33 +367,39 @@ def get_neo4j_statistics():
     )
     with driver.session() as session:
         # Get individual label counts
-        result = session.run("""
+        result = session.run(
+            """
         MATCH (n)
         UNWIND labels(n) AS label
         WITH label, count(n) AS count
         RETURN label, count
         ORDER BY count DESC
         LIMIT 5
-        """)
+        """
+        )
         top_5_labels = {row["label"]: row["count"] for row in result}
 
         # Get label combination counts
-        result = session.run("""
+        result = session.run(
+            """
         MATCH (n)
         WITH labels(n) AS labels, count(n) AS count
         RETURN labels, count
         ORDER BY count DESC
-        """)
+        """
+        )
         node_counts = {tuple(row["labels"]): row["count"] for row in result}
 
         # Get relationship counts
-        result = session.run("""
+        result = session.run(
+            """
         MATCH ()-[r]->()
         WITH type(r) AS type, count(r) AS count
         RETURN type, count
         ORDER BY count DESC
         LIMIT 5
-        """)
+        """
+        )
         relationship_counts = {row["type"]: row["count"] for row in result}
 
     driver.close()
@@ -418,7 +432,7 @@ def query_interface(file_upload=False):
             "label": "Enter you question here",
             "value": "",
             "placeholder": None,
-            "key": f"question{'_file' if file_upload else ''}"
+            "key": f"question{'_file' if file_upload else ''}",
         }
 
         query_llm_type_params = {
@@ -439,33 +453,39 @@ def query_interface(file_upload=False):
         }
 
         verbose_mode_params = {
-            "label":  "Enable Verbose Mode",
+            "label": "Enable Verbose Mode",
             "value": False,
             "key": f"verbose{'_file' if file_upload else ''}",
-            "help": "Show detailed logs and intermediate steps."
+            "help": "Show detailed logs and intermediate steps.",
         }
 
         if selected_example != "Select an example - or Write Your Own Query":
             example = next(ex for ex in examples if ex["label"] == selected_example)
 
-            question_params.update({
-                "value": example["question"],
-                "placeholder": example["question"],
-                "key": f"question_unchange{'_file' if file_upload else ''}"
-            })
+            question_params.update(
+                {
+                    "value": example["question"],
+                    "placeholder": example["question"],
+                    "key": f"question_unchange{'_file' if file_upload else ''}",
+                }
+            )
 
-            query_llm_type_params.update({
-                "index": model_choices.index(example["model"])
-            })
+            query_llm_type_params.update(
+                {"index": model_choices.index(example["model"])}
+            )
 
-            limit_query_return_params.update({
-                "index": limit_options.index(example["limit"]),
-            })
+            limit_query_return_params.update(
+                {
+                    "index": limit_options.index(example["limit"]),
+                }
+            )
 
-            verbose_mode_params.update({
-                "value": example["verbose"],
-            })
-        
+            verbose_mode_params.update(
+                {
+                    "value": example["verbose"],
+                }
+            )
+
         question = st.text_input(**question_params)
         query_llm_type = st.selectbox(**query_llm_type_params)
         limit_query_return = st.selectbox(**limit_query_return_params)
