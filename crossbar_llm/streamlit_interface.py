@@ -1,12 +1,8 @@
-import pathlib
-import sys
-
-sys.path.insert(0, pathlib.Path(__file__).parent.parent.absolute())
-
 import io
 import logging
 import os
 import pickle
+import sys
 from contextlib import redirect_stdout
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
@@ -16,7 +12,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from crossbar_llm.langchain_llm_qa_trial import RunPipeline
+from langchain_llm_qa_trial import RunPipeline
 
 examples = [
     {
