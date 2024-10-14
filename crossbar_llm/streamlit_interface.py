@@ -14,6 +14,26 @@ import plotly.express as px
 import streamlit as st
 from langchain_llm_qa_trial import RunPipeline
 
+from textcomplete import textcomplete, StrategyProps, TextcompleteResult
+
+if "getComps" not in st.session_state:
+    st.session_state.getComps = True
+
+if st.session_state.getComps:
+    with open('suggestions.pkl', 'rb') as f:
+        compounds_data = pickle.load(f)
+
+    compounds_data_processed = [
+        {'name': compound.lower().replace(' ', '_'), 'value': compound}
+        for compound in compounds_data
+    ]
+
+    st.session_state.compound_data = compounds_data_processed
+    st.session_state.getComps = False
+
+if not st.session_state.getComps:
+    compounds_data_processed = st.session_state.compound_data
+
 examples = [
     {
         "label": "Gene related to Psoriasis",
@@ -94,6 +114,18 @@ node_label_to_vector_index_names = {
     "Pathway": "[Biokeen](https://www.biorxiv.org/content/10.1101/631812v1)",
 }
 
+autocomplete_strategy = StrategyProps(
+    id="compounds",
+    match="\\B@(\\w*)",
+    data=compounds_data_processed,
+    comparator_keys=["name", "value"],
+    replace="(item) => `${item['value']}`",
+    template="(item) => `${item['value']} : ${item['name']}`",
+)
+
+if "txt" not in st.session_state:
+    st.session_state["txt"] = "Enter your question here"
+
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
 neo4j_uri = os.getenv("NEO4J_URI", "neo4j")
 neo4j_password = os.getenv("MY_NEO4J_PASSWORD", "password")
@@ -129,22 +161,32 @@ def main():
     with tab2:
         query_interface(file_upload=True)
 
-    st.sidebar.title("About CROssBAR LLM Query Interface")
-    st.sidebar.write(
-        """
-    This tool allows you to generate and run Cypher queries for Neo4j using various LLM models. 
-    You can analyze individual inputs or upload vector files for batch processing.
 
-    Key Features:
-    - Multiple LLM model support
-    - Vector file upload and analysis
-    - Cypher query generation and execution
-    - Detailed output with natural language answers
-    - Query statistics and recent query history
-
-    Use this tool to interact with the CROssBAR knowledge graph database and explore the data in a user-friendly manner.
-    """
+    textcomplete(
+    area_label="Enter your question here",
+    strategies=[autocomplete_strategy],
+    on_select=on_select,
+    max_count=10,
+    stop_enter_propagation=True,
     )
+
+    with st.sidebar:
+        st.title("About CROssBAR LLM Query Interface")
+        st.write(
+            """
+        This tool allows you to generate and run Cypher queries for Neo4j using various LLM models. 
+        You can analyze individual inputs or upload vector files for batch processing.
+
+        Key Features:
+        - Multiple LLM model support
+        - Vector file upload and analysis
+        - Cypher query generation and execution
+        - Detailed output with natural language answers
+        - Query statistics and recent query history
+
+        Use this tool to interact with the CROssBAR knowledge graph database and explore the data in a user-friendly manner.
+        """
+        )
 
 
 def setup_file_logging():
@@ -426,16 +468,17 @@ def query_interface(file_upload=False):
         )
 
         question_params = {
-            "label": "Enter you question here",
-            "value": "",
-            "placeholder": None,
+            "label": "Enter your question here",
+            "value": None,
+            "placeholder": st.session_state.txt,
             "key": f"question{'_file' if file_upload else ''}",
+            "on_change": on_change
         }
 
         query_llm_type_params = {
             "label": "LLM for Query Generation*",
             "options": model_choices,
-            "index": 0,
+            "index": 15,
             "key": f"llm_type{'_file' if file_upload else ''}",
             "help": "Choose the LLM to generate the Cypher query. *Required field.",
         }
@@ -468,7 +511,9 @@ def query_interface(file_upload=False):
             )
 
             query_llm_type_params.update(
-                {"index": model_choices.index(example["model"])}
+                {
+                    "index": model_choices.index(example["model"]),
+                }
             )
 
             limit_query_return_params.update(
@@ -483,7 +528,7 @@ def query_interface(file_upload=False):
                 }
             )
 
-        question = st.text_input(**question_params)
+        question = st.text_area(**question_params)
         query_llm_type = st.selectbox(**query_llm_type_params)
         limit_query_return = st.selectbox(**limit_query_return_params)
         verbose_mode = st.checkbox(**verbose_mode_params)
@@ -566,6 +611,143 @@ def query_interface(file_upload=False):
                 st.session_state.run_query_submitted = True
                 st.session_state.error_occurred = False
 
+        if st.session_state.get("generate_and_run_submitted", False):
+            if question and query_llm_type:
+                if not llm_api_key:
+                    st.warning("Please provide an API key for the LLM model.")
+                    st.session_state.error_occurred = True
+                    st.stop()
+                if not st.session_state.error_occurred:
+                    try:
+                        with st.spinner("Generating and Running Query..."):
+                            if file_upload and vector_file and vector_category:
+                                vector_index = f"{embedding_type}Embeddings"
+                                response, verbose_output, result, query = generate_and_run(
+                                    question,
+                                    query_llm_type,
+                                    limit_query_return,
+                                    verbose_mode,
+                                    api_key=llm_api_key,
+                                    vector_index=vector_index,
+                                    embedding=vector_data,
+                                )
+                            else:
+                                response, verbose_output, result, query = generate_and_run(
+                                    question,
+                                    query_llm_type,
+                                    limit_query_return,
+                                    verbose_mode,
+                                    api_key=llm_api_key,
+                                )
+
+                        st.subheader("Generated Cypher Query:")
+                        st.code(query, language="cypher")
+
+                        st.subheader("Raw Query Output:")
+                        st.code(str(result))
+
+                        st.subheader("Natural Language Answer:")
+                        st.write(fix_markdown(response))
+                    except Exception as e:
+                        st.error(f"Error processing query: {str(e)}")
+                        st.session_state.error_occurred = True
+                        st.stop()
+                else:
+                    st.warning("An error occured, please click the run button again.")
+
+            else:
+                st.warning(
+                    "Please make sure to fill in all the required fields before submitting the form."
+                )
+            st.session_state.generate_and_run_submitted = False
+
+        if st.session_state.get("generate_query_submitted", False):
+            if question and query_llm_type:
+                if not llm_api_key:
+                    st.warning("Please provide an API key for the LLM model.")
+                    st.session_state.error_occurred = True
+                    st.stop()
+                if not st.session_state.error_occurred:
+                    with st.spinner("Generating Cypher Query..."):
+                        if file_upload and vector_file and vector_category:
+                            vector_index = f"{embedding_type}Embeddings"
+                            generated_query = run_query(
+                                question,
+                                query_llm_type,
+                                limit_query_return,
+                                vector_index=vector_index,
+                                embedding=vector_data,
+                                api_key=llm_api_key,
+                            )
+                        else:
+                            generated_query = run_query(
+                                question,
+                                query_llm_type,
+                                limit_query_return,
+                                api_key=llm_api_key,
+                            )
+
+                    st.subheader("Generated Cypher Query:")
+                    st.text_area(
+                        "You can edit the generated query below:",
+                        value=generated_query,
+                        key="edited_query",
+                        height=150,
+                    )
+                else:
+                    st.warning("An error occured, please click the run button again.")
+            else:
+                st.warning(
+                    "Please make sure to fill in all the required fields before generating the query."
+                )
+            st.session_state.generate_query_submitted = False
+
+        if st.session_state.get("run_query_submitted", False):
+            if "edited_query" in st.session_state and st.session_state.edited_query:
+                if not llm_api_key:
+                    st.warning("Please provide an API key for the LLM model.")
+                    st.session_state.error_occurred = True
+                    st.stop()
+                if not st.session_state.error_occurred:
+                    with st.spinner("Running Cypher Query..."):
+                        if file_upload and vector_file and vector_category:
+                            vector_index = f"{embedding_type}Embeddings"
+                            response, verbose_output, result = run_natural(
+                                st.session_state.edited_query,
+                                question,
+                                query_llm_type,
+                                limit_query_return,
+                                verbose_mode,
+                                vector_index=vector_index,
+                                embedding=vector_data,
+                                api_key=llm_api_key,
+                            )
+                        else:
+                            response, verbose_output, result = run_natural(
+                                st.session_state.edited_query,
+                                question,
+                                query_llm_type,
+                                limit_query_return,
+                                verbose_mode,
+                                api_key=llm_api_key,
+                            )
+
+                    st.subheader("Raw Query Output:")
+                    st.code(str(result))
+
+                    st.subheader("Natural Language Answer:")
+                    st.write(fix_markdown(response))
+                else:
+                    st.warning("An error occured, please click the run button again.")
+
+            else:
+                st.warning("Please generate a Cypher query first before running it.")
+            st.session_state.run_query_submitted = False
+
+        st.subheader("Recent Queries")
+        recent_queries = st.session_state.recent_queries
+        st.table(pd.DataFrame(recent_queries))
+
     with col2:
         st.subheader("Database Statistics")
         if st.session_state.first_run:
@@ -582,20 +764,20 @@ def query_interface(file_upload=False):
             node_counts = st.session_state.latest_values["node_counts"]
             relationship_counts = st.session_state.latest_values["relationship_counts"]
 
-        with st.expander("Top 5 Node Labels", expanded=True):
+        with st.expander("Top 5 Node Labels", expanded=False):
             fig1 = px.pie(
                 values=list(top_5_labels.values()), names=list(top_5_labels.keys())
             )
-            st.plotly_chart(fig1, use_container_width=True)
+            st.plotly_chart(fig1, use_container_width=True, key="top_5_labels")
 
-        with st.expander("Top 5 Relationship Types", expanded=True):
+        with st.expander("Top 5 Relationship Types", expanded=False):
             fig2 = px.pie(
                 values=list(relationship_counts.values()),
                 names=list(relationship_counts.keys()),
             )
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True, key="top_5_relationships")
 
-        with st.expander("Node and Relationship Counts", expanded=True):
+        with st.expander("Node and Relationship Counts", expanded=False):
             total_nodes = sum(node_counts.values())
             total_relationships = sum(relationship_counts.values())
 
@@ -610,130 +792,16 @@ def query_interface(file_upload=False):
             node_df = node_df.sort_values("Count", ascending=False)
             st.dataframe(node_df)
 
-    if st.session_state.get("generate_and_run_submitted", False):
-        if question and query_llm_type:
-            if not st.session_state.error_occurred:
-                try:
-                    with st.spinner("Generating and Running Query..."):
-                        if file_upload and vector_file and vector_category:
-                            vector_index = f"{embedding_type}Embeddings"
-                            response, verbose_output, result, query = generate_and_run(
-                                question,
-                                query_llm_type,
-                                limit_query_return,
-                                verbose_mode,
-                                api_key=llm_api_key,
-                                vector_index=vector_index,
-                                embedding=vector_data,
-                            )
-                        else:
-                            response, verbose_output, result, query = generate_and_run(
-                                question,
-                                query_llm_type,
-                                limit_query_return,
-                                verbose_mode,
-                                api_key=llm_api_key,
-                            )
 
-                    st.subheader("Generated Cypher Query:")
-                    st.code(query, language="cypher")
+def on_select(textcomplete_result: TextcompleteResult):
+    searchResult = textcomplete_result.get("searchResult", "")
+    text = textcomplete_result.get("text", "")
+    print(searchResult, text)
+    st.session_state["txt"] = text
 
-                    st.subheader("Raw Query Output:")
-                    st.code(str(result))
-
-                    st.subheader("Natural Language Answer:")
-                    st.write(fix_markdown(response))
-                except Exception as e:
-                    st.error(f"Error processing query: {str(e)}")
-                    st.session_state.error_occurred = True
-                    st.stop()
-            else:
-                st.warning("An error occured, please click the run button again.")
-
-        else:
-            st.warning(
-                "Please make sure to fill in all the required fields before submitting the form."
-            )
-        st.session_state.generate_and_run_submitted = False
-
-    if st.session_state.get("generate_query_submitted", False):
-        if question and query_llm_type:
-            if not st.session_state.error_occurred:
-                with st.spinner("Generating Cypher Query..."):
-                    if file_upload and vector_file and vector_category:
-                        vector_index = f"{embedding_type}Embeddings"
-                        generated_query = run_query(
-                            question,
-                            query_llm_type,
-                            limit_query_return,
-                            vector_index=vector_index,
-                            embedding=vector_data,
-                            api_key=llm_api_key,
-                        )
-                    else:
-                        generated_query = run_query(
-                            question,
-                            query_llm_type,
-                            limit_query_return,
-                            api_key=llm_api_key,
-                        )
-
-                st.subheader("Generated Cypher Query:")
-                st.text_area(
-                    "You can edit the generated query below:",
-                    value=generated_query,
-                    key="edited_query",
-                    height=150,
-                )
-            else:
-                st.warning("An error occured, please click the run button again.")
-        else:
-            st.warning(
-                "Please make sure to fill in all the required fields before generating the query."
-            )
-        st.session_state.generate_query_submitted = False
-
-    if st.session_state.get("run_query_submitted", False):
-        if "edited_query" in st.session_state and st.session_state.edited_query:
-            if not st.session_state.error_occurred:
-                with st.spinner("Running Cypher Query..."):
-                    if file_upload and vector_file and vector_category:
-                        vector_index = f"{embedding_type}Embeddings"
-                        response, verbose_output, result = run_natural(
-                            st.session_state.edited_query,
-                            question,
-                            query_llm_type,
-                            limit_query_return,
-                            verbose_mode,
-                            vector_index=vector_index,
-                            embedding=vector_data,
-                            api_key=llm_api_key,
-                        )
-                    else:
-                        response, verbose_output, result = run_natural(
-                            st.session_state.edited_query,
-                            question,
-                            query_llm_type,
-                            limit_query_return,
-                            verbose_mode,
-                            api_key=llm_api_key,
-                        )
-
-                st.subheader("Raw Query Output:")
-                st.code(str(result))
-
-                st.subheader("Natural Language Answer:")
-                st.write(fix_markdown(response))
-            else:
-                st.warning("An error occured, please click the run button again.")
-
-        else:
-            st.warning("Please generate a Cypher query first before running it.")
-        st.session_state.run_query_submitted = False
-
-    st.subheader("Recent Queries")
-    recent_queries = st.session_state.recent_queries
-    st.table(pd.DataFrame(recent_queries))
+def on_change():
+    #dummy
+    print(st.session_state["txt"])
 
 
 if __name__ == "__main__":
