@@ -106,9 +106,6 @@ autocomplete_strategy = StrategyProps(
     template="(item) => `${item['value']} : ${item['name']}`",
 )
 
-if "txt" not in st.session_state:
-    st.session_state["txt"] = "Enter your question here"
-
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
 neo4j_uri = os.getenv("NEO4J_URI", "neo4j")
 neo4j_password = os.getenv("MY_NEO4J_PASSWORD", "password")
@@ -132,6 +129,9 @@ def main():
     
     if not st.session_state.getComps:
         compounds_data_processed = st.session_state.compound_data
+
+    if "txt" not in st.session_state:
+        st.session_state["txt"] = "Enter your question here"
     
     st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
     current_dir = os.path.dirname(os.path.realpath(__file__))
