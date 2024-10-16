@@ -97,14 +97,7 @@ node_label_to_vector_index_names = {
     "Pathway": "[Biokeen](https://www.biorxiv.org/content/10.1101/631812v1)",
 }
 
-autocomplete_strategy = StrategyProps(
-    id="compounds",
-    match="\\B@(\\w*)",
-    data=compounds_data_processed,
-    comparator_keys=["name", "value"],
-    replace="(item) => `${item['value']}`",
-    template="(item) => `${item['value']} : ${item['name']}`",
-)
+
 
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
 neo4j_uri = os.getenv("NEO4J_URI", "neo4j")
@@ -132,6 +125,15 @@ def main():
 
     if "txt" not in st.session_state:
         st.session_state["txt"] = "Enter your question here"
+
+    autocomplete_strategy = StrategyProps(
+    id="compounds",
+    match="\\B@(\\w*)",
+    data=compounds_data_processed,
+    comparator_keys=["name", "value"],
+    replace="(item) => `${item['value']}`",
+    template="(item) => `${item['value']} : ${item['name']}`",
+)
     
     st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
     current_dir = os.path.dirname(os.path.realpath(__file__))
