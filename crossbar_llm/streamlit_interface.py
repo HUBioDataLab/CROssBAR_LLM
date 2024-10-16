@@ -16,22 +16,6 @@ from langchain_llm_qa_trial import RunPipeline
 
 from textcomplete import textcomplete, StrategyProps, TextcompleteResult
 
-if "getComps" not in st.session_state:
-    st.session_state.getComps = True
-
-if st.session_state.getComps:
-    compounds_data = get_suggestions("./crossbar_llm/query_db")
-
-    compounds_data_processed = [
-        {'name': compound.lower().replace(' ', '_'), 'value': compound}
-        for compound in compounds_data
-    ]
-
-    st.session_state.compound_data = compounds_data_processed
-    st.session_state.getComps = False
-
-if not st.session_state.getComps:
-    compounds_data_processed = st.session_state.compound_data
 
 examples = [
     {
@@ -132,6 +116,23 @@ neo4j_password = os.getenv("MY_NEO4J_PASSWORD", "password")
 
 def main():
     # Setup
+    if "getComps" not in st.session_state:
+        st.session_state.getComps = True
+    
+    if st.session_state.getComps:
+        compounds_data = get_suggestions("./crossbar_llm/query_db")
+    
+        compounds_data_processed = [
+            {'name': compound.lower().replace(' ', '_'), 'value': compound}
+            for compound in compounds_data
+        ]
+    
+        st.session_state.compound_data = compounds_data_processed
+        st.session_state.getComps = False
+    
+    if not st.session_state.getComps:
+        compounds_data_processed = st.session_state.compound_data
+    
     st.set_page_config(page_title="CROssBAR LLM Query Interface", layout="wide")
     current_dir = os.path.dirname(os.path.realpath(__file__))
     parent_dir = os.path.dirname(current_dir)
