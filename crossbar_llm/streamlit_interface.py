@@ -16,26 +16,6 @@ from langchain_llm_qa_trial import RunPipeline
 
 from textcomplete import textcomplete, StrategyProps, TextcompleteResult
 
-def get_suggestions(directory):
-    pickle_file = "./suggestions.pkl"
-
-    if os.path.exists(pickle_file):
-        with open(pickle_file, "rb") as f:
-            return pickle.load(f)
-    else:
-        suggestions = set()
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                if file.endswith(".txt"):
-                    with open(os.path.join(root, file), "r") as f:
-                        suggestions.update(f.read().splitlines())
-        
-        suggestions = list(suggestions)
-
-        with open(pickle_file, "wb") as f:
-            pickle.dump(suggestions, f)
-        return suggestions
-
 if "getComps" not in st.session_state:
     st.session_state.getComps = True
 
@@ -812,11 +792,33 @@ def query_interface(file_upload=False):
             st.dataframe(node_df)
 
 
+def get_suggestions(directory):
+    pickle_file = "./suggestions.pkl"
+
+    if os.path.exists(pickle_file):
+        with open(pickle_file, "rb") as f:
+            return pickle.load(f)
+    else:
+        suggestions = set()
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.endswith(".txt"):
+                    with open(os.path.join(root, file), "r") as f:
+                        suggestions.update(f.read().splitlines())
+        
+        suggestions = list(suggestions)
+
+        with open(pickle_file, "wb") as f:
+            pickle.dump(suggestions, f)
+        return suggestions
+
+
 def on_select(textcomplete_result: TextcompleteResult):
     searchResult = textcomplete_result.get("searchResult", "")
     text = textcomplete_result.get("text", "")
     print(searchResult, text)
     st.session_state["txt"] = text
+
 
 def on_change():
     #dummy
