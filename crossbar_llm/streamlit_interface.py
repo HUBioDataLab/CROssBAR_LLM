@@ -767,14 +767,14 @@ def query_interface(file_upload=False):
             fig1 = px.pie(
                 values=list(top_5_labels.values()), names=list(top_5_labels.keys())
             )
-            st.plotly_chart(fig1, use_container_width=True, key="top_5_labels")
+            st.plotly_chart(fig1, use_container_width=True, key=f"top_5_labels_{file_upload}")
 
         with st.expander("Top 5 Relationship Types", expanded=False):
             fig2 = px.pie(
                 values=list(relationship_counts.values()),
                 names=list(relationship_counts.keys()),
             )
-            st.plotly_chart(fig2, use_container_width=True, key="top_5_relationships")
+            st.plotly_chart(fig2, use_container_width=True, key=f"top_5_relationships_{file_upload}")
 
         with st.expander("Node and Relationship Counts", expanded=False):
             total_nodes = sum(node_counts.values())
