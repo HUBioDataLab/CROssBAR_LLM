@@ -112,16 +112,11 @@ def main():
     if st.session_state.getComps:
         compounds_data = get_suggestions("./crossbar_llm/query_db")
     
-        compounds_data_processed = [
-            {'name': compound.lower().replace(' ', '_'), 'value': compound}
-            for compound in compounds_data
-        ]
-    
-        st.session_state.compound_data = compounds_data_processed
+        st.session_state.compound_data = compounds_data
         st.session_state.getComps = False
     
     if not st.session_state.getComps:
-        compounds_data_processed = st.session_state.compound_data
+        compounds_data = st.session_state.compound_data
 
     if "txt" not in st.session_state:
         st.session_state["txt"] = "Enter your question here"
@@ -129,7 +124,7 @@ def main():
     autocomplete_strategy = StrategyProps(
     id="compounds",
     match="\\B@(\\w*)",
-    data=compounds_data_processed,
+    data=compounds_data,
     comparator_keys=["name", "value"],
     replace="(item) => `${item['value']}`",
     template="(item) => `${item['value']} : ${item['name']}`",
@@ -808,8 +803,11 @@ def get_suggestions(directory):
                 if file.endswith(".txt"):
                     with open(os.path.join(root, file), "r") as f:
                         suggestions.update(f.read().splitlines())
-        
-        suggestions = list(suggestions)
+
+        suggestions = [
+            {'name': compound.lower().replace(' ', '_'), 'value': compound}
+            for compound in suggestions
+        ]
 
         with open(pickle_file, "wb") as f:
             pickle.dump(suggestions, f)
