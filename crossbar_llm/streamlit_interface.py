@@ -125,7 +125,7 @@ def main():
     id="compounds",
     match="\\B@(\\w*)",
     data=compounds_data,
-    comparator_keys=["name", "value"],
+    fuse_options={"keys": ["name", "value"], "shouldSort": True, "threshold": 0.3},
     replace="(item) => `${item['value']}`",
     template="(item) => `${item['value']} : ${item['name']}`",
 )

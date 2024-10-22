@@ -2943,13 +2943,13 @@ snowflake = ["snowflake-connector-python (>=2.8.0)", "snowflake-snowpark-python[
 
 [[package]]
 name = "streamlit-textcomplete"
-version = "0.1.2"
+version = "0.2.0"
 description = "Streamlit autocomplete Textcomplete editor for HTMLTextAreaElement"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "streamlit_textcomplete-0.1.2-py3-none-any.whl", hash = "sha256:f4f70b389719c9e674421b116013d63770d022eb87ef2d269907e3cbac03b699"},
-    {file = "streamlit_textcomplete-0.1.2.tar.gz", hash = "sha256:381a5340dd7481ec9d6da01222ce16a172d049f1a7b5517f39d9916bad83e8aa"},
+    {file = "streamlit_textcomplete-0.2.0-py3-none-any.whl", hash = "sha256:d18df56a61776b36345538dcdfbad1a8878a5590a5f1af604f3de3f4835ca4e3"},
+    {file = "streamlit_textcomplete-0.2.0.tar.gz", hash = "sha256:861b93de5fba2e35b569a68201347bdaf4839034e488ab1ad85a91c7d134ebba"},
 ]
 
 [package.dependencies]
@@ -3510,4 +3510,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.11"
-content-hash = "043e4ad313d0655b87830cd8e3d7ed80bc00107a0621546568a0b1d5e6d03373"
+content-hash = "8ef5ee26693299c847d84a92b9155724b45eaec380e2ba337dcc4ea97991340c"
