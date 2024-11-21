@@ -2,7 +2,7 @@
 name = "crossbar_llm"
 version = "0.1.0"
 description = ""
-authors = ["Melih DARCAN <57872471+MelihDarcanxyz@users.noreply.github.com>"]
+authors = ["Melih DARCAN <57872471+MelihDarcanxyz@users.noreply.github.com>", "Bünyamin Şen <106750021+bnymnsen@users.noreply.github.com>"]
 license = "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
 
 [tool.poetry.dependencies]
