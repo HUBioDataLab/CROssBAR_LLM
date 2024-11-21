@@ -18,8 +18,8 @@ from io import StringIO
 load_dotenv()
 
 origins = [
-    "http://localhost:3000",  # React app running on localhost
-    "http://127.0.0.1:3000",
+    "http://localhost:8501",  # React app running on localhost
+    "http://127.0.0.1:8501",
 ]
 
 app = FastAPI()

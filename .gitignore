@@ -14,7 +14,7 @@ graph_schema.json
 
 # Frontend
 # dependencies
-/node_modules
+**/node_modules
 /.pnp
 .pnp.js
 
@@ -22,7 +22,7 @@ graph_schema.json
 /coverage
 
 # production
-/build
+**/build
 
 # misc
 .DS_Store

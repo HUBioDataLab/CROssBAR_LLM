@@ -4,3 +4,6 @@ poetry.lock
 pyproject.toml
 questions.csv
 README.md
+**/node_modules
+**/__pycache__
+**/build

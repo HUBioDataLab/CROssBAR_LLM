@@ -16,9 +16,9 @@ from typing import Literal, Union
 
 import numpy as np
 import pandas as pd
-from neo4j_query_corrector import correct_query
-from neo4j_query_executor_extractor import Neo4jGraphHelper
-from qa_templates import (
+from .neo4j_query_corrector import correct_query
+from .neo4j_query_executor_extractor import Neo4jGraphHelper
+from .qa_templates import (
     CYPHER_GENERATION_PROMPT,
     CYPHER_OUTPUT_PARSER_PROMPT,
     VECTOR_SEARCH_CYPHER_GENERATION_PROMPT,
