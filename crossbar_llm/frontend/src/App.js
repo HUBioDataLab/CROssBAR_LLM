@@ -51,10 +51,10 @@ function App() {
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 4 }}>
         <Container maxWidth="lg">
-          <Typography variant="h5" align="center" gutterBottom>
+          <Typography variant="h2" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
             CROssBAR LLM Query Interface
           </Typography>
-          <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 2 }}>
+          <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 2, '.MuiTab-root': { fontWeight: 'bold' } }}>
             <Tab label="LLM Query" value="query" />
             <Tab label="Vector Search" value="vectorSearch" />
             <Tab label="About" value="about" />
@@ -93,6 +93,10 @@ function App() {
                   queryResult={queryResult}
                   executionResult={executionResult}
                 />
+                <LatestQueries 
+                  queries={latestQueries} 
+                  onSelectQuery={handleSelectQuery}
+                />
               </Grid2>
               <Grid2 item xs={12} md={4}>
                 <DatabaseStats />
@@ -119,13 +123,14 @@ function App() {
           bgcolor: 'background.paper', 
           boxShadow: 24, 
           p: 4, 
-          overflow: 'auto' 
+          overflow: 'auto',
+          borderRadius: 2
         }}>
-          <Typography id="about-modal-title" variant="h6" component="h2">
+          <Typography id="about-modal-title" variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
             About This Site
           </Typography>
           <About />
-          <Button onClick={handleCloseModal} sx={{ mt: 2 }}>Close</Button>
+          <Button onClick={handleCloseModal} sx={{ mt: 2, fontWeight: 'bold' }}>Close</Button>
         </Box>
       </Modal>
     </ThemeProvider>
