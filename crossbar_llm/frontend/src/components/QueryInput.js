@@ -28,6 +28,7 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
 
   const modelChoices = {
     OpenAI: [
@@ -62,6 +63,8 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
       'claude-instant-1.2',
     ]
   };
+
+  const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b'];
 
   const handleGenerateQuery = async () => {
     setLoading(true);
@@ -210,7 +213,15 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
           <Select
             labelId="llm-type-label"
             value={llmType}
-            onChange={(e) => setLlmType(e.target.value)}
+            onChange={(e) => {
+              const selectedModel = e.target.value;
+              setLlmType(selectedModel);
+              if (!supportedModels.includes(selectedModel)) {
+                setShowWarning(true);
+              } else {
+                setShowWarning(false);
+              }
+            }}
             label="LLM Type"
           >
             {modelChoices[provider].map((model) => (
@@ -220,6 +231,11 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
             ))}
           </Select>
         </FormControl>
+      )}
+      {showWarning && (
+        <Typography color="warning" sx={{ mt: 2 }}>
+          Warning: The selected model is not fully supported and may cause problems.
+        </Typography>
       )}
       {/* API Key Input */}
       <TextField
