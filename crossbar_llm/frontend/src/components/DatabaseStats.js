@@ -30,22 +30,16 @@ function DatabaseStats() {
   });
 
   useEffect(() => {
-    // If CSRF token is not set in cookies, wait for it to be set
-    if (!axios.defaults.headers['X-CSRF-Token']) {
-      axios.get('/csrf-token/', { withCredentials: true })
-        .then((response) => {
-          console.log('CSRF token set in cookies.');
-          const csrfToken = response.data.csrf_token;
-          document.cookie = `fastapi-csrf-token=${csrfToken}`;
-          axios.defaults.headers['X-CSRF-Token'] = csrfToken;
-        })
-        .catch((error) => {
-          console.error('Error fetching CSRF token:', error);
-        });
-    }
+    // If CSRF token is not set in cookies, wait for it to be set (a little wait) and then fetch the data
+    const waitForCsrfToken = async () => {
+      while (!axios.defaults.headers['X-CSRF-Token']) {
+        console.log('Waiting for CSRF token to be set in cookies...');
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
 
-
-    axios
+    waitForCsrfToken().then(() => {
+      axios
       .get('/database_stats/')
       .then((response) => {
         setStats(response.data);
@@ -54,6 +48,7 @@ function DatabaseStats() {
       .catch((error) => {
         console.error('Error fetching database statistics:', error);
       });
+    });
   }, []);
 
   if (!stats) {
