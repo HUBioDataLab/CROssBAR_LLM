@@ -50,10 +50,10 @@ function ResultsDisplay({ queryResult, executionResult }) {
                 </Typography>
               </>
             )}
-            <Typography variant="subtitle1" sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" sx={{ mt: 2 , fontWeight: 'bold'}}>
               Natural Language Response:
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1 }}>
+            <Typography variant="body1" sx={{ mt: 1, mb: 2, fontWeight: 'bold' }}>
               {executionResult.response}
             </Typography>
             <Typography variant="subtitle1" sx={{ mt: 2 }}>
