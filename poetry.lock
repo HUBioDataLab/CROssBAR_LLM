@@ -491,6 +491,22 @@ all = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>
 standard = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>=0.23.0)", "jinja2 (>=2.11.2)", "python-multipart (>=0.0.7)", "uvicorn[standard] (>=0.12.0)"]
 
 [[package]]
+name = "fastapi-csrf-protect"
+version = "0.3.2"
+description = "Stateless implementation of Cross-Site Request Forgery (XSRF) Protection by using Double Submit Cookie mitigation pattern"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "fastapi_csrf_protect-0.3.2-py3-none-any.whl", hash = "sha256:1091b2ef304712b97177124e2a42169ff5741362a25755950b22dbbc131a1e20"},
+    {file = "fastapi_csrf_protect-0.3.2.tar.gz", hash = "sha256:089d30ae494f638f58d99ea5ec14626388a4630241be3300e0793cddd762d610"},
+]
+
+[package.dependencies]
+fastapi = ">=0,<1"
+itsdangerous = ">=2.0.1,<3.0.0"
+pydantic = ">=1.7.2,<3.0.0"
+
+[[package]]
 name = "filelock"
 version = "3.16.1"
 description = "A platform independent file lock."
@@ -1076,6 +1092,17 @@ files = [
 
 [package.extras]
 all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
+
+[[package]]
+name = "itsdangerous"
+version = "2.2.0"
+description = "Safely pass data to untrusted environments and back."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "itsdangerous-2.2.0-py3-none-any.whl", hash = "sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef"},
+    {file = "itsdangerous-2.2.0.tar.gz", hash = "sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173"},
+]
 
 [[package]]
 name = "jiter"
@@ -2247,6 +2274,17 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-multipart"
+version = "0.0.17"
+description = "A streaming multipart parser for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python_multipart-0.0.17-py3-none-any.whl", hash = "sha256:15dc4f487e0a9476cc1201261188ee0940165cffc94429b6fc565c4d3045cb5d"},
+    {file = "python_multipart-0.0.17.tar.gz", hash = "sha256:41330d831cae6e2f22902704ead2826ea038d0419530eadff3ea80175aec5538"},
+]
+
+[[package]]
 name = "pytz"
 version = "2024.2"
 description = "World timezone definitions, modern and historical"
@@ -3072,4 +3110,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.11"
-content-hash = "02a78963c92bc659fd635128190e88023e5de1008820e3180b3b8b4f4765814f"
+content-hash = "308fd30e7f1818dfd763268a3a839750f65785f638c7c2bb3b6602c582fc86c0"

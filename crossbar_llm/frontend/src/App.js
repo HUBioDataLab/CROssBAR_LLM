@@ -5,9 +5,9 @@ import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
 import About from './components/About';
 import DatabaseStats from './components/DatabaseStats';
-import VectorUpload from './components/VectorUpload';
 import VectorSearch from './components/VectorSearch';
 import LatestQueries from './components/LatestQueries';
+import axios from './services/api';
 
 function App() {
   const [tabValue, setTabValue] = useState('query');
@@ -18,6 +18,17 @@ function App() {
   const [selectedQuery, setSelectedQuery] = useState(null);
 
   useEffect(() => {
+    axios.get('/csrf-token/', { withCredentials: true })
+      .then((response) => {
+        console.log('CSRF token set in cookies.');
+        const csrfToken = response.data.csrf_token;
+        document.cookie = `fastapi-csrf-token=${csrfToken}`;
+        axios.defaults.headers['X-CSRF-Token'] = csrfToken;
+      })
+      .catch((error) => {
+        console.error('Error fetching CSRF token:', error);
+      });
+
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
     if ((navigationType === 'navigate' || navigationType === 'reload')) {
@@ -60,7 +71,7 @@ function App() {
             <Tab label="About" value="about" />
           </Tabs>
           {tabValue === 'query' && (
-            <Grid2 container spacing={2}>
+            <Grid2 container spacing={2} alignItems="flex-start">
               <Grid2 item xs={12} md={8}>
                 <QueryInput
                   setQueryResult={setQueryResult}
@@ -76,13 +87,13 @@ function App() {
                   onSelectQuery={handleSelectQuery}
                 />
               </Grid2>
-              <Grid2 item xs={12} md={4}>
+              <Grid2 item xs={12} md={4} sx={{ position: 'sticky', top: 0 }}>
                 <DatabaseStats />
               </Grid2>
             </Grid2>
           )}
           {tabValue === 'vectorSearch' && 
-            <Grid2 container spacing={2}>
+            <Grid2 container spacing={2} alignItems="flex-start">
               <Grid2 item xs={12} md={8}>
                 <VectorSearch
                   setQueryResult={setQueryResult}
@@ -98,7 +109,7 @@ function App() {
                   onSelectQuery={handleSelectQuery}
                 />
               </Grid2>
-              <Grid2 item xs={12} md={4}>
+              <Grid2 item xs={12} md={4} sx={{ position: 'sticky', top: 0 }}>
                 <DatabaseStats />
               </Grid2>
             </Grid2>

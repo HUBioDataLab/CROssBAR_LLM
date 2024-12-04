@@ -38,7 +38,7 @@ function VectorUpload({ vectorCategory, setVectorCategory, embeddingType, setEmb
     if (Array.isArray(options)) {
       setEmbeddingType('');
     } else {
-      setEmbeddingType(options);
+      setEmbeddingType(options.match(/\[(.*?)\]/)[1]);
     }
   };
 
@@ -52,7 +52,7 @@ function VectorUpload({ vectorCategory, setVectorCategory, embeddingType, setEmb
     formData.append('vector_category', vectorCategory);
     if (embeddingType) {
       formData.append('embedding_type', embeddingType);
-    }
+    } 
     formData.append('file', selectedFile);
 
     axios

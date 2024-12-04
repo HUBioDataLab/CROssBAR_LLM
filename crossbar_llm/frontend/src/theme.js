@@ -56,6 +56,14 @@ const theme = createTheme({
         margin: 'normal',
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          backgroundColor: '#ffffff', 
+          borderRadius: '8px',
+        },
+      },
+    },
   },
 });
 

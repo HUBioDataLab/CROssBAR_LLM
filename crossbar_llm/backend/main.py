@@ -1,7 +1,8 @@
 import os
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse
+from fastapi_csrf_protect import CsrfProtect
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import Optional, List
@@ -10,6 +11,7 @@ import numpy as np
 import pandas as pd
 import neo4j
 from io import BytesIO
+
 
 import logging
 from io import StringIO
@@ -20,6 +22,7 @@ load_dotenv()
 origins = [
     "http://localhost:8501",  # React app running on localhost
     "http://127.0.0.1:8501",
+    "http://localhost:3000",  # React app running on localhost
 ]
 
 app = FastAPI()
@@ -32,6 +35,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class CsrfSettings(BaseModel):
+    secret_key: str = os.getenv("CSRF_SECRET_KEY")
+    
+
+@CsrfProtect.load_config
+def get_csrf_config():
+    return CsrfSettings()
+
+@app.get("/csrf-token/")
+def get_csrf_token(csrf_protect: CsrfProtect = Depends()):
+    csrf_token, signed_token = csrf_protect.generate_csrf_tokens()
+    response = JSONResponse({"detail": "CSRF cookie set" ,"csrf_token": csrf_token})
+    csrf_protect.set_csrf_cookie(signed_token, response)
+    return response
 
 # Neo4j connection details
 neo4j_user = os.getenv("NEO4J_USER", "neo4j")
@@ -60,96 +78,125 @@ class RunQueryRequest(BaseModel):
     verbose: bool = False
 
 @app.post("/generate_query/")
-async def generate_query(request: GenerateQueryRequest):
-    key = f"{request.llm_type}_{request.api_key}"
+async def generate_query(
+    request: Request,
+    generate_query_request: GenerateQueryRequest,
+    csrf_token: CsrfProtect = Depends()
+    ):
+    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    
+    key = f"{generate_query_request.llm_type}_{generate_query_request.api_key}"
 
     # Initialize or reuse RunPipeline instance
     if key not in pipeline_instances:
         pipeline_instances[key] = RunPipeline(
-            model_name=request.llm_type,
-            verbose=request.verbose,
+            model_name=generate_query_request.llm_type,
+            verbose=generate_query_request.verbose,
         )
 
     rp = pipeline_instances[key]
 
     log_stream = StringIO()
     handler = logging.StreamHandler(log_stream)
-    handler.setLevel(logging.DEBUG if request.verbose else logging.INFO)
+    handler.setLevel(logging.DEBUG if generate_query_request.verbose else logging.INFO)
     logger = logging.getLogger()
     logger.addHandler(handler)
     
     try:
-        embedding = None
-        if request.embedding is not None:
-            request.embedding = request.embedding.replace('{"vector_data":', '').replace('}', '').replace('[', '').replace(']', '')
-            embedding = [float(x) for x in request.embedding.split(",")]
+        if generate_query_request.embedding is not None:
+            
+            
+            print("Embedding:", generate_query_request.vector_index)
+            generate_query_request.embedding = generate_query_request.embedding.replace('{"vector_data":', '').replace('}', '').replace('[', '').replace(']', '')
+            embedding = [float(x) for x in generate_query_request.embedding.split(",")]
             embedding = np.array(embedding)
 
-            vector_index = f"{request.vector_index}Embeddings"
+            vector_index = f"{generate_query_request.vector_index}Embeddings"
 
             rp.search_type = "vector_search"
+            rp.top_k = generate_query_request.top_k
+            
+            query = rp.run_for_query(
+                question=generate_query_request.question,
+                model_name=generate_query_request.llm_type,
+                api_key=generate_query_request.api_key,
+                vector_index=vector_index,
+                embedding = embedding,
+                reset_llm_type=True
+            )
+            
         else:
             rp.search_type = "db_search"
-
-        print(f"Embedding for {request.vector_index}:", embedding)
-        print(f"Vector index for {request.vector_index}:", vector_index)
+            rp.top_k = generate_query_request.top_k
             
+            query = rp.run_for_query(
+                question=generate_query_request.question,
+                model_name=generate_query_request.llm_type,
+                api_key=generate_query_request.api_key,
+                reset_llm_type=True
+            )
 
-        query = rp.run_for_query(
-            question=request.question,
-            model_name=request.llm_type,
-            top_k=request.top_k,
-            api_key=request.api_key,
-            vector_index=vector_index,
-            embedding = embedding,
-            reset_llm_type=True
-        )
     finally:
         logger.removeHandler(handler)
 
     logs = log_stream.getvalue()
+    
+    response = JSONResponse({"query": query, "logs": logs})
+    csrf_token.set_csrf_cookie(csrf_token.generate_csrf_tokens(), response)
 
-    return {"query": query, "logs": logs}
+    return response
 
 @app.post("/run_query/")
-async def run_query(request: RunQueryRequest):
-    key = f"{request.llm_type}_{request.api_key}"
+async def run_query(
+    request: Request,
+    run_query_request: RunQueryRequest,
+    csrf_token: CsrfProtect = Depends()
+    ):
+    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    
+    key = f"{run_query_request.llm_type}_{run_query_request.api_key}"
 
     if key not in pipeline_instances:
         pipeline_instances[key] = RunPipeline(
-            model_name=request.llm_type,
-            verbose=request.verbose,
+            model_name=run_query_request.llm_type,
+            verbose=run_query_request.verbose,
         )
 
     rp = pipeline_instances[key]
 
     log_stream = StringIO()
     handler = logging.StreamHandler(log_stream)
-    handler.setLevel(logging.DEBUG if request.verbose else logging.INFO)
+    handler.setLevel(logging.DEBUG if run_query_request.verbose else logging.INFO)
     logger = logging.getLogger()
     logger.addHandler(handler)
 
     try:
         response, result = rp.execute_query(
-            query=request.query,
-            question=request.question,
-            model_name=request.llm_type,
-            api_key=request.api_key,
+            query=run_query_request.query,
+            question=run_query_request.question,
+            model_name=run_query_request.llm_type,
+            api_key=run_query_request.api_key,
             reset_llm_type=True
         )
     finally:
         logger.removeHandler(handler)
     
     logs = log_stream.getvalue()
-
-    return {"response": response, "result": result, "logs": logs}
+    
+    response = JSONResponse({"response": response, "result": result, "logs": logs})
+    csrf_token.set_csrf_cookie(csrf_token.generate_csrf_tokens(), response)
+    
+    return response
 
 @app.post("/upload_vector/")
 async def upload_vector(
+    request: Request,
+    csrf_token: CsrfProtect = Depends(),
     vector_category: str = Form(...),
     embedding_type: Optional[str] = Form(None),
     file: UploadFile = File(...)
 ):
+    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
     try:
         contents = await file.read()
         filename = file.filename
@@ -174,10 +221,20 @@ async def upload_vector(
             raise ValueError("Unsupported file format. Please upload a CSV or NPY file.")
 
         print(f"Vector data for {filename}:", vector_data)
+        
+        response = JSONResponse({"vector_data": vector_data.tolist()})
+        csrf_token.set_csrf_cookie(csrf_token.generate_csrf_tokens(), response)
 
-        return {"vector_data": vector_data.tolist()}
+        return response
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/database_stats/")
+async def get_database_stats(request: Request, csrf_token: CsrfProtect = Depends()):
+    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    statistics = get_neo4j_statistics()
+    return statistics
 
 # Utility functions
 
