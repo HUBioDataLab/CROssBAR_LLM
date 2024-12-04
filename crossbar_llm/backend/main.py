@@ -142,7 +142,6 @@ async def generate_query(
     logs = log_stream.getvalue()
     
     response = JSONResponse({"query": query, "logs": logs})
-    csrf_token.set_csrf_cookie(csrf_token.generate_csrf_tokens(), response)
 
     return response
 
@@ -184,7 +183,6 @@ async def run_query(
     logs = log_stream.getvalue()
     
     response = JSONResponse({"response": response, "result": result, "logs": logs})
-    csrf_token.set_csrf_cookie(csrf_token.generate_csrf_tokens(), response)
     
     return response
 
