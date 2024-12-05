@@ -19,12 +19,12 @@ openai = "^1.30.2"
 pandas = "^2.2.2"
 pydantic = "^2.7.1"
 python-dotenv = "^1.0.1"
-streamlit = "^1.35.0"
 langchain-nvidia-ai-endpoints = "^0.2.0"
 wrapt-timeout-decorator = "^1.5.1"
 langchain-openai = "^0.1.20"
-plotly = "^5.23.0"
-streamlit-textcomplete = "^0.2.0"
+fastapi = "^0.115.5"
+fastapi-csrf-protect = "0.3.2"
+python-multipart = "^0.0.17"
 
 [tool.poetry.dev-dependencies]
 

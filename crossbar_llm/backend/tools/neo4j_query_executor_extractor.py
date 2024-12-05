@@ -3,7 +3,7 @@ import os
 import re
 
 import neo4j
-from utils import timer_func
+from .utils import timer_func
 from pydantic import validate_call
 
 node_properties_query = """
