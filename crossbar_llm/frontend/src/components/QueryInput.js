@@ -173,7 +173,7 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
   };
 
   const handleSampleQuestionClick = (sampleQuestion) => {
-    setQuestion(sampleQuestion);
+    setQuestion(sampleQuestion.question);
   };
 
   return (
@@ -186,7 +186,7 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
         placeholder="Type your question here..."
         required
       />
-      <SampleQuestions onClick={handleSampleQuestionClick} />
+      <SampleQuestions onClick={handleSampleQuestionClick} isVectorTab={false}/>
       {/* Provider Selection */}
       <FormControl fullWidth margin="normal" required>
         <InputLabel id="provider-label">Provider</InputLabel>
@@ -234,7 +234,9 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
       )}
       {showWarning && (
         <Typography color="warning" sx={{ mt: 2 }}>
-          Warning: The selected model is not fully supported and may cause problems.
+          Warning: Smaller language models may produce inaccurate 
+          or fabricated responses ("hallucinations") so we recommend
+          using larger models such as Claude Sonnet, GPT-4, and Meta Llama 3.1 405B for accurate results. 
         </Typography>
       )}
       {/* API Key Input */}

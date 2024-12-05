@@ -178,8 +178,17 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
     }
   };
 
-  const handleSampleQuestionClick = (sampleQuestion) => {
-    setQuestion(sampleQuestion);
+  const handleSampleQuestionClick = (sampleQuestionObj) => {
+    setQuestion(sampleQuestionObj.question);
+    if (sampleQuestionObj.vectorCategory) {
+      setVectorCategory(sampleQuestionObj.vectorCategory);
+    }
+    if (sampleQuestionObj.embeddingType) {
+      setEmbeddingType(sampleQuestionObj.embeddingType);
+    }
+    if (sampleQuestionObj.vectorData) {
+      setVectorFile(sampleQuestionObj.vectorData);
+    }
   };
 
   return (
@@ -192,7 +201,7 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
         placeholder="Type your question here..."
         required
       />
-      <SampleQuestions onClick={handleSampleQuestionClick} />
+      <SampleQuestions onClick={handleSampleQuestionClick} isVectorTab={true} />
 
       {/* Provider Selection */}
       <FormControl fullWidth margin="normal" required>
