@@ -27,7 +27,6 @@ WORKDIR crossbar_llm
 WORKDIR frontend
 RUN /root/.local/share/pnpm/pnpm install
 RUN /root/.local/share/pnpm/pnpm build
-RUN rm -r /public
 RUN cp -rf build /public
 WORKDIR ..
 RUN rm -rf frontend
