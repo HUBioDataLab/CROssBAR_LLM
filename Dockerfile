@@ -12,7 +12,8 @@ RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(whic
 # Install static-web-server
 RUN curl -L -o sws.tar.gz https://github.com/static-web-server/static-web-server/releases/download/v2.34.0/static-web-server-v2.34.0-x86_64-unknown-linux-gnu.tar.gz
 RUN tar xzvf sws.tar.gz
-RUN mv static-web-server*/static-web-server /bin/
+RUN mv static-web-server-*/static-web-server /bin/
+RUN rm -rf static-web-server-* sws.tar.gz
 
 # Install backend requirements
 WORKDIR ..
