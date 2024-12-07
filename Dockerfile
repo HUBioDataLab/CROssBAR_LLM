@@ -10,7 +10,9 @@ RUN apt install -y nodejs wget curl
 RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
 
 # Install static-web-server
-RUN curl --proto '=https' --tlsv1.2 -sSfL https://get.static-web-server.net | sh
+RUN curl -L -o sws.tar.gz https://github.com/static-web-server/static-web-server/releases/download/v2.34.0/static-web-server-v2.34.0-x86_64-unknown-linux-gnu.tar.gz
+RUN tar xzvf sws.tar.gz
+RUN mv static-web-server*/static-web-server /bin/
 
 # Install backend requirements
 WORKDIR ..
