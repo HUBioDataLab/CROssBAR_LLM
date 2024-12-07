@@ -147,12 +147,17 @@ class Neo4jGraphHelper:
 
     def remove_embedding_attribute(self, data: dict) -> dict:
 
+        keys_to_delete = {}
+
         for k, v in data.items():
             if "embedding" in k:
-                del data[k]
+                keys_to_delete.add(k)
 
             elif isinstance(v, dict):
                 data[k] = self.remove_embedding_attribute(v)
+        
+        for k in keys_to_delete:
+            del data[k]
 
         return data
 
