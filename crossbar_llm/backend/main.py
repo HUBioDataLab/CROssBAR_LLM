@@ -22,7 +22,7 @@ load_dotenv()
 origins = [
     "http://localhost:8501",  # React app running on localhost
     "http://127.0.0.1:8501",
-    "http://localhost:3000",  # React app running on localhost
+    "https://crossbarv2.hubiodatalab.com/llm",
 ]
 
 app = FastAPI()
