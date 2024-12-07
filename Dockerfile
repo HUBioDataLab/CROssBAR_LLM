@@ -4,7 +4,7 @@ RUN apt update
 RUN apt upgrade -y
 
 # Install node
-RUN apt install -y nodejs wget
+RUN apt install -y nodejs wget curl
 
 # Install pnpm
 RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
