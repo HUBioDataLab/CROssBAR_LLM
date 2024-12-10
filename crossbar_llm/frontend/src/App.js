@@ -72,8 +72,8 @@ function App() {
             <Tab label="About" value="about" />
           </Tabs>
           {tabValue === 'query' && (
-            <Grid2 container spacing={2} alignItems="flex-start">
-              <Grid2 item xs={12} md={8}>
+            <Grid2 container spacing={2} alignItems="flex-start" wrap="nowrap">
+              <Grid2 item xs={12} md={8} sx={{ maxWidth: 'calc(100% - 300px)' }}>
                 <QueryInput
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
@@ -94,8 +94,8 @@ function App() {
             </Grid2>
           )}
           {tabValue === 'vectorSearch' && 
-            <Grid2 container spacing={2} alignItems="flex-start">
-              <Grid2 item xs={12} md={8}>
+            <Grid2 container spacing={2} alignItems="flex-start" wrap="nowrap">
+              <Grid2 item xs={12} md={8} sx={{ maxWidth: 'calc(100% - 300px)' }}>
                 <VectorSearch
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
@@ -110,7 +110,7 @@ function App() {
                   onSelectQuery={handleSelectQuery}
                 />
               </Grid2>
-              <Grid2 item xs={12} md={4} sx={{ position: 'sticky', top: 0 }}>
+              <Grid2 item xs={12} md={4} sx={{ width: '300px', position: 'sticky', top: 0 }}>
                 <DatabaseStats />
               </Grid2>
             </Grid2>
