@@ -83,20 +83,40 @@ function DatabaseStats() {
     ],
   };
 
+  const chartOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        ticks: {
+          autoSkip: false,
+          callback: function(value) {
+            const label = this.getLabelForValue(value);
+            return label;
+          },
+        },
+      },
+    },
+  };
 
   return (
-    <Accordion defaultExpanded={true} sx={{ mt: 2 }}>
+    <Accordion defaultExpanded={false} sx={{ mt: 2 }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography variant="h6">Database Statistics</Typography>
       </AccordionSummary>
-      <AccordionDetails>
-        <Typography variant="subtitle1">Top 5 Node Labels</Typography>
-        <Pie data={nodeLabelsChart} />
+      <AccordionDetails sx={{ maxHeight: 400, maxWidth: '100%', overflow: 'auto' }}>
+      <Typography variant="subtitle1">Top 5 Node Labels</Typography>
+        <div style={{ overflowX: 'auto' }}>
+          <Pie data={nodeLabelsChart} />
+        </div>
 
         <Typography variant="subtitle1" sx={{ mt: 4 }}>
           Top 5 Relationship Types
         </Typography>
-        <Bar data={relationshipChart} options={{ indexAxis: 'y' }} />
+        <div style={{ overflowX: 'auto' }}>
+          <Bar data={relationshipChart} options={chartOptions} />
+        </div>
       </AccordionDetails>
     </Accordion>
   );
