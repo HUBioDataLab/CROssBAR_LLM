@@ -23,7 +23,6 @@ function App() {
         console.log('CSRF token set in cookies.');
         const csrfToken = response.data.csrf_token;
         document.cookie = `fastapi-csrf-token=${csrfToken}`;
-        console.log('CSRF token:', csrfToken);
         axios.defaults.headers['X-CSRF-Token'] = csrfToken;
       })
       .catch((error) => {
