@@ -1,5 +1,7 @@
 import React from 'react';
 import { Typography, Card, CardContent, Box } from '@mui/material';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 function ResultsDisplay({ queryResult, executionResult }) {
   if (!queryResult && !executionResult) {
@@ -12,18 +14,9 @@ function ResultsDisplay({ queryResult, executionResult }) {
         <Card sx={{ mb: 2 }}>
           <CardContent>
             <Typography variant="h6">Generated Cypher Query:</Typography>
-            <Typography
-              variant="body1"
-              component="pre"
-              sx={{
-                whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word',
-                fontFamily: 'monospace',
-                mt: 1,
-              }}
-            >
+            <SyntaxHighlighter language="cypher" style={dracula}>
               {queryResult}
-            </Typography>
+            </SyntaxHighlighter>
           </CardContent>
         </Card>
       )}
@@ -36,41 +29,24 @@ function ResultsDisplay({ queryResult, executionResult }) {
                 <Typography variant="subtitle1" sx={{ mt: 2 }}>
                   Verbose Output:
                 </Typography>
-                <Typography
-                  variant="body2"
-                  component="pre"
-                  sx={{
-                    whiteSpace: 'pre-wrap',
-                    wordWrap: 'break-word',
-                    fontFamily: 'monospace',
-                    mt: 1,
-                  }}
-                >
+                <SyntaxHighlighter language="plaintext" style={dracula}>
                   {executionResult.verbose}
-                </Typography>
+                </SyntaxHighlighter>
               </>
             )}
-            <Typography variant="subtitle1" sx={{ mt: 2 , fontWeight: 'bold'}}>
+            <Typography variant="body1" sx={{ mt: 2, fontWeight: 'bold' }}>
               Natural Language Response:
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1, mb: 2, fontWeight: 'bold' }}>
+            <Typography variant="body1" sx={{ mt: 1, mb: 2 }}>
               {executionResult.response}
             </Typography>
+            <Box sx={{ height: 16 }} />
             <Typography variant="subtitle1" sx={{ mt: 2 }}>
               Raw Query Output:
             </Typography>
-            <Typography
-              variant="body1"
-              component="pre"
-              sx={{
-                whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word',
-                fontFamily: 'monospace',
-                mt: 1,
-              }}
-            >
+            <SyntaxHighlighter language="json" style={dracula}>
               {JSON.stringify(executionResult.result, null, 2)}
-            </Typography>
+            </SyntaxHighlighter>
           </CardContent>
         </Card>
       )}
