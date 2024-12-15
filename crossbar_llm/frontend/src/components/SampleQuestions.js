@@ -3,7 +3,7 @@ import { Button, Grid2 } from '@mui/material';
 
 function SampleQuestions({ onClick, isVectorTab }) {
   const examples = [
-    { question: 'Which Gene is related to Disease named psoriasis?' },
+    { question: 'Which Gene is related to the Disease named psoriasis?' },
     { question: 'What proteins does the drug named Caffeine target?' },
   ];
 
