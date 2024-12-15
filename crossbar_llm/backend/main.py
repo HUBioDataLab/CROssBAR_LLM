@@ -83,7 +83,10 @@ async def generate_query(
     generate_query_request: GenerateQueryRequest,
     csrf_token: CsrfProtect = Depends()
     ):
-    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    try:
+        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
     key = f"{generate_query_request.llm_type}_{generate_query_request.api_key}"
 
@@ -151,7 +154,11 @@ async def run_query(
     run_query_request: RunQueryRequest,
     csrf_token: CsrfProtect = Depends()
     ):
-    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    try:
+        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
     key = f"{run_query_request.llm_type}_{run_query_request.api_key}"
 
@@ -194,7 +201,12 @@ async def upload_vector(
     embedding_type: Optional[str] = Form(None),
     file: UploadFile = File(...)
 ):
-    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    try:
+        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
     try:
         contents = await file.read()
         filename = file.filename
@@ -229,7 +241,10 @@ async def upload_vector(
 
 @app.get("/database_stats/")
 async def get_database_stats(request: Request, csrf_token: CsrfProtect = Depends()):
-    await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    try:
+        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     statistics = get_neo4j_statistics()
     return statistics
 
