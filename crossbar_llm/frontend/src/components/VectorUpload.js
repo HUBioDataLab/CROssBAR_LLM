@@ -2,8 +2,17 @@ import React, { useState } from 'react';
 import { Button, InputLabel, MenuItem, FormControl, Select, Typography, Box } from '@mui/material';
 import axios from '../services/api';
 
-function VectorUpload({ vectorCategory, setVectorCategory, embeddingType, setEmbeddingType , vectorFile, setVectorFile }) {
-  const [selectedFile, setSelectedFile] = useState(null);
+function VectorUpload({ 
+  vectorCategory, 
+  setVectorCategory, 
+  embeddingType, 
+  setEmbeddingType, 
+  vectorFile, 
+  setVectorFile,
+  selectedFile,
+  setSelectedFile,
+  handleUpload
+}) {
 
   const nodeLabelToVectorIndexNames = {
     "SmallMolecule": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
@@ -40,36 +49,6 @@ function VectorUpload({ vectorCategory, setVectorCategory, embeddingType, setEmb
     } else {
       setEmbeddingType(options.match(/\[(.*?)\]/)[1]);
     }
-  };
-
-  const handleUpload = () => {
-    if (!selectedFile || !vectorCategory) {
-      alert('Please select a file and vector category.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('vector_category', vectorCategory);
-    if (embeddingType) {
-      formData.append('embedding_type', embeddingType);
-    } 
-    formData.append('file', selectedFile);
-
-    axios
-      .post('/upload_vector/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      .then((response) => {
-        console.log('File uploaded successfully:', response.data);
-        alert('File uploaded successfully.');
-        setVectorFile(response.data);
-      })
-      .catch((error) => {
-        console.error('Error uploading file:', error);
-        alert(error.response?.data?.detail || 'Error uploading file.');
-      });
   };
 
   return (

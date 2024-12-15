@@ -13,12 +13,14 @@ function SampleQuestions({ onClick, isVectorTab }) {
       vectorCategory: 'SmallMolecule',
       embeddingType: 'Selformer',
       vectorData: [0.1, 0.2, 0.3], // Example vector data
+      vectorFilePath: 'public/small_molecule_embedding.npy'
     },
     {
       question: 'What are the most similar proteins to the given protein?',
       vectorCategory: 'Protein',
       embeddingType: 'Esm2',
       vectorData: [0.4, 0.5, 0.6], // Example vector data
+      vectorFilePath: 'protein_embedding.npy'
     },
   ];
 

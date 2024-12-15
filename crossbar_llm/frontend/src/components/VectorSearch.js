@@ -27,6 +27,7 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
   const [vectorCategory, setVectorCategory] = useState('');
   const [embeddingType, setEmbeddingType] = useState('');
   const [vectorFile, setVectorFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [runnedQuery, setRunnedQuery] = useState(false);
   const [generatedQuery, setGeneratedQuery] = useState('');
   const [error, setError] = useState(null);
@@ -178,7 +179,7 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
     }
   };
 
-  const handleSampleQuestionClick = (sampleQuestionObj) => {
+  const handleSampleQuestionClick = async (sampleQuestionObj) => {
     setQuestion(sampleQuestionObj.question);
     if (sampleQuestionObj.vectorCategory) {
       setVectorCategory(sampleQuestionObj.vectorCategory);
@@ -189,6 +190,52 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
     if (sampleQuestionObj.vectorData) {
       setVectorFile(sampleQuestionObj.vectorData);
     }
+    if (sampleQuestionObj.vectorFilePath) {
+      try {
+        console.log('Using vector file from public folder:', sampleQuestionObj.vectorFilePath);
+        const response = await axios.get(`${process.env.PUBLIC_URL}/${sampleQuestionObj.vectorFilePath}`);
+        const file = new File([response.data], sampleQuestionObj.vectorFilePath);
+
+        
+        setSelectedFile(file);
+        // Wait before calling handleUpload to make sure selectedFile is set
+        setTimeout(handleUpload, 1000);
+      } catch (error) {
+        console.error('Error fetching vector file:', error);
+      }
+    }
+  };
+
+  const handleUpload = () => {
+    const file = selectedFile;
+    console.log('Uploading file:', file);
+    if (!file || !vectorCategory) {
+      alert('Please select a file and vector category.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('vector_category', vectorCategory);
+    if (embeddingType) {
+      formData.append('embedding_type', embeddingType);
+    }
+    formData.append('file', file);
+
+    axios
+      .post('/upload_vector/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then((response) => {
+        console.log('File uploaded successfully:', response.data);
+        alert('File uploaded successfully.');
+        setVectorFile(response.data); // Update vectorFile with response
+      })
+      .catch((error) => {
+        console.error('Error uploading file:', error);
+        alert(error.response?.data?.detail || 'Error uploading file.');
+      });
   };
 
   return (
@@ -286,6 +333,9 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
         setEmbeddingType={setEmbeddingType}
         vectorFile={vectorFile}
         setVectorFile={setVectorFile}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
+        handleUpload={handleUpload}
       />
       {/* Buttons */}
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
