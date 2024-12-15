@@ -221,7 +221,6 @@ async def upload_vector(
         print(f"Vector data for {filename}:", vector_data)
         
         response = JSONResponse({"vector_data": vector_data.tolist()})
-        csrf_token.set_csrf_cookie(csrf_token.generate_csrf_tokens(), response)
 
         return response
     except ValueError as e:
