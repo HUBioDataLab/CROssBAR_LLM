@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, InputLabel, MenuItem, FormControl, Select, Typography, Box } from '@mui/material';
 import axios from '../services/api';
 
@@ -32,6 +32,13 @@ function VectorUpload({
     "EcNumber": "[Rxnfp](https://www.nature.com/articles/s42256-020-00284-w)",
     "Pathway": "[Biokeen](https://www.biorxiv.org/content/10.1101/631812v1)",
   };
+
+  useEffect(() => {
+    if (selectedFile) {
+      handleUpload();
+    }
+  }, [selectedFile]);
+  
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -92,21 +99,13 @@ function VectorUpload({
 
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
         <Button variant="contained" component="label" fullWidth>
-          Select Vector File
+          Upload Vector File
           <input
             type="file"
             hidden
             onChange={handleFileChange}
             accept=".csv,.npy"
           />
-        </Button>
-        {selectedFile && (
-          <Typography sx={{ mt: 1 }}>
-            Selected File: {selectedFile.name}
-          </Typography>
-        )}
-        <Button variant="contained" onClick={handleUpload} fullWidth>
-          Upload Vector File
         </Button>
       </Box>
     </div>
