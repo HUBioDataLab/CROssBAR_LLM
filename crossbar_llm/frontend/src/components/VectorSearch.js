@@ -141,6 +141,7 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
     setLoading(true);
     setLogs('');
     try {
+      const embedding = JSON.stringify(vectorFile);
       const generateQueryResponse = await axios.post('/generate_query/', {
         question,
         llm_type: llmType,
