@@ -147,7 +147,8 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
         top_k: topK,
         api_key: apiKey,
         verbose,
-        vector_index: embeddingType || vectorCategory || null,
+        vector_index: embeddingType,
+        embedding: embedding,
       });
       const runQueryResponse = await axios.post('/run_query/', {
         query: generateQueryResponse.data.query,
