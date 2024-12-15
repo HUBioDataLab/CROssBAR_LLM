@@ -121,7 +121,6 @@ function App() {
       <Modal
         open={showAboutModal}
         onClose={handleCloseModal}
-        aria-labelledby="about-modal-title"
         aria-describedby="about-modal-description"
       >
         <Box sx={{ 
@@ -138,9 +137,6 @@ function App() {
           overflow: 'auto',
           borderRadius: 2
         }}>
-          <Typography id="about-modal-title" variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-            About This Site
-          </Typography>
           <About />
           <Button onClick={handleCloseModal} sx={{ mt: 2, fontWeight: 'bold' }}>Close</Button>
         </Box>
