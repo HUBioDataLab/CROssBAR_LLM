@@ -195,13 +195,11 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
     if (sampleQuestionObj.vectorFilePath) {
       try {
         console.log('Using vector file from public folder:', sampleQuestionObj.vectorFilePath);
-        const response = await axios.get(`${process.env.PUBLIC_URL}/${sampleQuestionObj.vectorFilePath}`);
-        const file = new File([response.data], sampleQuestionObj.vectorFilePath);
-
+        const response = await fetch(`${process.env.PUBLIC_URL}/${sampleQuestionObj.vectorFilePath}`);
+        const blob = await response.blob();
+        const file = new File([blob], sampleQuestionObj.vectorFilePath);
         
         setSelectedFile(file);
-        // Wait before calling handleUpload to make sure selectedFile is set
-        setTimeout(handleUpload, 1000);
       } catch (error) {
         console.error('Error fetching vector file:', error);
       }
