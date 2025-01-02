@@ -39,7 +39,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
       if (lastAtSymbol !== -1) {
         const query = newValue.slice(lastAtSymbol + 1, cursorPosition);
-        if (query.length > 0) {
+        if (query.length > 2) {
           const results = fuse.search(query);
           const matchedSuggestions = results.map((result) => result.item);
           setDisplaySuggestions(matchedSuggestions);
