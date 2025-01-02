@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Button,
   Box,
@@ -29,6 +29,9 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState('');
   const [showWarning, setShowWarning] = useState(false);
+  const [realtimeLogs, setRealtimeLogs] = useState('');
+  const eventSourceRef = useRef(null);
+
 
   const modelChoices = {
     OpenAI: [
@@ -66,9 +69,60 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
 
   const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b'];
 
+  const setupLogStream = () => {
+      if (verbose) {
+          // Close any existing connection
+          if (eventSourceRef.current) {
+              eventSourceRef.current.close();
+          }
+          
+          // Create new EventSource connection
+          eventSourceRef.current = new EventSource('/stream-logs');
+          
+          eventSourceRef.current.onmessage = (event) => {
+              const data = JSON.parse(event.data);
+              setRealtimeLogs(prev => prev + data.log + '\n');
+          };
+
+          eventSourceRef.current.onerror = (error) => {
+              console.error('EventSource failed:', error);
+              eventSourceRef.current.close();
+          };
+      }
+  };
+
+
+    const cleanupLogStream = () => {
+      if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+      }
+    };
+
+    // Cleanup on component unmount
+    useEffect(() => {
+      return () => cleanupLogStream();
+    }, []);
+
+    // Setup log stream when verbose mode changes
+    useEffect(() => {
+      if (verbose) {
+          setupLogStream();
+      } else {
+          cleanupLogStream();
+          setRealtimeLogs('');
+      }
+    }, [verbose]);
+
+
+  useEffect(() => {
+      return () => cleanupLogStream();
+  }, []);
+
+
   const handleGenerateQuery = async () => {
     setLoading(true);
-    setLogs('');
+    setRealtimeLogs('');
     try {
       const response = await axios.post('/generate_query/', {
         question,
@@ -93,6 +147,10 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
       });
     } catch (err) {
       console.error(err);
+      if (err.response?.data?.detail?.logs) {
+          setLogs(err.response.data.detail.logs);
+      }
+      setError(err.response?.data?.detail?.error || 'Error generating query.');
       setError('Error generating query.');
     } finally {
       setLoading(false);

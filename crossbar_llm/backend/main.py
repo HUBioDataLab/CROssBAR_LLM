@@ -10,11 +10,15 @@ from tools.langchain_llm_qa_trial import RunPipeline
 import numpy as np
 import pandas as pd
 import neo4j
-from io import BytesIO
+from io import BytesIO, StringIO
 
+from sse_starlette.sse import EventSourceResponse
+import asyncio
+import queue
+import threading
+import json
 
 import logging
-from io import StringIO
 
 # Load environment variables
 load_dotenv()
@@ -60,6 +64,44 @@ neo4j_db_name = os.getenv("NEO4J_DB_NAME", "neo4j")
 # Initialize RunPipeline instances cache
 pipeline_instances = {}
 
+
+log_queue = asyncio.Queue()
+
+# Create a custom logging handler
+class AsyncQueueHandler(logging.Handler):
+    def emit(self, record):
+        log_entry = self.format(record)
+        # Use asyncio.create_task to avoid blocking
+        asyncio.create_task(log_queue.put(log_entry))
+
+# Modify the existing logging setup
+def setup_logging(verbose=False):
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+    logger.handlers.clear()
+    
+    # Add async queue handler
+    queue_handler = AsyncQueueHandler()
+    queue_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(queue_handler)
+
+@app.get("/stream-logs")
+async def stream_logs():
+    async def event_generator():
+        while True:
+            try:
+                # Wait for new log entries
+                log_entry = await log_queue.get()
+                yield {
+                    "event": "log",
+                    "data": json.dumps({"log": log_entry})
+                }
+            except Exception as e:
+                logging.error(f"Error in event generator: {e}")
+                continue
+
+    return EventSourceResponse(event_generator())
+
 class GenerateQueryRequest(BaseModel):
     question: str
     llm_type: str
@@ -83,6 +125,7 @@ async def generate_query(
     generate_query_request: GenerateQueryRequest,
     csrf_token: CsrfProtect = Depends()
     ):
+    setup_logging(generate_query_request.verbose)
     try:
         await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
     except ValueError as e:
@@ -138,6 +181,18 @@ async def generate_query(
                 api_key=generate_query_request.api_key,
                 reset_llm_type=True
             )
+            
+    except Exception as e:
+        logging.error(f"Error generating query: {str(e)}")
+        logs = log_stream.getvalue()
+        logger.removeHandler(handler)
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": str(e),
+                "logs": logs
+            }
+        )
 
     finally:
         logger.removeHandler(handler)
@@ -154,6 +209,7 @@ async def run_query(
     run_query_request: RunQueryRequest,
     csrf_token: CsrfProtect = Depends()
     ):
+    setup_logging(run_query_request.verbose)
     try:
         await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
     
@@ -183,6 +239,18 @@ async def run_query(
             model_name=run_query_request.llm_type,
             api_key=run_query_request.api_key,
             reset_llm_type=True
+        )
+        
+    except Exception as e:
+        logging.error(f"Error running query: {str(e)}")
+        logs = log_stream.getvalue()
+        logger.removeHandler(handler)
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": str(e),
+                "logs": logs
+            }
         )
     finally:
         logger.removeHandler(handler)

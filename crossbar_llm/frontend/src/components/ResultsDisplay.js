@@ -3,7 +3,7 @@ import { Typography, Card, CardContent, Box } from '@mui/material';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
-function ResultsDisplay({ queryResult, executionResult }) {
+function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   if (!queryResult && !executionResult) {
     return null;
   }
@@ -24,15 +24,15 @@ function ResultsDisplay({ queryResult, executionResult }) {
         <Card>
           <CardContent>
             <Typography variant="h6">Results:</Typography>
-            {executionResult.verbose && (
-              <>
-                <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                  Verbose Output:
-                </Typography>
-                <SyntaxHighlighter language="plaintext" style={dracula}>
-                  {executionResult.verbose}
-                </SyntaxHighlighter>
-              </>
+            {realtimeLogs && (
+                <Card sx={{ mb: 2 }}>
+                    <CardContent>
+                        <Typography variant="h6">Real-time Logs:</Typography>
+                        <SyntaxHighlighter language="plaintext" style={dracula}>
+                            {realtimeLogs}
+                        </SyntaxHighlighter>
+                    </CardContent>
+                </Card>
             )}
             <Typography variant="body1" sx={{ mt: 2, fontWeight: 'bold' }}>
               Natural Language Response:
