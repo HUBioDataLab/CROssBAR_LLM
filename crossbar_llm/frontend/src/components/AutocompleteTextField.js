@@ -8,7 +8,10 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   const [displaySuggestions, setDisplaySuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const textFieldRef = useRef(null);
+  const suggestionsRef = useRef(null);
+  const ITEM_HEIGHT = 48;
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -29,6 +32,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     const newValue = event.target.value;
     setValue(newValue);
     setCursorPosition(event.target.selectionStart);
+    setSelectedIndex(0);
   
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -53,6 +57,67 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     }, 300);
   };
 
+  const handleKeyDown = (event) => {
+    if (!showSuggestions) return;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setSelectedIndex((prev) => {
+          const newIndex = prev < displaySuggestions.length - 1 ? prev + 1 : prev;
+          scrollSelectedIntoView(newIndex);
+          return newIndex;
+        });
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        setSelectedIndex((prev) => {
+          const newIndex = prev > 0 ? prev - 1 : prev;
+          scrollSelectedIntoView(newIndex);
+          return newIndex;
+        });
+        break;
+      case 'Tab':
+      case 'Enter':
+        event.preventDefault();
+        if (displaySuggestions[selectedIndex]) {
+          handleSuggestionClick(displaySuggestions[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        break;
+    }
+  };
+
+  const scrollSelectedIntoView = (index) => {
+    if (!suggestionsRef.current) return;
+
+    const container = suggestionsRef.current;
+    const selectedElement = container.children[0].children[index];
+    
+    if (!selectedElement) return;
+
+    const containerHeight = container.clientHeight;
+    const scrollTop = container.scrollTop;
+    const elementTop = selectedElement.offsetTop;
+    const elementBottom = elementTop + ITEM_HEIGHT;
+
+    if (elementBottom > scrollTop + containerHeight) {
+      // Scroll down
+      container.scrollTo({
+        top: elementBottom - containerHeight,
+        behavior: 'smooth'
+      });
+    } else if (elementTop < scrollTop) {
+      // Scroll up
+      container.scrollTo({
+        top: elementTop,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const handleSuggestionClick = (suggestion) => {
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
@@ -66,7 +131,6 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     setValue(newValue);
     setShowSuggestions(false);
 
-    // Set cursor position
     setTimeout(() => {
       if (textFieldRef.current) {
         textFieldRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
@@ -82,6 +146,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
         placeholder={placeholder}
         value={value}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         fullWidth
         multiline
         rows={4}
@@ -89,6 +154,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
       />
       {showSuggestions && displaySuggestions.length > 0 && (
         <Paper
+          ref={suggestionsRef}
           style={{
             position: 'absolute',
             zIndex: 9999,
@@ -103,6 +169,10 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
                 button
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
+                selected={index === selectedIndex}
+                style={{
+                  backgroundColor: index === selectedIndex ? '#e3f2fd' : 'transparent'
+                }}
               >
                 <ListItemText primary={suggestion} />
               </ListItem>
