@@ -4,7 +4,6 @@ import theme from './theme';
 import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
 import About from './components/About';
-import DatabaseStats from './components/DatabaseStats';
 import VectorSearch from './components/VectorSearch';
 import LatestQueries from './components/LatestQueries';
 import axios from './services/api';
@@ -87,9 +86,6 @@ function App() {
                   onSelectQuery={handleSelectQuery}
                 />
               </Grid2>
-              <Grid2 item xs={12} md={4} sx={{ position: 'sticky', top: 0 }}>
-                <DatabaseStats />
-              </Grid2>
             </Grid2>
           )}
           {tabValue === 'vectorSearch' && 
@@ -108,9 +104,6 @@ function App() {
                   queries={latestQueries} 
                   onSelectQuery={handleSelectQuery}
                 />
-              </Grid2>
-              <Grid2 item xs={12} md={4} sx={{ width: '300px', position: 'sticky', top: 0 }}>
-                <DatabaseStats />
               </Grid2>
             </Grid2>
           }
