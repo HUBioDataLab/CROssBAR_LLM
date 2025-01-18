@@ -24,7 +24,35 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   const fuse = new Fuse(suggestions, {
     includeScore: true,
-    threshold: 0.3,
+    threshold: 0.2,
+    distance: 100,
+    location: 0,
+    keys: [
+      {
+        name: 'default',
+        weight: 1.0
+      }
+    ],
+    sortFn: (a, b) => {
+      const aStr = suggestions[a.idx].toLowerCase();
+      const bStr = suggestions[b.idx].toLowerCase();
+      const query = value.slice(value.lastIndexOf('@') + 1, cursorPosition).toLowerCase();
+      
+      // Exact prefix match gets highest priority
+      const aStartsWithQuery = aStr.startsWith(query);
+      const bStartsWithQuery = bStr.startsWith(query);
+      
+      if (aStartsWithQuery && !bStartsWithQuery) return -1;
+      if (!aStartsWithQuery && bStartsWithQuery) return 1;
+      
+      // If both start with query, shorter one gets priority
+      if (aStartsWithQuery && bStartsWithQuery) {
+        return aStr.length - bStr.length;
+      }
+      
+      // Fall back to default Fuse score comparison
+      return a.score - b.score;
+    }
   });
 
   const debounceTimeoutRef = useRef(null);
