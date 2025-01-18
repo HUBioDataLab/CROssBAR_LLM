@@ -16,12 +16,19 @@ import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
 import SampleQuestions from './SampleQuestions';
 
-function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
+function QueryInput({ 
+  setQueryResult, 
+  setExecutionResult, 
+  addLatestQuery,
+  provider,
+  setProvider,
+  llmType,
+  setLlmType,
+  apiKey,
+  setApiKey 
+}) {
   const [question, setQuestion] = useState('');
-  const [provider, setProvider] = useState('');
-  const [llmType, setLlmType] = useState('');
   const [topK, setTopK] = useState(5);
-  const [apiKey, setApiKey] = useState('');
   const [verbose, setVerbose] = useState(false);
   const [runnedQuery, setRunnedQuery] = useState(false);
   const [generatedQuery, setGeneratedQuery] = useState('');

@@ -16,6 +16,9 @@ function App() {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [latestQueries, setLatestQueries] = useState([]);
   const [selectedQuery, setSelectedQuery] = useState(null);
+  const [provider, setProvider] = useState('');
+  const [llmType, setLlmType] = useState('');
+  const [apiKey, setApiKey] = useState('');
 
   useEffect(() => {
     axios.get('/csrf-token/', { withCredentials: true })
@@ -90,6 +93,12 @@ function App() {
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
                   addLatestQuery={addLatestQuery}
+                  provider={provider}
+                  setProvider={setProvider}
+                  llmType={llmType}
+                  setLlmType={setLlmType}
+                  apiKey={apiKey}
+                  setApiKey={setApiKey}
                 />
                 <ResultsDisplay
                   queryResult={queryResult}
@@ -114,6 +123,12 @@ function App() {
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
                   addLatestQuery={addLatestQuery}
+                  provider={provider}
+                  setProvider={setProvider}
+                  llmType={llmType}
+                  setLlmType={setLlmType}
+                  apiKey={apiKey}
+                  setApiKey={setApiKey}
                 />
                 <ResultsDisplay
                   queryResult={queryResult}

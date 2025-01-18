@@ -17,12 +17,19 @@ import axios from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
 
-function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
+function VectorSearch({ 
+  setQueryResult, 
+  setExecutionResult, 
+  addLatestQuery,
+  provider,
+  setProvider,
+  llmType,
+  setLlmType,
+  apiKey,
+  setApiKey 
+}) {
   const [question, setQuestion] = useState('');
-  const [provider, setProvider] = useState('');
-  const [llmType, setLlmType] = useState('');
   const [topK, setTopK] = useState(5);
-  const [apiKey, setApiKey] = useState('');
   const [verbose, setVerbose] = useState(false);
   const [vectorCategory, setVectorCategory] = useState('');
   const [embeddingType, setEmbeddingType] = useState('');
