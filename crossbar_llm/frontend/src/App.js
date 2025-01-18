@@ -31,7 +31,7 @@ function App() {
 
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
-    if ((navigationType === 'navigate') && !localStorage.getItem('hasVisited')) {
+    if ((navigationType === 'navigate' || navigationType === 'reload') && !localStorage.getItem('hasVisited')) {
       setShowAboutModal(true);
       localStorage.setItem('hasVisited', 'true');
     }
@@ -60,7 +60,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 4, mb: 4 }}>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 10, mb: 10 }}>
         <Container maxWidth="lg">
           <Typography 
             variant="h2" 
@@ -161,7 +161,6 @@ function App() {
             <CloseIcon />
           </IconButton>
           <About />
-          <Button onClick={handleCloseModal} sx={{ mt: 2, fontWeight: 'bold' }}>Close</Button>
         </Box>
       </Modal>
     </ThemeProvider>
