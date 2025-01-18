@@ -62,7 +62,15 @@ function App() {
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 4, mb: 4 }}>
         <Container maxWidth="lg">
-          <Typography variant="h2" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <Typography 
+            variant="h2" 
+            align="center" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: { xs: '2rem', sm: '3rem', md: '3.75rem' }
+            }}
+          >
             CROssBAR LLM Query Interface
           </Typography>
           <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 2, '.MuiTab-root': { fontWeight: 'bold' } }}>
@@ -71,8 +79,13 @@ function App() {
             <Tab label="About" value="about" />
           </Tabs>
           {tabValue === 'query' && (
-            <Grid2 container spacing={2} alignItems="flex-start" wrap="nowrap">
-              <Grid2 item xs={12} md={8} sx={{ maxWidth: 'calc(100% - 300px)' }}>
+            <Grid2 
+              container 
+              spacing={2} 
+              alignItems="flex-start"
+              sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+            >
+              <Grid2 item xs={12} md={8} sx={{ maxWidth: { xs: '100%', md: 'calc(100% - 300px)' } }}>
                 <QueryInput
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
@@ -90,8 +103,13 @@ function App() {
             </Grid2>
           )}
           {tabValue === 'vectorSearch' && 
-            <Grid2 container spacing={2} alignItems="flex-start" wrap="nowrap">
-              <Grid2 item xs={12} md={8} sx={{ maxWidth: 'calc(100% - 300px)' }}>
+            <Grid2 
+              container 
+              spacing={2} 
+              alignItems="flex-start"
+              sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+            >
+              <Grid2 item xs={12} md={8} sx={{ maxWidth: { xs: '100%', md: 'calc(100% - 300px)' } }}>
                 <VectorSearch
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}

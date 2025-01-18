@@ -45,6 +45,8 @@ function SampleQuestions({ onClick, isVectorTab }) {
               textTransform: 'none',
               justifyContent: 'center',
               textAlign: 'center',
+              padding: { xs: '8px', sm: '6px 16px' },
+              fontSize: { xs: '0.875rem', sm: '1rem' }
             }}
           >
             {exampleObj.question}

@@ -335,7 +335,12 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
         label="Enable Verbose Mode"
       />
       {/* Buttons */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        mt: 2,
+        flexDirection: { xs: 'column', sm: 'row' }
+      }}>
         <Button
           variant="outlined"
           fullWidth

@@ -338,7 +338,12 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
         handleUpload={handleUpload}
       />
       {/* Buttons */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        mt: 2,
+        flexDirection: { xs: 'column', sm: 'row' }
+      }}>
         <Button
           variant="outlined"
           fullWidth
