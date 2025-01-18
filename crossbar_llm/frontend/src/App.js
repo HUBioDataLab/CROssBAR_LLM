@@ -30,7 +30,7 @@ function App() {
 
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
-    if ((navigationType === 'navigate' || navigationType === 'reload')) {
+    if ((navigationType === 'navigate') && !localStorage.getItem('hasVisited')) {
       setShowAboutModal(true);
       localStorage.setItem('hasVisited', 'true');
     }
