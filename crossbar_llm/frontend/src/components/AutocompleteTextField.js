@@ -12,6 +12,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   const textFieldRef = useRef(null);
   const suggestionsRef = useRef(null);
   const ITEM_HEIGHT = 48;
+  const [mentions, setMentions] = useState([]); // [{start, end, state}] where state is 'typing', 'selecting', or 'completed'
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -28,12 +29,98 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   const debounceTimeoutRef = useRef(null);
 
+  const getMentionState = (position) => {
+    for (const mention of mentions) {
+      if (position >= mention.start && position <= mention.end) {
+        return mention.state;
+      }
+    }
+    return null;
+  };
+
+  const renderStyledText = () => {
+    const parts = [];
+    let lastIndex = 0;
+
+    mentions.sort((a, b) => a.start - b.start).forEach((mention) => {
+      // Text before mention
+      if (mention.start > lastIndex) {
+        parts.push(
+          <span key={`text-${lastIndex}`}>
+            {value.slice(lastIndex, mention.start)}
+          </span>
+        );
+      }
+
+      // Mentioned text
+      const mentionText = value.slice(mention.start, mention.end);
+      const color = 
+        mention.state === 'typing' ? '#ff6b6b' : 
+        mention.state === 'selecting' ? '#51cf66' : 
+        '#000000';
+
+      parts.push(
+        <span key={`mention-${mention.start}`} style={{ color }}>
+          {mentionText}
+        </span>
+      );
+
+      lastIndex = mention.end;
+    });
+
+    // Remaining text
+    if (lastIndex < value.length) {
+      parts.push(
+        <span key={`text-${lastIndex}`}>
+          {value.slice(lastIndex)}
+        </span>
+      );
+    }
+
+    return parts;
+  };
+
   const handleInputChange = (event) => {
     const newValue = event.target.value;
+    const cursorPos = event.target.selectionStart;
     setValue(newValue);
-    setCursorPosition(event.target.selectionStart);
+    setCursorPosition(cursorPos);
     setSelectedIndex(0);
-  
+
+    // Clean up mentions when text is deleted
+    setMentions(prevMentions => 
+      prevMentions.filter(mention => 
+        mention.start < newValue.length && 
+        newValue.slice(mention.start, mention.end) === value.slice(mention.start, mention.end)
+      )
+    );
+
+    // Add new mention when @ is typed
+    if (newValue[cursorPos - 1] === '@') {
+      setMentions(prevMentions => [...prevMentions, {
+        start: cursorPos - 1,
+        end: cursorPos,
+        state: 'typing'
+      }]);
+    }
+
+    // Update mentions state when typing
+    const lastAtSymbol = newValue.lastIndexOf('@', cursorPos - 1);
+    if (lastAtSymbol !== -1) {
+      setMentions(prevMentions => 
+        prevMentions.map(mention => {
+          if (mention.start === lastAtSymbol) {
+            return {
+              ...mention,
+              end: cursorPos,
+              state: 'typing'
+            };
+          }
+          return mention;
+        })
+      );
+    }
+
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
@@ -56,6 +143,26 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
       }
     }, 300);
   };
+
+  useEffect(() => {
+    if (showSuggestions && displaySuggestions.length > 0) {
+      // Update mention state to 'selecting' when suggestions are shown
+      const lastAtSymbol = value.lastIndexOf('@', cursorPosition - 1);
+      if (lastAtSymbol !== -1) {
+        setMentions(prevMentions => 
+          prevMentions.map(mention => {
+            if (mention.start === lastAtSymbol) {
+              return {
+                ...mention,
+                state: 'selecting'
+              };
+            }
+            return mention;
+          })
+        );
+      }
+    }
+  }, [showSuggestions, displaySuggestions, cursorPosition, value]);
 
   const handleKeyDown = (event) => {
     if (!showSuggestions) return;
@@ -128,6 +235,21 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     const newCursorPosition = newTextBeforeCursor.length;
 
     const newValue = newTextBeforeCursor + textAfterCursor;
+
+    // Update mention state with completed suggestion
+    setMentions(prevMentions => 
+      prevMentions.map(mention => {
+        if (mention.start === lastAtSymbol) {
+          return {
+            start: lastAtSymbol,
+            end: lastAtSymbol + suggestion.length,
+            state: 'completed'
+          };
+        }
+        return mention;
+      }).filter(mention => mention.start !== mention.end) // Remove empty mentions
+    );
+
     setValue(newValue);
     setShowSuggestions(false);
 
@@ -140,18 +262,44 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   return (
     <div style={{ position: 'relative' }}>
-      <TextField
-        inputRef={textFieldRef}
-        label={label}
-        placeholder={placeholder}
-        value={value}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        fullWidth
-        multiline
-        rows={4}
-        margin="normal"
-      />
+      <div style={{ position: 'relative' }}>
+        <TextField
+          inputRef={textFieldRef}
+          label={label}
+          placeholder={placeholder}
+          value={value}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          fullWidth
+          multiline
+          rows={4}
+          margin="normal"
+          sx={{
+            '& .MuiInputBase-input': {
+              color: 'transparent',
+              caretColor: 'black',
+            },
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: 'none',
+            padding: '16.5px 14px',
+            marginTop: '16px',
+            fontFamily: 'inherit',
+            fontSize: 'inherit',
+            lineHeight: '1.5',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {renderStyledText()}
+        </div>
+      </div>
       {showSuggestions && displaySuggestions.length > 0 && (
         <Paper
           ref={suggestionsRef}
