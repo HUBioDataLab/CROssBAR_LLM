@@ -16,12 +16,19 @@ import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
 import SampleQuestions from './SampleQuestions';
 
-function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
+function QueryInput({ 
+  setQueryResult, 
+  setExecutionResult, 
+  addLatestQuery,
+  provider,
+  setProvider,
+  llmType,
+  setLlmType,
+  apiKey,
+  setApiKey 
+}) {
   const [question, setQuestion] = useState('');
-  const [provider, setProvider] = useState('');
-  const [llmType, setLlmType] = useState('');
   const [topK, setTopK] = useState(5);
-  const [apiKey, setApiKey] = useState('');
   const [verbose, setVerbose] = useState(false);
   const [runnedQuery, setRunnedQuery] = useState(false);
   const [generatedQuery, setGeneratedQuery] = useState('');
@@ -40,19 +47,7 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
       'gpt-3.5-turbo',
       'gpt-4-turbo',
       'gpt-3.5-turbo-instruct',
-    ],
-    Google: [
-      'gemini-pro',
-      'gemini-1.5-pro-latest',
-      'gemini-1.5-flash-latest',
-    ],
-    Anthropic: [
-      'claude-3-5-sonnet-20240620',
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307',
-    ],
-    Other: [
+      { value: 'separator', label: '──────────' },
       'gpt-3.5-turbo-1106',
       'gpt-3.5-turbo-0125',
       'gpt-4-0125-preview',
@@ -61,10 +56,47 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
       'gpt-4-32k-0613',
       'gpt-4-0613',
       'gpt-3.5-turbo-16k',
+    ],
+    Anthropic: [
+      'claude-3-5-sonnet-20240620',
+      'claude-3-opus-20240229',
+      'claude-3-sonnet-20240229',
+      'claude-3-haiku-20240307',
+      { value: 'separator', label: '──────────' },
       'claude-2.1',
       'claude-2.0',
       'claude-instant-1.2',
-    ]
+    ],
+    Google: [
+      'gemini-pro',
+      'gemini-1.5-pro-latest',
+      'gemini-1.5-flash-latest',
+    ],
+    Groq: [
+      'llama3-8b-8192',
+      'llama3-70b-8192',
+      'mixtral-8x7b-32768',
+      'gemma-7b-it',
+      'gemma2-9b-it',
+    ],
+    Ollama: [
+      'codestral:latest',
+      'llama3:instruct',
+      'tomasonjo/codestral-text2cypher:latest',
+      'tomasonjo/llama3-text2cypher-demo:latest',
+      'llama3.1:8b',
+      'qwen2:7b-instruct',
+      'gemma2:latest',
+    ],
+    Nvidia: [
+      'meta/llama-3.1-405b-instruct',
+      'meta/llama-3.1-70b-instruct',
+      'meta/llama-3.1-8b-instruct',
+      'nv-mistralai/mistral-nemo-12b-instruct',
+      'mistralai/mixtral-8x22b-instruct-v0.1',
+      'mistralai/mistral-large-2-instruct',
+      'nvidia/nemotron-4-340b-instruct',
+    ],
   };
 
   const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b'];
@@ -273,19 +305,27 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
             value={llmType}
             onChange={(e) => {
               const selectedModel = e.target.value;
-              setLlmType(selectedModel);
-              if (!supportedModels.includes(selectedModel)) {
-                setShowWarning(true);
-              } else {
-                setShowWarning(false);
+              if (selectedModel !== 'separator') {
+                setLlmType(selectedModel);
+                if (!supportedModels.includes(selectedModel)) {
+                  setShowWarning(true);
+                } else {
+                  setShowWarning(false);
+                }
               }
             }}
             label="LLM Type"
           >
             {modelChoices[provider].map((model) => (
-              <MenuItem key={model} value={model}>
-                {model}
-              </MenuItem>
+              typeof model === 'object' ? (
+                <MenuItem key={model.value} value={model.value} disabled sx={{ opacity: 0.5 }}>
+                  {model.label}
+                </MenuItem>
+              ) : (
+                <MenuItem key={model} value={model}>
+                  {model}
+                </MenuItem>
+              )
             ))}
           </Select>
         </FormControl>
@@ -335,7 +375,12 @@ function QueryInput({ setQueryResult, setExecutionResult, addLatestQuery }) {
         label="Enable Verbose Mode"
       />
       {/* Buttons */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        mt: 2,
+        flexDirection: { xs: 'column', sm: 'row' }
+      }}>
         <Button
           variant="outlined"
           fullWidth

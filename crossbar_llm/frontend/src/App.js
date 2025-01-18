@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, CssBaseline, Box, Container, Tabs, Tab, Grid2, Modal, Typography, Button } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, Container, Tabs, Tab, Grid2, Modal, Typography, Button, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import theme from './theme';
 import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
 import About from './components/About';
-import DatabaseStats from './components/DatabaseStats';
 import VectorSearch from './components/VectorSearch';
 import LatestQueries from './components/LatestQueries';
 import axios from './services/api';
@@ -16,6 +16,9 @@ function App() {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [latestQueries, setLatestQueries] = useState([]);
   const [selectedQuery, setSelectedQuery] = useState(null);
+  const [provider, setProvider] = useState('');
+  const [llmType, setLlmType] = useState('');
+  const [apiKey, setApiKey] = useState('');
 
   useEffect(() => {
     axios.get('/csrf-token/', { withCredentials: true })
@@ -31,7 +34,7 @@ function App() {
 
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
-    if ((navigationType === 'navigate' || navigationType === 'reload')) {
+    if ((navigationType === 'navigate' || navigationType === 'reload') && !localStorage.getItem('hasVisited')) {
       setShowAboutModal(true);
       localStorage.setItem('hasVisited', 'true');
     }
@@ -60,9 +63,17 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 4 }}>
-        <Container maxWidth="lg">
-          <Typography variant="h2" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: { xs: 4, sm: 6, md: 10 }, mb: { xs: 4, sm: 6, md: 10 } }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          <Typography 
+            variant="h2" 
+            align="center" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' }
+            }}
+          >
             CROssBAR LLM Query Interface
           </Typography>
           <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 2, '.MuiTab-root': { fontWeight: 'bold' } }}>
@@ -71,12 +82,38 @@ function App() {
             <Tab label="About" value="about" />
           </Tabs>
           {tabValue === 'query' && (
-            <Grid2 container spacing={2} alignItems="flex-start" wrap="nowrap">
-              <Grid2 item xs={12} md={8} sx={{ maxWidth: 'calc(100% - 300px)' }}>
+            <Grid2 
+              container 
+              spacing={2} 
+              alignItems="flex-start"
+              sx={{ 
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: 'center'
+              }}
+            >
+              <Grid2 
+                item 
+                xs={12} 
+                sx={{ 
+                  maxWidth: { 
+                    xs: '100%', 
+                    sm: '90%', 
+                    md: '1000px' 
+                  },
+                  mx: 'auto',
+                  px: { xs: 1, sm: 2 }
+                }}
+              >
                 <QueryInput
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
                   addLatestQuery={addLatestQuery}
+                  provider={provider}
+                  setProvider={setProvider}
+                  llmType={llmType}
+                  setLlmType={setLlmType}
+                  apiKey={apiKey}
+                  setApiKey={setApiKey}
                 />
                 <ResultsDisplay
                   queryResult={queryResult}
@@ -86,19 +123,42 @@ function App() {
                   queries={latestQueries} 
                   onSelectQuery={handleSelectQuery}
                 />
-              </Grid2>
-              <Grid2 item xs={12} md={4} sx={{ position: 'sticky', top: 0 }}>
-                <DatabaseStats />
               </Grid2>
             </Grid2>
           )}
           {tabValue === 'vectorSearch' && 
-            <Grid2 container spacing={2} alignItems="flex-start" wrap="nowrap">
-              <Grid2 item xs={12} md={8} sx={{ maxWidth: 'calc(100% - 300px)' }}>
+            <Grid2 
+              container 
+              spacing={2} 
+              alignItems="flex-start"
+              sx={{ 
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: 'center'
+              }}
+            >
+              <Grid2 
+                item 
+                xs={12} 
+                sx={{ 
+                  maxWidth: { 
+                    xs: '100%', 
+                    sm: '90%', 
+                    md: '1000px' 
+                  },
+                  mx: 'auto',
+                  px: { xs: 1, sm: 2 }
+                }}
+              >
                 <VectorSearch
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
                   addLatestQuery={addLatestQuery}
+                  provider={provider}
+                  setProvider={setProvider}
+                  llmType={llmType}
+                  setLlmType={setLlmType}
+                  apiKey={apiKey}
+                  setApiKey={setApiKey}
                 />
                 <ResultsDisplay
                   queryResult={queryResult}
@@ -108,9 +168,6 @@ function App() {
                   queries={latestQueries} 
                   onSelectQuery={handleSelectQuery}
                 />
-              </Grid2>
-              <Grid2 item xs={12} md={4} sx={{ width: '300px', position: 'sticky', top: 0 }}>
-                <DatabaseStats />
               </Grid2>
             </Grid2>
           }
@@ -134,10 +191,21 @@ function App() {
           boxShadow: 24, 
           p: 4, 
           overflow: 'auto',
-          borderRadius: 2
+          borderRadius: 2,
+          position: 'relative'
         }}>
+          <IconButton
+            onClick={handleCloseModal}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'grey.500'
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           <About />
-          <Button onClick={handleCloseModal} sx={{ mt: 2, fontWeight: 'bold' }}>Close</Button>
         </Box>
       </Modal>
     </ThemeProvider>

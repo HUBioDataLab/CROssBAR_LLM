@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-export const loadSuggestions = async () => {
+const CACHE_KEY = 'crossbar_suggestions_cache';
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
+
+const computeSuggestions = async () => {
   const fileNames = [];
   const context = require.context('../../public', false, /\.txt$/);
   context.keys().forEach((key) => {
@@ -20,7 +23,28 @@ export const loadSuggestions = async () => {
     }
   }
 
-  const suggestions = Array.from(suggestionsSet);
+  return Array.from(suggestionsSet);
+};
+
+export const loadSuggestions = async () => {
+  // Check localStorage for cached suggestions
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    const { data, timestamp } = JSON.parse(cached);
+    // Check if cache is still valid
+    if (Date.now() - timestamp < CACHE_EXPIRY) {
+      return data;
+    }
+  }
+
+  // If no cache or expired, compute new suggestions
+  const suggestions = await computeSuggestions();
+  
+  // Save to localStorage with timestamp
+  localStorage.setItem(CACHE_KEY, JSON.stringify({
+    data: suggestions,
+    timestamp: Date.now()
+  }));
 
   return suggestions;
 };

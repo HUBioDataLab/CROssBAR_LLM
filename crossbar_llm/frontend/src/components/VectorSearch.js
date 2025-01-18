@@ -17,12 +17,19 @@ import axios from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
 
-function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
+function VectorSearch({ 
+  setQueryResult, 
+  setExecutionResult, 
+  addLatestQuery,
+  provider,
+  setProvider,
+  llmType,
+  setLlmType,
+  apiKey,
+  setApiKey 
+}) {
   const [question, setQuestion] = useState('');
-  const [provider, setProvider] = useState('');
-  const [llmType, setLlmType] = useState('');
   const [topK, setTopK] = useState(5);
-  const [apiKey, setApiKey] = useState('');
   const [verbose, setVerbose] = useState(false);
   const [vectorCategory, setVectorCategory] = useState('');
   const [embeddingType, setEmbeddingType] = useState('');
@@ -338,7 +345,12 @@ function VectorSearch({ setQueryResult, setExecutionResult, addLatestQuery }) {
         handleUpload={handleUpload}
       />
       {/* Buttons */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        mt: 2,
+        flexDirection: { xs: 'column', sm: 'row' }
+      }}>
         <Button
           variant="outlined"
           fullWidth
