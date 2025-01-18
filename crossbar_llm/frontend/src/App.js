@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, CssBaseline, Box, Container, Tabs, Tab, Grid2, Modal, Typography, Button } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, Container, Tabs, Tab, Grid2, Modal, Typography, Button, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import theme from './theme';
 import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -127,8 +128,20 @@ function App() {
           boxShadow: 24, 
           p: 4, 
           overflow: 'auto',
-          borderRadius: 2
+          borderRadius: 2,
+          position: 'relative'
         }}>
+          <IconButton
+            onClick={handleCloseModal}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'grey.500'
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           <About />
           <Button onClick={handleCloseModal} sx={{ mt: 2, fontWeight: 'bold' }}>Close</Button>
         </Box>
