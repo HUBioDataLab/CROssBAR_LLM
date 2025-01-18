@@ -60,7 +60,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 4 }}>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 4, mb: 4 }}>
         <Container maxWidth="lg">
           <Typography variant="h2" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
             CROssBAR LLM Query Interface
