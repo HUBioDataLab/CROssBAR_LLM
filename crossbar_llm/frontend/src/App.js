@@ -63,15 +63,15 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: 10, mb: 10 }}>
-        <Container maxWidth="lg">
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: { xs: 4, sm: 6, md: 10 }, mb: { xs: 4, sm: 6, md: 10 } }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
           <Typography 
             variant="h2" 
             align="center" 
             gutterBottom 
             sx={{ 
               fontWeight: 'bold',
-              fontSize: { xs: '2rem', sm: '3rem', md: '3.75rem' }
+              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' }
             }}
           >
             CROssBAR LLM Query Interface
@@ -86,9 +86,24 @@ function App() {
               container 
               spacing={2} 
               alignItems="flex-start"
-              sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+              sx={{ 
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: 'center'
+              }}
             >
-              <Grid2 item xs={12} md={8} sx={{ maxWidth: { xs: '100%', md: 'calc(100% - 300px)' } }}>
+              <Grid2 
+                item 
+                xs={12} 
+                sx={{ 
+                  maxWidth: { 
+                    xs: '100%', 
+                    sm: '90%', 
+                    md: '1000px' 
+                  },
+                  mx: 'auto',
+                  px: { xs: 1, sm: 2 }
+                }}
+              >
                 <QueryInput
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
@@ -116,9 +131,24 @@ function App() {
               container 
               spacing={2} 
               alignItems="flex-start"
-              sx={{ flexDirection: { xs: 'column', md: 'row' } }}
+              sx={{ 
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: 'center'
+              }}
             >
-              <Grid2 item xs={12} md={8} sx={{ maxWidth: { xs: '100%', md: 'calc(100% - 300px)' } }}>
+              <Grid2 
+                item 
+                xs={12} 
+                sx={{ 
+                  maxWidth: { 
+                    xs: '100%', 
+                    sm: '90%', 
+                    md: '1000px' 
+                  },
+                  mx: 'auto',
+                  px: { xs: 1, sm: 2 }
+                }}
+              >
                 <VectorSearch
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
