@@ -54,16 +54,16 @@ class Config(BaseModel):
     """
 
     load_dotenv()
-    openai_api_key: str = os.getenv("OPENAI_API_KEY")
-    gemini_api_key: str = os.getenv("GEMINI_API_KEY")
-    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY")
-    groq_api_key: str = os.getenv("GROQ_API_KEY")
-    replicate_api_key: str = os.getenv("REPLICATE_API_KEY")
-    nvidia_api_key: str = os.getenv("NVIDIA_API_KEY")
-    neo4j_usr: str = os.getenv("NEO4J_USER")
-    neo4j_password: str = os.getenv("MY_NEO4J_PASSWORD")
-    neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
-    neo4j_uri: str = os.getenv("NEO4J_URI")
+    # openai_api_key: str = os.getenv("OPENAI_API_KEY")
+    # gemini_api_key: str = os.getenv("GEMINI_API_KEY")
+    # anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY")
+    # groq_api_key: str = os.getenv("GROQ_API_KEY")
+    # replicate_api_key: str = os.getenv("REPLICATE_API_KEY")
+    # nvidia_api_key: str = os.getenv("NVIDIA_API_KEY")
+    # neo4j_usr: str = os.getenv("NEO4J_USER")
+    # neo4j_password: str = os.getenv("MY_NEO4J_PASSWORD")
+    # neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
+    # neo4j_uri: str = os.getenv("NEO4J_URI")
 
 
 class Neo4JConnection:
