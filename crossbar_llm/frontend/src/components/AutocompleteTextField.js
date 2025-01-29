@@ -24,47 +24,10 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   const fuse = new Fuse(suggestions, {
     includeScore: true,
-    threshold: 0.2,
-    distance: 10,
-    location: 0,
-    keys: [
-      {
-        name: 'default',
-        weight: 1.0
-      }
-    ],
-    sortFn: (a, b) => {
-      const aStr = suggestions[a.idx].toLowerCase();
-      const bStr = suggestions[b.idx].toLowerCase();
-      const query = value.slice(value.lastIndexOf('@') + 1, cursorPosition).toLowerCase();
-      
-      // Exact prefix match gets highest priority
-      const aStartsWithQuery = aStr.startsWith(query);
-      const bStartsWithQuery = bStr.startsWith(query);
-      
-      if (aStartsWithQuery && !bStartsWithQuery) return -1;
-      if (!aStartsWithQuery && bStartsWithQuery) return 1;
-      
-      // If both start with query, shorter one gets priority
-      if (aStartsWithQuery && bStartsWithQuery) {
-        return aStr.length - bStr.length;
-      }
-      
-      // Fall back to default Fuse score comparison
-      return a.score - b.score;
-    }
+    threshold: 0.3,
   });
 
   const debounceTimeoutRef = useRef(null);
-
-  const getMentionState = (position) => {
-    for (const mention of mentions) {
-      if (position >= mention.start && position <= mention.end) {
-        return mention.state;
-      }
-    }
-    return null;
-  };
 
   const renderStyledText = () => {
     const parts = [];
@@ -157,7 +120,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
       const lastAtSymbol = newValue.lastIndexOf('@', cursorPosition - 1);
 
       if (lastAtSymbol !== -1) {
-        const query = newValue.slice(lastAtSymbol + 1, cursorPosition);
+        const query = newValue.slice(lastAtSymbol + 1, cursorPosition+1);
         if (query.length > 2) {
           const results = fuse.search(query);
           const matchedSuggestions = results.map((result) => result.item);

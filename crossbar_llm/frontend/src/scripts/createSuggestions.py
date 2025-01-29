@@ -3,7 +3,7 @@ import json
 import re
 
 def create_suggestions():
-    folder_path = "../../public"
+    folder_path = "../../public/"
     suggestions_set = set()
     for file_name in os.listdir(folder_path):
         if file_name.endswith(".txt"):
