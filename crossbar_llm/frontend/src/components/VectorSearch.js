@@ -39,6 +39,7 @@ function VectorSearch({
   const [generatedQuery, setGeneratedQuery] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
   const [logs, setLogs] = useState('');
 
   const modelChoices = {
@@ -48,19 +49,7 @@ function VectorSearch({
       'gpt-3.5-turbo',
       'gpt-4-turbo',
       'gpt-3.5-turbo-instruct',
-    ],
-    Google: [
-      'gemini-pro',
-      'gemini-1.5-pro-latest',
-      'gemini-1.5-flash-latest',
-    ],
-    Anthropic: [
-      'claude-3-5-sonnet-20240620',
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307',
-    ],
-    Other: [
+      { value: 'separator', label: '──────────' },
       'gpt-3.5-turbo-1106',
       'gpt-3.5-turbo-0125',
       'gpt-4-0125-preview',
@@ -69,11 +58,50 @@ function VectorSearch({
       'gpt-4-32k-0613',
       'gpt-4-0613',
       'gpt-3.5-turbo-16k',
+    ],
+    Anthropic: [
+      'claude-3-5-sonnet-20240620',
+      'claude-3-opus-20240229',
+      'claude-3-sonnet-20240229',
+      'claude-3-haiku-20240307',
+      { value: 'separator', label: '──────────' },
       'claude-2.1',
       'claude-2.0',
       'claude-instant-1.2',
-    ]
+    ],
+    Google: [
+      'gemini-pro',
+      'gemini-1.5-pro-latest',
+      'gemini-1.5-flash-latest',
+    ],
+    Groq: [
+      'llama3-8b-8192',
+      'llama3-70b-8192',
+      'mixtral-8x7b-32768',
+      'gemma-7b-it',
+      'gemma2-9b-it',
+    ],
+    Ollama: [
+      'codestral:latest',
+      'llama3:instruct',
+      'tomasonjo/codestral-text2cypher:latest',
+      'tomasonjo/llama3-text2cypher-demo:latest',
+      'llama3.1:8b',
+      'qwen2:7b-instruct',
+      'gemma2:latest',
+    ],
+    Nvidia: [
+      'meta/llama-3.1-405b-instruct',
+      'meta/llama-3.1-70b-instruct',
+      'meta/llama-3.1-8b-instruct',
+      'nv-mistralai/mistral-nemo-12b-instruct',
+      'mistralai/mixtral-8x22b-instruct-v0.1',
+      'mistralai/mistral-large-2-instruct',
+      'nvidia/nemotron-4-340b-instruct',
+    ],
   };
+
+  const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b']; 
 
   const handleGenerateQuery = async () => {
     setLoading(true);
@@ -283,17 +311,40 @@ function VectorSearch({
           <Select
             labelId="llm-type-label"
             value={llmType}
-            onChange={(e) => setLlmType(e.target.value)}
+            onChange={(e) => {
+              const selectedModel = e.target.value;
+              if (selectedModel !== 'separator') {
+                setLlmType(selectedModel);
+                if (!supportedModels.includes(selectedModel)) {
+                  setShowWarning(true);
+                } else {
+                  setShowWarning(false);
+                }
+              }
+            }}
             label="LLM Type"
           >
             {modelChoices[provider].map((model) => (
+              typeof model === 'object' ? (
+                <MenuItem key={model.value} value={model.value} disabled sx={{ opacity: 0.5 }}>
+                  {model.label}
+                </MenuItem>
+              ) : (
               <MenuItem key={model} value={model}>
                 {model}
               </MenuItem>
+              )
             ))}
           </Select>
         </FormControl>
       )}
+      {showWarning && (
+              <Typography color="warning" sx={{ mt: 2 }}>
+                Warning: Smaller language models may produce inaccurate 
+                or fabricated responses ("hallucinations") so we recommend
+                using larger models such as Claude Sonnet, GPT-4, and Meta Llama 3.1 405B for accurate results. 
+              </Typography>
+            )}
       {/* API Key Input */}
       <TextField
         label="API Key for LLM"
