@@ -60,6 +60,7 @@ class Config(BaseModel):
     groq_api_key: str = os.getenv("GROQ_API_KEY", "default")
     replicate_api_key: str = os.getenv("REPLICATE_API_KEY", "default")
     nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", "default")
+    openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "default")
     neo4j_usr: str = os.getenv("NEO4J_USER")
     neo4j_password: str = os.getenv("MY_NEO4J_PASSWORD")
     neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
@@ -445,6 +446,14 @@ class RunPipeline:
             "mistralai/mistral-large-2-instruct",
             "nvidia/nemotron-4-340b-instruct",
         ]
+        
+        openrouter_llm_models = [
+            "deepseek/deepseek-r1-distill-llama-70b",
+            "deepseek/deepseek-r1:free",
+            "deepseek/deepseek-r1",
+            "deepseek/deepseek-r1:nitro",
+            "deepseek/deepseek-chat",
+        ] 
 
         if isinstance(model_name, (dict, list)):
 
@@ -486,6 +495,11 @@ class RunPipeline:
                             self.config.nvidia_api_key,
                             model_name=model_name["cypher_llm_model"],
                         ).llm
+                    if model_name in openrouter_llm_models:
+                        self.llm["cypher_llm"] = OpenAILanguageModel(
+                            self.config.openrouter_api_key,
+                            model_name=model_name["cypher_llm_model"],
+                        ).llm
                     else:
                         raise ValueError("Unsupported Language Model Name")
                 elif model_name in openai_llm_models:
@@ -516,6 +530,11 @@ class RunPipeline:
                         self.config.nvidia_api_key,
                         model_name=model_name["qa_llm_model"],
                     ).llm
+                elif model_name in openrouter_llm_models:
+                    self.llm["qa_llm"] = OpenAILanguageModel(
+                        self.config.openrouter_api_key,
+                        model_name=model_name["qa_llm_model"],
+                    ).llm
                 else:
                     raise ValueError("Unsupported Language Model Name")
 
@@ -540,6 +559,10 @@ class RunPipeline:
         elif model_name in nvidia_llm_models:
             self.llm = NVIDIALanguageModel(
                 self.config.nvidia_api_key, model_name=model_name
+            ).llm
+        elif model_name in openrouter_llm_models:
+            self.llm = OpenAILanguageModel(
+                self.config.openrouter_api_key, model_name=model_name
             ).llm
         else:
             raise ValueError("Unsupported Language Model Name")

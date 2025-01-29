@@ -69,6 +69,13 @@ function VectorSearch({
       'claude-2.0',
       'claude-instant-1.2',
     ],
+    OpenRouter: [
+      "deepseek/deepseek-r1",
+      "deepseek/deepseek-r1-distill-llama-70b",
+      "deepseek/deepseek-r1:free",
+      "deepseek/deepseek-r1:nitro",
+      "deepseek/deepseek-chat",
+    ], 
     Google: [
       'gemini-pro',
       'gemini-1.5-pro-latest',
@@ -101,7 +108,7 @@ function VectorSearch({
     ],
   };
 
-  const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b']; 
+  const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b', 'deepseek/deepseek-r1']; 
 
   const handleGenerateQuery = async () => {
     setLoading(true);
