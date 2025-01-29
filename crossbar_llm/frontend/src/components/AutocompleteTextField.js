@@ -25,7 +25,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   const fuse = new Fuse(suggestions, {
     includeScore: true,
     threshold: 0.2,
-    distance: 100,
+    distance: 10,
     location: 0,
     keys: [
       {
@@ -254,6 +254,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   };
 
   const handleSuggestionClick = (suggestion) => {
+    suggestion = suggestion.replaceAll('_', ' ');
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
     const lastAtSymbol = textBeforeCursor.lastIndexOf('@');

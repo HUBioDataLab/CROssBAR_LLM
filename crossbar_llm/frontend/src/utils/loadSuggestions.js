@@ -17,14 +17,33 @@ const computeSuggestions = async () => {
       const response = await axios.get(`${process.env.PUBLIC_URL}/${fileName}`);
       const fileContent = response.data;
       const words = fileContent.split(/\s+/).filter(Boolean);
-      words.forEach((word) => suggestionsSet.add(word));
+      words.forEach((word) => {
+        if (word.length > 2) {
+          suggestionsSet.add(word);
+        }
+      });
     } catch (error) {
       console.error(`Error loading ${fileName}:`, error);
     }
   }
 
-  return Array.from(suggestionsSet);
+  const suggestionsArray = Array.from(suggestionsSet);
+  return suggestionsArray;
 };
+
+const fetchSuggestions = async () => {
+  const response = await axios.get(`${process.env.PUBLIC_URL}/suggestions.json`);
+  console.log('Fetched suggestions:', response.data);
+  return response.data;
+};
+
+function chunkArray(array, size) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
 
 export const loadSuggestions = async () => {
   // Check localStorage for cached suggestions
@@ -37,14 +56,37 @@ export const loadSuggestions = async () => {
     }
   }
 
-  // If no cache or expired, compute new suggestions
-  const suggestions = await computeSuggestions();
+  // try reading chunk info
+  const chunkCount = parseInt(localStorage.getItem(CACHE_KEY + '_chunkCount') || '0', 10);
+  if (chunkCount > 0) {
+    const reassembled = [];
+    for (let i = 0; i < chunkCount; i++) {
+      const part = localStorage.getItem(CACHE_KEY + '_chunk_' + i);
+      if (part) reassembled.push(...JSON.parse(part));
+    }
+    return reassembled;
+  }
+
+  // If no cache or expired, fetch new suggestions
+  const suggestions = await fetchSuggestions();
   
   // Save to localStorage with timestamp
-  localStorage.setItem(CACHE_KEY, JSON.stringify({
-    data: suggestions,
-    timestamp: Date.now()
-  }));
+  try {
+    // clear any old chunks
+    const oldChunks = parseInt(localStorage.getItem(CACHE_KEY + '_chunkCount') || '0', 10);
+    for (let i = 0; i < oldChunks; i++) {
+      localStorage.removeItem(CACHE_KEY + '_chunk_' + i);
+    }
+
+    // split and store new data
+    const chunked = chunkArray(suggestions, 1000);
+    localStorage.setItem(CACHE_KEY + '_chunkCount', chunked.length.toString());
+    chunked.forEach((c, idx) => {
+      localStorage.setItem(CACHE_KEY + '_chunk_' + idx, JSON.stringify(c));
+    });
+  } catch (error) {
+    console.warn('Storage limit reached, skipping chunk caching:', error);
+  }
 
   return suggestions;
 };
