@@ -183,6 +183,7 @@ function QueryInput({
         query: response.data.query,
         type: 'Generate Query',
         llmType: llmType,
+        naturalAnswer: 'N/A',
       });
     } catch (err) {
       console.error(err);
@@ -219,6 +220,7 @@ function QueryInput({
         query: generatedQuery,
         type: 'Run Query',
         llmType: llmType,
+        naturalAnswer: response.data,
       });
     } catch (err) {
       console.error(err);

@@ -8,6 +8,7 @@ function LatestQueries({ queries, onSelectQuery }) {
     { field: 'query', headerName: 'Query', flex: 2 },
     { field: 'type', headerName: 'Type', flex: 1 },
     { field: 'llmType', headerName: 'LLM', flex: 1 },
+    { field: 'naturalAnswer', headerName: 'Answer', flex: 2 } // Added new column
   ];
 
   const rows = queries.slice().reverse().map((item, index) => ({
@@ -16,6 +17,7 @@ function LatestQueries({ queries, onSelectQuery }) {
     query: item.query,
     type: item.type,
     llmType: item.llmType,
+    naturalAnswer: item.naturalAnswer // Include natural language answer
   }));
 
   const handleRowClick = (params) => {
