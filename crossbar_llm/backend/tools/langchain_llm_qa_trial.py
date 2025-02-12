@@ -224,6 +224,23 @@ class NVIDIALanguageModel:
         )
 
 
+class OpenRouterLanguageModel:
+    """
+    OpenRouterLanguageModel class for interacting with OpenRouter's language models.
+    It initializes the model with given API key and specified parameters.
+    """
+
+    def __init__(
+        self, api_key: str, model_name: str = None, temperature: float | int = None,
+        base_url: str = "https://openrouter.ai/api/v1"
+    ):
+        self.model_name = model_name or "deepseek/deepseek-r1"
+        self.temperature = temperature or 0
+        self.llm = ChatOpenAI(
+            api_key=api_key, model=self.model_name, temperature=self.temperature, request_timeout=600, base_url=base_url
+        )
+
+
 class QueryChain:
     """
     QueryChain class to handle the generation, correction, and parsing of Cypher queries using language models.
@@ -496,7 +513,7 @@ class RunPipeline:
                             model_name=model_name["cypher_llm_model"],
                         ).llm
                     if model_name in openrouter_llm_models:
-                        self.llm["cypher_llm"] = OpenAILanguageModel(
+                        self.llm["cypher_llm"] = OpenRouterLanguageModel(
                             self.config.openrouter_api_key,
                             model_name=model_name["cypher_llm_model"],
                         ).llm
@@ -531,7 +548,7 @@ class RunPipeline:
                         model_name=model_name["qa_llm_model"],
                     ).llm
                 elif model_name in openrouter_llm_models:
-                    self.llm["qa_llm"] = OpenAILanguageModel(
+                    self.llm["qa_llm"] = OpenRouterLanguageModel(
                         self.config.openrouter_api_key,
                         model_name=model_name["qa_llm_model"],
                     ).llm
@@ -561,7 +578,7 @@ class RunPipeline:
                 self.config.nvidia_api_key, model_name=model_name
             ).llm
         elif model_name in openrouter_llm_models:
-            self.llm = OpenAILanguageModel(
+            self.llm = OpenRouterLanguageModel(
                 self.config.openrouter_api_key, model_name=model_name
             ).llm
         else:
