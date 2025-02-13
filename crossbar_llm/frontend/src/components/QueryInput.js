@@ -401,7 +401,7 @@ function QueryInput({
           Generate Cypher Query
         </Button>
         <Button
-          variant="contained"
+          variant="outlined"
           fullWidth
           onClick={handleRunGeneratedQuery}
           disabled={!generatedQuery || loading}
