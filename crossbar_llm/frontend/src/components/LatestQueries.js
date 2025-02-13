@@ -8,7 +8,16 @@ function LatestQueries({ queries, onSelectQuery }) {
     { field: 'query', headerName: 'Query', flex: 2 },
     { field: 'type', headerName: 'Type', flex: 1 },
     { field: 'llmType', headerName: 'LLM', flex: 1 },
-    { field: 'naturalAnswer', headerName: 'Answer', flex: 2 } // Added new column
+    { 
+      field: 'naturalAnswer', 
+      headerName: 'Answer', 
+      flex: 2,
+      renderCell: (params) => (
+        <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+          {params.value}
+        </div>
+      )
+    } // updated "Answer" column
   ];
 
   const rows = queries.slice().reverse().map((item, index) => ({
