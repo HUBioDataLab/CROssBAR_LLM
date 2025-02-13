@@ -220,7 +220,7 @@ function QueryInput({
         query: generatedQuery,
         type: 'Run Query',
         llmType: llmType,
-        naturalAnswer: response.data,
+        naturalAnswer: response.data.response,
       });
     } catch (err) {
       console.error(err);
@@ -262,6 +262,7 @@ function QueryInput({
         query: generateQueryResponse.data.query,
         type: 'Generate & Run Query',
         llmType: llmType,
+        naturalAnswer: runQueryResponse.data.response,
       });
     } catch (err) {
       console.error(err);
