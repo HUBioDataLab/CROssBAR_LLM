@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   Checkbox,
   CircularProgress,
+  useTheme,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
@@ -38,7 +39,7 @@ function QueryInput({
   const [showWarning, setShowWarning] = useState(false);
   const [realtimeLogs, setRealtimeLogs] = useState('');
   const eventSourceRef = useRef(null);
-
+  const theme = useTheme();
 
   const modelChoices = {
     OpenAI: [
@@ -425,12 +426,13 @@ function QueryInput({
       {logs && (
         <Box
           sx={{
-            backgroundColor: '#2d2d2d',
+            backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
             padding: 2,
             borderRadius: 1,
             overflow: 'auto',
             maxHeight: 200,
             mt: 2,
+            border: `1px solid ${theme.palette.divider}`
           }}
         >
           <pre
@@ -438,7 +440,7 @@ function QueryInput({
               margin: 0,
               fontFamily: 'monospace',
               fontSize: 12,
-              color: '#cccccc',
+              color: theme.palette.text.primary,
             }}
           >
             {logs}

@@ -1,45 +1,45 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
+export const getTheme = (mode) => createTheme({
   palette: {
-    mode: 'light', 
+    mode,
     primary: {
-      main: '#1976d2', 
+      main: '#1976d2',
     },
     secondary: {
-      main: '#ffffff', 
+      main: mode === 'dark' ? '#333333' : '#ffffff',
     },
     background: {
-      default: '#f5f5f5', 
-      paper: '#ffffff', 
+      default: mode === 'dark' ? '#121212' : '#f5f5f5',
+      paper: mode === 'dark' ? '#1e1e1e' : '#ffffff',
     },
     text: {
-      primary: '#000000', 
-      secondary: '#555555', 
+      primary: mode === 'dark' ? '#ffffff' : '#000000',
+      secondary: mode === 'dark' ? '#a0a0a0' : '#555555',
     },
   },
   typography: {
-    fontFamily: 'Inter, sans-serif', 
+    fontFamily: 'Inter, sans-serif',
     h5: {
-      fontWeight: 600, 
+      fontWeight: 600,
     },
     subtitle1: {
-      color: '#888888', 
+      color: mode === 'dark' ? '#888888' : '#666666',
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '8px', 
-          textTransform: 'none', 
-          boxShadow: 'none', 
+          borderRadius: '8px',
+          textTransform: 'none',
+          boxShadow: 'none',
         },
         containedPrimary: {
-          backgroundColor: '#000000', 
-          color: '#ffffff', 
+          backgroundColor: mode === 'dark' ? '#1976d2' : '#000000',
+          color: '#ffffff',
           '&:hover': {
-            backgroundColor: '#333333', 
+            backgroundColor: mode === 'dark' ? '#1565c0' : '#333333',
           },
         },
       },
@@ -47,7 +47,7 @@ const theme = createTheme({
     MuiTextField: {
       styleOverrides: {
         root: {
-          backgroundColor: '#ffffff', 
+          backgroundColor: mode === 'dark' ? '#1e1e1e' : '#ffffff',
           borderRadius: '8px',
         },
       },
@@ -59,12 +59,10 @@ const theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         select: {
-          backgroundColor: '#ffffff', 
+          backgroundColor: mode === 'dark' ? '#1e1e1e' : '#ffffff',
           borderRadius: '8px',
         },
       },
     },
   },
 });
-
-export default theme;

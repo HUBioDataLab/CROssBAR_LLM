@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, CssBaseline, Box, Container, Tabs, Tab, Grid2, Modal, Typography, Button, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import theme from './theme';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { getTheme } from './theme';
 import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
 import About from './components/About';
@@ -19,6 +21,26 @@ function App() {
   const [provider, setProvider] = useState('');
   const [llmType, setLlmType] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [mode, setMode] = useState(() => {
+    const savedMode = localStorage.getItem('theme-mode');
+    if (savedMode) {
+      return savedMode;
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  const theme = React.useMemo(() => getTheme(mode), [mode]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      if (!localStorage.getItem('theme-mode')) {
+        setMode(e.matches ? 'dark' : 'light');
+      }
+    };
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
 
   useEffect(() => {
     axios.get('/csrf-token/', { withCredentials: true })
@@ -60,10 +82,27 @@ function App() {
     setSelectedQuery(query);
   }
 
+  const toggleColorMode = () => {
+    const newMode = mode === 'light' ? 'dark' : 'light';
+    setMode(newMode);
+    localStorage.setItem('theme-mode', newMode);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: { xs: 4, sm: 6, md: 10 }, mb: { xs: 4, sm: 6, md: 10 } }}>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: { xs: 4, sm: 6, md: 10 }, mb: { xs: 4, sm: 6, md: 10 }, position: 'relative' }}>
+        <IconButton
+          onClick={toggleColorMode}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: 16,
+            color: 'text.primary'
+          }}
+        >
+          {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+        </IconButton>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
           <Typography 
             variant="h2" 

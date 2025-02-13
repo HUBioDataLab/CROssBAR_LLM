@@ -45,6 +45,8 @@ function LatestQueries({ queries, onSelectQuery }) {
         onRowClick={handleRowClick}
         rowsPerPageOptions={[5]}
         disableSelectionOnClick
+        getRowHeight={() => 'auto'}
+        sx={{ '& .MuiDataGrid-cell': { borderRight: '1px solid rgba(0, 0, 0, 0.12)' } }}
       />
     </div>
   );
