@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button, InputLabel, MenuItem, FormControl, Select, Typography, Box } from '@mui/material';
+import { Button, InputLabel, MenuItem, FormControl, Select, Typography, Box, Link } from '@mui/material';
 import axios from '../services/api';
+
+// Helper function to extract text and URL from markdown [text](url)
+const extractMarkdownLink = (markdown) => {
+  const match = markdown.match(/\[(.*?)\]\((.*?)\)/);
+  return match ? { text: match[1], url: match[2] } : { text: '', url: '' };
+};
 
 function VectorUpload({ 
   vectorCategory, 
@@ -58,6 +64,20 @@ function VectorUpload({
     }
   };
 
+  // Determine the current paper markdown string based on selection
+  let currentPaperMarkdown = '';
+  if (vectorCategory) {
+    const options = nodeLabelToVectorIndexNames[vectorCategory];
+    if (Array.isArray(options)) {
+      if (embeddingType) {
+        currentPaperMarkdown = options.find(option => option.includes(`[${embeddingType}]`)) || '';
+      }
+    } else {
+      currentPaperMarkdown = options;
+    }
+  }
+  const { text: paperText, url: paperUrl } = extractMarkdownLink(currentPaperMarkdown);
+
   return (
     <div>
       <FormControl fullWidth margin="normal">
@@ -95,6 +115,16 @@ function VectorUpload({
             })}
           </Select>
         </FormControl>
+      )}
+
+      {/* Render professional hyperlink if a paper link is available */}
+      {paperText && paperUrl && (
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          Read the associated paper:&nbsp;
+          <Link href={paperUrl} target="_blank" rel="noopener" underline="hover">
+            {paperText}
+          </Link>
+        </Typography>
       )}
 
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
