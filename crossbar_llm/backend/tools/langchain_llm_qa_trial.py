@@ -257,6 +257,7 @@ class QueryChain:
             ReplicateLanguageModel,
             OllamaLanguageModel,
             NVIDIALanguageModel,
+            OpenRouterLanguageModel,
         ],
         qa_llm: Union[
             OpenAILanguageModel,
@@ -266,6 +267,7 @@ class QueryChain:
             ReplicateLanguageModel,
             OllamaLanguageModel,
             NVIDIALanguageModel,
+            OpenRouterLanguageModel,
         ],
         schema: dict,
         verbose: bool = False,
