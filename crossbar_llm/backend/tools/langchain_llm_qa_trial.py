@@ -605,6 +605,8 @@ class RunPipeline:
             self.config.anthropic_api_key = api_key
             self.config.groq_api_key = api_key
             self.config.replicate_api_key = api_key
+            self.config.nvidia_api_key = api_key
+            self.config.openrouter_api_key = api_key
 
         else:
             self.config = Config()
@@ -662,6 +664,8 @@ class RunPipeline:
             self.config.anthropic_api_key = api_key
             self.config.groq_api_key = api_key
             self.config.replicate_api_key = api_key
+            self.config.nvidia_api_key = api_key
+            self.config.openrouter_api_key = api_key
         else:
             self.config = Config()
 
