@@ -427,10 +427,23 @@ function VectorSearch({
         </Button>
       </Box>
       <Button
-        variant="contained"
+        variant="outlined"
         fullWidth
         onClick={handleGenerateAndRun}
-        sx={{ mt: 2 }}
+        sx={{ 
+          mt: 2,
+          border: '2px solid #ff0000',
+          color: '#ff0000',
+          backgroundColor: 'transparent',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 0, 0, 0.04)',
+            border: '2px solid #ff0000',
+          },
+          '&.Mui-disabled': {
+            border: '2px solid rgba(255, 0, 0, 0.3)',
+            color: 'rgba(255, 0, 0, 0.3)',
+          }
+        }}
         disabled={loading || !question || !provider || !llmType || !apiKey || !topK}
       >
         Generate & Run Query

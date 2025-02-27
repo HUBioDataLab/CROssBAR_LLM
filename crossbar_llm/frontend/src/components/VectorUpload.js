@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, InputLabel, MenuItem, FormControl, Select, Typography, Box, Link } from '@mui/material';
+import { Button, InputLabel, MenuItem, FormControl, Select, Typography, Box, Link, useTheme } from '@mui/material';
 import axios from '../services/api';
 
 // Helper function to extract text and URL from markdown [text](url)
@@ -19,6 +19,7 @@ function VectorUpload({
   setSelectedFile,
   handleUpload
 }) {
+  const theme = useTheme();
 
   const nodeLabelToVectorIndexNames = {
     "SmallMolecule": "[Selformer](https://iopscience.iop.org/article/10.1088/2632-2153/acdb30)",
@@ -128,7 +129,24 @@ function VectorUpload({
       )}
 
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-        <Button variant="contained" component="label" fullWidth>
+        <Button 
+          variant="outlined" 
+          component="label" 
+          fullWidth
+          sx={{ 
+            border: '2px solid #ff0000',
+            color: '#ff0000',
+            backgroundColor: 'transparent',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 0, 0, 0.04)',
+              border: '2px solid #ff0000',
+            },
+            '&.Mui-disabled': {
+              border: theme.palette.mode === 'dark' ? '2px solid rgba(255, 0, 0, 0.3)' : '2px solid rgba(255, 0, 0, 0.3)',
+              color: theme.palette.mode === 'dark' ? 'rgba(255, 0, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)',
+            }
+          }}
+        >
           Upload Vector File
           <input
             type="file"
