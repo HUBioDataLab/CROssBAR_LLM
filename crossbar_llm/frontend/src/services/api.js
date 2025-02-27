@@ -9,6 +9,29 @@ const instance = axios.create({
   },
 });
 
+export const streamLogs = (onMessage, onError) => {
+  const eventSource = new EventSource('/stream-logs');
+  
+  eventSource.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.log) {
+        onMessage(data.log);
+      }
+    } catch (error) {
+      console.error('Error parsing log message:', error);
+    }
+  };
 
+  eventSource.onerror = (error) => {
+    console.error('EventSource failed:', error);
+    if (onError) {
+      onError(error);
+    }
+    eventSource.close();
+  };
+
+  return eventSource;
+};
 
 export default instance;

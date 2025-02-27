@@ -36,15 +36,43 @@ from pydantic import BaseModel, ConfigDict, validate_call
 
 
 def configure_logging(verbose=False, log_filename="query_log.log"):
-    log_handlers = [logging.FileHandler(log_filename)]
+    """
+    Configure logging for the application based on verbosity level.
+    
+    Args:
+        verbose (bool): Whether to show detailed debug logs
+        log_filename (str): Name of the log file to write logs to
+    """
+    # Create logs directory if it doesn't exist
+    log_dir = os.path.join(parent_dir, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_path = os.path.join(log_dir, log_filename)
+    
+    # Set up file handler for all logs
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    
+    # Set up handlers based on verbosity
+    handlers = [file_handler]
     if verbose:
-        log_handlers.append(logging.StreamHandler())
-
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(logging.Formatter(
+            '%(asctime)s - %(levelname)s - %(message)s'
+        ))
+        handlers.append(console_handler)
+    
+    # Configure root logger
     logging.basicConfig(
-        handlers=log_handlers,
-        level=logging.INFO,
+        handlers=handlers,
+        level=logging.DEBUG if verbose else logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
+    
+    # Log configuration completed
+    log_level = "DEBUG" if verbose else "INFO"
+    logging.info(f"Logging initialized with level: {log_level}, output to: {log_path}")
 
 
 class Config(BaseModel):

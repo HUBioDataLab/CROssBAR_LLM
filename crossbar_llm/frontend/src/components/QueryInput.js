@@ -115,61 +115,92 @@ function QueryInput({
 
   const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b', 'deepseek/deepseek-r1'];
 
+  // Modify the setupLogStream function to better handle the connection and errors
   const setupLogStream = () => {
       if (verbose) {
+          console.log('Setting up log stream for verbose mode');
           // Close any existing connection
           if (eventSourceRef.current) {
               eventSourceRef.current.close();
           }
           
-          // Create new EventSource connection
-          eventSourceRef.current = new EventSource('/stream-logs');
+          setRealtimeLogs('Connecting to log stream...\n');
+          
+          // Create new EventSource connection with a timestamp to avoid caching
+          const timestamp = new Date().getTime();
+          eventSourceRef.current = new EventSource(`/stream-logs?t=${timestamp}`);
+          
+          eventSourceRef.current.onopen = () => {
+              setRealtimeLogs(prev => prev + 'Log stream connected successfully\n');
+          };
           
           eventSourceRef.current.onmessage = (event) => {
-              const data = JSON.parse(event.data);
-              setRealtimeLogs(prev => prev + data.log + '\n');
+              try {
+                  const data = JSON.parse(event.data);
+                  setRealtimeLogs(prev => prev + data.log + '\n');
+                  
+                  // Auto-scroll to bottom of log container
+                  if (logContainerRef.current) {
+                      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+                  }
+              } catch (e) {
+                  console.error('Error parsing log data:', e);
+                  setRealtimeLogs(prev => prev + `Error parsing log: ${e.message}\n`);
+              }
           };
-
+          
           eventSourceRef.current.onerror = (error) => {
               console.error('EventSource failed:', error);
-              eventSourceRef.current.close();
+              setRealtimeLogs(prev => prev + `EventSource error: Connection to log stream failed or was closed\n`);
+              // Try to reconnect after a delay
+              setTimeout(() => {
+                  if (verbose && !eventSourceRef.current) {
+                      setupLogStream();
+                  }
+              }, 5000);
           };
       }
   };
-
-
-    const cleanupLogStream = () => {
+  
+  const cleanupLogStream = () => {
       if (eventSourceRef.current) {
+          console.log('Cleaning up log stream');
           eventSourceRef.current.close();
           eventSourceRef.current = null;
       }
-    };
+  };
 
-    // Cleanup on component unmount
-    useEffect(() => {
+  // Add a ref for auto-scrolling the log container
+  const logContainerRef = useRef(null);
+
+  // Cleanup on component unmount
+  useEffect(() => {
       return () => cleanupLogStream();
-    }, []);
+  }, []);
 
-    // Setup log stream when verbose mode changes
-    useEffect(() => {
+  // Setup log stream when verbose mode changes
+  useEffect(() => {
       if (verbose) {
           setupLogStream();
       } else {
           cleanupLogStream();
           setRealtimeLogs('');
       }
-    }, [verbose]);
-
+  }, [verbose]);
 
   useEffect(() => {
       return () => cleanupLogStream();
   }, []);
 
-
   const handleGenerateQuery = async () => {
     setLoading(true);
-    setRealtimeLogs('');
+    setRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
+    setLogs('');
     try {
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `Sending request with parameters:\n- Question: ${question}\n- Model: ${llmType}\n- Top K: ${topK}\n- Verbose: ${verbose}\n`);
+      }
+      
       const response = await axios.post('/generate_query/', {
         question,
         llm_type: llmType,
@@ -177,14 +208,22 @@ function QueryInput({
         api_key: apiKey,
         verbose,
       });
+      
       setGeneratedQuery(response.data.query);
       setQueryResult(response.data.query);
       setExecutionResult(null);
       setRunnedQuery(false);
       setError(null);
-      if (verbose && response.data.logs) {
-        setLogs(response.data.logs);
+      
+      if (verbose) {
+        if (response.data.logs) {
+          setLogs(response.data.logs);
+          setRealtimeLogs(prev => prev + 'Query generation completed successfully!\n');
+        } else {
+          setRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+        }
       }
+      
       addLatestQuery({
         question: question,
         query: response.data.query,
@@ -194,20 +233,31 @@ function QueryInput({
       });
     } catch (err) {
       console.error(err);
-      if (err.response?.data?.detail?.logs) {
-          setLogs(err.response.data.detail.logs);
+      const errorMessage = err.response?.data?.detail?.error || 'Error generating query.';
+      const errorLogs = err.response?.data?.detail?.logs || '';
+      
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (errorLogs) {
+          setLogs(errorLogs);
+        }
       }
-      setError(err.response?.data?.detail?.error || 'Error generating query.');
-      setError('Error generating query.');
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
-
+  
   const handleRunGeneratedQuery = async () => {
     setLoading(true);
     setLogs('');
+    setRealtimeLogs(verbose ? 'Executing Cypher query...\n' : '');
     try {
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `Query to execute:\n${generatedQuery}\n\n`);
+      }
+      
       const response = await axios.post('/run_query/', {
         query: generatedQuery,
         question,
@@ -216,12 +266,20 @@ function QueryInput({
         api_key: apiKey,
         verbose,
       });
+      
       setExecutionResult(response.data);
       setRunnedQuery(true);
       setError(null);
-      if (verbose && response.data.logs) {
-        setLogs(response.data.logs);
+      
+      if (verbose) {
+        if (response.data.logs) {
+          setLogs(response.data.logs);
+          setRealtimeLogs(prev => prev + 'Query executed successfully!\n');
+        } else {
+          setRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+        }
       }
+      
       addLatestQuery({
         question: question,
         query: generatedQuery,
@@ -231,16 +289,31 @@ function QueryInput({
       });
     } catch (err) {
       console.error(err);
-      setError('Error executing query.');
+      const errorMessage = err.response?.data?.detail?.error || 'Error executing query.';
+      const errorLogs = err.response?.data?.detail?.logs || '';
+      
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (errorLogs) {
+          setLogs(errorLogs);
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
-
+  
   const handleGenerateAndRun = async () => {
     setLoading(true);
     setLogs('');
+    setRealtimeLogs(verbose ? 'Generating and executing Cypher query...\n' : '');
     try {
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `Step 1: Generating query for question: "${question}"\n`);
+      }
+      
       const generateQueryResponse = await axios.post('/generate_query/', {
         question,
         llm_type: llmType,
@@ -248,32 +321,57 @@ function QueryInput({
         api_key: apiKey,
         verbose,
       });
+      
+      const generatedQuery = generateQueryResponse.data.query;
+      
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `Query generated: ${generatedQuery}\n\nStep 2: Executing the generated query\n`);
+      }
+      
       const runQueryResponse = await axios.post('/run_query/', {
-        query: generateQueryResponse.data.query,
+        query: generatedQuery,
         question,
         llm_type: llmType,
         top_k: topK,
         api_key: apiKey,
         verbose,
       });
-      setGeneratedQuery(generateQueryResponse.data.query);
-      setQueryResult(generateQueryResponse.data.query);
+      
+      setGeneratedQuery(generatedQuery);
+      setQueryResult(generatedQuery);
       setExecutionResult(runQueryResponse.data);
       setRunnedQuery(true);
       setError(null);
-      if (verbose && runQueryResponse.data.logs) {
-        setLogs(runQueryResponse.data.logs);
+      
+      if (verbose) {
+        if (runQueryResponse.data.logs) {
+          setLogs(runQueryResponse.data.logs);
+          setRealtimeLogs(prev => prev + 'Query generated and executed successfully!\n');
+        } else {
+          setRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+        }
       }
+      
       addLatestQuery({
         question: question,
-        query: generateQueryResponse.data.query,
+        query: generatedQuery,
         type: 'Generate & Run Query',
         llmType: llmType,
         naturalAnswer: runQueryResponse.data.response,
       });
     } catch (err) {
       console.error(err);
-      setError('Error generating and running query.');
+      const errorMessage = err.response?.data?.detail?.error || 'Error generating and running query.';
+      const errorLogs = err.response?.data?.detail?.logs || '';
+      
+      if (verbose) {
+        setRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (errorLogs) {
+          setLogs(errorLogs);
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -442,7 +540,8 @@ function QueryInput({
           <CircularProgress />
         </Box>
       )}
-      {logs && (
+      {/* Real-time logs from EventSource */}
+      {verbose && (
         <Box
           sx={{
             backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
@@ -453,21 +552,55 @@ function QueryInput({
             mt: 2,
             border: `1px solid ${theme.palette.divider}`
           }}
+          ref={logContainerRef}
         >
+          <Typography variant="subtitle2" gutterBottom>Real-time Logs:</Typography>
           <pre
             style={{
               margin: 0,
               fontFamily: 'monospace',
               fontSize: 12,
               color: theme.palette.text.primary,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}
+          >
+            {realtimeLogs || 'Waiting for logs...'}
+          </pre>
+        </Box>
+      )}
+      
+      {/* Final logs from API response */}
+      {logs && verbose && (
+        <Box
+          sx={{
+            backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
+            padding: 2,
+            borderRadius: 1,
+            overflow: 'auto',
+            maxHeight: 300,
+            mt: 2,
+            border: `1px solid ${theme.palette.divider}`
+          }}
+        >
+          <Typography variant="subtitle2" gutterBottom>Complete Logs:</Typography>
+          <pre
+            style={{
+              margin: 0,
+              fontFamily: 'monospace',
+              fontSize: 12,
+              color: theme.palette.text.primary,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
             }}
           >
             {logs}
           </pre>
         </Box>
       )}
+      
       {error && (
-        <Typography color="error" align="center">
+        <Typography color="error" align="center" sx={{ mt: 2 }}>
           {error}
         </Typography>
       )}

@@ -1,26 +1,25 @@
 import re
+import logging
 from collections import namedtuple
-
 from pydantic import validate_call
-
+from .utils import Logger
 
 @validate_call
 def extract_cypher(text: str) -> str:
     """Extract Cypher code from a text.
-
     Args:
         text: Text to extract Cypher code from.
-
     Returns:
         Cypher code extracted from the text.
     """
+    Logger.debug("Extracting Cypher code from text")
     # The pattern to find Cypher code enclosed in triple backticks
     pattern = r"```(.*?)```"
-
     # Find all matches in the input text
     matches = re.findall(pattern, text, re.DOTALL)
-
-    return matches[0] if matches else text
+    result = matches[0] if matches else text
+    Logger.debug(f"Extracted Cypher: {result[:50]}...")
+    return result
 
 Schema = namedtuple("Schema", ["left_node", "relation", "right_node"])
 
@@ -30,6 +29,7 @@ def load_schemas(str_schemas: str) -> list[Schema]:
     Args:
         str_schemas: string of schemas
     """
+    Logger.debug(f"Loading schemas from string: {str_schemas[:50]}...")
     values = str_schemas.replace("(", "").replace(")", "").split(",")
     schemas = []
     for i in range(len(values)//3):
@@ -40,6 +40,7 @@ def load_schemas(str_schemas: str) -> list[Schema]:
                 values[i*3+2].strip()
             )
         )
+    Logger.debug(f"Loaded {len(schemas)} schemas")
     return schemas
 
 class QueryCorrector:
@@ -56,6 +57,7 @@ class QueryCorrector:
             schemas: list of schemas
         """
         self.schemas = schemas
+        Logger.debug(f"QueryCorrector initialized with {len(schemas)} schemas")
     
     def clean_node(self, node: str) -> str:
         """
@@ -63,17 +65,19 @@ class QueryCorrector:
             node: node in string format
         
         """
+        Logger.debug(f"Cleaning node: {node}")
         node = re.sub(self.property_pattern, "", node)
         node = node.replace("(", "")
         node = node.replace(")", "")
         node = node.strip()
         return node
-
+        
     def detect_node_variables(self, query: str) -> dict[str, list[str]]:
         """
         Args:
             query: cypher query
         """
+        Logger.debug("Detecting node variables in query")
         nodes = re.findall(self.node_pattern, query)
         nodes = [self.clean_node(node) for node in nodes]
         res = {}
@@ -85,13 +89,15 @@ class QueryCorrector:
             if variable not in res:
                 res[variable] = []
             res[variable] += parts[1:]
+        Logger.debug(f"Detected {len(res)} node variables")
         return res
-
+        
     def extract_paths(self, query: str) -> 'list[str]':
         """
         Args:
             query: cypher query
         """
+        Logger.debug("Extracting paths from query")
         paths = []
         idx = 0
         while matched := self.path_pattern.findall(query[idx:]):
@@ -102,8 +108,9 @@ class QueryCorrector:
             path = "".join(matched)
             idx = query.find(path) + len(path) - len(matched[-1])
             paths.append(path)
+        Logger.debug(f"Extracted {len(paths)} paths")
         return paths
-
+        
     def judge_direction(self, relation: str) -> str:
         """
         Args:
@@ -114,8 +121,9 @@ class QueryCorrector:
             direction = "INCOMING"
         if relation[-1] == ">":
             direction = "OUTGOING"
+        Logger.debug(f"Relationship direction: {direction} for {relation}")
         return direction
-
+        
     def extract_node_variable(self, part: str) -> str:
         """
         Args:
@@ -126,13 +134,14 @@ class QueryCorrector:
         if idx != -1:
             part = part[:idx]
         return None if part == "" else part
-
+        
     def detect_labels(self, str_node: str, node_variable_dict: dict) -> list[str]:
         """
         Args:
             str_node: node in string format
             node_variable_dict: dictionary of node variables
         """
+        Logger.debug(f"Detecting labels for node: {str_node}")
         splitted = str_node.split(":")
         variable = splitted[0]
         labels = []
@@ -140,6 +149,7 @@ class QueryCorrector:
             labels = node_variable_dict[variable]
         elif variable == "" and len(splitted) > 1:
             labels = splitted[1:]
+        Logger.debug(f"Detected labels: {labels}")
         return labels
     
     def verify_schema(self, from_node_labels: list[str], relation_types: list[str], to_node_labels: list[str]) -> bool:
@@ -149,6 +159,7 @@ class QueryCorrector:
             relation_type: type of the relation
             to_node_labels: labels of the to node
         """
+        Logger.debug(f"Verifying schema: {from_node_labels} -- {relation_types} -> {to_node_labels}")
         valid_schemas = self.schemas
         if from_node_labels != []:
             from_node_labels = [label.strip('`') for label in from_node_labels]
@@ -159,30 +170,38 @@ class QueryCorrector:
         if relation_types != []:
             relation_types = [type.strip('`') for type in relation_types]
             valid_schemas = [schema for schema in valid_schemas if schema[1] in relation_types]
-        return valid_schemas != []
+        is_valid = valid_schemas != []
+        Logger.debug(f"Schema verification result: {'valid' if is_valid else 'invalid'}")
+        return is_valid
     
     def detect_relation_types(self, str_relation: str) -> tuple[str, list[str]]:
         """
         Args:
             str_relation: relation in string format
         """
+        Logger.debug(f"Detecting relation types for: {str_relation}")
         relation_direction = self.judge_direction(str_relation)        
         relation_type = self.relation_type_pattern.search(str_relation)
         if relation_type is None or relation_type.group('relation_type') is None:
+            Logger.debug("No relation type found")
             return relation_direction, []
         relation_types = [t.strip().strip('!') for t in relation_type.group('relation_type').split("|")]
+        Logger.debug(f"Detected relation types: {relation_types}")
         return relation_direction, relation_types
         
-
     def correct_query(self, query: str) -> str:
         """
         Args:
             query: cypher query
         """
+        Logger.info("Correcting Cypher query")
+        Logger.debug(f"Original query: {query}")
+        
         node_variable_dict = self.detect_node_variables(query)
         paths = self.extract_paths(query)
         for path in paths:
             original_path = path
+            Logger.debug(f"Processing path: {original_path}")
             start_idx = 0
             while start_idx < len(path):
                 match_res = re.match(self.node_relation_node_pattern, path[start_idx:])
@@ -197,36 +216,50 @@ class QueryCorrector:
                 relation_direction, relation_types = self.detect_relation_types(match_dict["relation"])
                 
                 if relation_types != [] and ''.join(relation_types).find('*') != -1:
+                    Logger.debug("Skipping path with wildcard relation type")
                     start_idx += len(match_dict["left_node"]) + len(match_dict["relation"]) + 2
                     continue
                 
                 if relation_direction == "OUTGOING":
+                    Logger.debug("Processing outgoing relation")
                     is_legal = self.verify_schema(left_node_labels, relation_types, right_node_labels)
                     if not is_legal:
+                        Logger.debug("Schema invalid, trying reverse direction")
                         is_legal = self.verify_schema(right_node_labels, relation_types, left_node_labels)
                         if is_legal:
+                            Logger.info("Correcting relation direction: outgoing -> incoming")
                             corrected_relation = "<" + match_dict["relation"][:-1]
                             corrected_partial_path = original_partial_path.replace(match_dict["relation"], corrected_relation)
                             query = query.replace(original_partial_path, corrected_partial_path)
                         else:
+                            Logger.warning("No valid schema found for path, query cannot be corrected")
                             return ""
                 elif relation_direction == "INCOMING":
+                    Logger.debug("Processing incoming relation")
                     is_legal = self.verify_schema(right_node_labels, relation_types, left_node_labels)
                     if not is_legal:
+                        Logger.debug("Schema invalid, trying reverse direction")
                         is_legal = self.verify_schema(left_node_labels, relation_types, right_node_labels)
                         if is_legal:
+                            Logger.info("Correcting relation direction: incoming -> outgoing")
                             corrected_relation = match_dict["relation"][1:] + ">"
                             corrected_partial_path = original_partial_path.replace(match_dict["relation"], corrected_relation)
                             query = query.replace(original_partial_path, corrected_partial_path)
                         else:
+                            Logger.warning("No valid schema found for path, query cannot be corrected")
                             return ""
                 else:
+                    Logger.debug("Processing bidirectional relation")
                     is_legal = self.verify_schema(left_node_labels, relation_types, right_node_labels)
                     is_legal |= self.verify_schema(right_node_labels, relation_types, left_node_labels)
                     if not is_legal:
+                        Logger.warning("No valid schema found for bidirectional path, query cannot be corrected")
                         return ""
                 
                 start_idx += len(match_dict["left_node"]) + len(match_dict["relation"]) + 2
+        
+        Logger.info("Query correction completed")
+        Logger.debug(f"Corrected query: {query}")
         return query
     
     def __call__(self, query: str) -> str:
@@ -236,12 +269,24 @@ class QueryCorrector:
         """
         return self.correct_query(query)
 
-
 # PREPARE EDGE SCHEMA
 @validate_call
 def correct_query(query: str, edge_schema: list) -> str:
+    """
+    Main function to correct a Cypher query based on edge schemas
+    
+    Args:
+        query: cypher query
+        edge_schema: list of edge schemas
+        
+    Returns:
+        Corrected query or empty string if cannot be corrected
+    """
+    Logger.info("Starting query correction process")
+    Logger.debug(f"Original query: {query}")
+    Logger.debug(f"Edge schema count: {len(edge_schema)}")
+    
     query = extract_cypher(query.strip("\n"))
-
     str_schemas = ""
     to_be_replaced = ["(", ")", ":", "[", "]", ">", "<"]
     for e in edge_schema:
@@ -251,10 +296,16 @@ def correct_query(query: str, edge_schema: list) -> str:
             for t in to_be_replaced:
                 s = s.replace(t, "")
             splitted_corrected.append(s)
-
         add =", ("+", ".join(splitted_corrected)+")"
         str_schemas += add
-
+    
     schemas = load_schemas(str_schemas.strip(",").strip())
     query_corrector = QueryCorrector(schemas)
-    return query_corrector(query)
+    
+    corrected_query = query_corrector(query)
+    if corrected_query:
+        Logger.info("Query successfully corrected")
+    else:
+        Logger.warning("Query could not be corrected")
+    
+    return corrected_query
