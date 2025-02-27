@@ -540,6 +540,28 @@ function QueryInput({
           <CircularProgress />
         </Box>
       )}
+      
+      {/* Generated Query TextArea */}
+      {generatedQuery && !runnedQuery && (
+        <TextField
+          label="Generated Cypher Query"
+          value={generatedQuery}
+          onChange={(e) => setGeneratedQuery(e.target.value)}
+          fullWidth
+          multiline
+          rows={4}
+          margin="normal"
+        />
+      )}
+
+      {/* Error message display */}
+      {error && (
+        <Typography color="error" align="center" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
+      
+      {/* Log sections moved below outputs */}
       {/* Real-time logs from EventSource */}
       {verbose && (
         <Box
@@ -597,24 +619,6 @@ function QueryInput({
             {logs}
           </pre>
         </Box>
-      )}
-      
-      {error && (
-        <Typography color="error" align="center" sx={{ mt: 2 }}>
-          {error}
-        </Typography>
-      )}
-      {/* Generated Query TextArea */}
-      {generatedQuery && !runnedQuery && (
-        <TextField
-          label="Generated Cypher Query"
-          value={generatedQuery}
-          onChange={(e) => setGeneratedQuery(e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          margin="normal"
-        />
       )}
     </div>
   );

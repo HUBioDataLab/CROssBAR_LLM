@@ -15,6 +15,7 @@ function App() {
   const [tabValue, setTabValue] = useState('query');
   const [queryResult, setQueryResult] = useState(null);
   const [executionResult, setExecutionResult] = useState(null);
+  const [realtimeLogs, setRealtimeLogs] = useState('');
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [latestQueries, setLatestQueries] = useState([]);
   const [selectedQuery, setSelectedQuery] = useState(null);
@@ -64,6 +65,9 @@ function App() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+    setQueryResult(null);
+    setExecutionResult(null);
+    setRealtimeLogs('');
   };
 
   const handleCloseModal = () => {
@@ -146,6 +150,7 @@ function App() {
                 <QueryInput
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
+                  setRealtimeLogs={setRealtimeLogs}
                   addLatestQuery={addLatestQuery}
                   provider={provider}
                   setProvider={setProvider}
@@ -157,6 +162,7 @@ function App() {
                 <ResultsDisplay
                   queryResult={queryResult}
                   executionResult={executionResult}
+                  realtimeLogs={realtimeLogs}
                 />
                 <LatestQueries 
                   queries={latestQueries} 
@@ -191,6 +197,7 @@ function App() {
                 <VectorSearch
                   setQueryResult={setQueryResult}
                   setExecutionResult={setExecutionResult}
+                  setRealtimeLogs={setRealtimeLogs}
                   addLatestQuery={addLatestQuery}
                   provider={provider}
                   setProvider={setProvider}
@@ -202,6 +209,7 @@ function App() {
                 <ResultsDisplay
                   queryResult={queryResult}
                   executionResult={executionResult}
+                  realtimeLogs={realtimeLogs}
                 />
                 <LatestQueries 
                   queries={latestQueries} 

@@ -642,6 +642,26 @@ function VectorSearch({
         </Box>
       )}
       
+      {/* Generated Query TextArea */}
+      {generatedQuery && !runnedQuery && (
+        <TextField
+          label="Generated Cypher Query"
+          value={generatedQuery}
+          onChange={(e) => setGeneratedQuery(e.target.value)}
+          fullWidth
+          multiline
+          rows={4}
+          margin="normal"
+        />
+      )}
+      
+      {error && (
+        <Typography color="error" align="center" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
+
+      {/* Log sections moved to bottom */}
       {/* Real-time logs from EventSource */}
       {verbose && (
         <Box
@@ -699,24 +719,6 @@ function VectorSearch({
             {logs}
           </pre>
         </Box>
-      )}
-      
-      {error && (
-        <Typography color="error" align="center" sx={{ mt: 2 }}>
-          {error}
-        </Typography>
-      )}
-      {/* Generated Query TextArea */}
-      {generatedQuery && !runnedQuery && (
-        <TextField
-          label="Generated Cypher Query"
-          value={generatedQuery}
-          onChange={(e) => setGeneratedQuery(e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          margin="normal"
-        />
       )}
     </div>
   );
