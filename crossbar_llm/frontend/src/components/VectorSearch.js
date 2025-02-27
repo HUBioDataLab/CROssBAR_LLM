@@ -60,6 +60,8 @@ function VectorSearch({
       'gpt-3.5-turbo-16k',
     ],
     Anthropic: [
+      'claude-3-5-sonnet-latest',
+      'claude-3-7-sonnet-latest',
       'claude-3-5-sonnet-20240620',
       'claude-3-opus-20240229',
       'claude-3-sonnet-20240229',
@@ -77,6 +79,10 @@ function VectorSearch({
       "deepseek/deepseek-chat",
     ], 
     Google: [
+      'gemini-2.0-flash-thinking-exp-01-21',
+      'gemini-2.0-pro-exp-02-05',
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-lite',
       'gemini-pro',
       'gemini-1.5-pro-latest',
       'gemini-1.5-flash-latest',
