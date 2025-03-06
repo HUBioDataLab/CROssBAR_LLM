@@ -35,7 +35,7 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
         </Card>
       )}
 
-      {(queryResult || executionResult?.result) && (
+      {(executionResult?.result) && (
         <Card sx={{ mb: 2 }}>
           <CardContent>
             {queryResult && (
