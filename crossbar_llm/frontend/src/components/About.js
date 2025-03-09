@@ -325,7 +325,7 @@ function About({ onClose }) {
       
       <Box sx={{ mt: 4, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          CROssBAR LLM Interface • Developed by EMBL-EBI and METU
+          CROssBAR LLM Interface • Developed by HUBIODATALAB
         </Typography>
         
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
@@ -334,7 +334,7 @@ function About({ onClose }) {
             size="small" 
             startIcon={<LanguageIcon />}
             component={Link}
-            href="https://crossbar.kansil.org/"
+            href="https://crossbarv2.hubiodatalab.com/"
             target="_blank"
             rel="noopener"
             sx={{ borderRadius: '10px' }}
@@ -347,7 +347,7 @@ function About({ onClose }) {
             size="small" 
             startIcon={<GitHubIcon />}
             component={Link}
-            href="https://github.com/cansyl/CROssBAR"
+            href="https://github.com/HUBIODATALAB/crossbar_llm"
             target="_blank"
             rel="noopener"
             sx={{ borderRadius: '10px' }}
