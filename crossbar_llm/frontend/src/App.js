@@ -1,27 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, CssBaseline, Box, Container, Tabs, Tab, Grid2, Modal, Typography, Button, IconButton } from '@mui/material';
+import { 
+  ThemeProvider, 
+  CssBaseline, 
+  Box, 
+  Container, 
+  Typography, 
+  Button, 
+  IconButton,
+  Drawer,
+  AppBar,
+  Toolbar,
+  Divider,
+  useMediaQuery,
+  Paper,
+  Fade,
+  Avatar,
+  Tooltip,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemButton
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import MenuIcon from '@mui/icons-material/Menu';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { getTheme } from './theme';
 import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
 import About from './components/About';
 import VectorSearch from './components/VectorSearch';
 import LatestQueries from './components/LatestQueries';
+import Home from './components/Home';
 import axios from './services/api';
 
 function App() {
-  const [tabValue, setTabValue] = useState('query');
+  const [tabValue, setTabValue] = useState('home');
   const [queryResult, setQueryResult] = useState(null);
   const [executionResult, setExecutionResult] = useState(null);
   const [realtimeLogs, setRealtimeLogs] = useState('');
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [latestQueries, setLatestQueries] = useState([]);
   const [selectedQuery, setSelectedQuery] = useState(null);
+  const [question, setQuestion] = useState('');
   const [provider, setProvider] = useState('');
   const [llmType, setLlmType] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(true);
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('theme-mode');
     if (savedMode) {
@@ -31,6 +64,7 @@ function App() {
   });
 
   const theme = React.useMemo(() => getTheme(mode), [mode]);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -61,6 +95,16 @@ function App() {
       setShowAboutModal(true);
       localStorage.setItem('hasVisited', 'true');
     }
+    
+    // Always set the tab to home when the app loads
+    setTabValue('home');
+    
+    // Check if there's a prefilled query from the home page
+    const prefillQuery = localStorage.getItem('prefillQuery');
+    if (prefillQuery) {
+      setQuestion(prefillQuery);
+      localStorage.removeItem('prefillQuery');
+    }
   }, []);
 
   const handleTabChange = (event, newValue) => {
@@ -68,6 +112,19 @@ function App() {
     setQueryResult(null);
     setExecutionResult(null);
     setRealtimeLogs('');
+    setDrawerOpen(false);
+    
+    // Reset question field when changing tabs
+    setQuestion('');
+    
+    // Check if there's a prefilled query when switching to the query tab
+    if (newValue === 'query') {
+      const prefillQuery = localStorage.getItem('prefillQuery');
+      if (prefillQuery) {
+        setQuestion(prefillQuery);
+        localStorage.removeItem('prefillQuery');
+      }
+    }
   };
 
   const handleCloseModal = () => {
@@ -75,7 +132,16 @@ function App() {
   };
 
   const addLatestQuery = (queryDetails) => {
-    if (latestQueries.length >= 5) {
+    // Check if this is a duplicate query (same question and queryType)
+    const isDuplicate = latestQueries.some(q => 
+      q.question === queryDetails.question && 
+      q.queryType === queryDetails.queryType
+    );
+    
+    // If it's a duplicate, don't add it
+    if (isDuplicate) return;
+    
+    if (latestQueries.length >= 10) {
       setLatestQueries([...latestQueries.slice(1), queryDetails]);
     } else {
       setLatestQueries([...latestQueries, queryDetails]);
@@ -84,6 +150,21 @@ function App() {
 
   const handleSelectQuery = (query) => {
     setSelectedQuery(query);
+    setQuestion(query.question);
+    
+    // If it's a generated query, set the query result
+    if (query.queryType === 'generated') {
+      setQueryResult(query.query);
+      setExecutionResult(null);
+    } 
+    // If it's a run query, set both query result and execution result
+    else if (query.queryType === 'run') {
+      setQueryResult(query.query);
+      setExecutionResult({
+        response: query.response,
+        result: [] // We don't store the result in latestQueries, so use an empty array
+      });
+    }
   }
 
   const toggleColorMode = () => {
@@ -92,169 +173,455 @@ function App() {
     localStorage.setItem('theme-mode', newMode);
   };
 
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const toggleDrawerVisibility = () => {
+    setDrawerVisible(!drawerVisible);
+  };
+
+  const renderTabContent = () => {
+    switch(tabValue) {
+      case 'home':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <Home handleTabChange={handleTabChange} />
+            </Box>
+          </Fade>
+        );
+      case 'query':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <QueryInput
+                setQueryResult={setQueryResult}
+                setExecutionResult={setExecutionResult}
+                setRealtimeLogs={setRealtimeLogs}
+                addLatestQuery={addLatestQuery}
+                provider={provider}
+                setProvider={setProvider}
+                llmType={llmType}
+                setLlmType={setLlmType}
+                apiKey={apiKey}
+                setApiKey={setApiKey}
+                question={question}
+                setQuestion={setQuestion}
+              />
+              <ResultsDisplay
+                queryResult={queryResult}
+                executionResult={executionResult}
+                realtimeLogs={realtimeLogs}
+              />
+              <LatestQueries 
+                queries={latestQueries} 
+                onSelectQuery={handleSelectQuery}
+              />
+            </Box>
+          </Fade>
+        );
+      case 'vectorSearch':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <VectorSearch
+                setQueryResult={setQueryResult}
+                setExecutionResult={setExecutionResult}
+                setRealtimeLogs={setRealtimeLogs}
+                addLatestQuery={addLatestQuery}
+                provider={provider}
+                setProvider={setProvider}
+                llmType={llmType}
+                setLlmType={setLlmType}
+                apiKey={apiKey}
+                setApiKey={setApiKey}
+                question={question}
+                setQuestion={setQuestion}
+              />
+              <ResultsDisplay
+                queryResult={queryResult}
+                executionResult={executionResult}
+                realtimeLogs={realtimeLogs}
+              />
+              <LatestQueries 
+                queries={latestQueries} 
+                onSelectQuery={handleSelectQuery}
+              />
+            </Box>
+          </Fade>
+        );
+      case 'about':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <About />
+            </Box>
+          </Fade>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const drawer = (
+    <Box sx={{ width: 280, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        py: 2,
+        borderBottom: theme => `1px solid ${theme.palette.divider}`
+      }}>
+        <Typography variant="h6" sx={{ 
+          fontWeight: 600, 
+          fontFamily: "'Poppins', 'Roboto', sans-serif",
+          background: mode === 'dark' 
+            ? 'linear-gradient(90deg, #64B5F6 0%, #B39DDB 100%)' 
+            : 'linear-gradient(90deg, #0071e3 0%, #5e5ce6 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.01em'
+        }}>
+          CROssBAR LLM
+        </Typography>
+      </Box>
+      
+      <Box sx={{ flexGrow: 1, px: 2, pt: 1.5, overflowY: 'auto' }}>
+        <List sx={{ p: 0, mt: 0 }}>
+          <ListItem disablePadding sx={{ mt: 0 }}>
+            <ListItemButton 
+              onClick={() => handleTabChange(null, 'home')}
+              selected={tabValue === 'home'}
+              sx={{ 
+                borderRadius: '12px',
+                py: 1.5,
+                '&.Mui-selected': {
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(100, 181, 246, 0.15)' 
+                    : 'rgba(0, 113, 227, 0.08)',
+                  '&:hover': {
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(100, 181, 246, 0.2)' 
+                      : 'rgba(0, 113, 227, 0.12)',
+                  }
+                }
+              }}
+            >
+              <ListItemIcon sx={{ 
+                minWidth: 40,
+                color: tabValue === 'home' 
+                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                  : 'inherit'
+              }}>
+                <HomeOutlinedIcon />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Home" 
+                primaryTypographyProps={{ 
+                  fontWeight: tabValue === 'home' ? 600 : 400,
+                  fontFamily: "'Poppins', 'Roboto', sans-serif",
+                  color: tabValue === 'home' 
+                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                    : 'inherit'
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+          
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <ListItemButton 
+              onClick={() => handleTabChange(null, 'query')}
+              selected={tabValue === 'query'}
+              sx={{ 
+                borderRadius: '12px',
+                py: 1.5,
+                '&.Mui-selected': {
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(100, 181, 246, 0.15)' 
+                    : 'rgba(0, 113, 227, 0.08)',
+                  '&:hover': {
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(100, 181, 246, 0.2)' 
+                      : 'rgba(0, 113, 227, 0.12)',
+                  }
+                }
+              }}
+            >
+              <ListItemIcon sx={{ 
+                minWidth: 40,
+                color: tabValue === 'query' 
+                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                  : 'inherit'
+              }}>
+                <ChatOutlinedIcon />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Query" 
+                primaryTypographyProps={{ 
+                  fontWeight: tabValue === 'query' ? 600 : 400,
+                  fontFamily: "'Poppins', 'Roboto', sans-serif",
+                  color: tabValue === 'query' 
+                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                    : 'inherit'
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+          
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <ListItemButton 
+              onClick={() => handleTabChange(null, 'vectorSearch')}
+              selected={tabValue === 'vectorSearch'}
+              sx={{ 
+                borderRadius: '12px',
+                py: 1.5,
+                '&.Mui-selected': {
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(100, 181, 246, 0.15)' 
+                    : 'rgba(0, 113, 227, 0.08)',
+                  '&:hover': {
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(100, 181, 246, 0.2)' 
+                      : 'rgba(0, 113, 227, 0.12)',
+                  }
+                }
+              }}
+            >
+              <ListItemIcon sx={{ 
+                minWidth: 40,
+                color: tabValue === 'vectorSearch' 
+                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                  : 'inherit'
+              }}>
+                <SearchOutlinedIcon />
+              </ListItemIcon>
+              <ListItemText 
+                primary="Vector Search" 
+                primaryTypographyProps={{ 
+                  fontWeight: tabValue === 'vectorSearch' ? 600 : 400,
+                  fontFamily: "'Poppins', 'Roboto', sans-serif",
+                  color: tabValue === 'vectorSearch' 
+                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                    : 'inherit'
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+          
+          <ListItem disablePadding>
+            <ListItemButton 
+              onClick={() => handleTabChange(null, 'about')}
+              selected={tabValue === 'about'}
+              sx={{ 
+                borderRadius: '12px',
+                py: 1.5,
+                '&.Mui-selected': {
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(100, 181, 246, 0.15)' 
+                    : 'rgba(0, 113, 227, 0.08)',
+                  '&:hover': {
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(100, 181, 246, 0.2)' 
+                      : 'rgba(0, 113, 227, 0.12)',
+                  }
+                }
+              }}
+            >
+              <ListItemIcon sx={{ 
+                minWidth: 40,
+                color: tabValue === 'about' 
+                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                  : 'inherit'
+              }}>
+                <InfoOutlinedIcon />
+              </ListItemIcon>
+              <ListItemText 
+                primary="About" 
+                primaryTypographyProps={{ 
+                  fontWeight: tabValue === 'about' ? 600 : 400,
+                  fontFamily: "'Poppins', 'Roboto', sans-serif",
+                  color: tabValue === 'about' 
+                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
+                    : 'inherit'
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Box>
+      
+      <Box sx={{ 
+        p: 2, 
+        borderTop: theme => `1px solid ${theme.palette.divider}`,
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        <Typography variant="caption" sx={{ 
+          color: 'text.secondary', 
+          textAlign: 'center',
+          fontFamily: "'Poppins', 'Roboto', sans-serif"
+        }}>
+          CROssBAR LLM v1.0
+        </Typography>
+      </Box>
+    </Box>
+  );
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', mt: { xs: 4, sm: 6, md: 10 }, mb: { xs: 4, sm: 6, md: 10 }, position: 'relative' }}>
-        <IconButton
-          onClick={toggleColorMode}
-          sx={{
-            position: 'absolute',
-            right: 16,
-            top: 16,
-            color: 'text.primary'
+      <Box sx={{ 
+        display: 'flex', 
+        minHeight: '100vh',
+        background: theme => theme.palette.mode === 'dark' 
+          ? 'linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%)' 
+          : 'linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%)'
+      }}>
+        <AppBar 
+          position="fixed" 
+          elevation={0}
+          sx={{ 
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            borderBottom: theme => `1px solid ${theme.palette.divider}`,
+            width: '100%'
           }}
         >
-          {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-        </IconButton>
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          <Typography 
-            variant="h2" 
-            align="center" 
-            gutterBottom 
-            sx={{ 
-              fontWeight: 'bold',
-              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' }
-            }}
-          >
-            CROssBAR LLM Query Interface
-          </Typography>
-          <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 2, '.MuiTab-root': { fontWeight: 'bold' } }}>
-            <Tab label="LLM Query" value="query" />
-            <Tab label="Vector Search" value="vectorSearch" />
-            <Tab label="About" value="about" />
-          </Tabs>
-          {tabValue === 'query' && (
-            <Grid2 
-              container 
-              spacing={2} 
-              alignItems="flex-start"
-              sx={{ 
-                flexDirection: { xs: 'column', md: 'row' },
-                justifyContent: 'center'
-              }}
-            >
-              <Grid2 
-                item 
-                xs={12} 
-                sx={{ 
-                  maxWidth: { 
-                    xs: '100%', 
-                    sm: '90%', 
-                    md: '1000px' 
-                  },
-                  mx: 'auto',
-                  px: { xs: 1, sm: 2 }
-                }}
-              >
-                <QueryInput
-                  setQueryResult={setQueryResult}
-                  setExecutionResult={setExecutionResult}
-                  setRealtimeLogs={setRealtimeLogs}
-                  addLatestQuery={addLatestQuery}
-                  provider={provider}
-                  setProvider={setProvider}
-                  llmType={llmType}
-                  setLlmType={setLlmType}
-                  apiKey={apiKey}
-                  setApiKey={setApiKey}
-                />
-                <ResultsDisplay
-                  queryResult={queryResult}
-                  executionResult={executionResult}
-                  realtimeLogs={realtimeLogs}
-                />
-                <LatestQueries 
-                  queries={latestQueries} 
-                  onSelectQuery={handleSelectQuery}
-                />
-              </Grid2>
-            </Grid2>
-          )}
-          {tabValue === 'vectorSearch' && 
-            <Grid2 
-              container 
-              spacing={2} 
-              alignItems="flex-start"
-              sx={{ 
-                flexDirection: { xs: 'column', md: 'row' },
-                justifyContent: 'center'
-              }}
-            >
-              <Grid2 
-                item 
-                xs={12} 
-                sx={{ 
-                  maxWidth: { 
-                    xs: '100%', 
-                    sm: '90%', 
-                    md: '1000px' 
-                  },
-                  mx: 'auto',
-                  px: { xs: 1, sm: 2 }
-                }}
-              >
-                <VectorSearch
-                  setQueryResult={setQueryResult}
-                  setExecutionResult={setExecutionResult}
-                  setRealtimeLogs={setRealtimeLogs}
-                  addLatestQuery={addLatestQuery}
-                  provider={provider}
-                  setProvider={setProvider}
-                  llmType={llmType}
-                  setLlmType={setLlmType}
-                  apiKey={apiKey}
-                  setApiKey={setApiKey}
-                />
-                <ResultsDisplay
-                  queryResult={queryResult}
-                  executionResult={executionResult}
-                  realtimeLogs={realtimeLogs}
-                />
-                <LatestQueries 
-                  queries={latestQueries} 
-                  onSelectQuery={handleSelectQuery}
-                />
-              </Grid2>
-            </Grid2>
-          }
-          {tabValue === 'about' && <About />}
-        </Container>
-      </Box>
-      <Modal
-        open={showAboutModal}
-        onClose={handleCloseModal}
-        aria-describedby="about-modal-description"
-      >
-        <Box sx={{ 
-          position: 'absolute', 
-          top: '50%', 
-          left: '50%', 
-          transform: 'translate(-50%, -50%)', 
-          width: '90%', 
-          maxWidth: 600, 
-          maxHeight: '90%', 
-          bgcolor: 'background.paper', 
-          boxShadow: 24, 
-          p: 4, 
-          overflow: 'auto',
-          borderRadius: 2,
-          position: 'relative'
-        }}>
-          <IconButton
-            onClick={handleCloseModal}
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                backgroundColor: theme => theme.palette.mode === 'dark' 
+                  ? 'rgba(100, 181, 246, 0.1)' 
+                  : 'rgba(0, 113, 227, 0.05)',
+                borderRadius: '12px',
+                px: 2,
+                py: 0.5
+              }}>
+                <Typography variant="h6" noWrap component="div" sx={{ 
+                  fontWeight: 700,
+                  display: { xs: 'none', sm: 'block' },
+                  background: mode === 'dark' 
+                    ? 'linear-gradient(90deg, #64B5F6 0%, #B39DDB 100%)' 
+                    : 'linear-gradient(90deg, #0071e3 0%, #5e5ce6 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  letterSpacing: '-0.01em'
+                }}>
+                  CROssBAR LLM
+                </Typography>
+              </Box>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Tooltip title={drawerVisible ? "Hide sidebar" : "Show sidebar"}>
+                <IconButton 
+                  onClick={toggleDrawerVisibility} 
+                  color="inherit"
+                  sx={{ 
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255, 255, 255, 0.05)' 
+                      : 'rgba(0, 0, 0, 0.03)',
+                    backdropFilter: 'blur(10px)',
+                    border: theme => `1px solid ${theme.palette.mode === 'dark' 
+                      ? 'rgba(255, 255, 255, 0.1)' 
+                      : 'rgba(0, 0, 0, 0.05)'}`,
+                    '&:hover': {
+                      backgroundColor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(255, 255, 255, 0.1)' 
+                        : 'rgba(0, 0, 0, 0.05)',
+                    }
+                  }}
+                >
+                  {drawerVisible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+                <IconButton 
+                  onClick={toggleColorMode} 
+                  color="inherit"
+                  sx={{ 
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255, 255, 255, 0.05)' 
+                      : 'rgba(0, 0, 0, 0.03)',
+                    backdropFilter: 'blur(10px)',
+                    border: theme => `1px solid ${theme.palette.mode === 'dark' 
+                      ? 'rgba(255, 255, 255, 0.1)' 
+                      : 'rgba(0, 0, 0, 0.05)'}`,
+                    '&:hover': {
+                      backgroundColor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(255, 255, 255, 0.1)' 
+                        : 'rgba(0, 0, 0, 0.05)',
+                    }
+                  }}
+                >
+                  {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        
+        {drawerVisible && (
+          <Drawer
+            variant="permanent"
+            open={true}
             sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: 'grey.500'
+              width: 280,
+              flexShrink: 0,
+              [`& .MuiDrawer-paper`]: { 
+                width: 280,
+                boxSizing: 'border-box',
+                border: 'none',
+                background: theme => theme.palette.mode === 'dark' 
+                  ? 'rgba(28, 28, 30, 0.8)' 
+                  : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+              }
             }}
           >
-            <CloseIcon />
-          </IconButton>
-          <About />
+            {drawer}
+          </Drawer>
+        )}
+        
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: { xs: '100%', md: drawerVisible ? `calc(100% - 280px)` : '100%' },
+            mt: 6,
+            mb: 4,
+            maxWidth: drawerVisible ? '1200px' : '1480px',
+            mx: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'all 0.3s ease-in-out'
+          }}
+        >
+          <Box sx={{ flexGrow: 1 }}>
+            {renderTabContent()}
+            
+            {showAboutModal && (
+              <About onClose={handleCloseModal} />
+            )}
+          </Box>
+          
+          <Box sx={{ 
+            mt: 4,
+            pt: 2, 
+            borderTop: theme => `1px solid ${theme.palette.divider}`,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              © {new Date().getFullYear()} CROssBAR
+            </Typography>
+          </Box>
         </Box>
-      </Modal>
+      </Box>
     </ThemeProvider>
   );
 }
