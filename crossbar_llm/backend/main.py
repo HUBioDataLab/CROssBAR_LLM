@@ -28,7 +28,6 @@ origins = [
     "http://localhost:8501",  # React app running on localhost
     "http://127.0.0.1:8501",
     "https://crossbarv2.hubiodatalab.com/llm",
-    "http://localhost:3000"
 ]
 
 app = FastAPI()
