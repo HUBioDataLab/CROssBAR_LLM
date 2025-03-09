@@ -1,9 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TextField, List, ListItem, ListItemText, Paper } from '@mui/material';
+import { 
+  TextField, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Paper, 
+  Typography,
+  Box,
+  useTheme,
+  alpha,
+  Fade,
+  Portal,
+  Tooltip,
+  Zoom,
+  Slide,
+  Button,
+  Collapse,
+  Divider,
+  IconButton
+} from '@mui/material';
 import Fuse from 'fuse.js';
 import { loadSuggestions } from '../utils/loadSuggestions';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import CloseIcon from '@mui/icons-material/Close';
 
 function AutocompleteTextField({ value, setValue, label, placeholder }) {
+  const theme = useTheme();
   const [suggestions, setSuggestions] = useState([]);
   const [displaySuggestions, setDisplaySuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -11,8 +35,12 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const textFieldRef = useRef(null);
   const suggestionsRef = useRef(null);
+  const containerRef = useRef(null);
+  const [suggestionsPosition, setSuggestionsPosition] = useState({ top: 0, left: 0, width: 0 });
   const ITEM_HEIGHT = 48;
   const [mentions, setMentions] = useState([]); // [{start, end, state}] where state is 'typing', 'selecting', or 'completed'
+  const [showHint, setShowHint] = useState(true);
+  const [expandedHint, setExpandedHint] = useState(false);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -21,6 +49,18 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     };
     fetchSuggestions();
   }, []);
+
+  // Update suggestions position when they are shown
+  useEffect(() => {
+    if (showSuggestions && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setSuggestionsPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [showSuggestions]);
 
   const fuse = new Fuse(suggestions, {
     includeScore: true,
@@ -46,12 +86,12 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
       // Mentioned text
       const mentionText = value.slice(mention.start, mention.end);
       const color = 
-        mention.state === 'typing' ? '#ff6b6b' : 
-        mention.state === 'selecting' ? '#51cf66' : 
-        '#000000';
+        mention.state === 'typing' ? theme.palette.error.main : 
+        mention.state === 'selecting' ? theme.palette.success.main : 
+        theme.palette.text.primary;
 
       parts.push(
-        <span key={`mention-${mention.start}`} style={{ color }}>
+        <span key={`mention-${mention.start}`} style={{ color, fontWeight: 500 }}>
           {mentionText}
         </span>
       );
@@ -71,12 +111,32 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     return parts;
   };
 
+  // Initial setup - only show hint if field is empty
+  useEffect(() => {
+    // Only show hint initially if the field is empty
+    if (!value) {
+      setShowHint(true);
+    } else {
+      setShowHint(false);
+    }
+  }, []);
+
+  // Additional effect to monitor value changes - show hint when field becomes empty
+  useEffect(() => {
+    // If value becomes empty, show the hint
+    if (value === '') {
+      setShowHint(true);
+    }
+  }, [value]);
+
   const handleInputChange = (event) => {
     const newValue = event.target.value;
     const cursorPos = event.target.selectionStart;
     setValue(newValue);
     setCursorPosition(cursorPos);
     setSelectedIndex(0);
+    
+    // No longer hiding the hint when typing - it stays visible
 
     // Clean up mentions when text is deleted
     setMentions(prevMentions => 
@@ -217,6 +277,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   };
 
   const handleSuggestionClick = (suggestion) => {
+    // Replace underscores with spaces when using the suggestion in the text field
     suggestion = suggestion.replaceAll('_', ' ');
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
@@ -253,7 +314,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative' }}>
       <div style={{ position: 'relative' }}>
         <TextField
           inputRef={textFieldRef}
@@ -262,6 +323,12 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onFocus={() => {
+            // Only show hint on focus if the field is empty and hint is not already shown
+            if (!value && !showHint) {
+              setShowHint(true);
+            }
+          }}
           fullWidth
           multiline
           rows={4}
@@ -269,7 +336,19 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
           sx={{
             '& .MuiInputBase-input': {
               color: 'transparent',
-              caretColor: 'black',
+              caretColor: theme.palette.primary.main,
+              fontFamily: theme.typography.fontFamily,
+              fontSize: '1rem',
+            },
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '12px',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`,
+              },
+              '&.Mui-focused': {
+                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.2)}`,
+              }
             },
           }}
         />
@@ -283,42 +362,201 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
             pointerEvents: 'none',
             padding: '16.5px 14px',
             marginTop: '16px',
-            fontFamily: 'inherit',
-            fontSize: 'inherit',
+            fontFamily: theme.typography.fontFamily,
+            fontSize: '1rem',
             lineHeight: '1.5',
             whiteSpace: 'pre-wrap',
           }}
         >
-          {renderStyledText()}
+          {value ? renderStyledText() : (
+            <span style={{ color: theme.palette.text.disabled }}>
+              {placeholder}
+            </span>
+          )}
         </div>
       </div>
-      {showSuggestions && displaySuggestions.length > 0 && (
-        <Paper
-          ref={suggestionsRef}
-          style={{
-            position: 'absolute',
-            zIndex: 9999,
-            maxHeight: 200,
-            overflowY: 'auto',
-            width: '100%',
-          }}
+      
+      {/* Enhanced Autocomplete hint with slide animation */}
+      {showHint && (
+        <Slide 
+          direction="up" 
+          in={showHint} 
+          timeout={400} 
+          unmountOnExit
+          mountOnEnter
         >
-          <List>
-            {displaySuggestions.map((suggestion, index) => (
-              <ListItem
-                button
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                selected={index === selectedIndex}
-                style={{
-                  backgroundColor: index === selectedIndex ? '#e3f2fd' : 'transparent'
-                }}
-              >
-                <ListItemText primary={suggestion} />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
+          <Paper
+            elevation={1}
+            sx={{
+              mt: 1,
+              mb: 2,
+              p: 1,
+              borderRadius: '8px',
+              border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+              backgroundColor: alpha(theme.palette.info.main, 0.05),
+              position: 'relative',
+              transformOrigin: 'bottom',
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <InfoOutlinedIcon 
+                  fontSize="small" 
+                  sx={{ 
+                    fontSize: '18px', 
+                    mr: 1,
+                    mt: 0.2, 
+                    color: theme.palette.info.main 
+                  }} 
+                />
+                <Box>
+                  <Typography 
+                    variant="subtitle2" 
+                    sx={{ 
+                      color: theme.palette.info.main,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Entity Autocomplete Available
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: theme.palette.text.secondary,
+                      fontWeight: 400,
+                    }}
+                  >
+                    Type @ followed by at least 3 characters to search for biomedical entities
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Button
+                  size="small"
+                  color="info"
+                  sx={{ minWidth: '30px', mr: 1 }}
+                  onClick={() => {
+                    setExpandedHint(!expandedHint);
+                  }}
+                  endIcon={expandedHint ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                >
+                  {expandedHint ? "Less" : "More"}
+                </Button>
+                <IconButton 
+                  size="small" 
+                  onClick={() => setShowHint(false)}
+                  sx={{ color: theme.palette.text.secondary }}
+                  aria-label="Close hint"
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Box>
+            
+            <Collapse in={expandedHint} timeout="auto">
+              <Divider sx={{ my: 1.5 }} />
+              <Box sx={{ py: 0.5 }}>
+                <Typography variant="body2" paragraph sx={{ mb: 1 }}>
+                  <strong>How to use autocomplete:</strong>
+                </Typography>
+                <Box component="ol" sx={{ pl: 2, mt: 0, mb: 1.5 }}>
+                  <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
+                    Type <code style={{ backgroundColor: alpha(theme.palette.primary.main, 0.1), padding: '2px 4px', borderRadius: '3px' }}>@</code> symbol followed by the entity name you're looking for.
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
+                    After typing at least 3 characters, a dropdown menu will appear with matching entities.
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
+                    Use <strong>arrow keys</strong> to navigate the suggestions, <strong>Enter</strong> or <strong>Tab</strong> to select.
+                  </Typography>
+                  <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
+                    You can also click on a suggestion to select it.
+                  </Typography>
+                </Box>
+                <Typography variant="body2" paragraph sx={{ mb: 1 }}>
+                  <strong>Available entity types include:</strong> genes, proteins, diseases, drugs, pathways and more.
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mt: 1 }}>
+                  This feature helps ensure accurate entity names in your queries and improves search results.
+                </Typography>
+              </Box>
+            </Collapse>
+          </Paper>
+        </Slide>
+      )}
+      
+      {showSuggestions && displaySuggestions.length > 0 && (
+        <Portal>
+          <Fade in={showSuggestions} timeout={200}>
+            <Paper
+              ref={suggestionsRef}
+              elevation={6}
+              sx={{
+                position: 'absolute',
+                zIndex: 9999,
+                maxHeight: 350,
+                overflowY: 'auto',
+                width: suggestionsPosition.width,
+                top: suggestionsPosition.top,
+                left: suggestionsPosition.left,
+                borderRadius: '12px',
+                boxShadow: theme.shadows[8],
+                '&::-webkit-scrollbar': {
+                  width: '8px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                  borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: alpha(theme.palette.background.paper, 0.5),
+                }
+              }}
+            >
+              <List sx={{ py: 1 }}>
+                {displaySuggestions.map((suggestion, index) => (
+                  <ListItem
+                    button
+                    key={index}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    selected={index === selectedIndex}
+                    sx={{
+                      py: 1,
+                      px: 2,
+                      transition: 'all 0.15s ease-in-out',
+                      borderLeft: index === selectedIndex 
+                        ? `4px solid ${theme.palette.primary.main}` 
+                        : '4px solid transparent',
+                      backgroundColor: index === selectedIndex 
+                        ? alpha(theme.palette.primary.main, 0.08)
+                        : 'transparent',
+                      '&:hover': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                      }
+                    }}
+                  >
+                    <ListItemText 
+                      primary={
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontWeight: index === selectedIndex ? 500 : 400,
+                            color: index === selectedIndex 
+                              ? theme.palette.primary.main 
+                              : theme.palette.text.primary
+                          }}
+                        >
+                          {suggestion.replace(/_/g, ' ')}
+                        </Typography>
+                      } 
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Fade>
+        </Portal>
       )}
     </div>
   );

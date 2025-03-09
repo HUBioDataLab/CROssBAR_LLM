@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Button,
   Box,
@@ -12,11 +12,33 @@ import {
   Checkbox,
   CircularProgress,
   useTheme,
+  Paper,
+  Collapse,
+  Alert,
+  Tooltip,
+  IconButton,
+  Grid,
+  Zoom,
+  Divider,
+  Chip,
+  alpha,
+  Switch,
+  Fade,
+  InputAdornment,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SendIcon from '@mui/icons-material/Send';
+import TuneIcon from '@mui/icons-material/Tune';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import StorageIcon from '@mui/icons-material/Storage';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import TerminalIcon from '@mui/icons-material/Terminal';
+import KeyIcon from '@mui/icons-material/Key';
 
 function VectorSearch({ 
   setQueryResult, 
@@ -27,9 +49,11 @@ function VectorSearch({
   llmType,
   setLlmType,
   apiKey,
-  setApiKey 
+  setApiKey,
+  question,
+  setQuestion,
+  setRealtimeLogs
 }) {
-  const [question, setQuestion] = useState('');
   const [topK, setTopK] = useState(5);
   const [verbose, setVerbose] = useState(false);
   const [vectorCategory, setVectorCategory] = useState('');
@@ -41,8 +65,11 @@ function VectorSearch({
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showDebugLogs, setShowDebugLogs] = useState(false);
+  const [highlightSettings, setHighlightSettings] = useState(false);
   const [logs, setLogs] = useState('');
-  const [realtimeLogs, setRealtimeLogs] = useState('');
+  const [localRealtimeLogs, setLocalRealtimeLogs] = useState('');
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const theme = useTheme();
@@ -121,84 +148,183 @@ function VectorSearch({
   
   const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b', 'deepseek/deepseek-r1'];
   
-  // Setup real-time log streaming with EventSource
-  const setupLogStream = () => {
-    if (verbose) {
-      console.log('Setting up log stream for vector search verbose mode');
-      // Close any existing connection
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-      
-      setRealtimeLogs('Connecting to log stream...\n');
-      
-      // Create new EventSource connection with a timestamp to avoid caching
-      const timestamp = new Date().getTime();
-      eventSourceRef.current = new EventSource(`/stream-logs?t=${timestamp}`);
-      
-      eventSourceRef.current.onopen = () => {
-        setRealtimeLogs(prev => prev + 'Log stream connected successfully\n');
-      };
-      
-      eventSourceRef.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          setRealtimeLogs(prev => prev + data.log + '\n');
-          
-          // Auto-scroll to bottom of log container
-          if (logContainerRef.current) {
-            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
-          }
-        } catch (e) {
-          console.error('Error parsing log data:', e);
-          setRealtimeLogs(prev => prev + `Error parsing log: ${e.message}\n`);
-        }
-      };
-      
-      eventSourceRef.current.onerror = (error) => {
-        console.error('EventSource failed:', error);
-        setRealtimeLogs(prev => prev + `EventSource error: Connection to log stream failed or was closed\n`);
-        // Try to reconnect after a delay
-        setTimeout(() => {
-          if (verbose && !eventSourceRef.current) {
-            setupLogStream();
-          }
-        }, 5000);
-      };
+  // Update both local and app-level realtime logs
+  const updateRealtimeLogs = useCallback((newLogs) => {
+    if (typeof newLogs === 'function') {
+      setLocalRealtimeLogs(newLogs);
+      setRealtimeLogs(newLogs);
+    } else {
+      setLocalRealtimeLogs(newLogs);
+      setRealtimeLogs(newLogs);
+    }
+  }, [setRealtimeLogs]);
+  
+  // Clear logs
+  const clearLogs = useCallback(() => {
+    setLocalRealtimeLogs('');
+    setRealtimeLogs('');
+    console.log('Logs cleared');
+  }, [setRealtimeLogs]);
+  
+  // Function to check if settings are valid
+  const isSettingsValid = () => {
+    // Check if provider is selected
+    if (!provider) return false;
+    
+    // Check if model is selected
+    if (!llmType) return false;
+    
+    // Check if API key is provided for providers that need it
+    if ((provider === 'OpenAI' || provider === 'Anthropic' || provider === 'Cohere') && !apiKey) {
+      return false;
+    }
+    
+    // Check if topK is set
+    if (!topK) return false;
+    
+    return true;
+  };
+  
+  // Highlight settings button when hovering over action buttons if settings are not valid
+  const handleActionButtonHover = (isHovering) => {
+    if (!isSettingsValid() && isHovering) {
+      setHighlightSettings(true);
+    } else if (!isHovering) {
+      // Use a timeout to prevent flickering when moving between buttons
+      setTimeout(() => {
+        setHighlightSettings(false);
+      }, 300);
     }
   };
   
+  // Reset highlight when settings become valid
+  useEffect(() => {
+    if (isSettingsValid()) {
+      setHighlightSettings(false);
+    }
+  }, [provider, llmType, apiKey, topK]);
+  
+  // Enhanced log streaming setup with better error handling and reconnection
+  const setupLogStream = () => {
+    if (verbose) {
+      console.log('Setting up log stream for vector search verbose mode');
+      
+      // Close any existing connection but don't clear logs
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      
+      // Don't add any initialization messages
+      
+      try {
+        // Create new EventSource connection with a timestamp to avoid caching
+        const timestamp = new Date().getTime();
+        eventSourceRef.current = new EventSource(`/stream-logs?t=${timestamp}`);
+        
+        // Connection opened successfully - no message needed
+        eventSourceRef.current.onopen = () => {
+          // Just auto-scroll to bottom of log container
+          if (logContainerRef.current) {
+            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+          }
+        };
+        
+        // Handle incoming messages
+        eventSourceRef.current.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.log) {
+              updateRealtimeLogs(prev => prev + data.log + '\n');
+              
+              // Auto-scroll to bottom of log container
+              if (logContainerRef.current) {
+                logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing log data:', e);
+            // Don't add error messages to the logs
+          }
+        };
+        
+        // Handle connection errors - don't add messages about connection issues
+        eventSourceRef.current.onerror = (error) => {
+          console.error('EventSource failed:', error);
+          
+          // Try to reconnect after a delay if verbose is still enabled
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+            eventSourceRef.current = null;
+          }
+          
+          setTimeout(() => {
+            if (verbose && !eventSourceRef.current) {
+              setupLogStream();
+            }
+          }, 3000);
+        };
+      } catch (error) {
+        console.error('Error setting up log stream:', error);
+        // Don't add error messages to the logs
+      }
+    }
+  };
+  
+  // Improved cleanup function - don't clear logs when cleaning up
   const cleanupLogStream = () => {
     if (eventSourceRef.current) {
       console.log('Cleaning up log stream');
       eventSourceRef.current.close();
       eventSourceRef.current = null;
+      // Don't clear logs here
     }
   };
-  
+
   // Setup log stream when verbose mode changes
   useEffect(() => {
     if (verbose) {
       setupLogStream();
     } else {
       cleanupLogStream();
-      setRealtimeLogs('');
+      // Clear logs only when verbose mode is explicitly disabled
+      clearLogs();
     }
-  }, [verbose]);
+  }, [verbose, clearLogs]);
   
   // Cleanup on component unmount
   useEffect(() => {
     return () => cleanupLogStream();
   }, []);
   
+  // Listen for clear logs event
+  useEffect(() => {
+    const handleClearLogs = () => {
+      clearLogs();
+    };
+    
+    window.addEventListener('clearDebugLogs', handleClearLogs);
+    
+    return () => {
+      window.removeEventListener('clearDebugLogs', handleClearLogs);
+    };
+  }, [clearLogs]);
+  
   const handleGenerateQuery = async () => {
+    // Check if settings are valid
+    if (!isSettingsValid()) {
+      setError("Please configure your model settings first (provider, model, and API key if required)");
+      toggleSettings(); // Open settings panel
+      return;
+    }
+    
     setLoading(true);
-    setRealtimeLogs(verbose ? 'Generating Cypher query with vector search...\n' : '');
+    updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
     setLogs('');
     
     try {
       if (verbose) {
-        setRealtimeLogs(prev => prev + `Sending request with parameters:
+        updateRealtimeLogs(prev => prev + `Sending request with parameters:
 - Question: ${question}
 - Model: ${llmType}
 - Top K: ${topK}
@@ -220,8 +346,14 @@ function VectorSearch({
         embedding: embedding,
       });
       
-      setGeneratedQuery(response.data.query);
-      setQueryResult(response.data.query);
+      // Process the query result before setting it
+      const queryData = response.data.query;
+      
+      // Set the generated query regardless of type
+      setGeneratedQuery(queryData);
+      
+      // Set the query result for display
+      setQueryResult(queryData);
       setExecutionResult(null);
       setRunnedQuery(false);
       setError(null);
@@ -229,26 +361,37 @@ function VectorSearch({
       if (verbose) {
         if (response.data.logs) {
           setLogs(response.data.logs);
-          setRealtimeLogs(prev => prev + 'Query generation with vector search completed successfully!\n');
+          updateRealtimeLogs(prev => prev + 'Query generation with vector search completed successfully!\n');
         } else {
-          setRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+          updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
       
       addLatestQuery({
         question: question,
-        query: response.data.query,
-        type: 'Generate Query (Vector)',
-        llmType: llmType,
-        naturalAnswer: 'N/A',
+        query: queryData,
+        timestamp: new Date().toISOString(),
+        queryType: 'generated',
+        vectorIndex: vectorCategory,
+        embedding: embeddingType
       });
     } catch (err) {
       console.error(err);
-      const errorMessage = err.response?.data?.detail?.error || 'Error generating query with vector search.';
+      let errorMessage = 'Error generating query with vector search.';
+      
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'object') {
+          errorMessage = err.response.data.detail.error || 
+                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      }
+      
       const errorLogs = err.response?.data?.detail?.logs || '';
       
       if (verbose) {
-        setRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
         if (errorLogs) {
           setLogs(errorLogs);
         }
@@ -261,13 +404,22 @@ function VectorSearch({
   };
   
   const handleRunGeneratedQuery = async () => {
+    if (!generatedQuery) return;
+    
+    // Check if settings are valid
+    if (!isSettingsValid()) {
+      setError("Please configure your model settings first (provider, model, and API key if required)");
+      toggleSettings(); // Open settings panel
+      return;
+    }
+    
     setLoading(true);
     setLogs('');
-    setRealtimeLogs(verbose ? 'Executing Cypher query from vector search...\n' : '');
+    updateRealtimeLogs(prev => prev + 'Executing Cypher query from vector search...\n');
     
     try {
       if (verbose) {
-        setRealtimeLogs(prev => prev + `Query to execute:\n${generatedQuery}\n\n`);
+        updateRealtimeLogs(prev => prev + `Query to execute:\n${generatedQuery}\n\n`);
       }
       
       const response = await axios.post('/run_query/', {
@@ -279,33 +431,48 @@ function VectorSearch({
         verbose,
       });
       
-      setExecutionResult(response.data);
+      setExecutionResult({
+        result: response.data.result,
+        response: response.data.response
+      });
       setRunnedQuery(true);
       setError(null);
       
       if (verbose) {
         if (response.data.logs) {
           setLogs(response.data.logs);
-          setRealtimeLogs(prev => prev + 'Query executed successfully!\n');
+          updateRealtimeLogs(prev => prev + 'Query executed successfully!\n');
         } else {
-          setRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+          updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
       
       addLatestQuery({
         question: question,
         query: generatedQuery,
-        type: 'Run Query (Vector)',
-        llmType: llmType,
-        naturalAnswer: response.data.response,
+        timestamp: new Date().toISOString(),
+        queryType: 'run',
+        response: response.data.response,
+        vectorIndex: vectorCategory,
+        embedding: embeddingType
       });
     } catch (err) {
       console.error(err);
-      const errorMessage = err.response?.data?.detail?.error || 'Error executing query.';
+      let errorMessage = 'Error executing query.';
+      
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'object') {
+          errorMessage = err.response.data.detail.error || 
+                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      }
+      
       const errorLogs = err.response?.data?.detail?.logs || '';
       
       if (verbose) {
-        setRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
         if (errorLogs) {
           setLogs(errorLogs);
         }
@@ -318,70 +485,196 @@ function VectorSearch({
   };
   
   const handleGenerateAndRun = async () => {
+    // Check if settings are valid
+    if (!isSettingsValid()) {
+      setError("Please configure your model settings first (provider, model, and API key if required)");
+      toggleSettings(); // Open settings panel
+      return;
+    }
+    
     setLoading(true);
+    updateRealtimeLogs(verbose ? 'Generating and running Cypher query...\n' : '');
+    setRunnedQuery(false);
+    setGeneratedQuery('');
+    setQueryResult(null);
+    setExecutionResult(null);
     setLogs('');
-    setRealtimeLogs(verbose ? 'Generating and executing Cypher query with vector search...\n' : '');
+    clearLogs();
+    
+    if (verbose) {
+      updateRealtimeLogs('Starting vector search query generation...\n');
+    }
     
     try {
-      if (verbose) {
-        setRealtimeLogs(prev => prev + `Step 1: Generating query for question with vector: "${question}"\n`);
+      // Check if we have a vector file
+      if (!vectorFile && vectorCategory) {
+        throw new Error('Vector file is required for vector search');
       }
       
-      const embedding = JSON.stringify(vectorFile);
-      const generateQueryResponse = await axios.post('/generate_query/', {
-        question,
+      // Prepare the request data
+      const requestData = {
+        question: question,
+        provider: provider,
         llm_type: llmType,
-        top_k: topK,
         api_key: apiKey,
-        verbose,
-        vector_index: embeddingType,
-        embedding: embedding,
-      });
-      
-      const generatedQuery = generateQueryResponse.data.query;
-      
-      if (verbose) {
-        setRealtimeLogs(prev => prev + `Query generated: ${generatedQuery}\n\nStep 2: Executing the generated query\n`);
-      }
-      
-      const runQueryResponse = await axios.post('/run_query/', {
-        query: generatedQuery,
-        question,
-        llm_type: llmType,
         top_k: topK,
-        api_key: apiKey,
-        verbose,
-      });
+        verbose: verbose
+      };
       
-      setGeneratedQuery(generatedQuery);
-      setQueryResult(generatedQuery);
-      setExecutionResult(runQueryResponse.data);
-      setRunnedQuery(true);
-      setError(null);
-      
-      if (verbose) {
-        if (runQueryResponse.data.logs) {
-          setLogs(runQueryResponse.data.logs);
-          setRealtimeLogs(prev => prev + 'Query generated and executed successfully with vector search!\n');
+      // Add vector data if available
+      if (vectorFile) {
+        requestData.vector_category = vectorCategory;
+        requestData.embedding_type = embeddingType;
+        
+        // If vectorFile has vector_data property, use it
+        if (vectorFile.vector_data) {
+          requestData.vector_data = vectorFile.vector_data;
         } else {
-          setRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+          // Otherwise, use the entire vectorFile as the data
+          requestData.vector_data = vectorFile;
+        }
+      } else if (selectedFile) {
+        // If we have a selected file but no vectorFile data yet,
+        // we need to include the file in the request
+        requestData.vector_category = vectorCategory;
+        requestData.embedding_type = embeddingType;
+        
+        // Create a FormData object to send the file
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('vector_category', vectorCategory);
+        formData.append('embedding_type', embeddingType);
+        
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `Uploading vector file: ${selectedFile.name}\n`);
+        }
+        
+        try {
+          // Upload the file first
+          const uploadResponse = await axios.post('/upload_vector/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          
+          if (verbose) {
+            updateRealtimeLogs(prev => prev + `File uploaded successfully\n`);
+          }
+          
+          // Use the uploaded vector data
+          requestData.vector_data = uploadResponse.data.vector_data;
+          setVectorFile(uploadResponse.data);
+        } catch (error) {
+          throw new Error(`Error uploading vector file: ${error.message}`);
         }
       }
       
+      if (verbose) {
+        updateRealtimeLogs(prev => prev + `Generating vector search query with parameters:\n` +
+          `Question: ${question}\n` +
+          `Provider: ${provider}\n` +
+          `Model: ${llmType}\n` +
+          `Top K: ${topK}\n` +
+          `Vector Category: ${vectorCategory || 'N/A'}\n` +
+          `Embedding Type: ${embeddingType || 'N/A'}\n` +
+          `Vector Data: ${vectorFile ? 'Provided' : 'Not provided'}\n\n`);
+      }
+      
+      const response = await axios.post('/generate_query/', requestData);
+      
+      // Process the query result
+      const generatedQuery = response.data.query;
+      
+      // Handle case where generatedQuery is an object
+      const queryString = typeof generatedQuery === 'object' ? JSON.stringify(generatedQuery) : generatedQuery;
+      
+      setGeneratedQuery(queryString);
+      
+      if (verbose) {
+        updateRealtimeLogs(prev => prev + `Generated query: ${queryString}\n\n`);
+        
+        if (response.data.logs) {
+          setLogs(response.data.logs);
+        }
+      }
+      
+      // Now run the generated query
+      if (verbose) {
+        updateRealtimeLogs(prev => prev + `Running the generated query...\n`);
+      }
+      
+      // Prepare the run query request
+      const runRequestData = {
+        query: queryString,
+        top_k: topK,
+        verbose: verbose
+      };
+      
+      // Add vector data if available
+      if (vectorFile) {
+        runRequestData.vector_category = vectorCategory;
+        runRequestData.embedding_type = embeddingType;
+        
+        // If vectorFile has vector_data property, use it
+        if (vectorFile.vector_data) {
+          runRequestData.vector_data = vectorFile.vector_data;
+        } else {
+          // Otherwise, use the entire vectorFile as the data
+          runRequestData.vector_data = vectorFile;
+        }
+      } else if (selectedFile) {
+        // If we have a selected file but no vectorFile data yet,
+        // we should have already uploaded it in the generate step
+        // and stored the result in vectorFile
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `Warning: Selected file exists but no vector data available\n`);
+        }
+      }
+      
+      const runResponse = await axios.post('/run_query/', runRequestData);
+      
+      setRunnedQuery(true);
+      setQueryResult(queryString);
+      setExecutionResult(runResponse.data.response);
+      
+      if (verbose) {
+        updateRealtimeLogs(prev => prev + `Query execution completed successfully!\n`);
+        
+        if (runResponse.data.logs) {
+          setLogs(prev => prev + '\n\n' + runResponse.data.logs);
+        }
+      }
+      
+      // Update the latest queries
       addLatestQuery({
         question: question,
-        query: generatedQuery,
-        type: 'Generate & Run Query (Vector)',
-        llmType: llmType,
-        naturalAnswer: runQueryResponse.data.response,
+        query: queryString,
+        timestamp: new Date().toISOString(),
+        queryType: 'vector',
+        response: runResponse.data.response,
+        vectorCategory: vectorCategory,
+        embeddingType: embeddingType
       });
     } catch (err) {
-      console.error(err);
-      const errorMessage = err.response?.data?.detail?.error || 'Error generating and running query with vector search.';
+      console.error('Error in vector search:', err);
+      
+      let errorMessage = 'An error occurred during vector search.';
+      
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'object') {
+          errorMessage = err.response.data.detail.error || 
+                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       const errorLogs = err.response?.data?.detail?.logs || '';
       
       if (verbose) {
-        setRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
         if (errorLogs) {
           setLogs(errorLogs);
         }
@@ -394,35 +687,87 @@ function VectorSearch({
   };
   
   const handleSampleQuestionClick = async (sampleQuestionObj) => {
-    setQuestion(sampleQuestionObj.question);
+    if (!sampleQuestionObj) return;
+    
+    // Clear any previous errors
+    setError(null);
+    
+    // Handle both string and object formats for backward compatibility
+    if (typeof sampleQuestionObj === 'string') {
+      setQuestion(sampleQuestionObj);
+      return;
+    }
+    
+    // Set the question
+    setQuestion(sampleQuestionObj.question || '');
+    
+    // Reset vector-related state
+    setVectorCategory('');
+    setEmbeddingType('');
+    setVectorFile(null);
+    setSelectedFile(null);
+    
+    // Set vector category if provided
     if (sampleQuestionObj.vectorCategory) {
+      console.log('Setting vector category:', sampleQuestionObj.vectorCategory);
       setVectorCategory(sampleQuestionObj.vectorCategory);
     }
+    
+    // Set embedding type if provided
     if (sampleQuestionObj.embeddingType) {
+      console.log('Setting embedding type:', sampleQuestionObj.embeddingType);
       setEmbeddingType(sampleQuestionObj.embeddingType);
     }
+    
+    // Set vector data if provided
     if (sampleQuestionObj.vectorData) {
+      console.log('Setting vector data');
       setVectorFile(sampleQuestionObj.vectorData);
     }
+    
+    // Load vector file if path is provided
     if (sampleQuestionObj.vectorFilePath) {
       try {
+        console.log('Loading vector file from path:', sampleQuestionObj.vectorFilePath);
         if (verbose) {
-          setRealtimeLogs(prev => prev + `Loading vector file from public folder: ${sampleQuestionObj.vectorFilePath}\n`);
+          updateRealtimeLogs(prev => prev + `Loading vector file from public folder: ${sampleQuestionObj.vectorFilePath}\n`);
         }
-        console.log('Using vector file from public folder:', sampleQuestionObj.vectorFilePath);
+        
         const response = await fetch(`${process.env.PUBLIC_URL}/${sampleQuestionObj.vectorFilePath}`);
+        
+        if (!response.ok) {
+          const errorMsg = `Failed to fetch vector file: ${response.status} ${response.statusText}`;
+          console.error(errorMsg);
+          setError(errorMsg);
+          if (verbose) {
+            updateRealtimeLogs(prev => prev + `Error: ${errorMsg}\n`);
+          }
+          return;
+        }
+        
+        // For NPY files, we need to handle them as binary data
         const blob = await response.blob();
         const file = new File([blob], sampleQuestionObj.vectorFilePath);
         
+        // Set the selected file for upload
         setSelectedFile(file);
+        
         if (verbose) {
-          setRealtimeLogs(prev => prev + `Vector file loaded successfully: ${file.name}\n`);
+          updateRealtimeLogs(prev => prev + `Vector file loaded successfully: ${file.name}\n`);
         }
       } catch (error) {
-        console.error('Error fetching vector file:', error);
+        console.error('Error loading vector file:', error);
+        setError(`Error loading vector file: ${error.message}`);
         if (verbose) {
-          setRealtimeLogs(prev => prev + `Error loading vector file: ${error.message}\n`);
+          updateRealtimeLogs(prev => prev + `Error loading vector file: ${error.message}\n`);
         }
+      }
+    } else if (sampleQuestionObj.vectorCategory) {
+      // If a vector category is specified but no file path, show a warning
+      const warningMsg = `No vector file specified for ${sampleQuestionObj.vectorCategory}. Please upload a vector file.`;
+      console.warn(warningMsg);
+      if (verbose) {
+        updateRealtimeLogs(prev => prev + `Warning: ${warningMsg}\n`);
       }
     }
   };
@@ -436,7 +781,7 @@ function VectorSearch({
     }
     
     if (verbose) {
-      setRealtimeLogs(prev => prev + `Uploading vector file: ${file.name} (${file.size} bytes)\nCategory: ${vectorCategory}\nEmbedding Type: ${embeddingType || 'N/A'}\n`);
+      updateRealtimeLogs(prev => prev + `Uploading vector file: ${file.name} (${file.size} bytes)\nCategory: ${vectorCategory}\nEmbedding Type: ${embeddingType || 'N/A'}\n`);
     }
     
     const formData = new FormData();
@@ -455,272 +800,445 @@ function VectorSearch({
       .then((response) => {
         console.log('File uploaded successfully:', response.data);
         if (verbose) {
-          setRealtimeLogs(prev => prev + `File uploaded successfully. Vector size: ${response.data.vector_data.length} elements\n`);
+          updateRealtimeLogs(prev => prev + `File uploaded successfully. Vector size: ${response.data.vector_data ? response.data.vector_data.length : 'unknown'} elements\n`);
         }
-        alert('File uploaded successfully.');
         setVectorFile(response.data); // Update vectorFile with response
       })
       .catch((error) => {
         console.error('Error uploading file:', error);
         const errorMsg = error.response?.data?.detail || 'Error uploading file.';
         if (verbose) {
-          setRealtimeLogs(prev => prev + `Error uploading file: ${errorMsg}\n`);
+          updateRealtimeLogs(prev => prev + `Error uploading file: ${errorMsg}\n`);
         }
-        alert(errorMsg);
+        setError(errorMsg);
       });
   };
   
-  return (
-    <div>
-      {/* Autocomplete Text Field */}
-      <AutocompleteTextField
-        label="Enter your question"
-        value={question}
-        setValue={setQuestion}
-        placeholder="Type your question here..."
-        required
-      />
-      <SampleQuestions onClick={handleSampleQuestionClick} isVectorTab={true} />
-      {/* Provider Selection */}
-      <FormControl fullWidth margin="normal" required>
-        <InputLabel id="provider-label">Provider</InputLabel>
-        <Select
-          labelId="provider-label"
-          value={provider}
-          onChange={(e) => {
-            setProvider(e.target.value);
-            setLlmType('');
-          }}
-          label="Provider"
-        >
-          {Object.keys(modelChoices).map((providerName) => (
-            <MenuItem key={providerName} value={providerName}>
-              {providerName}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      {/* LLM Type Selection */}
-      {provider && (
-        <FormControl fullWidth margin="normal" required>
-          <InputLabel id="llm-type-label">LLM Type</InputLabel>
-          <Select
-            labelId="llm-type-label"
-            value={llmType}
-            onChange={(e) => {
-              const selectedModel = e.target.value;
-              if (selectedModel !== 'separator') {
-                setLlmType(selectedModel);
-                if (!supportedModels.includes(selectedModel)) {
-                  setShowWarning(true);
-                } else {
-                  setShowWarning(false);
-                }
-              }
-            }}
-            label="LLM Type"
-          >
-            {modelChoices[provider].map((model) => (
-              typeof model === 'object' ? (
-                <MenuItem key={model.value} value={model.value} disabled sx={{ opacity: 0.5 }}>
-                  {model.label}
-                </MenuItem>
-              ) : (
-              <MenuItem key={model} value={model}>
-                {model}
-              </MenuItem>
-              )
-            ))}
-          </Select>
-        </FormControl>
-      )}
-      {showWarning && (
-        <Typography color="warning" sx={{ mt: 2 }}>
-          Warning: Smaller language models may produce inaccurate 
-          or fabricated responses ("hallucinations") so we recommend
-          using larger models such as Claude Sonnet, GPT-4, and Meta Llama 3.1 405B for accurate results. 
-        </Typography>
-      )}
-      {/* API Key Input */}
-      <TextField
-        label="API Key for LLM"
-        type="password"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-        fullWidth
-        margin="normal"
-        helperText="Enter your API key for the selected LLM."
-        required
-      />
-      {/* Limit Query Return Selection */}
-      <FormControl fullWidth margin="normal" required>
-        <InputLabel id="top-k-label">Limit Query Return</InputLabel>
-        <Select
-          labelId="top-k-label"
-          value={topK}
-          onChange={(e) => setTopK(e.target.value)}
-          label="Limit Query Return"
-        >
-          {[1, 3, 5, 10, 15, 20, 50, 100].map((k) => (
-            <MenuItem key={k} value={k}>
-              {k}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      {/* Verbose Mode Checkbox */}
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={verbose}
-            onChange={(e) => setVerbose(e.target.checked)}
-          />
-        }
-        label="Enable Verbose Mode"
-      />
-      {/* Vector Upload Component */}
-      <VectorUpload
-        vectorCategory={vectorCategory}
-        setVectorCategory={setVectorCategory}
-        embeddingType={embeddingType}
-        setEmbeddingType={setEmbeddingType}
-        vectorFile={vectorFile}
-        setVectorFile={setVectorFile}
-        selectedFile={selectedFile}
-        setSelectedFile={setSelectedFile}
-        handleUpload={handleUpload}
-      />
-      {/* Buttons */}
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 2, 
-        mt: 2,
-        flexDirection: { xs: 'column', sm: 'row' }
-      }}>
-        <Button
-          variant="outlined"
-          fullWidth
-          onClick={handleGenerateQuery}
-          disabled={loading || !question || !provider || !llmType || !apiKey || !topK}
-        >
-          Generate Cypher Query
-        </Button>
-        <Button
-          variant="outlined"
-          fullWidth
-          onClick={handleRunGeneratedQuery}
-          disabled={!generatedQuery || loading}
-        >
-          Run Generated Query
-        </Button>
-      </Box>
-      <Button
-        variant="outlined"
-        fullWidth
-        onClick={handleGenerateAndRun}
-        sx={{ 
-          mt: 2,
-          border: '2px solid #ff0000',
-          color: '#ff0000',
-          backgroundColor: 'transparent',
-          '&:hover': {
-            backgroundColor: 'rgba(255, 0, 0, 0.04)',
-            border: '2px solid #ff0000',
-          },
-          '&.Mui-disabled': {
-            border: theme.palette.mode === 'dark' ? '2px solid rgba(255, 0, 0, 0.3)' : '2px solid rgba(255, 0, 0, 0.3)',
-            color: theme.palette.mode === 'dark' ? 'rgba(255, 0, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)',
-          }
-        }}
-        disabled={loading || !question || !provider || !llmType || !apiKey || !topK}
-      >
-        Generate & Run Query
-      </Button>
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <CircularProgress />
-        </Box>
-      )}
-      
-      {/* Generated Query TextArea */}
-      {generatedQuery && !runnedQuery && (
-        <TextField
-          label="Generated Cypher Query"
-          value={generatedQuery}
-          onChange={(e) => setGeneratedQuery(e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          margin="normal"
-        />
-      )}
-      
-      {error && (
-        <Typography color="error" align="center" sx={{ mt: 2 }}>
-          {error}
-        </Typography>
-      )}
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
 
-      {/* Log sections moved to bottom */}
-      {/* Real-time logs from EventSource */}
-      {verbose && (
-        <Box
-          sx={{
-            backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
-            padding: 2,
-            borderRadius: 1,
-            overflow: 'auto',
-            maxHeight: 200,
-            mt: 2,
-            border: `1px solid ${theme.palette.divider}`
-          }}
-          ref={logContainerRef}
-        >
-          <Typography variant="subtitle2" gutterBottom>Real-time Logs:</Typography>
-          <pre
-            style={{
-              margin: 0,
-              fontFamily: 'monospace',
-              fontSize: 12,
-              color: theme.palette.text.primary,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word'
+  return (
+    <Box>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 0, 
+          mb: 4, 
+          borderRadius: '24px',
+          overflow: 'hidden',
+          border: theme => `1px solid ${theme.palette.divider}`,
+          backdropFilter: 'blur(10px)',
+          backgroundColor: theme => theme.palette.mode === 'dark' 
+            ? alpha(theme.palette.background.paper, 0.8)
+            : alpha(theme.palette.background.paper, 0.8),
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
+              Vector Search
+            </Typography>
+            <Box>
+              <Tooltip title="Model Settings">
+                <IconButton 
+                  onClick={toggleSettings} 
+                  color={showSettings || highlightSettings ? "primary" : "default"}
+                  sx={{ 
+                    borderRadius: '12px',
+                    backgroundColor: (showSettings || highlightSettings)
+                      ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
+                      : 'transparent',
+                    transition: 'all 0.3s ease',
+                    animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
+                    transform: highlightSettings ? 'scale(1.1)' : 'scale(1)',
+                    '@keyframes pulse': {
+                      '0%': {
+                        boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
+                      },
+                      '70%': {
+                        boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)'
+                      },
+                      '100%': {
+                        boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)'
+                      }
+                    }
+                  }}
+                >
+                  <TuneIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Help">
+                <IconButton 
+                  onClick={() => setShowWarning(!showWarning)}
+                  color={showWarning ? "primary" : "default"}
+                  sx={{ 
+                    ml: 1,
+                    borderRadius: '12px',
+                    backgroundColor: showWarning 
+                      ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
+                      : 'transparent'
+                  }}
+                >
+                  <HelpOutlineIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          <Collapse in={showWarning}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 3, 
+                borderRadius: '16px',
+                '& .MuiAlert-icon': {
+                  alignItems: 'center'
+                }
+              }}
+              icon={<LightbulbOutlinedIcon />}
+            >
+              Ask any biomedical question with vector search to query the CROssBAR knowledge graph. Upload a vector file to enhance your search results.
+            </Alert>
+          </Collapse>
+
+          <Collapse in={showSettings}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                mb: 3, 
+                borderRadius: '16px',
+                backgroundColor: theme => theme.palette.mode === 'dark' 
+                  ? alpha(theme.palette.background.subtle, 0.5)
+                  : alpha(theme.palette.background.subtle, 0.5),
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 3 }}>
+                Model Settings
+              </Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {/* First row - Provider and Model */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                    <FormControl fullWidth variant="outlined" size="small">
+                      <InputLabel id="provider-label">Provider</InputLabel>
+                      <Select
+                        labelId="provider-label"
+                        value={provider}
+                        onChange={(e) => {
+                          setProvider(e.target.value);
+                          setLlmType('');
+                        }}
+                        label="Provider"
+                      >
+                        <MenuItem value="">
+                          <em>Select a provider</em>
+                        </MenuItem>
+                        {Object.keys(modelChoices).map((providerName) => (
+                          <MenuItem key={providerName} value={providerName}>
+                            {providerName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  
+                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                    <FormControl fullWidth variant="outlined" size="small" disabled={!provider}>
+                      <InputLabel id="model-label">Model</InputLabel>
+                      <Select
+                        labelId="model-label"
+                        value={llmType}
+                        onChange={(e) => {
+                          const selectedModel = e.target.value;
+                          if (selectedModel !== 'separator') {
+                            setLlmType(selectedModel);
+                            if (!supportedModels.includes(selectedModel)) {
+                              setShowWarning(true);
+                            } else {
+                              setShowWarning(false);
+                            }
+                          }
+                        }}
+                        label="Model"
+                      >
+                        <MenuItem value="">
+                          <em>Select a model</em>
+                        </MenuItem>
+                        {provider && modelChoices[provider].map((model) => (
+                          model.value === 'separator' ? (
+                            <Divider key={model.label} sx={{ my: 1 }} />
+                          ) : (
+                            <MenuItem key={model} value={model}>
+                              {model}
+                              {supportedModels.includes(model) && (
+                                <Chip 
+                                  label="Recommended" 
+                                  size="small" 
+                                  color="primary" 
+                                  sx={{ ml: 1, height: '20px', fontSize: '0.65rem' }} 
+                                />
+                              )}
+                            </MenuItem>
+                          )
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+                
+                {/* Second row - API Key and Results Limit */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                    <FormControl fullWidth variant="outlined" size="small">
+                      <TextField
+                        label="API Key for LLM"
+                        type="password"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        size="small"
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <KeyIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </FormControl>
+                  </Box>
+                  
+                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                    <FormControl fullWidth variant="outlined" size="small">
+                      <InputLabel id="top-k-label">Results Limit</InputLabel>
+                      <Select
+                        labelId="top-k-label"
+                        value={topK}
+                        onChange={(e) => setTopK(e.target.value)}
+                        label="Results Limit"
+                      >
+                        {[1, 3, 5, 10, 15, 20, 50, 100].map((k) => (
+                          <MenuItem key={k} value={k}>
+                            {k}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+                
+                {/* Third row - Debug Mode */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                    <FormControl component="fieldset" variant="outlined" fullWidth>
+                      <Box 
+                        onClick={() => setVerbose(!verbose)}
+                        sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'space-between',
+                          p: 1.5,
+                          height: '40px',
+                          borderRadius: '8px',
+                          border: theme => `1px solid ${theme.palette.divider}`,
+                          backgroundColor: verbose ? 
+                            (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.main, 0.05)) : 
+                            'transparent',
+                          transition: 'all 0.2s ease-in-out',
+                          cursor: 'pointer',
+                          '&:hover': {
+                            backgroundColor: verbose ?
+                              (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.15) : alpha(theme.palette.info.main, 0.08)) :
+                              (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.05) : alpha(theme.palette.info.main, 0.03))
+                          }
+                        }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Tooltip title="Enable to see detailed logs of the vector search process">
+                            <InfoOutlinedIcon 
+                              fontSize="small" 
+                              sx={{ 
+                                mr: 1.5, 
+                                color: verbose ? 'info.main' : 'text.secondary',
+                                transition: 'color 0.2s ease-in-out',
+                              }} 
+                            />
+                          </Tooltip>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            Debug Mode
+                          </Typography>
+                        </Box>
+                        <Switch
+                          checked={verbose}
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent triggering the parent onClick
+                            setVerbose(e.target.checked);
+                          }}
+                          color="info"
+                          size="small"
+                        />
+                      </Box>
+                      {verbose && (
+                        <Fade in={verbose}>
+                          <Typography variant="caption" color="info.main" sx={{ mt: 0.5, display: 'flex', alignItems: 'center' }}>
+                            <TerminalIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+                            Real-time logs will appear below the results
+                          </Typography>
+                        </Fade>
+                      )}
+                    </FormControl>
+                  </Box>
+                </Box>
+              </Box>
+            </Paper>
+          </Collapse>
+
+          <Box sx={{ mb: 3 }}>
+            <AutocompleteTextField
+              value={question}
+              setValue={setQuestion}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleGenerateAndRun();
+                }
+              }}
+              placeholder="E.g., Find proteins similar to BRCA1 that are associated with breast cancer"
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              disabled={loading}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  fontSize: '1rem',
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? alpha(theme.palette.background.subtle, 0.3)
+                    : alpha(theme.palette.background.subtle, 0.3),
+                }
+              }}
+            />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <VectorUpload
+              vectorCategory={vectorCategory}
+              setVectorCategory={setVectorCategory}
+              embeddingType={embeddingType}
+              setEmbeddingType={setEmbeddingType}
+              vectorFile={vectorFile}
+              setVectorFile={setVectorFile}
+              selectedFile={selectedFile}
+              setSelectedFile={setSelectedFile}
+              handleUpload={handleUpload}
+            />
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <SampleQuestions onQuestionClick={handleSampleQuestionClick} isVectorTab={true} />
+            </Box>
+            
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings first"}>
+                <Box 
+                  onMouseEnter={() => handleActionButtonHover(true)}
+                  onMouseLeave={() => handleActionButtonHover(false)}
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={handleGenerateQuery}
+                    disabled={loading || !question || !isSettingsValid()}
+                    startIcon={<SendIcon />}
+                    sx={{ 
+                      borderRadius: '12px',
+                      px: 3,
+                      height: '44px'
+                    }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : 'Generate'}
+                  </Button>
+                </Box>
+              </Tooltip>
+              
+              <Tooltip title={isSettingsValid() ? "Generate and Run Query" : "Configure settings first"}>
+                <Box
+                  onMouseEnter={() => handleActionButtonHover(true)}
+                  onMouseLeave={() => handleActionButtonHover(false)}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleGenerateAndRun}
+                    disabled={loading || !question || !isSettingsValid()}
+                    startIcon={<PlayArrowIcon />}
+                    sx={{ 
+                      borderRadius: '12px',
+                      px: 3,
+                      height: '44px'
+                    }}
+                  >
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run'}
+                  </Button>
+                </Box>
+              </Tooltip>
+            </Box>
+          </Box>
+        </Box>
+        
+        {generatedQuery && !runnedQuery && (
+          <Box 
+            onMouseEnter={() => handleActionButtonHover(true)}
+            onMouseLeave={() => handleActionButtonHover(false)}
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              p: 2, 
+              backgroundColor: theme => theme.palette.mode === 'dark' 
+                ? alpha(theme.palette.primary.main, 0.1)
+                : alpha(theme.palette.primary.main, 0.05),
+              borderTop: theme => `1px solid ${theme.palette.divider}`
             }}
           >
-            {realtimeLogs || 'Waiting for logs...'}
-          </pre>
-        </Box>
-      )}
-      
-      {/* Final logs from API response */}
-      {logs && verbose && (
-        <Box
-          sx={{
-            backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
-            padding: 2,
-            borderRadius: 1,
-            overflow: 'auto',
-            maxHeight: 300,
-            mt: 2,
-            border: `1px solid ${theme.palette.divider}`
-          }}
-        >
-          <Typography variant="subtitle2" gutterBottom>Complete Logs:</Typography>
-          <pre
-            style={{
-              margin: 0,
-              fontFamily: 'monospace',
-              fontSize: 12,
-              color: theme.palette.text.primary,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word'
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleRunGeneratedQuery}
+              disabled={loading || !isSettingsValid()}
+              startIcon={<PlayArrowIcon />}
+              sx={{ 
+                borderRadius: '12px',
+                px: 3
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Run Generated Query'}
+            </Button>
+          </Box>
+        )}
+      </Paper>
+
+      {error && (
+        <Zoom in={!!error}>
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: '16px',
+              boxShadow: theme => theme.palette.mode === 'dark' 
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+                : '0 4px 20px rgba(0, 0, 0, 0.05)',
             }}
           >
-            {logs}
-          </pre>
-        </Box>
+            {typeof error === 'object' && error !== null 
+              ? (error.msg || JSON.stringify(error)) 
+              : error}
+          </Alert>
+        </Zoom>
       )}
-    </div>
+    </Box>
   );
 }
 
