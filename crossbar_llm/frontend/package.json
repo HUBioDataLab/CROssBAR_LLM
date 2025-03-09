@@ -20,9 +20,13 @@
     "numpy-parser": "^1.2.3",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
+    "react-force-graph": "^1.47.4",
     "react-scripts": "5.0.1",
     "react-syntax-highlighter": "^15.6.1",
+    "reactflow": "^11.11.4",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.13",
     "web-vitals": "^2.1.4"
@@ -51,5 +55,13 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://crossbarv2.hubiodatalab.com/llm"
+  "homepage": "https://crossbarv2.hubiodatalab.com/llm",
+  "devDependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "autoprefixer": "^10.4.20",
+    "framer-motion": "^12.4.2",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^4.0.6"
+  }
 }

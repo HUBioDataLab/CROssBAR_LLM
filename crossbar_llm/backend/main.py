@@ -206,7 +206,13 @@ async def generate_query(
     Logger.info(f"Generating query for question: '{generate_query_request.question}'")
     Logger.debug(f"Using LLM: {generate_query_request.llm_type}, top_k: {generate_query_request.top_k}")
     
-    key = f"{generate_query_request.llm_type}_{generate_query_request.api_key}"
+    # Handle "demo" API key by using the Gemini API key from .env
+    api_key = generate_query_request.api_key
+    if api_key == "demo":
+        api_key = os.getenv("GEMINI_API_KEY")
+        Logger.info("Using Gemini API key from .env for demo request")
+    
+    key = f"{generate_query_request.llm_type}_{api_key}"
 
     # Initialize or reuse RunPipeline instance
     if key not in pipeline_instances:
@@ -242,7 +248,7 @@ async def generate_query(
             query = rp.run_for_query(
                 question=generate_query_request.question,
                 model_name=generate_query_request.llm_type,
-                api_key=generate_query_request.api_key,
+                api_key=api_key,
                 vector_index=vector_index,
                 embedding=embedding,
                 reset_llm_type=True
@@ -256,7 +262,7 @@ async def generate_query(
             query = rp.run_for_query(
                 question=generate_query_request.question,
                 model_name=generate_query_request.llm_type,
-                api_key=generate_query_request.api_key,
+                api_key=api_key,
                 reset_llm_type=True
             )
             
@@ -301,7 +307,13 @@ async def run_query(
     Logger.debug(f"Query to execute: {run_query_request.query}")
     Logger.debug(f"Using LLM: {run_query_request.llm_type}, top_k: {run_query_request.top_k}")
     
-    key = f"{run_query_request.llm_type}_{run_query_request.api_key}"
+    # Handle "demo" API key by using the Gemini API key from .env
+    api_key = run_query_request.api_key
+    if api_key == "demo":
+        api_key = os.getenv("GEMINI_API_KEY")
+        Logger.info("Using Gemini API key from .env for demo request")
+    
+    key = f"{run_query_request.llm_type}_{api_key}"
 
     if key not in pipeline_instances:
         Logger.info(f"Creating new pipeline instance for {run_query_request.llm_type}")
@@ -324,7 +336,7 @@ async def run_query(
             query=run_query_request.query,
             question=run_query_request.question,
             model_name=run_query_request.llm_type,
-            api_key=run_query_request.api_key,
+            api_key=api_key,
             reset_llm_type=True
         )
         
