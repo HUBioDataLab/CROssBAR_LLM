@@ -357,7 +357,7 @@ function App() {
                 <ChatOutlinedIcon />
               </ListItemIcon>
               <ListItemText 
-                primary="Query" 
+                primary="Graph Explorer" 
                 primaryTypographyProps={{ 
                   fontWeight: tabValue === 'query' ? 600 : 400,
                   fontFamily: "'Poppins', 'Roboto', sans-serif",
@@ -397,7 +397,7 @@ function App() {
                 <SearchOutlinedIcon />
               </ListItemIcon>
               <ListItemText 
-                primary="Vector Search" 
+                primary="Semantic Search" 
                 primaryTypographyProps={{ 
                   fontWeight: tabValue === 'vectorSearch' ? 600 : 400,
                   fontFamily: "'Poppins', 'Roboto', sans-serif",

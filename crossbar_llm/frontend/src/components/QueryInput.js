@@ -646,7 +646,7 @@ function QueryInput({
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
-              Ask a Question
+              Graph Explorer
             </Typography>
             <Box>
               <Tooltip title="Model Settings">
