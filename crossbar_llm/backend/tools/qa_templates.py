@@ -131,8 +131,8 @@ given question in order to answer it.
 Instructions:
 Output is formatted as list of dictionaries. You will parse them into natural language text based
 on given question. If the cypher output is 'Given cypher query did not return any result', then use
-your internal knowledge to answer questions and add an all-caps warning that you used your internal knowledge not
-cypher query result.
+your internal knowledge to answer questions and add a warning message that says 'Please note that, 
+in this case, the provided information is based on the internal knowledge of the selected LLM, it was not obtained from CROssBARv2 KG'.
 
 Example:
     Cypher Output: [{{'p.node_name': 'ITPR2'}}, {{'p.node_name': 'ITPR3'}}, {{'p.node_name': 'PDE1A'}}]
