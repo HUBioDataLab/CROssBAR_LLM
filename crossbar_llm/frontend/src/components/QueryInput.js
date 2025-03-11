@@ -344,6 +344,11 @@ function QueryInput({
       setRunnedQuery(false);
       setError(null);
       
+      // Collapse settings panel to show results
+      if (showSettings) {
+        setShowSettings(false);
+      }
+      
       if (verbose) {
         if (response.data.logs) {
           setLogs(response.data.logs);
@@ -422,6 +427,11 @@ function QueryInput({
       });
       setRunnedQuery(true);
       setError(null);
+      
+      // Collapse settings panel to show results
+      if (showSettings) {
+        setShowSettings(false);
+      }
       
       if (verbose) {
         if (response.data.logs) {
@@ -541,6 +551,11 @@ function QueryInput({
       });
       setRunnedQuery(true);
       setError(null);
+      
+      // Collapse settings panel to show results
+      if (showSettings) {
+        setShowSettings(false);
+      }
       
       if (verbose) {
         if (runResponse.data.logs) {
@@ -697,6 +712,71 @@ function QueryInput({
             </Alert>
           </Collapse>
 
+          <Box sx={{ mb: 3 }}>
+            <AutocompleteTextField
+              value={question}
+              setValue={setQuestion}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleGenerateAndRun();
+                }
+              }}
+              placeholder="E.g., What are the drugs that target proteins associated with Alzheimer's disease?"
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              disabled={loading}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  fontSize: '1rem',
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? alpha(theme.palette.background.subtle, 0.3)
+                    : alpha(theme.palette.background.subtle, 0.3),
+                }
+              }}
+            />
+          </Box>
+
+          {/* Prominent Settings Button */}
+          {!isSettingsValid() && (
+            <Box sx={{ mb: 3 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                startIcon={<TuneIcon />}
+                onClick={toggleSettings}
+                sx={{ 
+                  borderRadius: '12px', 
+                  py: 1.2,
+                  boxShadow: 2,
+                  bgcolor: theme => theme.palette.primary.main,
+                  '&:hover': {
+                    bgcolor: theme => theme.palette.primary.dark,
+                  },
+                  animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
+                  '@keyframes pulse': {
+                    '0%': {
+                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
+                    },
+                    '70%': {
+                      boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)'
+                    },
+                    '100%': {
+                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)'
+                    }
+                  }
+                }}
+              >
+                Configure Model Settings
+              </Button>
+            </Box>
+          )}
+
+          {/* Settings panel moved below the query input and Configure Settings button */}
           <Collapse in={showSettings}>
             <Paper 
               elevation={0} 
@@ -873,70 +953,6 @@ function QueryInput({
               </Box>
             </Paper>
           </Collapse>
-
-          <Box sx={{ mb: 3 }}>
-            <AutocompleteTextField
-              value={question}
-              setValue={setQuestion}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleGenerateAndRun();
-                }
-              }}
-              placeholder="E.g., What are the drugs that target proteins associated with Alzheimer's disease?"
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-              disabled={loading}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '16px',
-                  fontSize: '1rem',
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? alpha(theme.palette.background.subtle, 0.3)
-                    : alpha(theme.palette.background.subtle, 0.3),
-                }
-              }}
-            />
-          </Box>
-
-          {/* Prominent Settings Button */}
-          {!isSettingsValid() && (
-            <Box sx={{ mb: 3 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                startIcon={<TuneIcon />}
-                onClick={toggleSettings}
-                sx={{ 
-                  borderRadius: '12px', 
-                  py: 1.2,
-                  boxShadow: 2,
-                  bgcolor: theme => theme.palette.primary.main,
-                  '&:hover': {
-                    bgcolor: theme => theme.palette.primary.dark,
-                  },
-                  animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
-                  '@keyframes pulse': {
-                    '0%': {
-                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
-                    },
-                    '70%': {
-                      boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)'
-                    },
-                    '100%': {
-                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)'
-                    }
-                  }
-                }}
-              >
-                Configure Model Settings
-              </Button>
-            </Box>
-          )}
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>

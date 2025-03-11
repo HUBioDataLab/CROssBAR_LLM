@@ -62,6 +62,7 @@ function VectorSearch({
   const [selectedFile, setSelectedFile] = useState(null);
   const [runnedQuery, setRunnedQuery] = useState(false);
   const [generatedQuery, setGeneratedQuery] = useState('');
+  const [editableQuery, setEditableQuery] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
@@ -306,65 +307,66 @@ function VectorSearch({
     
     setLoading(true);
     updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
+    setRunnedQuery(false);
+    setGeneratedQuery('');
+    setQueryResult(null);
+    setExecutionResult(null);
     setLogs('');
+    clearLogs();
     
     try {
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `Sending request with parameters:
-- Question: ${question}
-- Model: ${llmType}
-- Top K: ${topK}
-- Vector Category: ${vectorCategory}
-- Embedding Type: ${embeddingType}
-- Verbose: ${verbose}
-- Vector file size: ${vectorFile ? JSON.stringify(vectorFile).length : 0} bytes
-`);
-      }
-      
-      const embedding = JSON.stringify(vectorFile);
-      const response = await axios.post('/generate_query/', {
-        question,
+      // Prepare the request data
+      const requestData = {
+        question: question,
+        provider: provider, 
         llm_type: llmType,
-        top_k: topK,
         api_key: apiKey,
-        verbose,
-        vector_index: embeddingType,
-        embedding: embedding,
-      });
+        top_k: topK,
+        verbose: verbose
+      };
       
-      // Process the query result before setting it
-      const queryData = response.data.query;
-      
-      // Set the generated query regardless of type
-      setGeneratedQuery(queryData);
-      
-      // Set the query result for display
-      setQueryResult(queryData);
-      setExecutionResult(null);
-      setRunnedQuery(false);
-      setError(null);
-      
-      if (verbose) {
-        if (response.data.logs) {
-          setLogs(response.data.logs);
-          updateRealtimeLogs(prev => prev + 'Query generation with vector search completed successfully!\n');
+      // Add vector data if available
+      if (vectorFile) {
+        requestData.vector_category = vectorCategory;
+        requestData.embedding_type = embeddingType;
+        
+        // Use the vector data
+        if (vectorFile.vector_data) {
+          requestData.vector_data = vectorFile.vector_data;
         } else {
-          updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
+          requestData.vector_data = vectorFile;
         }
       }
       
-      addLatestQuery({
-        question: question,
-        query: queryData,
-        timestamp: new Date().toISOString(),
-        queryType: 'generated',
-        vectorIndex: vectorCategory,
-        embedding: embeddingType
-      });
-    } catch (err) {
-      console.error(err);
-      let errorMessage = 'Error generating query with vector search.';
+      const response = await axios.post('/generate_vector_query/', requestData);
       
+      if (response.data && response.data.query) {
+        setGeneratedQuery(response.data.query);
+        setEditableQuery(response.data.query);
+        
+        // Collapse settings panel to show results
+        if (showSettings) {
+          setShowSettings(false);
+        }
+        
+        if (verbose && response.data.logs) {
+          setLogs(response.data.logs);
+          updateRealtimeLogs(prev => prev + 'Query generation completed successfully!\n');
+        }
+        
+        addLatestQuery({
+          question: question,
+          query: response.data.query,
+          timestamp: new Date().toISOString(),
+          queryType: 'vector-generated'
+        });
+      } else {
+        throw new Error('No query returned from server');
+      }
+    } catch (err) {
+      console.error("Error generating vector query:", err);
+      
+      let errorMessage = 'Failed to generate query.';
       if (err.response?.data?.detail) {
         if (typeof err.response.data.detail === 'object') {
           errorMessage = err.response.data.detail.error || 
@@ -390,7 +392,7 @@ function VectorSearch({
   };
   
   const handleRunGeneratedQuery = async () => {
-    if (!generatedQuery) return;
+    if (!editableQuery) return;
     
     // Check if settings are valid
     if (!isSettingsValid()) {
@@ -400,56 +402,51 @@ function VectorSearch({
     }
     
     setLoading(true);
-    setLogs('');
-    updateRealtimeLogs(prev => prev + 'Executing Cypher query from vector search...\n');
+    updateRealtimeLogs(verbose ? 'Running Cypher query...\n' : '');
     
     try {
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `Query to execute:\n${generatedQuery}\n\n`);
-      }
-      
       const response = await axios.post('/run_query/', {
-        query: generatedQuery,
-        question,
-        llm_type: llmType,
-        top_k: topK,
-        api_key: apiKey,
-        verbose,
-      });
-      
-      setExecutionResult({
-        result: response.data.result,
-        response: response.data.response
-      });
-      setRunnedQuery(true);
-      setError(null);
-      
-      if (verbose) {
-        if (response.data.logs) {
-          setLogs(response.data.logs);
-          updateRealtimeLogs(prev => prev + 'Query executed successfully!\n');
-        } else {
-          updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
-        }
-      }
-      
-      addLatestQuery({
+        query: editableQuery,
         question: question,
-        query: generatedQuery,
-        timestamp: new Date().toISOString(),
-        queryType: 'run',
-        response: response.data.response,
-        vectorIndex: vectorCategory,
-        embedding: embeddingType
+        llm_type: llmType,
+        api_key: apiKey,
+        verbose: verbose
       });
-    } catch (err) {
-      console.error(err);
-      let errorMessage = 'Error executing query.';
       
+      if (response.data) {
+        setQueryResult(editableQuery);
+        setExecutionResult({
+          result: response.data.result,
+          response: response.data.response
+        });
+        setRunnedQuery(true);
+        
+        // Collapse settings panel to show results
+        if (showSettings) {
+          setShowSettings(false);
+        }
+        
+        if (verbose && response.data.logs) {
+          setLogs(prev => prev + '\n\n' + response.data.logs);
+          updateRealtimeLogs(prev => prev + 'Query execution completed successfully!\n');
+        }
+        
+        addLatestQuery({
+          question: question,
+          query: editableQuery, 
+          timestamp: new Date().toISOString(),
+          queryType: 'vector-run',
+          response: response.data.response
+        });
+      }
+    } catch (err) {
+      console.error("Error running query:", err);
+      
+      let errorMessage = 'Failed to run query.';
       if (err.response?.data?.detail) {
         if (typeof err.response.data.detail === 'object') {
           errorMessage = err.response.data.detail.error || 
-                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
+                         (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
         } else {
           errorMessage = err.response.data.detail;
         }
@@ -622,6 +619,11 @@ function VectorSearch({
       setRunnedQuery(true);
       setQueryResult(queryString);
       setExecutionResult(runResponse.data.response);
+      
+      // Collapse settings panel to show results
+      if (showSettings) {
+        setShowSettings(false);
+      }
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Query execution completed successfully!\n`);
@@ -823,7 +825,7 @@ function VectorSearch({
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
-              Semantic Search
+              Vector Search
             </Typography>
             <Box>
               <Tooltip title="Model Settings">
@@ -884,10 +886,89 @@ function VectorSearch({
               }}
               icon={<LightbulbOutlinedIcon />}
             >
-              Ask any biomedical question with vector search to query the CROssBAR knowledge graph. Upload a vector file to enhance your search results.
+              Use vector search to find similar biomedical entities using embeddings. You can upload your own vector data or use the vector database.
             </Alert>
           </Collapse>
 
+          <Box sx={{ mb: 3 }}>
+            <AutocompleteTextField
+              value={question}
+              setValue={setQuestion}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleGenerateAndRun();
+                }
+              }}
+              placeholder="E.g., Find proteins similar to BRCA1 that are associated with breast cancer"
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              disabled={loading}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  fontSize: '1rem',
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? alpha(theme.palette.background.subtle, 0.3)
+                    : alpha(theme.palette.background.subtle, 0.3),
+                }
+              }}
+            />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <VectorUpload
+              vectorCategory={vectorCategory}
+              setVectorCategory={setVectorCategory}
+              embeddingType={embeddingType}
+              setEmbeddingType={setEmbeddingType}
+              vectorFile={vectorFile}
+              setVectorFile={setVectorFile}
+              selectedFile={selectedFile}
+              setSelectedFile={setSelectedFile}
+              handleUpload={handleUpload}
+            />
+          </Box>
+
+          {/* Prominent Settings Button */}
+          {!isSettingsValid() && (
+            <Box sx={{ mb: 3 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                startIcon={<TuneIcon />}
+                onClick={toggleSettings}
+                sx={{ 
+                  borderRadius: '12px', 
+                  py: 1.2,
+                  boxShadow: 2,
+                  bgcolor: theme => theme.palette.primary.main,
+                  '&:hover': {
+                    bgcolor: theme => theme.palette.primary.dark,
+                  },
+                  animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
+                  '@keyframes pulse': {
+                    '0%': {
+                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
+                    },
+                    '70%': {
+                      boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)'
+                    },
+                    '100%': {
+                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)'
+                    }
+                  }
+                }}
+              >
+                Configure Model Settings
+              </Button>
+            </Box>
+          )}
+
+          {/* Settings panel moved below the query input and Configure Settings button */}
           <Collapse in={showSettings}>
             <Paper 
               elevation={0} 
@@ -922,9 +1003,9 @@ function VectorSearch({
                         <MenuItem value="">
                           <em>Select a provider</em>
                         </MenuItem>
-                        {Object.keys(modelChoices).map((providerName) => (
-                          <MenuItem key={providerName} value={providerName}>
-                            {providerName}
+                        {Object.keys(modelChoices).map((provider) => (
+                          <MenuItem key={provider} value={provider}>
+                            {provider}
                           </MenuItem>
                         ))}
                       </Select>
@@ -937,17 +1018,7 @@ function VectorSearch({
                       <Select
                         labelId="model-label"
                         value={llmType}
-                        onChange={(e) => {
-                          const selectedModel = e.target.value;
-                          if (selectedModel !== 'separator') {
-                            setLlmType(selectedModel);
-                            if (!supportedModels.includes(selectedModel)) {
-                              setShowWarning(true);
-                            } else {
-                              setShowWarning(false);
-                            }
-                          }
-                        }}
+                        onChange={(e) => setLlmType(e.target.value)}
                         label="Model"
                       >
                         <MenuItem value="">
@@ -975,17 +1046,16 @@ function VectorSearch({
                   </Box>
                 </Box>
                 
-                {/* Second row - API Key and Results Limit */}
+                {/* Second row - API Key and TopK */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small">
                       <TextField
-                        label="API Key for LLM"
+                        label="API Key"
                         type="password"
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
                         size="small"
-                        variant="outlined"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -1080,84 +1150,6 @@ function VectorSearch({
               </Box>
             </Paper>
           </Collapse>
-
-          <Box sx={{ mb: 3 }}>
-            <AutocompleteTextField
-              value={question}
-              setValue={setQuestion}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleGenerateAndRun();
-                }
-              }}
-              placeholder="E.g., Find proteins similar to BRCA1 that are associated with breast cancer"
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-              disabled={loading}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '16px',
-                  fontSize: '1rem',
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? alpha(theme.palette.background.subtle, 0.3)
-                    : alpha(theme.palette.background.subtle, 0.3),
-                }
-              }}
-            />
-          </Box>
-
-          <Box sx={{ mb: 3 }}>
-            <VectorUpload
-              vectorCategory={vectorCategory}
-              setVectorCategory={setVectorCategory}
-              embeddingType={embeddingType}
-              setEmbeddingType={setEmbeddingType}
-              vectorFile={vectorFile}
-              setVectorFile={setVectorFile}
-              selectedFile={selectedFile}
-              setSelectedFile={setSelectedFile}
-              handleUpload={handleUpload}
-            />
-          </Box>
-
-          {/* Prominent Settings Button */}
-          {!isSettingsValid() && (
-            <Box sx={{ mb: 3 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                startIcon={<TuneIcon />}
-                onClick={toggleSettings}
-                sx={{ 
-                  borderRadius: '12px', 
-                  py: 1.2,
-                  boxShadow: 2,
-                  bgcolor: theme => theme.palette.primary.main,
-                  '&:hover': {
-                    bgcolor: theme => theme.palette.primary.dark,
-                  },
-                  animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
-                  '@keyframes pulse': {
-                    '0%': {
-                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
-                    },
-                    '70%': {
-                      boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)'
-                    },
-                    '100%': {
-                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)'
-                    }
-                  }
-                }}
-              >
-                Configure Model Settings
-              </Button>
-            </Box>
-          )}
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
