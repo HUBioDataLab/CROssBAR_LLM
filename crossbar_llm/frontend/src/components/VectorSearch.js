@@ -1123,6 +1123,42 @@ function VectorSearch({
             />
           </Box>
 
+          {/* Prominent Settings Button */}
+          {!isSettingsValid() && (
+            <Box sx={{ mb: 3 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                startIcon={<TuneIcon />}
+                onClick={toggleSettings}
+                sx={{ 
+                  borderRadius: '12px', 
+                  py: 1.2,
+                  boxShadow: 2,
+                  bgcolor: theme => theme.palette.primary.main,
+                  '&:hover': {
+                    bgcolor: theme => theme.palette.primary.dark,
+                  },
+                  animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
+                  '@keyframes pulse': {
+                    '0%': {
+                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
+                    },
+                    '70%': {
+                      boxShadow: '0 0 0 10px rgba(25, 118, 210, 0)'
+                    },
+                    '100%': {
+                      boxShadow: '0 0 0 0 rgba(25, 118, 210, 0)'
+                    }
+                  }
+                }}
+              >
+                Configure Model Settings
+              </Button>
+            </Box>
+          )}
+
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
               <SampleQuestions onQuestionClick={handleSampleQuestionClick} isVectorTab={true} />
