@@ -64,7 +64,10 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   const fuse = new Fuse(suggestions, {
     includeScore: true,
-    threshold: 0.3,
+    threshold: 0.5,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+    keys: ['name'],
   });
 
   const debounceTimeoutRef = useRef(null);
@@ -181,11 +184,33 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
       if (lastAtSymbol !== -1) {
         const query = newValue.slice(lastAtSymbol + 1, cursorPosition+1);
-        if (query.length > 2) {
-          const results = fuse.search(query);
-          const matchedSuggestions = results.map((result) => result.item);
-          setDisplaySuggestions(matchedSuggestions);
-          setShowSuggestions(true);
+        // Convert spaces to underscores in query to match the format of suggestions
+        const formattedQuery = query.replace(/\s+/g, '_');
+        
+        if (query.length > 1) { 
+          let matchedSuggestions;
+          
+          // First try direct inclusion for exact matches
+          if (query.length > 3) {
+            matchedSuggestions = suggestions.filter(s => 
+              s.toLowerCase().includes(formattedQuery.toLowerCase())
+            )
+            // Sort by length to prioritize shorter suggestions
+            .sort((a, b) => a.length - b.length)
+            .slice(0, 15); // Limit to 15 results
+          }
+          
+          // Only use fuzzy search if query is more than 3 characters
+          if ((!matchedSuggestions || matchedSuggestions.length === 0) && query.length > 3) {
+            const results = fuse.search(formattedQuery);
+            matchedSuggestions = results.map((result) => result.item)
+              // Sort by length to prioritize shorter suggestions
+              .sort((a, b) => a.length - b.length)
+              .slice(0, 15);
+          }
+          
+          setDisplaySuggestions(matchedSuggestions || []);
+          setShowSuggestions(matchedSuggestions && matchedSuggestions.length > 0);
         } else {
           setShowSuggestions(false);
         }
@@ -278,13 +303,13 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   const handleSuggestionClick = (suggestion) => {
     // Replace underscores with spaces when using the suggestion in the text field
-    suggestion = suggestion.replaceAll('_', ' ');
+    const displaySuggestion = suggestion.replaceAll('_', ' ');
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
     const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
 
     const newTextBeforeCursor =
-      textBeforeCursor.slice(0, lastAtSymbol) + suggestion + ' ';
+      textBeforeCursor.slice(0, lastAtSymbol) + displaySuggestion + ' ';
     const newCursorPosition = newTextBeforeCursor.length;
 
     const newValue = newTextBeforeCursor + textAfterCursor;
@@ -295,7 +320,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
         if (mention.start === lastAtSymbol) {
           return {
             start: lastAtSymbol,
-            end: lastAtSymbol + suggestion.length,
+            end: lastAtSymbol + displaySuggestion.length,
             state: 'completed'
           };
         }

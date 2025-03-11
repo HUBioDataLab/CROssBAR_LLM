@@ -33,7 +33,7 @@ const computeSuggestions = async () => {
 
 const fetchSuggestions = async () => {
   const response = await axios.get(`${process.env.PUBLIC_URL}/suggestions.json`);
-  console.log('Fetched suggestions:', response.data);
+  console.log('Fetched suggestions count:', response.data.length);
   return response.data;
 };
 
@@ -49,22 +49,49 @@ export const loadSuggestions = async () => {
   // Check localStorage for cached suggestions
   const cached = localStorage.getItem(CACHE_KEY);
   if (cached) {
-    const { data, timestamp } = JSON.parse(cached);
-    // Check if cache is still valid
-    if (Date.now() - timestamp < CACHE_EXPIRY) {
-      return data;
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      // Check if cache is still valid
+      if (Date.now() - timestamp < CACHE_EXPIRY) {
+        return data;
+      }
+    } catch (error) {
+      console.error('Error parsing cached suggestions:', error);
+      localStorage.removeItem(CACHE_KEY);
     }
   }
 
   // try reading chunk info
   const chunkCount = parseInt(localStorage.getItem(CACHE_KEY + '_chunkCount') || '0', 10);
   if (chunkCount > 0) {
-    const reassembled = [];
-    for (let i = 0; i < chunkCount; i++) {
-      const part = localStorage.getItem(CACHE_KEY + '_chunk_' + i);
-      if (part) reassembled.push(...JSON.parse(part));
+    try {
+      const reassembled = [];
+      let allChunksValid = true;
+      
+      for (let i = 0; i < chunkCount; i++) {
+        const part = localStorage.getItem(CACHE_KEY + '_chunk_' + i);
+        if (part) {
+          try {
+            const parsedPart = JSON.parse(part);
+            reassembled.push(...parsedPart);
+          } catch (error) {
+            console.error(`Error parsing chunk ${i}:`, error);
+            allChunksValid = false;
+            break;
+          }
+        } else {
+          console.warn(`Chunk ${i} not found in localStorage`);
+          allChunksValid = false;
+          break;
+        }
+      }
+      
+      if (allChunksValid) {
+        return reassembled;
+      }
+    } catch (error) {
+      console.error('Error reassembling chunks:', error);
     }
-    return reassembled;
   }
 
   // If no cache or expired, fetch new suggestions
@@ -72,6 +99,17 @@ export const loadSuggestions = async () => {
   
   // Save to localStorage with timestamp
   try {
+    // Try to save the whole array first
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        data: suggestions,
+        timestamp: Date.now()
+      }));
+      return suggestions;
+    } catch (error) {
+      console.warn('Error saving to localStorage, will try chunking:', error);
+    }
+    
     // clear any old chunks
     const oldChunks = parseInt(localStorage.getItem(CACHE_KEY + '_chunkCount') || '0', 10);
     for (let i = 0; i < oldChunks; i++) {
@@ -81,11 +119,42 @@ export const loadSuggestions = async () => {
     // split and store new data
     const chunked = chunkArray(suggestions, 1000);
     localStorage.setItem(CACHE_KEY + '_chunkCount', chunked.length.toString());
-    chunked.forEach((c, idx) => {
-      localStorage.setItem(CACHE_KEY + '_chunk_' + idx, JSON.stringify(c));
-    });
+    
+    let allChunksSaved = true;
+    for (let i = 0; i < chunked.length; i++) {
+      try {
+        localStorage.setItem(CACHE_KEY + '_chunk_' + i, JSON.stringify(chunked[i]));
+      } catch (error) {
+        console.error(`Failed to save chunk ${i}:`, error);
+        allChunksSaved = false;
+        break;
+      }
+    }
+    
+    if (!allChunksSaved) {
+      // If we couldn't save all chunks, try with smaller chunk size
+      console.warn('Not all chunks saved, trying smaller chunk size');
+      // Clear previous failed chunks
+      for (let i = 0; i < chunked.length; i++) {
+        localStorage.removeItem(CACHE_KEY + '_chunk_' + i);
+      }
+      
+      const smallerChunked = chunkArray(suggestions, 500);
+      localStorage.setItem(CACHE_KEY + '_chunkCount', smallerChunked.length.toString());
+      
+      for (let i = 0; i < smallerChunked.length; i++) {
+        try {
+          localStorage.setItem(CACHE_KEY + '_chunk_' + i, JSON.stringify(smallerChunked[i]));
+        } catch (error) {
+          console.error(`Failed to save smaller chunk ${i}:`, error);
+          // At this point, we just give up on chunking
+          localStorage.setItem(CACHE_KEY + '_chunkCount', '0');
+          break;
+        }
+      }
+    }
   } catch (error) {
-    console.warn('Storage limit reached, skipping chunk caching:', error);
+    console.error('Storage error during chunking:', error);
   }
 
   return suggestions;
