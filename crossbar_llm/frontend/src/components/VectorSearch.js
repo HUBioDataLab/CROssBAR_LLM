@@ -888,6 +888,34 @@ function VectorSearch({
             </Alert>
           </Collapse>
 
+          <Box sx={{ mb: 3 }}>
+            <AutocompleteTextField
+              value={question}
+              setValue={setQuestion}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleGenerateAndRun();
+                }
+              }}
+              placeholder="E.g., Find proteins similar to BRCA1 that are associated with breast cancer"
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              disabled={loading}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  fontSize: '1rem',
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? alpha(theme.palette.background.subtle, 0.3)
+                    : alpha(theme.palette.background.subtle, 0.3),
+                }
+              }}
+            />
+          </Box>
+
           <Collapse in={showSettings}>
             <Paper 
               elevation={0} 
@@ -1080,34 +1108,6 @@ function VectorSearch({
               </Box>
             </Paper>
           </Collapse>
-
-          <Box sx={{ mb: 3 }}>
-            <AutocompleteTextField
-              value={question}
-              setValue={setQuestion}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleGenerateAndRun();
-                }
-              }}
-              placeholder="E.g., Find proteins similar to BRCA1 that are associated with breast cancer"
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-              disabled={loading}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '16px',
-                  fontSize: '1rem',
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? alpha(theme.palette.background.subtle, 0.3)
-                    : alpha(theme.palette.background.subtle, 0.3),
-                }
-              }}
-            />
-          </Box>
 
           <Box sx={{ mb: 3 }}>
             <VectorUpload
