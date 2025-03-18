@@ -22,6 +22,9 @@ import BiotechOutlinedIcon from '@mui/icons-material/BiotechOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
+import MedicationOutlinedIcon from '@mui/icons-material/MedicationOutlined';
+import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined';
+import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import axios from '../services/api';
@@ -226,42 +229,71 @@ function Home({ handleTabChange }) {
   const [error, setError] = useState(null);
   const syntaxTheme = theme.palette.mode === 'dark' ? dracula : docco;
 
-  const handleDemoSubmit = async (e) => {
-    e.preventDefault();
-    if (!demoQuery.trim()) return;
+  // Hard-coded demo examples
+  const demoExamples = [
+    {
+      question: "Which Gene is related to the Disease named psoriasis?",
+      query: `MATCH (g:Gene)-[:Gene_is_related_to_disease]->(d:Disease) 
+WHERE d.name = "psoriasis" 
+RETURN g`,
+      result: "The genes related to the disease psoriasis are TNFSF15 (ncbigene:9966), FGF19 (ncbigene:9965), SLC23A2 (ncbigene:9962), MVP (ncbigene:9961), and USP15 (ncbigene:9958).",
+      icon: <HealthAndSafetyOutlinedIcon />,
+      color: "primary"
+    },
+    {
+      question: "What proteins are targeted by the drug methotrexate?",
+      query: `MATCH (d:Drug {name:"Methotrexate"})-[:Drug_targets_protein]->(p:Protein)
+RETURN p`,
+      result: "The drug Methotrexate targets the proteins Adenosine receptor A2a, Receptor-type tyrosine-protein phosphatase mu, DNA-(apurinic or apyrimidinic site) endonuclease (EC 3.1.11.2) (APEX nuclease) (APEN) (Apurinic-apyrimidinic endonuclease 1) (AP endonuclease 1) (APE-1) (REF-1) (Redox factor-1), G1/S-specific cyclin-D1, and Trans-acting T-cell-specific transcription factor GATA-3.",
+      icon: <MedicationOutlinedIcon />,
+      color: "secondary"
+    },
+    {
+      question: "Find all pathways associated with Alzheimer's disease",
+      query: `MATCH (d:Disease {name: "Alzheimer disease"})-[:Disease_modulates_pathway]->(p:Pathway)
+RETURN p`,
+      result: "The pathways associated with Alzheimer disease are Fluid shear stress and atherosclerosis (kegg.pathway:hsa05418), Viral myocarditis (kegg.pathway:hsa05416), Dilated cardiomyopathy (kegg.pathway:hsa05414), Hypertrophic cardiomyopathy (kegg.pathway:hsa05410), and Graft (kegg.pathway:hsa05332).",
+      icon: <RouteOutlinedIcon />,
+      color: "info"
+    }
+  ];
+
+  const sampleQuestions = demoExamples.map(ex => ex.question);
+
+  const handleDemoSubmit = async (e, selectedQuery = null) => {
+    if (e) e.preventDefault();
+    
+    // Use the provided selectedQuery if available, otherwise use the state value
+    const queryToUse = selectedQuery || demoQuery;
+    
+    if (!queryToUse.trim()) return;
     
     setLoading(true);
     setError(null);
     
-    try {
-      const response = await axios.post('/generate_query/', {
-        question: demoQuery,
-        provider: 'Google',
-        llm_type: 'gemini-2.0-flash',
-        api_key: 'demo',
-        verbose: false
-      });
-      
-      setDemoResponse({
-        query: response.data.query,
-        question: demoQuery
-      });
-    } catch (err) {
-      console.error('Error in demo query:', err);
-      setError('An error occurred while processing your query. Please try again.');
-    } finally {
-      setLoading(false);
+    // Find the matching example
+    const exampleMatch = demoExamples.find(ex => ex.question === queryToUse) || demoExamples[0];
+    
+    // Update the state to show the selection (in case selectedQuery was provided)
+    if (selectedQuery) {
+      setDemoQuery(selectedQuery);
     }
+    
+    // Simulate network delay for realism
+    setTimeout(() => {
+      setDemoResponse({
+        query: exampleMatch.query,
+        question: queryToUse,
+        result: exampleMatch.result
+      });
+      setLoading(false);
+    }, 1200); // Simulate a 1.2 second delay for realism
   };
 
-  const sampleQuestions = [
-    "What drugs target the BRCA1 gene?",
-    "Show me proteins associated with Alzheimer's disease",
-    "Find pathways related to inflammation"
-  ];
-
   const handleSampleClick = (question) => {
-    setDemoQuery(question);
+    // Call handleDemoSubmit directly with the selected question
+    // This avoids the asynchronous state update issue
+    handleDemoSubmit(null, question);
   };
 
   return (
@@ -738,54 +770,88 @@ function Home({ handleTabChange }) {
                 }}
               >
                 <Box component="form" onSubmit={handleDemoSubmit}>
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Ask a biomedical question
+                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                    Select a biomedical question
                   </Typography>
                   
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
-                      Try one of these examples:
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {sampleQuestions.map((q, i) => (
-                        <Chip 
-                          key={i} 
-                          label={q} 
-                          onClick={() => handleSampleClick(q)}
-                          sx={{ 
-                            borderRadius: '8px',
-                            '&:hover': {
-                              backgroundColor: theme => theme.palette.mode === 'dark' 
-                                ? alpha(theme.palette.primary.main, 0.2)
-                                : alpha(theme.palette.primary.main, 0.1),
-                            }
-                          }}
-                        />
+                  <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+                    Click on any example below to see how CROssBAR LLM translates natural language into database queries
+                  </Typography>
+                  
+                  <Box sx={{ mb: 3 }}>
+                    <Grid container spacing={2}>
+                      {demoExamples.map((example, i) => (
+                        <Grid item xs={12} key={i}>
+                          <Paper
+                            elevation={0}
+                            onClick={() => handleSampleClick(example.question)}
+                            sx={{
+                              p: 2.5,
+                              borderRadius: '16px',
+                              cursor: 'pointer',
+                              border: theme => `1px solid ${
+                                demoQuery === example.question 
+                                  ? theme.palette[example.color].main 
+                                  : theme.palette.divider
+                              }`,
+                              backgroundColor: theme => demoQuery === example.question
+                                ? (theme.palette.mode === 'dark'
+                                  ? alpha(theme.palette[example.color].main, 0.15)
+                                  : alpha(theme.palette[example.color].main, 0.05))
+                                : 'transparent',
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                backgroundColor: theme => theme.palette.mode === 'dark'
+                                  ? alpha(theme.palette[example.color].main, 0.1)
+                                  : alpha(theme.palette[example.color].main, 0.03),
+                                transform: 'translateY(-2px)',
+                                boxShadow: theme => `0 4px 12px ${alpha(theme.palette[example.color].main, 0.1)}`
+                              },
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: theme => demoQuery === example.question
+                                  ? theme.palette[example.color].main
+                                  : (theme.palette.mode === 'dark'
+                                    ? alpha(theme.palette[example.color].main, 0.2)
+                                    : alpha(theme.palette[example.color].main, 0.1)),
+                                color: theme => demoQuery === example.question
+                                  ? '#fff'
+                                  : theme.palette[example.color].main,
+                                mr: 2,
+                                transition: 'all 0.3s ease',
+                              }}
+                            >
+                              {example.icon}
+                            </Box>
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                fontWeight: demoQuery === example.question ? 600 : 400 
+                              }}
+                            >
+                              {example.question}
+                            </Typography>
+                          </Paper>
+                        </Grid>
                       ))}
-                    </Box>
+                    </Grid>
                   </Box>
                   
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Enter your biomedical question..."
-                    value={demoQuery}
-                    onChange={(e) => setDemoQuery(e.target.value)}
-                    sx={{ mb: 2 }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton 
-                            type="submit" 
-                            disabled={loading || !demoQuery.trim()}
-                            color="primary"
-                          >
-                            {loading ? <CircularProgress size={24} /> : <SendIcon />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
+                  {loading && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                      <CircularProgress size={40} />
+                    </Box>
+                  )}
                   
                   {error && (
                     <Alert severity="error" sx={{ mb: 2 }}>
@@ -824,6 +890,24 @@ function Home({ handleTabChange }) {
                         >
                           {demoResponse.query}
                         </SyntaxHighlighter>
+                      </Paper>
+                      
+                      <Typography variant="subtitle2" sx={{ mt: 3, mb: 1, color: 'text.secondary' }}>
+                        Result:
+                      </Typography>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          borderRadius: '12px',
+                          p: 2,
+                          backgroundColor: theme => theme.palette.mode === 'dark' 
+                            ? alpha(theme.palette.background.default, 0.6)
+                            : alpha(theme.palette.background.default, 0.6),
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {demoResponse.result}
+                        </Typography>
                       </Paper>
                       
                       <Box sx={{ mt: 3, textAlign: 'center' }}>
