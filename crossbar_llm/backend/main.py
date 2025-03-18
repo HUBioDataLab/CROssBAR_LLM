@@ -489,6 +489,28 @@ def get_neo4j_statistics():
     
     return statistics
 
+@app.get("/api_keys_status/")
+async def get_api_keys_status():
+    Logger.info("API keys status requested")
+    
+    # Load env variables to ensure we have the latest
+    load_dotenv()
+    
+    # Check which API keys are available in the environment
+    api_keys_status = {
+        "OpenAI": os.getenv("OPENAI_API_KEY", "") != "" and os.getenv("OPENAI_API_KEY", "") != "default",
+        "Anthropic": os.getenv("ANTHROPIC_API_KEY", "") != "" and os.getenv("ANTHROPIC_API_KEY", "") != "default",
+        "Gemini": os.getenv("GEMINI_API_KEY", "") != "" and os.getenv("GEMINI_API_KEY", "") != "default",
+        "Groq": os.getenv("GROQ_API_KEY", "") != "" and os.getenv("GROQ_API_KEY", "") != "default",
+        "Replicate": os.getenv("REPLICATE_API_KEY", "") != "" and os.getenv("REPLICATE_API_KEY", "") != "default",
+        "Nvidia": os.getenv("NVIDIA_API_KEY", "") != "" and os.getenv("NVIDIA_API_KEY", "") != "default",
+        "OpenRouter": os.getenv("OPENROUTER_API_KEY", "") != "" and os.getenv("OPENROUTER_API_KEY", "") != "default",
+        "Cohere": os.getenv("COHERE_API_KEY", "") != "" and os.getenv("COHERE_API_KEY", "") != "default"
+    }
+    
+    Logger.debug(f"API keys status: {api_keys_status}")
+    return api_keys_status
+
 # Initialize logging on startup
 @app.on_event("startup")
 async def startup_event():

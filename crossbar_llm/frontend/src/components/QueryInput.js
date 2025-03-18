@@ -28,7 +28,11 @@ import {
   Autocomplete,
   Zoom,
   alpha,
-  Switch
+  Switch,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  CheckCircleIcon
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import api from '../services/api';
@@ -78,6 +82,9 @@ function QueryInput({
   const [localRealtimeLogs, setLocalRealtimeLogs] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [highlightSettings, setHighlightSettings] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [apiKeysStatus, setApiKeysStatus] = useState({});
+  const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const abortControllerRef = useRef(null);
@@ -146,6 +153,58 @@ function QueryInput({
 
   const supportedModels = ['gpt-4o', 'claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.0-flash'];
 
+  // Fetch API keys status on component mount
+  useEffect(() => {
+    const fetchApiKeysStatus = async () => {
+      try {
+        const response = await fetch('/api_keys_status/');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('API keys status:', data);
+          setApiKeysStatus(data);
+          setApiKeysLoaded(true);
+          
+          // Set API key to "env" if the selected provider has an API key in .env
+          if (provider && data[provider]) {
+            setApiKey('env');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching API keys status:', error);
+      }
+    };
+    
+    fetchApiKeysStatus();
+  }, [provider, setApiKey]);
+  
+  // Check if the selected provider requires an API key to be entered
+  const providerNeedsApiKey = useCallback(() => {
+    if (!apiKeysLoaded) return true;
+    
+    // If the provider has an API key in .env, no need to enter one
+    if (apiKeysStatus[provider]) {
+      return false;
+    }
+    
+    // These providers always need an API key if not in .env
+    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'Cohere' || 
+           provider === 'Gemini' || provider === 'Groq' || provider === 'Nvidia' || 
+           provider === 'OpenRouter';
+  }, [provider, apiKeysStatus, apiKeysLoaded]);
+
+  // When provider changes, update API key if needed
+  useEffect(() => {
+    if (apiKeysLoaded && provider) {
+      if (apiKeysStatus[provider]) {
+        // Provider has an API key in .env
+        setApiKey('env');
+      } else {
+        // Provider doesn't have an API key in .env, clear it
+        setApiKey('');
+      }
+    }
+  }, [provider, apiKeysStatus, apiKeysLoaded, setApiKey]);
+
   // Function to check if settings are valid
   const isSettingsValid = () => {
     // Check if provider is selected
@@ -155,7 +214,7 @@ function QueryInput({
     if (!llmType) return false;
     
     // Check if API key is provided for providers that need it
-    if ((provider === 'OpenAI' || provider === 'Anthropic' || provider === 'Cohere') && !apiKey) {
+    if (providerNeedsApiKey() && !apiKey) {
       return false;
     }
     
@@ -303,10 +362,10 @@ function QueryInput({
   };
 
   const handleGenerateQuery = async () => {
-    // Check if settings are valid
     if (!isSettingsValid()) {
-      setError("Please configure your model settings first (provider, model, and API key if required)");
-      toggleSettings(); // Open settings panel
+      alert("Please configure the LLM settings first");
+      setSettingsOpen(true);
+      setHighlightSettings(true);
       return;
     }
     
@@ -323,11 +382,14 @@ function QueryInput({
         updateRealtimeLogs(prev => prev + `Sending request with parameters:\n- Question: ${question}\n- Model: ${llmType}\n- Top K: ${topK}\n- Verbose: ${verbose}\n`);
       }
       
+      // Update API key to use from environment if available
+      const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+      
       const response = await api.post('/generate_query/', {
         question,
         llm_type: llmType,
         top_k: topK,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         verbose,
       }, { signal });
       
@@ -393,10 +455,10 @@ function QueryInput({
   const handleRunGeneratedQuery = async () => {
     if (!editableQuery) return;
     
-    // Check if settings are valid
     if (!isSettingsValid()) {
-      setError("Please configure your model settings first (provider, model, and API key if required)");
-      toggleSettings(); // Open settings panel
+      alert("Please configure the LLM settings first");
+      setSettingsOpen(true);
+      setHighlightSettings(true);
       return;
     }
     
@@ -411,11 +473,14 @@ function QueryInput({
         updateRealtimeLogs(prev => prev + 'Executing generated Cypher query...\n');
       }
       
+      // Update API key to use from environment if available
+      const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+      
       const response = await api.post('/run_query/', {
         query: editableQuery,
         question: question,
         llm_type: llmType,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         verbose,
       }, { signal });
       
@@ -477,10 +542,10 @@ function QueryInput({
   };
 
   const handleGenerateAndRun = async () => {
-    // Check if settings are valid
     if (!isSettingsValid()) {
-      setError("Please configure your model settings first (provider, model, and API key if required)");
-      toggleSettings(); // Open settings panel
+      alert("Please configure the LLM settings first");
+      setSettingsOpen(true);
+      setHighlightSettings(true);
       return;
     }
     
@@ -497,12 +562,15 @@ function QueryInput({
         updateRealtimeLogs(prev => prev + `Sending request with parameters:\n- Question: ${question}\n- Model: ${llmType}\n- Top K: ${topK}\n- Verbose: ${verbose}\n`);
       }
       
+      // Update API key to use from environment if available
+      const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+      
       // First generate the query
       const generateResponse = await api.post('/generate_query/', {
         question,
         llm_type: llmType,
         top_k: topK,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         verbose,
       }, { signal });
       
@@ -539,7 +607,7 @@ function QueryInput({
         query: processedQuery,
         question: question,
         llm_type: llmType,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         verbose,
       }, { signal });
       
@@ -859,24 +927,51 @@ function QueryInput({
                 
                 {/* Second row - API Key and Top K */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-                    <FormControl fullWidth variant="outlined" size="small">
-                      <TextField
-                        label="API Key"
-                        type="password"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        size="small"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <KeyIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
+                  {/* Only show API Key field if provider needs it and doesn't have a key in .env */}
+                  {!apiKeysStatus[provider] && (
+                    <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                      <FormControl fullWidth variant="outlined" size="small">
+                        <TextField
+                          label="API Key"
+                          type="password"
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          size="small"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <KeyIcon fontSize="small" />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </FormControl>
+                    </Box>
+                  )}
+                  
+                  {/* If provider has an API key in .env, show this instead */}
+                  {apiKeysLoaded && apiKeysStatus[provider] && (
+                    <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                      <Paper
+                        variant="outlined"
+                        sx={{ 
+                          p: 1.5, 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          backgroundColor: theme => theme.palette.mode === 'dark' ? alpha('#4caf50', 0.1) : alpha('#4caf50', 0.05),
+                          border: '1px solid rgba(76, 175, 80, 0.3)'
                         }}
-                      />
-                    </FormControl>
-                  </Box>
+                      >
+                        <Box sx={{ color: '#4caf50', mr: 1, display: 'flex', alignItems: 'center' }}>
+                          {/* Using a check icon without the CheckCircleIcon import */}
+                          <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z"/>
+                          </svg>
+                        </Box>
+                        <Typography variant="body2">Using API key from .env file</Typography>
+                      </Paper>
+                    </Box>
+                  )}
                   
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small">
