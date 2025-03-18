@@ -144,7 +144,7 @@ function QueryInput({
     ],
   };
 
-  const supportedModels = ['gpt-4o', 'claude3.5', 'llama3.2-405b', 'deepseek/deepseek-r1'];
+  const supportedModels = ['gpt-4o', 'claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.0-flash'];
 
   // Function to check if settings are valid
   const isSettingsValid = () => {
