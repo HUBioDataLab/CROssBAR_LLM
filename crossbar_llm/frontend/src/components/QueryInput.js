@@ -651,17 +651,20 @@ function QueryInput({
             </Typography>
             <Box>
               <Tooltip title="Model Settings">
-                <IconButton 
+                <Button 
                   onClick={toggleSettings} 
                   color={showSettings || highlightSettings ? "primary" : "default"}
+                  startIcon={<TuneIcon />}
+                  variant={showSettings ? "contained" : "text"}
+                  size="small"
                   sx={{ 
                     borderRadius: '12px',
-                    backgroundColor: (showSettings || highlightSettings)
+                    backgroundColor: (showSettings && !highlightSettings)
                       ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
-                      : 'transparent',
+                      : highlightSettings ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08)) : 'transparent',
                     transition: 'all 0.3s ease',
                     animation: highlightSettings ? 'pulse 1.5s infinite' : 'none',
-                    transform: highlightSettings ? 'scale(1.1)' : 'scale(1)',
+                    transform: highlightSettings ? 'scale(1.05)' : 'scale(1)',
                     '@keyframes pulse': {
                       '0%': {
                         boxShadow: '0 0 0 0 rgba(25, 118, 210, 0.7)'
@@ -675,8 +678,8 @@ function QueryInput({
                     }
                   }}
                 >
-                  <TuneIcon />
-                </IconButton>
+                  Configure Model Settings
+                </Button>
               </Tooltip>
               <Tooltip title="Help">
                 <IconButton 
