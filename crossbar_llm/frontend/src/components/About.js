@@ -52,7 +52,7 @@ function About({ onClose }) {
             letterSpacing: '-0.02em'
           }}
         >
-          CROssBAR LLM
+          CROssBAR-LLM
         </Typography>
         <Typography variant="h6" sx={{ 
           color: 'text.secondary', 
@@ -91,7 +91,7 @@ function About({ onClose }) {
             </Box>
             
             <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7 }}>
-              CROssBAR LLM allows you to query complex biomedical knowledge graphs using natural language. The system translates your questions into Cypher queries that extract relevant information from the Neo4j database.
+              CROssBAR-LLM allows you to query complex biomedical knowledge graphs using natural language. The system translates your questions into Cypher queries that extract relevant information from the Neo4j database.
             </Typography>
             
             <List sx={{ pl: 2 }}>
@@ -325,7 +325,7 @@ function About({ onClose }) {
       
       <Box sx={{ mt: 4, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          CROssBAR LLM Interface • Developed by HUBIODATALAB
+          CROssBAR-LLM Interface • Developed by HUBIODATALAB
         </Typography>
         
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>

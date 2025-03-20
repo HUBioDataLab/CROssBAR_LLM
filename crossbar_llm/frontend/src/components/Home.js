@@ -331,7 +331,7 @@ RETURN p`,
                       letterSpacing: '-0.02em'
                     }}
                   >
-                    CROssBAR LLM
+                    CROssBAR-LLM
                   </Typography>
                   <Typography 
                     variant="h5" 
@@ -463,7 +463,7 @@ RETURN p`,
               mb: 6
             }}
           >
-            CROssBAR LLM combines the power of large language models with biomedical knowledge graphs to enable natural language querying of complex data
+            CROssBAR-LLM combines the power of large language models with biomedical knowledge graphs to enable natural language querying of complex data
           </Typography>
 
           <Grid container spacing={3}>
@@ -752,7 +752,7 @@ RETURN p`,
               textAlign: 'center'
             }}
           >
-            Experience the power of CROssBAR LLM with this quick demo
+            Experience the power of CROssBAR-LLM with this quick demo
           </Typography>
 
           <Grid container spacing={4} justifyContent="center">
@@ -775,7 +775,7 @@ RETURN p`,
                   </Typography>
                   
                   <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-                    Click on any example below to see how CROssBAR LLM translates natural language into database queries
+                    Click on any example below to see how CROssBAR-LLM translates natural language into database queries
                   </Typography>
                   
                   <Box sx={{ mb: 3 }}>

@@ -283,7 +283,7 @@ function App() {
           WebkitTextFillColor: 'transparent',
           letterSpacing: '-0.01em'
         }}>
-          CROssBAR LLM
+          CROssBAR-LLM
         </Typography>
       </Box>
       
@@ -462,7 +462,7 @@ function App() {
           textAlign: 'center',
           fontFamily: "'Poppins', 'Roboto', sans-serif"
         }}>
-          CROssBAR LLM v1.0
+          CROssBAR-LLM v1.0
         </Typography>
       </Box>
     </Box>
@@ -509,7 +509,7 @@ function App() {
                   WebkitTextFillColor: 'transparent',
                   letterSpacing: '-0.01em'
                 }}>
-                  CROssBAR LLM
+                  CROssBAR-LLM
                 </Typography>
               </Box>
             </Box>
