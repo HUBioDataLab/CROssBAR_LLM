@@ -29,6 +29,7 @@ import {
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
+import api from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
