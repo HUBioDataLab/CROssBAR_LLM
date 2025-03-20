@@ -25,9 +25,11 @@ import {
   Switch,
   Fade,
   InputAdornment,
+  useMediaQuery,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
+import api from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -39,6 +41,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import KeyIcon from '@mui/icons-material/Key';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function VectorSearch({ 
   setQueryResult, 
@@ -70,9 +73,15 @@ function VectorSearch({
   const [highlightSettings, setHighlightSettings] = useState(false);
   const [logs, setLogs] = useState('');
   const [localRealtimeLogs, setLocalRealtimeLogs] = useState('');
+  const [apiKeysStatus, setApiKeysStatus] = useState({});
+  const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const dropzoneRef = useRef(null);
+  const isFirstRender = useRef(true);
+  const abortControllerRef = useRef(null);
 
   const modelChoices = {
     OpenAI: [
@@ -134,6 +143,56 @@ function VectorSearch({
   
   const supportedModels = ['gpt-4o', 'claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.0-flash'];
   
+  // Fetch API keys status on component mount
+  useEffect(() => {
+    const fetchApiKeysStatus = async () => {
+      try {
+        const response = await api.get('/api_keys_status/');
+        if (response.data) {
+          console.log('API keys status:', response.data);
+          setApiKeysStatus(response.data);
+          setApiKeysLoaded(true);
+          
+          // Set API key to "env" if the selected provider has an API key in .env
+          if (provider && response.data[provider]) {
+            setApiKey('env');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching API keys status:', error);
+      }
+    };
+    
+    fetchApiKeysStatus();
+  }, [provider, setApiKey]);
+  
+  // Check if the selected provider requires an API key to be entered
+  const providerNeedsApiKey = useCallback(() => {
+    if (!apiKeysLoaded) return true;
+    
+    // If the provider has an API key in .env, no need to enter one
+    if (apiKeysStatus[provider]) {
+      return false;
+    }
+    
+    // These providers always need an API key if not in .env
+    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' || 
+           provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
+  }, [provider, apiKeysStatus, apiKeysLoaded]);
+
+  // When provider changes, update API key if needed
+  useEffect(() => {
+    if (apiKeysLoaded && provider) {
+      if (apiKeysStatus[provider]) {
+        // Provider has an API key in .env
+        setApiKey('env');
+      } else {
+        // Provider doesn't have an API key in .env, clear it
+        setApiKey('');
+      }
+    }
+  }, [provider, apiKeysStatus, apiKeysLoaded, setApiKey]);
+  
   // Update both local and app-level realtime logs
   const updateRealtimeLogs = useCallback((newLogs) => {
     if (typeof newLogs === 'function') {
@@ -161,7 +220,7 @@ function VectorSearch({
     if (!llmType) return false;
     
     // Check if API key is provided for providers that need it
-    if ((provider === 'OpenAI' || provider === 'Anthropic' || provider === 'Cohere') && !apiKey) {
+    if (providerNeedsApiKey() && !apiKey) {
       return false;
     }
     
@@ -297,10 +356,10 @@ function VectorSearch({
   }, [clearLogs]);
   
   const handleGenerateQuery = async () => {
-    // Check if settings are valid
     if (!isSettingsValid()) {
-      setError("Please configure your model settings first (provider, model, and API key if required)");
-      toggleSettings(); // Open settings panel
+      alert("Please configure the LLM settings first");
+      setShowSettings(true);
+      setHighlightSettings(true);
       return;
     }
     
@@ -321,12 +380,15 @@ function VectorSearch({
 `);
       }
       
+      // Update API key to use from environment if available
+      const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+      
       const embedding = JSON.stringify(vectorFile);
       const response = await axios.post('/generate_query/', {
         question,
         llm_type: llmType,
         top_k: topK,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         verbose,
         vector_index: embeddingType,
         embedding: embedding,
@@ -392,10 +454,10 @@ function VectorSearch({
   const handleRunGeneratedQuery = async () => {
     if (!generatedQuery) return;
     
-    // Check if settings are valid
     if (!isSettingsValid()) {
-      setError("Please configure your model settings first (provider, model, and API key if required)");
-      toggleSettings(); // Open settings panel
+      alert("Please configure the LLM settings first");
+      setShowSettings(true);
+      setHighlightSettings(true);
       return;
     }
     
@@ -408,12 +470,15 @@ function VectorSearch({
         updateRealtimeLogs(prev => prev + `Query to execute:\n${generatedQuery}\n\n`);
       }
       
+      // Update API key to use from environment if available
+      const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+      
       const response = await axios.post('/run_query/', {
         query: generatedQuery,
         question,
         llm_type: llmType,
         top_k: topK,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         verbose,
       });
       
@@ -471,10 +536,10 @@ function VectorSearch({
   };
   
   const handleGenerateAndRun = async () => {
-    // Check if settings are valid
     if (!isSettingsValid()) {
-      setError("Please configure your model settings first (provider, model, and API key if required)");
-      toggleSettings(); // Open settings panel
+      alert("Please configure the LLM settings first");
+      setShowSettings(true);
+      setHighlightSettings(true);
       return;
     }
     
@@ -492,6 +557,9 @@ function VectorSearch({
     }
     
     try {
+      // Update API key to use from environment if available
+      const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+      
       // Check if we have a vector file
       if (!vectorFile && vectorCategory) {
         throw new Error('Vector file is required for vector search');
@@ -499,12 +567,12 @@ function VectorSearch({
       
       // Prepare the request data
       const requestData = {
-        question: question,
-        provider: provider,
+        question,
+        provider,
         llm_type: llmType,
-        api_key: apiKey,
+        api_key: effectiveApiKey,
         top_k: topK,
-        verbose: verbose
+        verbose,
       };
       
       // Add vector data if available
@@ -1008,25 +1076,46 @@ function VectorSearch({
                 
                 {/* Second row - API Key and Results Limit */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-                    <FormControl fullWidth variant="outlined" size="small">
-                      <TextField
-                        label="API Key for LLM"
-                        type="password"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        size="small"
+                  {/* Only show API Key field if provider needs it */}
+                  {!apiKeysStatus[provider] && (
+                    <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                      <FormControl fullWidth variant="outlined" size="small">
+                        <TextField
+                          label="API Key for LLM"
+                          type="password"
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          size="small"
+                          variant="outlined"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <KeyIcon fontSize="small" />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </FormControl>
+                    </Box>
+                  )}
+                  {/* If provider has an API key in .env, show this instead */}
+                  {apiKeysLoaded && apiKeysStatus[provider] && (
+                    <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
+                      <Paper
                         variant="outlined"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <KeyIcon fontSize="small" />
-                            </InputAdornment>
-                          ),
+                        sx={{ 
+                          p: 1.5, 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          backgroundColor: theme => theme.palette.mode === 'dark' ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.main, 0.05),
+                          border: theme => `1px solid ${alpha(theme.palette.success.main, 0.3)}`
                         }}
-                      />
-                    </FormControl>
-                  </Box>
+                      >
+                        <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 1 }} />
+                        <Typography variant="body2">Using API key from .env file</Typography>
+                      </Paper>
+                    </Box>
+                  )}
                   
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small">
