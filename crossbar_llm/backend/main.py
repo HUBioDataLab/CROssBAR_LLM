@@ -206,11 +206,33 @@ async def generate_query(
     Logger.info(f"Generating query for question: '{generate_query_request.question}'")
     Logger.debug(f"Using LLM: {generate_query_request.llm_type}, top_k: {generate_query_request.top_k}")
     
-    # Handle "demo" API key by using the Gemini API key from .env
+    # Handle "env" API key by using the API key from .env
     api_key = generate_query_request.api_key
-    if api_key == "demo":
-        api_key = os.getenv("GEMINI_API_KEY")
-        Logger.info("Using Gemini API key from .env for demo request")
+    if api_key == "env":
+        # Determine provider based on LLM type
+        if generate_query_request.llm_type.startswith("gpt"):
+            api_key = os.getenv("OPENAI_API_KEY")
+            Logger.info("Using OpenAI API key from .env")
+        elif generate_query_request.llm_type.startswith("claude"):
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            Logger.info("Using Anthropic API key from .env")
+        elif generate_query_request.llm_type.startswith("gemini"):
+            api_key = os.getenv("GEMINI_API_KEY")
+            Logger.info("Using Google API key from .env")
+        elif generate_query_request.llm_type.startswith("llama") or generate_query_request.llm_type.startswith("mixtral"):
+            api_key = os.getenv("GROQ_API_KEY")
+            Logger.info("Using Groq API key from .env")
+        elif generate_query_request.llm_type.startswith("meta/llama") or generate_query_request.llm_type.startswith("mistralai"):
+            api_key = os.getenv("NVIDIA_API_KEY")
+            Logger.info("Using NVIDIA API key from .env")
+        elif generate_query_request.llm_type.startswith("deepseek"):
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            Logger.info("Using OpenRouter API key from .env")
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Could not determine provider for LLM type. Please provide an API key directly."
+            )
     
     key = f"{generate_query_request.llm_type}_{api_key}"
 
@@ -307,11 +329,33 @@ async def run_query(
     Logger.debug(f"Query to execute: {run_query_request.query}")
     Logger.debug(f"Using LLM: {run_query_request.llm_type}, top_k: {run_query_request.top_k}")
     
-    # Handle "demo" API key by using the Gemini API key from .env
+    # Handle "env" API key by using the API key from .env
     api_key = run_query_request.api_key
-    if api_key == "demo":
-        api_key = os.getenv("GEMINI_API_KEY")
-        Logger.info("Using Gemini API key from .env for demo request")
+    if api_key == "env":
+        # Determine provider based on LLM type
+        if run_query_request.llm_type.startswith("gpt"):
+            api_key = os.getenv("OPENAI_API_KEY")
+            Logger.info("Using OpenAI API key from .env")
+        elif run_query_request.llm_type.startswith("claude"):
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            Logger.info("Using Anthropic API key from .env")
+        elif run_query_request.llm_type.startswith("gemini"):
+            api_key = os.getenv("GEMINI_API_KEY")
+            Logger.info("Using Google API key from .env")
+        elif run_query_request.llm_type.startswith("llama") or run_query_request.llm_type.startswith("mixtral"):
+            api_key = os.getenv("GROQ_API_KEY")
+            Logger.info("Using Groq API key from .env")
+        elif run_query_request.llm_type.startswith("meta/llama") or run_query_request.llm_type.startswith("mistralai"):
+            api_key = os.getenv("NVIDIA_API_KEY")
+            Logger.info("Using NVIDIA API key from .env")
+        elif run_query_request.llm_type.startswith("deepseek"):
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            Logger.info("Using OpenRouter API key from .env")
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Could not determine provider for LLM type. Please provide an API key directly."
+            )
     
     key = f"{run_query_request.llm_type}_{api_key}"
 
@@ -500,12 +544,10 @@ async def get_api_keys_status():
     api_keys_status = {
         "OpenAI": os.getenv("OPENAI_API_KEY", "") != "" and os.getenv("OPENAI_API_KEY", "") != "default",
         "Anthropic": os.getenv("ANTHROPIC_API_KEY", "") != "" and os.getenv("ANTHROPIC_API_KEY", "") != "default",
-        "Gemini": os.getenv("GEMINI_API_KEY", "") != "" and os.getenv("GEMINI_API_KEY", "") != "default",
+        "Google": os.getenv("GEMINI_API_KEY", "") != "" and os.getenv("GEMINI_API_KEY", "") != "default",
         "Groq": os.getenv("GROQ_API_KEY", "") != "" and os.getenv("GROQ_API_KEY", "") != "default",
-        "Replicate": os.getenv("REPLICATE_API_KEY", "") != "" and os.getenv("REPLICATE_API_KEY", "") != "default",
         "Nvidia": os.getenv("NVIDIA_API_KEY", "") != "" and os.getenv("NVIDIA_API_KEY", "") != "default",
         "OpenRouter": os.getenv("OPENROUTER_API_KEY", "") != "" and os.getenv("OPENROUTER_API_KEY", "") != "default",
-        "Cohere": os.getenv("COHERE_API_KEY", "") != "" and os.getenv("COHERE_API_KEY", "") != "default"
     }
     
     Logger.debug(f"API keys status: {api_keys_status}")

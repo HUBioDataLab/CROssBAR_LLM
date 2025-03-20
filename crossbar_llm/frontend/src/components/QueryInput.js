@@ -157,15 +157,14 @@ function QueryInput({
   useEffect(() => {
     const fetchApiKeysStatus = async () => {
       try {
-        const response = await fetch('/api_keys_status/');
-        if (response.ok) {
-          const data = await response.json();
-          console.log('API keys status:', data);
-          setApiKeysStatus(data);
+        const response = await api.get('/api_keys_status/');
+        if (response.data) {
+          console.log('API keys status:', response.data);
+          setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
           
           // Set API key to "env" if the selected provider has an API key in .env
-          if (provider && data[provider]) {
+          if (provider && response.data[provider]) {
             setApiKey('env');
           }
         }
@@ -187,9 +186,8 @@ function QueryInput({
     }
     
     // These providers always need an API key if not in .env
-    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'Cohere' || 
-           provider === 'Gemini' || provider === 'Groq' || provider === 'Nvidia' || 
-           provider === 'OpenRouter';
+    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' || 
+           provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
   }, [provider, apiKeysStatus, apiKeysLoaded]);
 
   // When provider changes, update API key if needed
