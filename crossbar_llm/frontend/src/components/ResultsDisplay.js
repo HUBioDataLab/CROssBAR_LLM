@@ -141,7 +141,9 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const openNeo4jBrowser = (e) => {
     e.stopPropagation();
     const credentials = btoa(`${neo4jCredentials.username}:${neo4jCredentials.password}`);
-    window.open(`${neo4jBrowserUrl}/browser/?connectURL=${encodeURIComponent(neo4jBrowserUrl)}&credentials=${credentials}`, '_blank');
+    const url = `${neo4jBrowserUrl}/browser/?connectURL=${encodeURIComponent(neo4jBrowserUrl)}&credentials=${credentials}`;
+    console.log('Opening Neo4j Browser URL:', url);
+    window.open(url, '_blank');
   };
   
   const openNeo4jBrowserWithQuery = (e) => {
@@ -150,7 +152,11 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
     const encodedQuery = encodeURIComponent(processedQueryResult);
     const credentials = btoa(`${neo4jCredentials.username}:${neo4jCredentials.password}`);
     // Open Neo4j Browser with the query and credentials
-    window.open(`${neo4jBrowserUrl}/browser/?connectURL=${encodeURIComponent(neo4jBrowserUrl)}&credentials=${credentials}&cmd=${encodedQuery}`, '_blank');
+    const url = `${neo4jBrowserUrl}/browser/?connectURL=${encodeURIComponent(neo4jBrowserUrl)}&credentials=${credentials}&cmd=${encodedQuery}`;
+    console.log('Opening Neo4j Browser URL with query:', url);
+    console.log('Original query:', processedQueryResult);
+    console.log('Encoded query:', encodedQuery);
+    window.open(url, '_blank');
   };
 
   const handleNeo4jSettingsOpen = (e) => {
