@@ -497,8 +497,15 @@ function App() {
                   : 'rgba(0, 113, 227, 0.05)',
                 borderRadius: '12px',
                 px: 2,
-                py: 0.5
-              }}>
+                py: 0.5,
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(100, 181, 246, 0.15)' 
+                    : 'rgba(0, 113, 227, 0.1)',
+                }
+              }}
+              onClick={() => handleTabChange(null, 'home')}>
                 <Typography variant="h6" noWrap component="div" sx={{ 
                   fontWeight: 700,
                   display: { xs: 'none', sm: 'block' },
@@ -522,16 +529,19 @@ function App() {
                   sx={{ 
                     backgroundColor: theme => theme.palette.mode === 'dark' 
                       ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(0, 0, 0, 0.03)',
+                      : 'rgba(0, 113, 227, 0.08)',
                     backdropFilter: 'blur(10px)',
                     border: theme => `1px solid ${theme.palette.mode === 'dark' 
                       ? 'rgba(255, 255, 255, 0.1)' 
-                      : 'rgba(0, 0, 0, 0.05)'}`,
+                      : 'rgba(0, 113, 227, 0.15)'}`,
                     '&:hover': {
                       backgroundColor: theme => theme.palette.mode === 'dark' 
                         ? 'rgba(255, 255, 255, 0.1)' 
-                        : 'rgba(0, 0, 0, 0.05)',
-                    }
+                        : 'rgba(0, 113, 227, 0.12)',
+                    },
+                    color: theme => theme.palette.mode === 'dark'
+                      ? 'inherit'
+                      : 'rgba(0, 113, 227, 0.8)'
                   }}
                 >
                   {drawerVisible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -544,16 +554,19 @@ function App() {
                   sx={{ 
                     backgroundColor: theme => theme.palette.mode === 'dark' 
                       ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(0, 0, 0, 0.03)',
+                      : 'rgba(0, 113, 227, 0.08)',
                     backdropFilter: 'blur(10px)',
                     border: theme => `1px solid ${theme.palette.mode === 'dark' 
                       ? 'rgba(255, 255, 255, 0.1)' 
-                      : 'rgba(0, 0, 0, 0.05)'}`,
+                      : 'rgba(0, 113, 227, 0.15)'}`,
                     '&:hover': {
                       backgroundColor: theme => theme.palette.mode === 'dark' 
                         ? 'rgba(255, 255, 255, 0.1)' 
-                        : 'rgba(0, 0, 0, 0.05)',
-                    }
+                        : 'rgba(0, 113, 227, 0.12)',
+                    },
+                    color: theme => theme.palette.mode === 'dark'
+                      ? 'inherit'
+                      : 'rgba(0, 113, 227, 0.8)'
                   }}
                 >
                   {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
