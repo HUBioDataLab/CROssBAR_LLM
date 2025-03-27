@@ -19,7 +19,8 @@ import {
   DialogTitle,
   DialogActions,
   Zoom,
-  CircularProgress
+  CircularProgress,
+  TextField
 } from '@mui/material';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
@@ -33,6 +34,9 @@ import DataObjectIcon from '@mui/icons-material/DataObject';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const theme = useTheme();
@@ -40,6 +44,13 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copySnackbar, setCopySnackbar] = useState(false);
   const [clearLogsSnackbar, setClearLogsSnackbar] = useState(false);
+  const [neo4jBrowserUrl, setNeo4jBrowserUrl] = useState(() => {
+    // Try to get the URL from localStorage, otherwise use default
+    return localStorage.getItem('neo4jBrowserUrl') || 'http://localhost:7474';
+  });
+  const [tempNeo4jUrl, setTempNeo4jUrl] = useState(neo4jBrowserUrl);
+  const [isNeo4jSettingsOpen, setIsNeo4jSettingsOpen] = useState(false);
+  const [neo4jUrlSaved, setNeo4jUrlSaved] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     response: true,
     query: true,
@@ -118,6 +129,39 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
     } else {
       return <Typography component="span" sx={{ fontFamily: 'monospace', fontSize: '0.9rem', display: 'block' }}>{line}</Typography>;
     }
+  };
+
+  const openNeo4jBrowser = (e) => {
+    e.stopPropagation();
+    window.open(`${neo4jBrowserUrl}/browser/`, '_blank');
+  };
+  
+  const openNeo4jBrowserWithQuery = (e) => {
+    e.stopPropagation();
+    // Encode the query for URL
+    const encodedQuery = encodeURIComponent(processedQueryResult);
+    // Open Neo4j Browser with the query
+    window.open(`${neo4jBrowserUrl}/browser/?cmd=${encodedQuery}`, '_blank');
+  };
+
+  const handleNeo4jSettingsOpen = (e) => {
+    e.stopPropagation();
+    setTempNeo4jUrl(neo4jBrowserUrl);
+    setIsNeo4jSettingsOpen(true);
+  };
+
+  const handleNeo4jSettingsClose = () => {
+    setIsNeo4jSettingsOpen(false);
+  };
+
+  const handleNeo4jSettingsSave = () => {
+    setNeo4jBrowserUrl(tempNeo4jUrl);
+    localStorage.setItem('neo4jBrowserUrl', tempNeo4jUrl);
+    setIsNeo4jSettingsOpen(false);
+    setNeo4jUrlSaved(true);
+    setTimeout(() => {
+      setNeo4jUrlSaved(false);
+    }, 1500);
   };
 
   return (
@@ -241,6 +285,15 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
                       <ContentCopyIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  <Tooltip title="Open in Neo4j Browser">
+                    <IconButton 
+                      size="small" 
+                      onClick={openNeo4jBrowserWithQuery}
+                      sx={{ mr: 1, borderRadius: '10px' }}
+                    >
+                      <OpenInNewIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                   <IconButton 
                     size="small" 
                     onClick={(e) => {
@@ -328,6 +381,24 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
                       sx={{ mr: 1, borderRadius: '10px' }}
                     >
                       <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="View in Neo4j Browser">
+                    <IconButton 
+                      size="small" 
+                      onClick={openNeo4jBrowser}
+                      sx={{ mr: 1, borderRadius: '10px' }}
+                    >
+                      <OpenInNewIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Configure Neo4j Browser URL">
+                    <IconButton 
+                      size="small" 
+                      onClick={handleNeo4jSettingsOpen}
+                      sx={{ mr: 1, borderRadius: '10px' }}
+                    >
+                      <SettingsIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="View fullscreen">
@@ -609,6 +680,84 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
           </Alert>
         </Zoom>
       </Snackbar>
+
+      <Snackbar
+        open={neo4jUrlSaved}
+        autoHideDuration={1500}
+        onClose={() => setNeo4jUrlSaved(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Zoom in={neo4jUrlSaved}>
+          <Alert 
+            severity="success" 
+            variant="filled"
+            onClose={() => setNeo4jUrlSaved(false)}
+            sx={{ 
+              borderRadius: '12px',
+              boxShadow: theme => theme.palette.mode === 'dark' 
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+                : '0 4px 20px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            Neo4j Browser URL saved successfully
+          </Alert>
+        </Zoom>
+      </Snackbar>
+
+      {/* Neo4j Browser Settings Dialog */}
+      <Dialog
+        open={isNeo4jSettingsOpen}
+        onClose={handleNeo4jSettingsClose}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            backdropFilter: 'blur(10px)',
+            backgroundColor: theme => theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.background.paper, 0.9)
+              : alpha(theme.palette.background.paper, 0.9),
+          }
+        }}
+      >
+        <DialogTitle sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <SettingsIcon sx={{ mr: 1.5, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Configure Neo4j Browser
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2, minWidth: '400px' }}>
+          <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+            Enter the URL of your Neo4j Browser instance:
+          </Typography>
+          <TextField
+            fullWidth
+            label="Neo4j Browser URL"
+            variant="outlined"
+            value={tempNeo4jUrl}
+            onChange={(e) => setTempNeo4jUrl(e.target.value)}
+            placeholder="http://localhost:7474"
+            helperText="Example: http://localhost:7474 or https://neo4j.example.com"
+            sx={{ mb: 1 }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: theme => `1px solid ${theme.palette.divider}` }}>
+          <Button 
+            onClick={handleNeo4jSettingsClose} 
+            variant="outlined"
+            sx={{ borderRadius: '12px', mr: 1 }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleNeo4jSettingsSave} 
+            variant="contained"
+            sx={{ borderRadius: '12px' }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
