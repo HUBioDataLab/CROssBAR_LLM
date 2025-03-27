@@ -37,6 +37,7 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import SettingsIcon from '@mui/icons-material/Settings';
+import KeyIcon from '@mui/icons-material/Key';
 
 function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const theme = useTheme();
@@ -45,10 +46,16 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const [copySnackbar, setCopySnackbar] = useState(false);
   const [clearLogsSnackbar, setClearLogsSnackbar] = useState(false);
   const [neo4jBrowserUrl, setNeo4jBrowserUrl] = useState(() => {
-    // Try to get the URL from localStorage, otherwise use default
     return localStorage.getItem('neo4jBrowserUrl') || 'http://localhost:7474';
   });
+  const [neo4jCredentials, setNeo4jCredentials] = useState(() => {
+    return {
+      username: localStorage.getItem('neo4jUsername') || 'neo4j',
+      password: localStorage.getItem('neo4jPassword') || ''
+    };
+  });
   const [tempNeo4jUrl, setTempNeo4jUrl] = useState(neo4jBrowserUrl);
+  const [tempCredentials, setTempCredentials] = useState(neo4jCredentials);
   const [isNeo4jSettingsOpen, setIsNeo4jSettingsOpen] = useState(false);
   const [neo4jUrlSaved, setNeo4jUrlSaved] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -133,20 +140,23 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
 
   const openNeo4jBrowser = (e) => {
     e.stopPropagation();
-    window.open(`${neo4jBrowserUrl}/browser/`, '_blank');
+    const credentials = btoa(`${neo4jCredentials.username}:${neo4jCredentials.password}`);
+    window.open(`${neo4jBrowserUrl}/browser/?connectURL=${encodeURIComponent(neo4jBrowserUrl)}&credentials=${credentials}`, '_blank');
   };
   
   const openNeo4jBrowserWithQuery = (e) => {
     e.stopPropagation();
     // Encode the query for URL
     const encodedQuery = encodeURIComponent(processedQueryResult);
-    // Open Neo4j Browser with the query
-    window.open(`${neo4jBrowserUrl}/browser/?cmd=${encodedQuery}`, '_blank');
+    const credentials = btoa(`${neo4jCredentials.username}:${neo4jCredentials.password}`);
+    // Open Neo4j Browser with the query and credentials
+    window.open(`${neo4jBrowserUrl}/browser/?connectURL=${encodeURIComponent(neo4jBrowserUrl)}&credentials=${credentials}&cmd=${encodedQuery}`, '_blank');
   };
 
   const handleNeo4jSettingsOpen = (e) => {
     e.stopPropagation();
     setTempNeo4jUrl(neo4jBrowserUrl);
+    setTempCredentials(neo4jCredentials);
     setIsNeo4jSettingsOpen(true);
   };
 
@@ -156,7 +166,10 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
 
   const handleNeo4jSettingsSave = () => {
     setNeo4jBrowserUrl(tempNeo4jUrl);
+    setNeo4jCredentials(tempCredentials);
     localStorage.setItem('neo4jBrowserUrl', tempNeo4jUrl);
+    localStorage.setItem('neo4jUsername', tempCredentials.username);
+    localStorage.setItem('neo4jPassword', tempCredentials.password);
     setIsNeo4jSettingsOpen(false);
     setNeo4jUrlSaved(true);
     setTimeout(() => {
@@ -728,7 +741,7 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
         </DialogTitle>
         <DialogContent sx={{ mt: 2, minWidth: '400px' }}>
           <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            Enter the URL of your Neo4j Browser instance:
+            Enter your Neo4j Browser configuration:
           </Typography>
           <TextField
             fullWidth
@@ -738,6 +751,26 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
             onChange={(e) => setTempNeo4jUrl(e.target.value)}
             placeholder="http://localhost:7474"
             helperText="Example: http://localhost:7474 or https://neo4j.example.com"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Username"
+            variant="outlined"
+            value={tempCredentials.username}
+            onChange={(e) => setTempCredentials({ ...tempCredentials, username: e.target.value })}
+            placeholder="neo4j"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            variant="outlined"
+            value={tempCredentials.password}
+            onChange={(e) => setTempCredentials({ ...tempCredentials, password: e.target.value })}
+            placeholder="Enter your password"
+            helperText="Your credentials will be stored securely in your browser"
             sx={{ mb: 1 }}
           />
         </DialogContent>
