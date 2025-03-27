@@ -655,7 +655,7 @@ RETURN p`,
                       Knowledge Graph
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-                      Access comprehensive biomedical data from the CROssBAR knowledge graph
+                      Access comprehensive biomedical data from the CROssBARv2 knowledge graph
                     </Typography>
                   </Paper>
                 </Button>

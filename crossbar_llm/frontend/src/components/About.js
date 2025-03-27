@@ -325,7 +325,7 @@ function About({ onClose }) {
             rel="noopener"
             sx={{ borderRadius: '10px' }}
           >
-            CROssBAR Website
+            CROssBARv2 Website
           </Button>
           
           <Button 
