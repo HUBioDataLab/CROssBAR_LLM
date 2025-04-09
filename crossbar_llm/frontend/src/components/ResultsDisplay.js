@@ -33,6 +33,7 @@ import DataObjectIcon from '@mui/icons-material/DataObject';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import LaunchIcon from '@mui/icons-material/Launch';
 
 function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const theme = useTheme();
@@ -40,6 +41,8 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copySnackbar, setCopySnackbar] = useState(false);
   const [clearLogsSnackbar, setClearLogsSnackbar] = useState(false);
+  const [neo4jBrowserSnackbar, setNeo4jBrowserSnackbar] = useState(false);
+  const [showNeo4jDialog, setShowNeo4jDialog] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     response: true,
     query: true,
@@ -48,6 +51,8 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   });
   
   const logContainerRef = useRef(null);
+  
+  const neo4jBrowserUrl = 'https://https://crossbarv2.hubiodatalab.com/db/';
   
   // Auto-scroll logs to bottom when they update
   useEffect(() => {
@@ -96,6 +101,28 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
     setTimeout(() => {
       setClearLogsSnackbar(false);
     }, 1500);
+  };
+
+  const handleNeo4jBrowserOpen = () => {
+    // Show dialog first instead of immediately opening the browser
+    setShowNeo4jDialog(true);
+    
+    // Copy the query to clipboard
+    if (processedQueryResult) {
+      navigator.clipboard.writeText(processedQueryResult);
+      setCopySnackbar(true);
+      setTimeout(() => {
+        setCopySnackbar(false);
+      }, 1500);
+    }
+  };
+  
+  const openNeo4jBrowser = () => {
+    // Close the dialog
+    setShowNeo4jDialog(false);
+    
+    // Open Neo4j Browser in a new tab
+    window.open(neo4jBrowserUrl, '_blank');
   };
 
   const toggleSection = (section) => {
@@ -229,6 +256,25 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
                   </Typography>
                 </Box>
                 <Box>
+                  <Tooltip title="View in Neo4j Browser">
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      startIcon={<LaunchIcon fontSize="small" />}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the parent onClick
+                        handleNeo4jBrowserOpen();
+                      }}
+                      sx={{ 
+                        mr: 1, 
+                        borderRadius: '10px',
+                        textTransform: 'none'
+                      }}
+                    >
+                      Neo4j Browser
+                    </Button>
+                  </Tooltip>
                   <Tooltip title="Copy to clipboard">
                     <IconButton 
                       size="small" 
@@ -609,6 +655,101 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
           </Alert>
         </Zoom>
       </Snackbar>
+
+      <Snackbar
+        open={neo4jBrowserSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setNeo4jBrowserSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Zoom in={neo4jBrowserSnackbar}>
+          <Alert 
+            severity="info" 
+            variant="filled"
+            onClose={() => setNeo4jBrowserSnackbar(false)}
+            sx={{ 
+              borderRadius: '12px',
+              boxShadow: theme => theme.palette.mode === 'dark' 
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+                : '0 4px 20px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Typography variant="body2">
+              Query copied! Paste it in the Neo4j Browser command line (using Ctrl+V or ⌘+V)
+            </Typography>
+          </Alert>
+        </Zoom>
+      </Snackbar>
+      
+      {/* Neo4j Browser Instructions Dialog */}
+      <Dialog 
+        open={showNeo4jDialog} 
+        onClose={() => setShowNeo4jDialog(false)}
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: '20px',
+            backdropFilter: 'blur(10px)',
+            backgroundColor: theme => theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.background.paper, 0.9)
+              : alpha(theme.palette.background.paper, 0.9),
+            maxWidth: '500px'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          borderBottom: theme => `1px solid ${theme.palette.divider}`,
+          pb: 2
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <LaunchIcon sx={{ mr: 1.5, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Open in Neo4j Browser
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2, p: 3 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            The query has been copied to your clipboard. When Neo4j Browser opens:
+          </Typography>
+          <Box sx={{ 
+            backgroundColor: theme => theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.background.default, 0.5)
+              : alpha(theme.palette.background.default, 0.5),
+            p: 2,
+            borderRadius: '10px',
+            mb: 2
+          }}>
+            <Typography component="ol" sx={{ pl: 2 }}>
+              <li>Click in the command input at the top of the Neo4j Browser</li>
+              <li>Paste the query (Ctrl+V or ⌘+V)</li>
+              <li>Press Enter or click the play button to run the query</li>
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            The Neo4j Browser provides a visual representation of your graph database query results.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ 
+          borderTop: theme => `1px solid ${theme.palette.divider}`,
+          p: 2
+        }}>
+          <Button 
+            onClick={() => setShowNeo4jDialog(false)} 
+            variant="outlined"
+            sx={{ borderRadius: '12px', textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={openNeo4jBrowser} 
+            variant="contained"
+            sx={{ borderRadius: '12px', textTransform: 'none' }}
+            autoFocus
+          >
+            Open Neo4j Browser
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
