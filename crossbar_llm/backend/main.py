@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi_csrf_protect import CsrfProtect
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from tools.langchain_llm_qa_trial import RunPipeline, configure_logging
 from tools.utils import Logger
 import numpy as np
@@ -20,6 +20,7 @@ import threading
 import json
 import logging
 import time
+from datetime import datetime, timedelta
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +32,39 @@ origins = [
 ]
 
 app = FastAPI()
+
+# Rate limiting implementation
+class RateLimiter:
+    def __init__(self, max_requests: int = 5, time_window: int = 60):
+        self.max_requests = max_requests  # Number of allowed requests in time window
+        self.time_window = time_window    # Time window in seconds
+        self.request_records: Dict[str, List[datetime]] = {}  # IP -> list of request timestamps
+    
+    def is_rate_limited(self, ip: str) -> bool:
+        current_time = datetime.now()
+        
+        # If IP not in records, add it
+        if ip not in self.request_records:
+            self.request_records[ip] = [current_time]
+            return False
+        
+        # Filter out timestamps older than the time window
+        cutoff_time = current_time - timedelta(seconds=self.time_window)
+        self.request_records[ip] = [
+            timestamp for timestamp in self.request_records[ip] 
+            if timestamp > cutoff_time
+        ]
+        
+        # Check if rate limit exceeded
+        if len(self.request_records[ip]) >= self.max_requests:
+            return True
+        
+        # Add current timestamp
+        self.request_records[ip].append(current_time)
+        return False
+
+# Create rate limiter instance - adjust parameters as needed
+rate_limiter = RateLimiter(max_requests=5, time_window=60)  # 5 requests per minute
 
 # Enable CORS
 app.add_middleware(
@@ -67,6 +101,18 @@ neo4j_db_name = os.getenv("NEO4J_DB_NAME", "neo4j")
 # Initialize RunPipeline instances cache
 pipeline_instances = {}
 
+# Helper function to check rate limits and return appropriate error
+def check_rate_limit(request: Request):
+    client_ip = request.client.host
+    if rate_limiter.is_rate_limited(client_ip):
+        Logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        raise HTTPException(
+            status_code=429, 
+            detail={
+                "error": "Rate limit exceeded. Please try again later.",
+                "retry_after": rate_limiter.time_window
+            }
+        )
 
 log_queue = asyncio.Queue()
 
@@ -196,6 +242,9 @@ async def generate_query(
     generate_query_request: GenerateQueryRequest,
     csrf_token: CsrfProtect = Depends()
     ):
+    # Apply rate limiting
+    check_rate_limit(request)
+    
     setup_logging(generate_query_request.verbose)
     try:
         await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
@@ -317,6 +366,9 @@ async def run_query(
     run_query_request: RunQueryRequest,
     csrf_token: CsrfProtect = Depends()
     ):
+    # Apply rate limiting
+    check_rate_limit(request)
+    
     setup_logging(run_query_request.verbose)
     try:
         await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
@@ -416,6 +468,9 @@ async def upload_vector(
     embedding_type: Optional[str] = Form(None),
     file: UploadFile = File(...)
 ):
+    # Apply rate limiting
+    check_rate_limit(request)
+    
     Logger.info(f"Vector upload requested for category: {vector_category}")
     Logger.debug(f"Embedding type: {embedding_type}")
     Logger.debug(f"Filename: {file.filename}")
@@ -466,6 +521,9 @@ async def upload_vector(
 
 @app.get("/database_stats/")
 async def get_database_stats(request: Request, csrf_token: CsrfProtect = Depends()):
+    # Apply rate limiting - less restrictive for read-only operations
+    check_rate_limit(request)
+    
     Logger.info("Database stats requested")
     try:
         await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
@@ -534,7 +592,20 @@ def get_neo4j_statistics():
     return statistics
 
 @app.get("/api_keys_status/")
-async def get_api_keys_status():
+async def get_api_keys_status(request: Request):
+    # Apply less restrictive rate limiting for configuration endpoints
+    # We'll use the same rate limiter but with a special check
+    client_ip = request.client.host
+    if len(rate_limiter.request_records.get(client_ip, [])) > 15:  # Allow more requests for this endpoint
+        Logger.warning(f"Configuration rate limit exceeded for IP: {client_ip}")
+        raise HTTPException(
+            status_code=429, 
+            detail={
+                "error": "Too many configuration requests. Please try again later.",
+                "retry_after": 30
+            }
+        )
+    
     Logger.info("API keys status requested")
     
     # Load env variables to ensure we have the latest
@@ -559,4 +630,5 @@ async def startup_event():
     setup_logging(verbose=False)
     # Initialize the event loop for threading usage
     asyncio.get_event_loop_policy().get_event_loop()
-    Logger.info("API server started")
+    Logger.info("API server started with rate limiting enabled")
+    Logger.info(f"Rate limit: {rate_limiter.max_requests} requests per {rate_limiter.time_window} seconds")

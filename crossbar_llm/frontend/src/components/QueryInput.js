@@ -85,13 +85,65 @@ function QueryInput({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKeysStatus, setApiKeysStatus] = useState({});
   const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
+  // Rate limiting states
+  const [rateLimited, setRateLimited] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(0);
+  const [retryCountdown, setRetryCountdown] = useState(0);
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const countdownTimerRef = useRef(null);
   const theme = useTheme();
 
   // Create a custom syntax highlighting theme based on current theme
   const syntaxTheme = theme.palette.mode === 'dark' ? dracula : docco;
+
+  // Helper function to handle rate limiting errors
+  const handleRateLimitError = (error) => {
+    if (error.response && error.response.status === 429) {
+      const retrySeconds = error.response.data.detail?.retry_after || 60;
+      setRateLimited(true);
+      setRetryAfter(retrySeconds);
+      setRetryCountdown(retrySeconds);
+      
+      // Clear any existing countdown timer
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+      
+      // Set up countdown timer
+      countdownTimerRef.current = setInterval(() => {
+        setRetryCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownTimerRef.current);
+            setRateLimited(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return `Rate limit exceeded. Please try again in ${retrySeconds} seconds.`;
+    }
+    
+    // Handle other types of errors
+    if (error.response?.data?.detail) {
+      return typeof error.response.data.detail === 'object' 
+        ? (error.response.data.detail.error || error.response.data.detail.msg || JSON.stringify(error.response.data.detail))
+        : error.response.data.detail;
+    }
+    
+    return error.message || 'An unknown error occurred';
+  };
+  
+  // Clean up the countdown timer on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+    };
+  }, []);
 
   const modelChoices = {
     OpenAI: [
@@ -367,6 +419,11 @@ function QueryInput({
       return;
     }
     
+    // Prevent submitting if rate limited
+    if (rateLimited) {
+      return;
+    }
+    
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -429,16 +486,12 @@ function QueryInput({
         console.log('Request canceled:', error.message);
       } else {
         console.error('Error generating query:', error);
-        // Handle error object properly
-        let errorMessage = 'An error occurred while generating the query.';
-        if (error.response?.data?.detail) {
-          errorMessage = typeof error.response.data.detail === 'object' 
-            ? (error.response.data.detail.msg || JSON.stringify(error.response.data.detail))
-            : error.response.data.detail;
-        }
+        // Use the rate limit handler to process errors
+        const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
+        
         if (verbose) {
-          updateRealtimeLogs(prev => prev + `Error: ${error.message}\n`);
+          updateRealtimeLogs(prev => prev + `Error: ${errorMessage}\n`);
         }
       }
     } finally {
@@ -457,6 +510,11 @@ function QueryInput({
       alert("Please configure the LLM settings first");
       setSettingsOpen(true);
       setHighlightSettings(true);
+      return;
+    }
+    
+    // Prevent submitting if rate limited
+    if (rateLimited) {
       return;
     }
     
@@ -518,16 +576,12 @@ function QueryInput({
         console.log('Request canceled:', error.message);
       } else {
         console.error('Error running query:', error);
-        // Handle error object properly
-        let errorMessage = 'An error occurred while running the query.';
-        if (error.response?.data?.detail) {
-          errorMessage = typeof error.response.data.detail === 'object' 
-            ? (error.response.data.detail.msg || JSON.stringify(error.response.data.detail))
-            : error.response.data.detail;
-        }
+        // Use the rate limit handler to process errors
+        const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
+        
         if (verbose) {
-          updateRealtimeLogs(prev => prev + `Error: ${error.message}\n`);
+          updateRealtimeLogs(prev => prev + `Error: ${errorMessage}\n`);
         }
       }
     } finally {
@@ -544,6 +598,11 @@ function QueryInput({
       alert("Please configure the LLM settings first");
       setSettingsOpen(true);
       setHighlightSettings(true);
+      return;
+    }
+    
+    // Prevent submitting if rate limited
+    if (rateLimited) {
       return;
     }
     
@@ -653,16 +712,12 @@ function QueryInput({
         console.log('Request canceled:', error.message);
       } else {
         console.error('Error generating and running query:', error);
-        // Handle error object properly
-        let errorMessage = 'An error occurred while generating and running the query.';
-        if (error.response?.data?.detail) {
-          errorMessage = typeof error.response.data.detail === 'object' 
-            ? (error.response.data.detail.msg || JSON.stringify(error.response.data.detail))
-            : error.response.data.detail;
-        }
+        // Use the rate limit handler to process errors
+        const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
+        
         if (verbose) {
-          updateRealtimeLogs(prev => prev + `Error: ${error.message}\n`);
+          updateRealtimeLogs(prev => prev + `Error: ${errorMessage}\n`);
         }
       }
     } finally {
@@ -1281,6 +1336,44 @@ function QueryInput({
             {typeof error === 'object' && error !== null 
               ? (error.msg || JSON.stringify(error)) 
               : error}
+            
+            {/* Countdown timer for rate limiting */}
+            {rateLimited && retryCountdown > 0 && (
+              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} />
+                <Typography variant="body2">
+                  You can try again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}.
+                </Typography>
+              </Box>
+            )}
+          </Alert>
+        </Zoom>
+      )}
+      
+      {/* Rate limiting warning without other errors */}
+      {rateLimited && !error && (
+        <Zoom in={rateLimited}>
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: '16px',
+              boxShadow: theme => theme.palette.mode === 'dark' 
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+                : '0 4px 20px rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            <Typography variant="body2">
+              Rate limit exceeded. Please wait before making more requests.
+            </Typography>
+            {retryCountdown > 0 && (
+              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} />
+                <Typography variant="body2">
+                  You can try again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}.
+                </Typography>
+              </Box>
+            )}
           </Alert>
         </Zoom>
       )}

@@ -75,6 +75,9 @@ function VectorSearch({
   const [localRealtimeLogs, setLocalRealtimeLogs] = useState('');
   const [apiKeysStatus, setApiKeysStatus] = useState({});
   const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(0);
+  const [retryCountdown, setRetryCountdown] = useState(0);
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const theme = useTheme();
@@ -82,6 +85,7 @@ function VectorSearch({
   const dropzoneRef = useRef(null);
   const isFirstRender = useRef(true);
   const abortControllerRef = useRef(null);
+  const countdownTimerRef = useRef(null);
 
   const modelChoices = {
     OpenAI: [
@@ -355,11 +359,66 @@ function VectorSearch({
     };
   }, [clearLogs]);
   
+  // Helper function to handle rate limiting errors
+  const handleRateLimitError = (error) => {
+    if (error.response && error.response.status === 429) {
+      const retrySeconds = error.response.data.detail?.retry_after || 60;
+      setRateLimited(true);
+      setRetryAfter(retrySeconds);
+      setRetryCountdown(retrySeconds);
+      
+      // Clear any existing countdown timer
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+      
+      // Set up countdown timer
+      countdownTimerRef.current = setInterval(() => {
+        setRetryCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownTimerRef.current);
+            setRateLimited(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return `Rate limit exceeded. Please try again in ${retrySeconds} seconds.`;
+    }
+    
+    // Handle other types of errors
+    if (error.response?.data?.detail) {
+      if (typeof error.response.data.detail === 'object') {
+        return error.response.data.detail.error || 
+               error.response.data.detail.msg || 
+               JSON.stringify(error.response.data.detail);
+      }
+      return error.response.data.detail;
+    }
+    
+    return error.message || 'An unknown error occurred';
+  };
+  
+  // Clean up the countdown timer on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleGenerateQuery = async () => {
     if (!isSettingsValid()) {
       alert("Please configure the LLM settings first");
       setShowSettings(true);
       setHighlightSettings(true);
+      return;
+    }
+    
+    // Prevent submitting if rate limited
+    if (rateLimited) {
       return;
     }
     
@@ -425,27 +484,13 @@ function VectorSearch({
       });
     } catch (err) {
       console.error(err);
-      let errorMessage = 'Error generating query with vector search.';
-      
-      if (err.response?.data?.detail) {
-        if (typeof err.response.data.detail === 'object') {
-          errorMessage = err.response.data.detail.error || 
-                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
-        } else {
-          errorMessage = err.response.data.detail;
-        }
-      }
-      
-      const errorLogs = err.response?.data?.detail?.logs || '';
+      // Use the rate limit handler
+      const errorMessage = handleRateLimitError(err);
+      setError(errorMessage);
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
-        if (errorLogs) {
-          setLogs(errorLogs);
-        }
       }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -458,6 +503,11 @@ function VectorSearch({
       alert("Please configure the LLM settings first");
       setShowSettings(true);
       setHighlightSettings(true);
+      return;
+    }
+    
+    // Prevent submitting if rate limited
+    if (rateLimited) {
       return;
     }
     
@@ -509,27 +559,13 @@ function VectorSearch({
       });
     } catch (err) {
       console.error(err);
-      let errorMessage = 'Error executing query.';
-      
-      if (err.response?.data?.detail) {
-        if (typeof err.response.data.detail === 'object') {
-          errorMessage = err.response.data.detail.error || 
-                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
-        } else {
-          errorMessage = err.response.data.detail;
-        }
-      }
-      
-      const errorLogs = err.response?.data?.detail?.logs || '';
+      // Use the rate limit handler
+      const errorMessage = handleRateLimitError(err);
+      setError(errorMessage);
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
-        if (errorLogs) {
-          setLogs(errorLogs);
-        }
       }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -540,6 +576,11 @@ function VectorSearch({
       alert("Please configure the LLM settings first");
       setShowSettings(true);
       setHighlightSettings(true);
+      return;
+    }
+    
+    // Prevent submitting if rate limited
+    if (rateLimited) {
       return;
     }
     
@@ -712,29 +753,13 @@ function VectorSearch({
     } catch (err) {
       console.error('Error in vector search:', err);
       
-      let errorMessage = 'An error occurred during vector search.';
-      
-      if (err.response?.data?.detail) {
-        if (typeof err.response.data.detail === 'object') {
-          errorMessage = err.response.data.detail.error || 
-                        (err.response.data.detail.msg || JSON.stringify(err.response.data.detail));
-        } else {
-          errorMessage = err.response.data.detail;
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      
-      const errorLogs = err.response?.data?.detail?.logs || '';
+      // Use the rate limit handler
+      const errorMessage = handleRateLimitError(err);
+      setError(errorMessage);
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
-        if (errorLogs) {
-          setLogs(errorLogs);
-        }
       }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -834,6 +859,11 @@ function VectorSearch({
       return;
     }
     
+    // Prevent submitting if rate limited
+    if (rateLimited) {
+      return;
+    }
+    
     if (verbose) {
       updateRealtimeLogs(prev => prev + `Uploading vector file: ${file.name} (${file.size} bytes)\nCategory: ${vectorCategory}\nEmbedding Type: ${embeddingType || 'N/A'}\n`);
     }
@@ -860,11 +890,13 @@ function VectorSearch({
       })
       .catch((error) => {
         console.error('Error uploading file:', error);
-        const errorMsg = error.response?.data?.detail || 'Error uploading file.';
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(error);
+        setError(errorMessage);
+        
         if (verbose) {
-          updateRealtimeLogs(prev => prev + `Error uploading file: ${errorMsg}\n`);
+          updateRealtimeLogs(prev => prev + `Error uploading file: ${errorMessage}\n`);
         }
-        setError(errorMsg);
       });
   };
   
@@ -1349,6 +1381,44 @@ function VectorSearch({
             {typeof error === 'object' && error !== null 
               ? (error.msg || JSON.stringify(error)) 
               : error}
+              
+            {/* Countdown timer for rate limiting */}
+            {rateLimited && retryCountdown > 0 && (
+              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} />
+                <Typography variant="body2">
+                  You can try again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}.
+                </Typography>
+              </Box>
+            )}
+          </Alert>
+        </Zoom>
+      )}
+      
+      {/* Rate limiting warning without other errors */}
+      {rateLimited && !error && (
+        <Zoom in={rateLimited}>
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 3, 
+              borderRadius: '16px',
+              boxShadow: theme => theme.palette.mode === 'dark' 
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+                : '0 4px 20px rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            <Typography variant="body2">
+              Rate limit exceeded. Please wait before making more requests.
+            </Typography>
+            {retryCountdown > 0 && (
+              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} />
+                <Typography variant="body2">
+                  You can try again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}.
+                </Typography>
+              </Box>
+            )}
           </Alert>
         </Zoom>
       )}
