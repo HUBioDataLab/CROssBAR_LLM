@@ -52,7 +52,7 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   
   const logContainerRef = useRef(null);
   
-  const neo4jBrowserUrl = 'https://https://crossbarv2.hubiodatalab.com/db/';
+  const neo4jBrowserUrl = 'https://crossbarv2.hubiodatalab.com/db/';
   
   // Auto-scroll logs to bottom when they update
   useEffect(() => {
