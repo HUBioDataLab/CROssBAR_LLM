@@ -1,10 +1,10 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const CROSSBAR_LLM_ROOT_PATH = process.env.REACT_APP_CROSSBAR_LLM_ROOT_PATH || '/llm';
+const REACT_APP_CROSSBAR_LLM_ROOT_PATH = process.env.REACT_APP_CROSSBAR_LLM_ROOT_PATH || '/llm';
 
 const instance = axios.create({
-  baseURL: `https://crossbarv2.hubiodatalab.com${CROSSBAR_LLM_ROOT_PATH}/api`, // Backend URL
+  baseURL: `https://crossbarv2.hubiodatalab.com${REACT_APP_CROSSBAR_LLM_ROOT_PATH}/api`, // Backend URL
   withCredentials: true, // Allow credentials (cookies) to be sent
   headers: {
     'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ load_dotenv()
 origins = [
     "http://localhost:8501",  # React app running on localhost
     "http://127.0.0.1:8501",
-    f"https://crossbarv2.hubiodatalab.com{os.getenv('CROSSBAR_LLM_ROOT_PATH')}",
+    f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}",
 ]
 
 app = FastAPI()
