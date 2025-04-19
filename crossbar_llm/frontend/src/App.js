@@ -78,7 +78,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    axios.get('/csrf-token/', { withCredentials: true })
+    axios.get('./csrf-token/', { withCredentials: true })
       .then((response) => {
         console.log('CSRF token set in cookies.');
         const csrfToken = response.data.csrf_token;
