@@ -122,13 +122,15 @@ class AsyncQueueHandler(logging.Handler):
         super().__init__()
         # Create a thread-safe queue for log messages
         self.log_messages = queue.Queue()
+        # Initialize running attribute before starting the thread
+        self.running = True
         # Start a worker thread to process log messages
         self.worker_thread = threading.Thread(target=self._worker, daemon=True)
         self.worker_thread.start()
-        self.running = True
         
     def emit(self, record):
-        if not self.running:
+        # Use getattr with default to avoid AttributeError
+        if not getattr(self, 'running', True):
             return
         log_entry = self.format(record)
         # Add to the thread-safe queue
@@ -136,7 +138,8 @@ class AsyncQueueHandler(logging.Handler):
     
     def _worker(self):
         """Worker thread that transfers messages from the thread-safe queue to the asyncio queue."""
-        while self.running:
+        # Use getattr with default to avoid AttributeError
+        while getattr(self, 'running', True):
             try:
                 # Get message from the thread-safe queue (blocking with timeout)
                 log_entry = self.log_messages.get(timeout=0.5)
@@ -175,8 +178,9 @@ class AsyncQueueHandler(logging.Handler):
                 continue
     
     def close(self):
+        # Set running to False
         self.running = False
-        if self.worker_thread.is_alive():
+        if hasattr(self, 'worker_thread') and self.worker_thread.is_alive():
             self.worker_thread.join(timeout=1.0)
         super().close()
 
