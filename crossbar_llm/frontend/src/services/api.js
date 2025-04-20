@@ -12,7 +12,7 @@ const instance = axios.create({
 });
 
 export const streamLogs = (onMessage, onError) => {
-  const eventSource = new EventSource('./stream-logs');
+  const eventSource = new EventSource('/stream-logs');
   
   eventSource.onmessage = (event) => {
     try {
