@@ -55,6 +55,7 @@
       "last 1 safari version"
     ]
   },
+  "homepage": "https://crossbarv2.hubiodatalab.com%REACT_APP_CROSSBAR_LLM_ROOT_PATH%",
   "devDependencies": {
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/forms": "^0.5.10",
