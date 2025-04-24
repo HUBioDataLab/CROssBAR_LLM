@@ -55,6 +55,7 @@ function App() {
   const [apiKey, setApiKey] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(true);
+  const [clientIP, setClientIP] = useState('');
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('theme-mode');
     if (savedMode) {
@@ -78,16 +79,30 @@ function App() {
   }, []);
 
   useEffect(() => {
-    axios.get('/csrf-token/', { withCredentials: true })
-      .then((response) => {
+    const fetchCsrfToken = async () => {
+      try {
+        // Get client IP if available
+        const ip = sessionStorage.getItem('client_ip');
+        const headers = {};
+        if (ip) {
+          headers['X-Client-IP'] = ip;
+        }
+        
+        const response = await axios.get('/csrf-token/', { 
+          withCredentials: true,
+          headers
+        });
+        
         console.log('CSRF token set in cookies.');
         const csrfToken = response.data.csrf_token;
         document.cookie = `fastapi-csrf-token=${csrfToken}`;
         axios.defaults.headers['X-CSRF-Token'] = csrfToken;
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error fetching CSRF token:', error);
-      });
+      }
+    };
+    
+    fetchCsrfToken();
 
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
@@ -105,6 +120,33 @@ function App() {
       setQuestion(prefillQuery);
       localStorage.removeItem('prefillQuery');
     }
+  }, []);
+
+  // Fetch client IP on app startup
+  useEffect(() => {
+    const fetchClientIP = async () => {
+      // Check sessionStorage first
+      const storedIP = sessionStorage.getItem('client_ip');
+      if (storedIP) {
+        setClientIP(storedIP);
+        return;
+      }
+
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ip) {
+            setClientIP(data.ip);
+            sessionStorage.setItem('client_ip', data.ip);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching client IP:', error);
+      }
+    };
+
+    fetchClientIP();
   }, []);
 
   const handleTabChange = (event, newValue) => {

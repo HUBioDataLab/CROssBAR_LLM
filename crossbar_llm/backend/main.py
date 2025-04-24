@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_csrf_protect import CsrfProtect
@@ -32,6 +32,53 @@ origins = [
 ]
 
 app = FastAPI()
+
+# Helper function to get real client IP address when behind a reverse proxy
+def get_client_ip(request: Request, x_forwarded_for: Optional[str] = Header(None)):
+    # First try X-Forwarded-For header which is standard for proxies
+    if x_forwarded_for:
+        # X-Forwarded-For can contain multiple IPs - the first one is the client
+        client_ip = x_forwarded_for.split(',')[0].strip()
+        Logger.debug(f"Using X-Forwarded-For IP: {client_ip}")
+        return client_ip
+    
+    # Try X-Real-IP header (used by some proxies)
+    x_real_ip = request.headers.get('x-real-ip')
+    if x_real_ip:
+        Logger.debug(f"Using X-Real-IP: {x_real_ip}")
+        return x_real_ip
+    
+    # Try custom header (if client is sending it)
+    client_ip_header = request.headers.get('x-client-ip')
+    if client_ip_header:
+        Logger.debug(f"Using X-Client-IP header: {client_ip_header}")
+        return client_ip_header
+    
+    # Try to get from request body if provided
+    try:
+        body = request.scope.get('_body')
+        if body:
+            body_json = json.loads(body.decode('utf-8'))
+            if 'client_ip' in body_json:
+                Logger.debug(f"Using client_ip from request body: {body_json['client_ip']}")
+                return body_json['client_ip']
+    except:
+        pass
+    
+    # Try to get from form data for multipart/form-data requests
+    try:
+        if request.headers.get('content-type', '').startswith('multipart/form-data'):
+            form_data = request._form
+            if form_data and 'client_ip' in form_data:
+                client_ip = form_data.get('client_ip')
+                Logger.debug(f"Using client_ip from form data: {client_ip}")
+                return client_ip
+    except:
+        pass
+    
+    # Fall back to the direct client IP (the proxy server most likely)
+    Logger.debug(f"Falling back to direct client IP: {request.client.host}")
+    return request.client.host
 
 # Rate limiting implementation
 class RateLimiter:
@@ -125,7 +172,9 @@ pipeline_instances = {}
 
 # Helper function to check rate limits and return appropriate error
 def check_rate_limit(request: Request):
-    client_ip = request.client.host
+    # Get actual client IP from headers or fallback to direct client IP
+    client_ip = get_client_ip(request)
+    
     is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip)
     
     if is_limited:
@@ -506,6 +555,7 @@ async def upload_vector(
     csrf_token: CsrfProtect = Depends(),
     vector_category: str = Form(...),
     embedding_type: Optional[str] = Form(None),
+    client_ip: Optional[str] = Form(None),
     file: UploadFile = File(...)
 ):
     # Apply rate limiting
@@ -634,7 +684,7 @@ def get_neo4j_statistics():
 @app.get("/api_keys_status/")
 async def get_api_keys_status(request: Request):
     # Apply less restrictive rate limiting for configuration endpoints
-    client_ip = request.client.host
+    client_ip = get_client_ip(request)
     is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip)
     
     if is_limited:
