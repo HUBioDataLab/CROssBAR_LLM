@@ -89,6 +89,7 @@ function QueryInput({
   const [rateLimited, setRateLimited] = useState(false);
   const [retryAfter, setRetryAfter] = useState(0);
   const [retryCountdown, setRetryCountdown] = useState(0);
+  const [limitType, setLimitType] = useState("");
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const abortControllerRef = useRef(null);
@@ -102,9 +103,11 @@ function QueryInput({
   const handleRateLimitError = (error) => {
     if (error.response && error.response.status === 429) {
       const retrySeconds = error.response.data.detail?.retry_after || 60;
+      const limitType = error.response.data.detail?.limit_type || "minute";
       setRateLimited(true);
       setRetryAfter(retrySeconds);
       setRetryCountdown(retrySeconds);
+      setLimitType(limitType);
       
       // Clear any existing countdown timer
       if (countdownTimerRef.current) {
@@ -123,7 +126,7 @@ function QueryInput({
         });
       }, 1000);
       
-      return `Rate limit exceeded. Please try again in ${retrySeconds} seconds.`;
+      return error.response.data.detail?.error || `Rate limit exceeded. Please try again in ${retrySeconds} seconds.`;
     }
     
     // Handle other types of errors
@@ -1342,7 +1345,10 @@ function QueryInput({
               <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
                 <CircularProgress size={16} sx={{ mr: 1 }} />
                 <Typography variant="body2">
-                  You can try again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}.
+                  {limitType === "minute" && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
+                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown/60)} minute${Math.floor(retryCountdown/60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
+                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown/3600)} hour${Math.floor(retryCountdown/3600) !== 1 ? 's' : ''}).`}
+                  {!limitType && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
                 </Typography>
               </Box>
             )}
@@ -1364,13 +1370,19 @@ function QueryInput({
             }}
           >
             <Typography variant="body2">
-              Rate limit exceeded. Please wait before making more requests.
+              {limitType === "minute" && "Minute rate limit exceeded (3 requests per minute)."}
+              {limitType === "hour" && "Hour rate limit exceeded (10 requests per hour)."}
+              {limitType === "day" && "Daily rate limit exceeded (25 requests per day)."}
+              {!limitType && "Rate limit exceeded. Please wait before making more requests."}
             </Typography>
             {retryCountdown > 0 && (
               <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
                 <CircularProgress size={16} sx={{ mr: 1 }} />
                 <Typography variant="body2">
-                  You can try again in {retryCountdown} second{retryCountdown !== 1 ? 's' : ''}.
+                  {limitType === "minute" && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
+                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown/60)} minute${Math.floor(retryCountdown/60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
+                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown/3600)} hour${Math.floor(retryCountdown/3600) !== 1 ? 's' : ''}).`}
+                  {!limitType && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
                 </Typography>
               </Box>
             )}

@@ -35,36 +35,58 @@ app = FastAPI()
 
 # Rate limiting implementation
 class RateLimiter:
-    def __init__(self, max_requests: int = 5, time_window: int = 60):
-        self.max_requests = max_requests  # Number of allowed requests in time window
-        self.time_window = time_window    # Time window in seconds
+    def __init__(self):
         self.request_records: Dict[str, List[datetime]] = {}  # IP -> list of request timestamps
     
-    def is_rate_limited(self, ip: str) -> bool:
+    def is_rate_limited(self, ip: str) -> tuple[bool, str, int]:
         current_time = datetime.now()
         
         # If IP not in records, add it
         if ip not in self.request_records:
             self.request_records[ip] = [current_time]
-            return False
+            return False, "", 0
         
-        # Filter out timestamps older than the time window
-        cutoff_time = current_time - timedelta(seconds=self.time_window)
-        self.request_records[ip] = [
-            timestamp for timestamp in self.request_records[ip] 
-            if timestamp > cutoff_time
-        ]
-        
-        # Check if rate limit exceeded
-        if len(self.request_records[ip]) >= self.max_requests:
-            return True
-        
-        # Add current timestamp
+        # Add current timestamp to tracking
         self.request_records[ip].append(current_time)
-        return False
+        
+        # Check minute limit (3 requests per minute)
+        minute_ago = current_time - timedelta(minutes=1)
+        minute_requests = [ts for ts in self.request_records[ip] if ts > minute_ago]
+        if len(minute_requests) > 3:
+            # Keep only requests from the last day for storage efficiency
+            self.request_records[ip] = [
+                ts for ts in self.request_records[ip] 
+                if ts > (current_time - timedelta(days=1))
+            ]
+            return True, "minute", 60
+        
+        # Check hour limit (10 requests per hour)
+        hour_ago = current_time - timedelta(hours=1)
+        hour_requests = [ts for ts in self.request_records[ip] if ts > hour_ago]
+        if len(hour_requests) > 10:
+            # Keep only requests from the last day for storage efficiency
+            self.request_records[ip] = [
+                ts for ts in self.request_records[ip] 
+                if ts > (current_time - timedelta(days=1))
+            ]
+            return True, "hour", 3600
+            
+        # Check day limit (25 requests per day)
+        day_ago = current_time - timedelta(days=1)
+        day_requests = [ts for ts in self.request_records[ip] if ts > day_ago]
+        if len(day_requests) > 25:
+            # Keep last 30 days of requests
+            self.request_records[ip] = [
+                ts for ts in self.request_records[ip] 
+                if ts > (current_time - timedelta(days=30))
+            ]
+            return True, "day", 86400
+            
+        # No rate limit exceeded
+        return False, "", 0
 
-# Create rate limiter instance - adjust parameters as needed
-rate_limiter = RateLimiter(max_requests=5, time_window=60)  # 5 requests per minute
+# Create rate limiter instance
+rate_limiter = RateLimiter()
 
 # Enable CORS
 app.add_middleware(
@@ -104,13 +126,27 @@ pipeline_instances = {}
 # Helper function to check rate limits and return appropriate error
 def check_rate_limit(request: Request):
     client_ip = request.client.host
-    if rate_limiter.is_rate_limited(client_ip):
-        Logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip)
+    
+    if is_limited:
+        Logger.warning(f"Rate limit exceeded for IP: {client_ip} ({limit_type} limit)")
+        
+        # Create appropriate error message based on limit type
+        if limit_type == "minute":
+            detail_message = "Minute rate limit exceeded (3 requests per minute)."
+        elif limit_type == "hour":
+            detail_message = "Hour rate limit exceeded (10 requests per hour)."
+        elif limit_type == "day":
+            detail_message = "Daily rate limit exceeded (25 requests per day)."
+        else:
+            detail_message = "Rate limit exceeded."
+            
         raise HTTPException(
             status_code=429, 
             detail={
-                "error": "Rate limit exceeded. Please try again later.",
-                "retry_after": rate_limiter.time_window
+                "error": detail_message,
+                "retry_after": retry_seconds,
+                "limit_type": limit_type
             }
         )
 
@@ -598,15 +634,17 @@ def get_neo4j_statistics():
 @app.get("/api_keys_status/")
 async def get_api_keys_status(request: Request):
     # Apply less restrictive rate limiting for configuration endpoints
-    # We'll use the same rate limiter but with a special check
     client_ip = request.client.host
-    if len(rate_limiter.request_records.get(client_ip, [])) > 15:  # Allow more requests for this endpoint
-        Logger.warning(f"Configuration rate limit exceeded for IP: {client_ip}")
+    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip)
+    
+    if is_limited:
+        Logger.warning(f"Configuration rate limit exceeded for IP: {client_ip} ({limit_type} limit)")
         raise HTTPException(
             status_code=429, 
             detail={
-                "error": "Too many configuration requests. Please try again later.",
-                "retry_after": 30
+                "error": f"Rate limit exceeded. Please try again later.",
+                "retry_after": retry_seconds,
+                "limit_type": limit_type
             }
         )
     
@@ -635,4 +673,4 @@ async def startup_event():
     # Initialize the event loop for threading usage
     asyncio.get_event_loop_policy().get_event_loop()
     Logger.info("API server started with rate limiting enabled")
-    Logger.info(f"Rate limit: {rate_limiter.max_requests} requests per {rate_limiter.time_window} seconds")
+    Logger.info("Rate limits: 3 requests per minute, 10 requests per hour, 25 requests per day")
