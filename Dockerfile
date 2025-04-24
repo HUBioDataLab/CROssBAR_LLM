@@ -1,5 +1,9 @@
 FROM python:3.10-slim-bookworm
 
+ARG PUBLIC_URL=/llm
+
+ENV REACT_APP_CROSSBAR_LLM_ROOT_PATH=$PUBLIC_URL
+
 RUN apt update
 RUN apt upgrade -y
 
@@ -29,7 +33,7 @@ WORKDIR crossbar_llm
 # Install & build frontend
 WORKDIR frontend
 RUN /root/.local/share/pnpm/pnpm install
-RUN /root/.local/share/pnpm/pnpm build
+RUN PUBLIC_URL=$PUBLIC_URL /root/.local/share/pnpm/pnpm build
 RUN cp -rf build /public
 WORKDIR ..
 RUN rm -rf frontend
