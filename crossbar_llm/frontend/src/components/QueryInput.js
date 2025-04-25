@@ -1290,14 +1290,18 @@ function QueryInput({
                     height: '100%',
                     padding: '16px 14px',
                     overflow: 'auto',
+                    overflowX: 'hidden',
                     pointerEvents: 'none',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'keep-all',
+                    whiteSpace: 'pre-wrap !important',
+                    wordBreak: 'break-word',
+                    wordWrap: 'break-word',
                   }}
                 >
                   <SyntaxHighlighter
                     language="cypher"
                     style={syntaxTheme}
+                    wrapLines={true}
+                    wrapLongLines={true}
                     customStyle={{
                       margin: 0,
                       padding: 0,
@@ -1305,6 +1309,11 @@ function QueryInput({
                       fontSize: '0.9rem',
                       lineHeight: '1.5',
                       height: 'auto',
+                      width: '100%',
+                      whiteSpace: 'pre-wrap !important',
+                      wordBreak: 'break-word',
+                      wordWrap: 'break-word',
+                      overflow: 'hidden',
                     }}
                   >
                     {editableQuery || ' '}
@@ -1330,9 +1339,15 @@ function QueryInput({
                     caretColor: theme.palette.text.primary,
                     resize: 'none',
                     zIndex: 1,
+                    whiteSpace: 'pre-wrap !important',
+                    wordBreak: 'break-word',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    overflowX: 'hidden',
                   }}
                   placeholder="Edit the generated query here..."
                   spellCheck="false"
+                  wrap="soft"
                 />
               </Box>
             </Box>
