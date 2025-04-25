@@ -95,7 +95,6 @@ function App() {
         
         console.log('CSRF token set in cookies.');
         const csrfToken = response.data.csrf_token;
-        document.cookie = `fastapi-csrf-token=${csrfToken}`;
         axios.defaults.headers['X-CSRF-Token'] = csrfToken;
       } catch (error) {
         console.error('Error fetching CSRF token:', error);
