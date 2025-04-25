@@ -683,21 +683,6 @@ def get_neo4j_statistics():
 
 @app.get("/api_keys_status/")
 async def get_api_keys_status(request: Request):
-    # Apply less restrictive rate limiting for configuration endpoints
-    client_ip = get_client_ip(request)
-    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip)
-    
-    if is_limited:
-        Logger.warning(f"Configuration rate limit exceeded for IP: {client_ip} ({limit_type} limit)")
-        raise HTTPException(
-            status_code=429, 
-            detail={
-                "error": f"Rate limit exceeded. Please try again later.",
-                "retry_after": retry_seconds,
-                "limit_type": limit_type
-            }
-        )
-    
     Logger.info("API keys status requested")
     
     # Load env variables to ensure we have the latest
