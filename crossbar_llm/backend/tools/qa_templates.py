@@ -1,4 +1,4 @@
-from langchain.prompts import PromptTemplate
+from langchain.prompts.prompt import PromptTemplate
 
 
 CYPHER_GENERATION_TEMPLATE = """Task:Generate Cypher statement to query a graph database.

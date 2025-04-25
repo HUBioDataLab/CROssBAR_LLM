@@ -155,11 +155,11 @@ class OpenAILanguageModel:
         ]
         
         if self.model_name in no_temp_models:
-            print(f"Model {self.model_name} does not support temperature parameter")
             self.llm = ChatOpenAI(
                 api_key=api_key,
                 model_name=self.model_name,
                 request_timeout=600,
+                temperature=1,
             )
         else:
             self.llm = ChatOpenAI(
@@ -182,9 +182,9 @@ class GoogleGenerativeLanguageModel:
         self.model_name = model_name or "gemini-1.5-pro-latest"
         self.temperature = temperature or 0
         self.llm = GoogleGenerativeAI(
-            google_api_key=api_key,
+            api_key=api_key,
             model=self.model_name,
-            temparature=self.temperature,
+            temperature=self.temperature,
             request_timeout=600,
         )
 
@@ -285,7 +285,7 @@ class OpenRouterLanguageModel:
         self.model_name = model_name or "deepseek/deepseek-r1"
         self.temperature = temperature or 0
         self.llm = ChatOpenAI(
-            api_key=api_key, model=self.model_name, temperature=self.temperature, request_timeout=600, base_url=base_url
+            api_key=api_key, model_name=self.model_name, temperature=self.temperature, request_timeout=600, base_url=base_url
         )
 
 
