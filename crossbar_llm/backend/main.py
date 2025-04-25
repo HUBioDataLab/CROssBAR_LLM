@@ -37,8 +37,10 @@ app = FastAPI()
 def get_client_ip(request: Request, x_forwarded_for: Optional[str] = Header(None)):
     # First try X-Forwarded-For header which is standard for proxies
     if x_forwarded_for:
+        # Ensure x_forwarded_for is treated as a string
+        x_forwarded_for_str = str(x_forwarded_for)
         # X-Forwarded-For can contain multiple IPs - the first one is the client
-        client_ip = x_forwarded_for.split(',')[0].strip()
+        client_ip = x_forwarded_for_str.split(',')[0].strip()
         Logger.debug(f"Using X-Forwarded-For IP: {client_ip}")
         return client_ip
     
