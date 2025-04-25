@@ -89,6 +89,9 @@ class RateLimiter:
     
     def is_rate_limited(self, ip: str) -> tuple[bool, str, int]:
         current_time = datetime.now()
+
+        Logger.debug(f"Checking rate limit for IP: {ip}")
+        print(f"Checking rate limit for IP: {ip}")
         
         # If IP not in records, add it
         if ip not in self.request_records:
