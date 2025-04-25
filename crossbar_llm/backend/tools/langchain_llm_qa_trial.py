@@ -142,12 +142,32 @@ class OpenAILanguageModel:
     ):
         self.model_name = model_name or "gpt-3.5-turbo-instruct"
         self.temperature = temperature or 0
-        self.llm = ChatOpenAI(
-            api_key=api_key,
-            model_name=self.model_name,
-            temperature=self.temperature,
-            request_timeout=600,
-        )
+        
+        # Models that don't support temperature parameter
+        no_temp_models = [
+            "gpt-4.1-2025-04-14",
+            "o4-mini-2025-04-16",
+            "o3-2025-04-16",
+            "o3-mini-2025-01-31",
+            "o1-2024-12-17",
+            "o1-mini-2024-09-12",
+            "o1-pro-2025-03-19",
+        ]
+        
+        if self.model_name in no_temp_models:
+            print(f"Model {self.model_name} does not support temperature parameter")
+            self.llm = ChatOpenAI(
+                api_key=api_key,
+                model_name=self.model_name,
+                request_timeout=600,
+            )
+        else:
+            self.llm = ChatOpenAI(
+                api_key=api_key,
+                model_name=self.model_name,
+                temperature=self.temperature,
+                request_timeout=600,
+            )
 
 
 class GoogleGenerativeLanguageModel:
@@ -445,8 +465,17 @@ class RunPipeline:
             "gemini-pro",
             "gemini-1.5-pro-latest",
             "gemini-1.5-flash-latest",
+            "gemini-2.5-flash-preview-04-17",
+            "gemini-2.5-pro-preview-03-25",
         ]
         openai_llm_models = [
+            "gpt-4.1-2025-04-14",
+            "o4-mini-2025-04-16",
+            "o3-2025-04-16",
+            "o3-mini-2025-01-31",
+            "o1-2024-12-17",
+            "o1-mini-2024-09-12",
+            "o1-pro-2025-03-19",
             "gpt-3.5-turbo-instruct",
             "gpt-3.5-turbo-1106",
             "gpt-3.5-turbo",

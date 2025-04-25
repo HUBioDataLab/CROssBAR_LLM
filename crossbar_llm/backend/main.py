@@ -407,8 +407,19 @@ async def generate_query(
     # Handle "env" API key by using the API key from .env
     api_key = generate_query_request.api_key
     if api_key == "env":
+        # List of special OpenAI models that need OpenAI API key
+        special_openai_models = [
+            "gpt-4.1-2025-04-14",
+            "o4-mini-2025-04-16",
+            "o3-2025-04-16",
+            "o3-mini-2025-01-31",
+            "o1-2024-12-17",
+            "o1-mini-2024-09-12",
+            "o1-pro-2025-03-19",
+        ]
+        
         # Determine provider based on LLM type
-        if generate_query_request.llm_type.startswith("gpt"):
+        if generate_query_request.llm_type.startswith("gpt") or generate_query_request.llm_type in special_openai_models:
             api_key = os.getenv("OPENAI_API_KEY")
             Logger.info("Using OpenAI API key from .env")
         elif generate_query_request.llm_type.startswith("claude"):
@@ -533,8 +544,19 @@ async def run_query(
     # Handle "env" API key by using the API key from .env
     api_key = run_query_request.api_key
     if api_key == "env":
+        # List of special OpenAI models that need OpenAI API key
+        special_openai_models = [
+            "gpt-4.1-2025-04-14",
+            "o4-mini-2025-04-16",
+            "o3-2025-04-16",
+            "o3-mini-2025-01-31",
+            "o1-2024-12-17",
+            "o1-mini-2024-09-12",
+            "o1-pro-2025-03-19",
+        ]
+        
         # Determine provider based on LLM type
-        if run_query_request.llm_type.startswith("gpt"):
+        if run_query_request.llm_type.startswith("gpt") or run_query_request.llm_type in special_openai_models:
             api_key = os.getenv("OPENAI_API_KEY")
             Logger.info("Using OpenAI API key from .env")
         elif run_query_request.llm_type.startswith("claude"):
