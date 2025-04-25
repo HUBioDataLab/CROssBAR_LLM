@@ -35,13 +35,24 @@ app = FastAPI()
 
 # Helper function to get real client IP address when behind a reverse proxy
 def get_client_ip(request: Request, x_forwarded_for: Optional[str] = Header(None)):
+    # Print debug information
+    Logger.debug(f"x_forwarded_for type: {type(x_forwarded_for)}")
+    Logger.debug(f"x_forwarded_for value: {x_forwarded_for}")
+    
     # First try X-Forwarded-For header which is standard for proxies
-    if x_forwarded_for:
+    if x_forwarded_for and isinstance(x_forwarded_for, str):
         # Ensure x_forwarded_for is treated as a string
         x_forwarded_for_str = str(x_forwarded_for)
         # X-Forwarded-For can contain multiple IPs - the first one is the client
         client_ip = x_forwarded_for_str.split(',')[0].strip()
         Logger.debug(f"Using X-Forwarded-For IP: {client_ip}")
+        return client_ip
+    
+    # Try getting X-Forwarded-For from the request headers directly
+    x_forwarded_for_header = request.headers.get('x-forwarded-for')
+    if x_forwarded_for_header:
+        client_ip = x_forwarded_for_header.split(',')[0].strip()
+        Logger.debug(f"Using X-Forwarded-For from request headers: {client_ip}")
         return client_ip
     
     # Try X-Real-IP header (used by some proxies)
@@ -79,8 +90,13 @@ def get_client_ip(request: Request, x_forwarded_for: Optional[str] = Header(None
         pass
     
     # Fall back to the direct client IP (the proxy server most likely)
-    Logger.debug(f"Falling back to direct client IP: {request.client.host}")
-    return request.client.host
+    if hasattr(request, 'client') and hasattr(request.client, 'host'):
+        Logger.debug(f"Falling back to direct client IP: {request.client.host}")
+        return request.client.host
+    
+    # Ultimate fallback
+    Logger.warning("Could not determine client IP, using default")
+    return "127.0.0.1"
 
 # Rate limiting implementation
 class RateLimiter:
@@ -179,12 +195,40 @@ pipeline_instances = {}
 
 # Helper function to check rate limits and return appropriate error
 def check_rate_limit(request: Request):
-    # Get actual client IP from headers or fallback to direct client IP
-    client_ip = get_client_ip(request)
+    # Get actual client IP from headers or fallback to direct client IP (without Header dependency)
+    # Try getting X-Forwarded-For from the request headers directly
+    client_ip = None
+    
+    # Try to get from headers
+    x_forwarded_for = request.headers.get('x-forwarded-for')
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(',')[0].strip()
+        Logger.debug(f"Using X-Forwarded-For from request headers: {client_ip}")
+    
+    # Try X-Real-IP header
+    elif request.headers.get('x-real-ip'):
+        client_ip = request.headers.get('x-real-ip')
+        Logger.debug(f"Using X-Real-IP: {client_ip}")
+    
+    # Try custom header
+    elif request.headers.get('x-client-ip'):
+        client_ip = request.headers.get('x-client-ip')
+        Logger.debug(f"Using X-Client-IP header: {client_ip}")
+    
+    # Fall back to direct client IP
+    elif hasattr(request, 'client') and hasattr(request.client, 'host'):
+        client_ip = request.client.host
+        Logger.debug(f"Using direct client IP: {client_ip}")
+    
+    # Default
+    else:
+        client_ip = "127.0.0.1"
+        Logger.warning("Could not determine client IP, using default")
     
     # Ensure client_ip is a string
     client_ip_str = str(client_ip)
     Logger.debug(f"Client IP for rate limiting: {client_ip_str}")
+    print(f"Client IP for rate limiting: {client_ip_str}")
     
     is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip_str)
     
