@@ -90,46 +90,47 @@ class RateLimiter:
     def is_rate_limited(self, ip: str) -> tuple[bool, str, int]:
         current_time = datetime.now()
 
-        Logger.debug(f"Checking rate limit for IP: {ip}")
-        print(f"Checking rate limit for IP: {ip}")
+        # Ensure ip is a string
+        ip_str = str(ip)
+        Logger.debug(f"Checking rate limit for IP: {ip_str}")
         
         # If IP not in records, add it
-        if ip not in self.request_records:
-            self.request_records[ip] = [current_time]
+        if ip_str not in self.request_records:
+            self.request_records[ip_str] = [current_time]
             return False, "", 0
         
         # Add current timestamp to tracking
-        self.request_records[ip].append(current_time)
+        self.request_records[ip_str].append(current_time)
         
         # Check minute limit (3 requests per minute)
         minute_ago = current_time - timedelta(minutes=1)
-        minute_requests = [ts for ts in self.request_records[ip] if ts > minute_ago]
+        minute_requests = [ts for ts in self.request_records[ip_str] if ts > minute_ago]
         if len(minute_requests) > 3:
             # Keep only requests from the last day for storage efficiency
-            self.request_records[ip] = [
-                ts for ts in self.request_records[ip] 
+            self.request_records[ip_str] = [
+                ts for ts in self.request_records[ip_str] 
                 if ts > (current_time - timedelta(days=1))
             ]
             return True, "minute", 60
         
         # Check hour limit (10 requests per hour)
         hour_ago = current_time - timedelta(hours=1)
-        hour_requests = [ts for ts in self.request_records[ip] if ts > hour_ago]
+        hour_requests = [ts for ts in self.request_records[ip_str] if ts > hour_ago]
         if len(hour_requests) > 10:
             # Keep only requests from the last day for storage efficiency
-            self.request_records[ip] = [
-                ts for ts in self.request_records[ip] 
+            self.request_records[ip_str] = [
+                ts for ts in self.request_records[ip_str] 
                 if ts > (current_time - timedelta(days=1))
             ]
             return True, "hour", 3600
             
         # Check day limit (25 requests per day)
         day_ago = current_time - timedelta(days=1)
-        day_requests = [ts for ts in self.request_records[ip] if ts > day_ago]
+        day_requests = [ts for ts in self.request_records[ip_str] if ts > day_ago]
         if len(day_requests) > 25:
             # Keep last 30 days of requests
-            self.request_records[ip] = [
-                ts for ts in self.request_records[ip] 
+            self.request_records[ip_str] = [
+                ts for ts in self.request_records[ip_str] 
                 if ts > (current_time - timedelta(days=30))
             ]
             return True, "day", 86400
@@ -180,10 +181,14 @@ def check_rate_limit(request: Request):
     # Get actual client IP from headers or fallback to direct client IP
     client_ip = get_client_ip(request)
     
-    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip)
+    # Ensure client_ip is a string
+    client_ip_str = str(client_ip)
+    Logger.debug(f"Client IP for rate limiting: {client_ip_str}")
+    
+    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip_str)
     
     if is_limited:
-        Logger.warning(f"Rate limit exceeded for IP: {client_ip} ({limit_type} limit)")
+        Logger.warning(f"Rate limit exceeded for IP: {client_ip_str} ({limit_type} limit)")
         
         # Create appropriate error message based on limit type
         if limit_type == "minute":
