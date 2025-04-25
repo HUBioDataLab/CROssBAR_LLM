@@ -119,10 +119,10 @@ class RateLimiter:
         # Add current timestamp to tracking
         self.request_records[ip_str].append(current_time)
         
-        # Check minute limit (3 requests per minute)
+        # Check minute limit (6 requests per minute)
         minute_ago = current_time - timedelta(minutes=1)
         minute_requests = [ts for ts in self.request_records[ip_str] if ts > minute_ago]
-        if len(minute_requests) > 3:
+        if len(minute_requests) > 6:
             # Keep only requests from the last day for storage efficiency
             self.request_records[ip_str] = [
                 ts for ts in self.request_records[ip_str] 
@@ -130,10 +130,10 @@ class RateLimiter:
             ]
             return True, "minute", 60
         
-        # Check hour limit (10 requests per hour)
+        # Check hour limit (20 requests per hour)
         hour_ago = current_time - timedelta(hours=1)
         hour_requests = [ts for ts in self.request_records[ip_str] if ts > hour_ago]
-        if len(hour_requests) > 10:
+        if len(hour_requests) > 20:
             # Keep only requests from the last day for storage efficiency
             self.request_records[ip_str] = [
                 ts for ts in self.request_records[ip_str] 
@@ -141,10 +141,10 @@ class RateLimiter:
             ]
             return True, "hour", 3600
             
-        # Check day limit (25 requests per day)
+        # Check day limit (50 requests per day)
         day_ago = current_time - timedelta(days=1)
         day_requests = [ts for ts in self.request_records[ip_str] if ts > day_ago]
-        if len(day_requests) > 25:
+        if len(day_requests) > 50:
             # Keep last 30 days of requests
             self.request_records[ip_str] = [
                 ts for ts in self.request_records[ip_str] 
@@ -237,11 +237,11 @@ def check_rate_limit(request: Request):
         
         # Create appropriate error message based on limit type
         if limit_type == "minute":
-            detail_message = "Minute rate limit exceeded (3 requests per minute)."
+            detail_message = "Minute rate limit exceeded (6 requests per minute)."
         elif limit_type == "hour":
-            detail_message = "Hour rate limit exceeded (10 requests per hour)."
+            detail_message = "Hour rate limit exceeded (20 requests per hour)."
         elif limit_type == "day":
-            detail_message = "Daily rate limit exceeded (25 requests per day)."
+            detail_message = "Daily rate limit exceeded (50 requests per day)."
         else:
             detail_message = "Rate limit exceeded."
             

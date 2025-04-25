@@ -1370,9 +1370,9 @@ function QueryInput({
             }}
           >
             <Typography variant="body2">
-              {limitType === "minute" && "Minute rate limit exceeded (3 requests per minute)."}
-              {limitType === "hour" && "Hour rate limit exceeded (10 requests per hour)."}
-              {limitType === "day" && "Daily rate limit exceeded (25 requests per day)."}
+              {limitType === "minute" && "Minute rate limit exceeded (6 requests per minute)."}
+              {limitType === "hour" && "Hour rate limit exceeded (20 requests per hour)."}
+              {limitType === "day" && "Daily rate limit exceeded (50 requests per day)."}
               {!limitType && "Rate limit exceeded. Please wait before making more requests."}
             </Typography>
             {retryCountdown > 0 && (
