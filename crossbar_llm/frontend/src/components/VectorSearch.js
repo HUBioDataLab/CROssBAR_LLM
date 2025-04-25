@@ -42,6 +42,10 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import KeyIcon from '@mui/icons-material/Key';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CodeIcon from '@mui/icons-material/Code';
+import RestoreIcon from '@mui/icons-material/Restore';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 function VectorSearch({ 
   setQueryResult, 
@@ -79,9 +83,11 @@ function VectorSearch({
   const [retryAfter, setRetryAfter] = useState(0);
   const [retryCountdown, setRetryCountdown] = useState(0);
   const [limitType, setLimitType] = useState('');
+  const [originalQuery, setOriginalQuery] = useState('');
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const theme = useTheme();
+  const syntaxTheme = theme.palette.mode === 'dark' ? dracula : docco;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const dropzoneRef = useRef(null);
   const isFirstRender = useRef(true);
@@ -463,6 +469,7 @@ function VectorSearch({
       
       // Set the generated query regardless of type
       setGeneratedQuery(queryData);
+      setOriginalQuery(queryData);
       
       // Set the query result for display
       setQueryResult(queryData);
@@ -689,6 +696,7 @@ function VectorSearch({
       const queryString = typeof generatedQuery === 'object' ? JSON.stringify(generatedQuery) : generatedQuery;
       
       setGeneratedQuery(queryString);
+      setOriginalQuery(queryString);
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Generated query: ${queryString}\n\n`);
@@ -1391,33 +1399,122 @@ function VectorSearch({
         </Box>
         
         {generatedQuery && !runnedQuery && (
-          <Box 
-            onMouseEnter={() => handleActionButtonHover(true)}
-            onMouseLeave={() => handleActionButtonHover(false)}
-            sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              p: 2, 
+          <>
+            <Box sx={{ 
+              p: 3, 
+              borderTop: theme => `1px solid ${theme.palette.divider}`,
               backgroundColor: theme => theme.palette.mode === 'dark' 
-                ? alpha(theme.palette.primary.main, 0.1)
-                : alpha(theme.palette.primary.main, 0.05),
-              borderTop: theme => `1px solid ${theme.palette.divider}`
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleRunGeneratedQuery}
-              disabled={loading || !isSettingsValid()}
-              startIcon={<PlayArrowIcon />}
+                ? alpha(theme.palette.background.subtle, 0.3)
+                : alpha(theme.palette.background.subtle, 0.3),
+            }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center' }}>
+                <CodeIcon fontSize="small" sx={{ mr: 1 }} />
+                Generated Query (Editable)
+              </Typography>
+              <Box 
+                sx={{
+                  position: 'relative',
+                  borderRadius: '12px',
+                  border: theme => `1px solid ${theme.palette.divider}`,
+                  height: '150px',
+                  overflow: 'hidden',
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    padding: '16px 14px',
+                    overflow: 'auto',
+                    pointerEvents: 'none',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'keep-all',
+                  }}
+                >
+                  <SyntaxHighlighter
+                    language="cypher"
+                    style={syntaxTheme}
+                    customStyle={{
+                      margin: 0,
+                      padding: 0,
+                      background: 'transparent',
+                      fontSize: '0.9rem',
+                      lineHeight: '1.5',
+                      height: 'auto',
+                    }}
+                  >
+                    {generatedQuery || ' '}
+                  </SyntaxHighlighter>
+                </Box>
+                <textarea
+                  value={generatedQuery}
+                  onChange={(e) => setGeneratedQuery(e.target.value)}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    padding: '16px 14px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.9rem',
+                    lineHeight: '1.5',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    color: 'transparent',
+                    caretColor: theme.palette.text.primary,
+                    resize: 'none',
+                    zIndex: 1,
+                  }}
+                  placeholder="Edit the generated query here..."
+                  spellCheck="false"
+                />
+              </Box>
+            </Box>
+            <Box 
+              onMouseEnter={() => handleActionButtonHover(true)}
+              onMouseLeave={() => handleActionButtonHover(false)}
               sx={{ 
-                borderRadius: '12px',
-                px: 3
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                p: 2, 
+                backgroundColor: theme => theme.palette.mode === 'dark' 
+                  ? alpha(theme.palette.primary.main, 0.1)
+                  : alpha(theme.palette.primary.main, 0.05),
+                borderTop: theme => `1px solid ${theme.palette.divider}`
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Run Generated Query'}
-            </Button>
-          </Box>
+              <Button
+                variant="outlined"
+                onClick={() => setGeneratedQuery(originalQuery)}
+                disabled={loading}
+                startIcon={<RestoreIcon />}
+                sx={{ 
+                  borderRadius: '12px',
+                  px: 3
+                }}
+              >
+                Reset to Original
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleRunGeneratedQuery}
+                disabled={loading || !isSettingsValid()}
+                startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowIcon />}
+                sx={{ 
+                  borderRadius: '12px',
+                  px: 3
+                }}
+              >
+                Run Query
+              </Button>
+            </Box>
+          </>
         )}
       </Paper>
 

@@ -1272,65 +1272,68 @@ function QueryInput({
                 <CodeIcon fontSize="small" sx={{ mr: 1 }} />
                 Generated Query (Editable)
               </Typography>
-              <Box sx={{ 
-                position: 'relative',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                border: theme => `1px solid ${theme.palette.divider}`,
-              }}>
-                <TextField
-                  value={editableQuery}
-                  onChange={(e) => setEditableQuery(e.target.value)}
-                  multiline
-                  rows={5}
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Edit the generated query here..."
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '12px',
-                      fontFamily: 'monospace',
-                      fontSize: '0.9rem',
-                      backgroundColor: 'transparent',
-                      '& fieldset': {
-                        border: 'none',
-                      },
-                    },
-                    '& .MuiOutlinedInput-input': {
-                      color: 'transparent',
-                      caretColor: theme.palette.text.primary,
-                      zIndex: 1,
-                      position: 'relative',
-                    },
-                  }}
-                />
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: 0, 
-                  left: 0, 
-                  right: 0, 
-                  bottom: 0, 
-                  pointerEvents: 'none',
-                  padding: '16.5px 14px',
+              <Box 
+                sx={{
+                  position: 'relative',
+                  borderRadius: '12px',
+                  border: theme => `1px solid ${theme.palette.divider}`,
+                  height: '150px',
                   overflow: 'hidden',
-                }}>
-                  <SyntaxHighlighter 
-                    language="cypher" 
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    padding: '16px 14px',
+                    overflow: 'auto',
+                    pointerEvents: 'none',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'keep-all',
+                  }}
+                >
+                  <SyntaxHighlighter
+                    language="cypher"
                     style={syntaxTheme}
                     customStyle={{
                       margin: 0,
                       padding: 0,
                       background: 'transparent',
                       fontSize: '0.9rem',
-                      fontFamily: 'monospace',
-                      height: '100%',
-                      width: '100%',
-                      overflow: 'hidden',
+                      lineHeight: '1.5',
+                      height: 'auto',
                     }}
                   >
                     {editableQuery || ' '}
                   </SyntaxHighlighter>
                 </Box>
+                <textarea
+                  value={editableQuery}
+                  onChange={(e) => setEditableQuery(e.target.value)}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    padding: '16px 14px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.9rem',
+                    lineHeight: '1.5',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    color: 'transparent',
+                    caretColor: theme.palette.text.primary,
+                    resize: 'none',
+                    zIndex: 1,
+                  }}
+                  placeholder="Edit the generated query here..."
+                  spellCheck="false"
+                />
               </Box>
             </Box>
             <Box 
