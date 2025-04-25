@@ -76,6 +76,96 @@ instance.interceptors.request.use(async (config) => {
   }
 });
 
+// CSRF token refresh function
+const refreshCsrfToken = async () => {
+  try {
+    const clientIP = sessionStorage.getItem('client_ip');
+    const headers = {};
+    if (clientIP) {
+      headers['X-Client-IP'] = clientIP;
+    }
+    
+    const response = await axios.get('/csrf-token/', {
+      baseURL: instance.defaults.baseURL,
+      withCredentials: true,
+      headers
+    });
+    
+    console.log('CSRF token refreshed in api instance');
+    const csrfToken = response.data.csrf_token;
+    instance.defaults.headers['X-CSRF-Token'] = csrfToken;
+    return csrfToken;
+  } catch (error) {
+    console.error('Error refreshing CSRF token:', error);
+    throw error;
+  }
+};
+
+// Add a response interceptor to handle CSRF token expiration
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
+instance.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
+    
+    // Check if error is related to CSRF token
+    if (error.response && 
+        (error.response.status === 400 || error.response.status === 403) && 
+        (error.response.data?.detail?.includes('CSRF') || 
+         error.response.data?.detail?.includes('csrf')) &&
+        !originalRequest._retry) {
+      
+      // If we're already refreshing, add to queue
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers['X-CSRF-Token'] = token;
+            return instance(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+      
+      originalRequest._retry = true;
+      isRefreshing = true;
+      
+      try {
+        const token = await refreshCsrfToken();
+        // Update original request with new token
+        originalRequest.headers['X-CSRF-Token'] = token;
+        
+        // Process any requests in the queue
+        processQueue(null, token);
+        return instance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export const streamLogs = (onMessage, onError) => {
   const eventSource = new EventSource('/stream-logs');
   
@@ -100,5 +190,8 @@ export const streamLogs = (onMessage, onError) => {
 
   return eventSource;
 };
+
+// Export the refreshCsrfToken function for explicit usage
+export { refreshCsrfToken };
 
 export default instance;

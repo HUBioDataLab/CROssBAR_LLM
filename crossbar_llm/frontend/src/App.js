@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   ThemeProvider, 
   CssBaseline, 
@@ -39,7 +39,7 @@ import About from './components/About';
 import VectorSearch from './components/VectorSearch';
 import LatestQueries from './components/LatestQueries';
 import Home from './components/Home';
-import axios from './services/api';
+import axios, { refreshCsrfToken } from './services/api';
 
 function App() {
   const [tabValue, setTabValue] = useState('home');
@@ -79,29 +79,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        // Get client IP if available
-        const ip = sessionStorage.getItem('client_ip');
-        const headers = {};
-        if (ip) {
-          headers['X-Client-IP'] = ip;
-        }
-        
-        const response = await axios.get('/csrf-token/', { 
-          withCredentials: true,
-          headers
-        });
-        
-        console.log('CSRF token set in cookies.');
-        const csrfToken = response.data.csrf_token;
-        axios.defaults.headers['X-CSRF-Token'] = csrfToken;
-      } catch (error) {
-        console.error('Error fetching CSRF token:', error);
-      }
-    };
-    
-    fetchCsrfToken();
+    // Initial token fetch
+    refreshCsrfToken();
+
+    // Set up periodic token refresh (every 15 minutes)
+    const tokenRefreshInterval = setInterval(() => {
+      console.log('Refreshing CSRF token periodically');
+      refreshCsrfToken();
+    }, 15 * 60 * 1000); // 15 minutes
 
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
@@ -119,6 +104,11 @@ function App() {
       setQuestion(prefillQuery);
       localStorage.removeItem('prefillQuery');
     }
+    
+    // Clean up on unmount
+    return () => {
+      clearInterval(tokenRefreshInterval);
+    };
   }, []);
 
   // Fetch client IP on app startup

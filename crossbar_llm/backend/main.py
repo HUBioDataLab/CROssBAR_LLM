@@ -169,6 +169,11 @@ app.add_middleware(
 
 class CsrfSettings(BaseModel):
     secret_key: str = os.getenv("CSRF_SECRET_KEY")
+    cookie_secure: bool = False
+    cookie_samesite: str = "lax"
+    cookie_httponly: bool = True
+    # Set a longer expiration time (24 hours)
+    cookie_max_age: int = 86400  # 24 hours in seconds
     
 
 @CsrfProtect.load_config
