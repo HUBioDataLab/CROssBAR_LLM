@@ -175,15 +175,16 @@ function VectorSearch({
   const providerNeedsApiKey = useCallback(() => {
     if (!apiKeysLoaded) return true;
     
-    // If the provider has an API key in .env, no need to enter one
-    if (apiKeysStatus[provider]) {
+    // If the provider has an API key in .env and user wants to use it,
+    // no need to enter one
+    if (apiKeysStatus[provider] && apiKey === 'env') {
       return false;
     }
     
     // These providers always need an API key if not in .env
     return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' || 
            provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
-  }, [provider, apiKeysStatus, apiKeysLoaded]);
+  }, [provider, apiKeysStatus, apiKeysLoaded, apiKey]);
 
   // When provider changes, update API key if needed
   useEffect(() => {
@@ -225,7 +226,8 @@ function VectorSearch({
     if (!llmType) return false;
     
     // Check if API key is provided for providers that need it
-    if (providerNeedsApiKey() && !apiKey) {
+    // Only check if provider needs a key AND user is not using the env key
+    if (providerNeedsApiKey() && apiKey !== 'env' && !apiKey) {
       return false;
     }
     
@@ -1133,7 +1135,7 @@ function VectorSearch({
                       </FormControl>
                     </Box>
                   )}
-                  {/* If provider has an API key in .env, show this instead */}
+                  {/* If provider has an API key in .env, show info with option to override */}
                   {apiKeysLoaded && apiKeysStatus[provider] && (
                     <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                       <Paper
@@ -1141,13 +1143,57 @@ function VectorSearch({
                         sx={{ 
                           p: 1.5, 
                           display: 'flex', 
-                          alignItems: 'center',
+                          flexDirection: 'column',
                           backgroundColor: theme => theme.palette.mode === 'dark' ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.main, 0.05),
                           border: theme => `1px solid ${alpha(theme.palette.success.main, 0.3)}`
                         }}
                       >
-                        <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 1 }} />
-                        <Typography variant="body2">Using API key from .env file</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 1 }} />
+                            <Typography variant="body2">Using API key from .env file</Typography>
+                          </Box>
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                size="small" 
+                                checked={apiKey !== 'env'} 
+                                onChange={(e) => {
+                                  setApiKey(e.target.checked ? '' : 'env');
+                                }}
+                                sx={{ p: 0.5 }}
+                              />
+                            }
+                            label={<Typography variant="caption">Use custom</Typography>}
+                            sx={{ m: 0, '& .MuiTypography-root': { fontSize: '0.7rem', opacity: 0.7 } }}
+                          />
+                        </Box>
+                        
+                        {/* Show API key input if user wants to use custom key */}
+                        {apiKey !== 'env' && (
+                          <TextField
+                            placeholder="Enter your API key"
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            size="small"
+                            margin="dense"
+                            variant="outlined"
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <KeyIcon fontSize="small" />
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{ 
+                              mt: 1.5,
+                              '& .MuiOutlinedInput-root': {
+                                backgroundColor: 'background.paper',
+                              }
+                            }}
+                          />
+                        )}
                       </Paper>
                     </Box>
                   )}

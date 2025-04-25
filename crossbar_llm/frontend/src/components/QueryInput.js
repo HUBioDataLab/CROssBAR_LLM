@@ -235,15 +235,16 @@ function QueryInput({
   const providerNeedsApiKey = useCallback(() => {
     if (!apiKeysLoaded) return true;
     
-    // If the provider has an API key in .env, no need to enter one
-    if (apiKeysStatus[provider]) {
+    // If the provider has an API key in .env and user wants to use it,
+    // no need to enter one
+    if (apiKeysStatus[provider] && apiKey === 'env') {
       return false;
     }
     
     // These providers always need an API key if not in .env
     return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' || 
            provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
-  }, [provider, apiKeysStatus, apiKeysLoaded]);
+  }, [provider, apiKeysStatus, apiKeysLoaded, apiKey]);
 
   // When provider changes, update API key if needed
   useEffect(() => {
@@ -267,7 +268,8 @@ function QueryInput({
     if (!llmType) return false;
     
     // Check if API key is provided for providers that need it
-    if (providerNeedsApiKey() && !apiKey) {
+    // Only check if provider needs a key AND user is not using the env key
+    if (providerNeedsApiKey() && apiKey !== 'env' && !apiKey) {
       return false;
     }
     
@@ -983,7 +985,7 @@ function QueryInput({
                 
                 {/* Second row - API Key and Top K */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  {/* Only show API Key field if provider needs it and doesn't have a key in .env */}
+                  {/* Show API Key field based on conditions */}
                   {!apiKeysStatus[provider] && (
                     <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                       <FormControl fullWidth variant="outlined" size="small">
@@ -1005,7 +1007,7 @@ function QueryInput({
                     </Box>
                   )}
                   
-                  {/* If provider has an API key in .env, show this instead */}
+                  {/* If provider has an API key in .env, show info with option to override */}
                   {apiKeysLoaded && apiKeysStatus[provider] && (
                     <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                       <Paper
@@ -1013,18 +1015,61 @@ function QueryInput({
                         sx={{ 
                           p: 1.5, 
                           display: 'flex', 
-                          alignItems: 'center',
+                          flexDirection: 'column',
                           backgroundColor: theme => theme.palette.mode === 'dark' ? alpha('#4caf50', 0.1) : alpha('#4caf50', 0.05),
                           border: '1px solid rgba(76, 175, 80, 0.3)'
                         }}
                       >
-                        <Box sx={{ color: '#4caf50', mr: 1, display: 'flex', alignItems: 'center' }}>
-                          {/* Using a check icon without the CheckCircleIcon import */}
-                          <svg width="20" height="20" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z"/>
-                          </svg>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ color: '#4caf50', mr: 1, display: 'flex', alignItems: 'center' }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z"/>
+                              </svg>
+                            </Box>
+                            <Typography variant="body2">Using API key from .env file</Typography>
+                          </Box>
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                size="small" 
+                                checked={apiKey !== 'env'} 
+                                onChange={(e) => {
+                                  setApiKey(e.target.checked ? '' : 'env');
+                                }}
+                                sx={{ p: 0.5 }}
+                              />
+                            }
+                            label={<Typography variant="caption">Use custom</Typography>}
+                            sx={{ m: 0, '& .MuiTypography-root': { fontSize: '0.7rem', opacity: 0.7 } }}
+                          />
                         </Box>
-                        <Typography variant="body2">Using API key from .env file</Typography>
+                        
+                        {/* Show API key input if user wants to use custom key */}
+                        {apiKey !== 'env' && (
+                          <TextField
+                            placeholder="Enter your API key"
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            size="small"
+                            margin="dense"
+                            variant="outlined"
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <KeyIcon fontSize="small" />
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{ 
+                              mt: 1.5,
+                              '& .MuiOutlinedInput-root': {
+                                backgroundColor: 'background.paper',
+                              }
+                            }}
+                          />
+                        )}
                       </Paper>
                     </Box>
                   )}
