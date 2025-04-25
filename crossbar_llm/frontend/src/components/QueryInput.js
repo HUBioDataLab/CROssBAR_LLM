@@ -54,6 +54,7 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import StopIcon from '@mui/icons-material/Stop';
+import EditIcon from '@mui/icons-material/Edit';
 
 function QueryInput({ 
   setQueryResult, 
@@ -405,6 +406,21 @@ function QueryInput({
       window.removeEventListener('clearDebugLogs', handleClearLogs);
     };
   }, [clearLogs]);
+
+  // Listen for edit query event from ResultsDisplay
+  useEffect(() => {
+    const handleEditQuery = () => {
+      if (generatedQuery && runnedQuery) {
+        setRunnedQuery(false);
+      }
+    };
+    
+    window.addEventListener('editQuery', handleEditQuery);
+    
+    return () => {
+      window.removeEventListener('editQuery', handleEditQuery);
+    };
+  }, [generatedQuery, runnedQuery]);
 
   const handleAbort = () => {
     if (abortControllerRef.current) {

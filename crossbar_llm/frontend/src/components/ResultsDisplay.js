@@ -34,6 +34,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import LaunchIcon from '@mui/icons-material/Launch';
+import EditIcon from '@mui/icons-material/Edit';
 
 function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const theme = useTheme();
@@ -285,6 +286,20 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
                       sx={{ mr: 1, borderRadius: '10px' }}
                     >
                       <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Edit Query">
+                    <IconButton 
+                      size="small" 
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the parent onClick
+                        // Dispatch event for parent component to handle query editing
+                        const editQueryEvent = new CustomEvent('editQuery');
+                        window.dispatchEvent(editQueryEvent);
+                      }}
+                      sx={{ mr: 1, borderRadius: '10px' }}
+                    >
+                      <EditIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   <IconButton 
