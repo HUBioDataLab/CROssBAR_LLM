@@ -97,11 +97,19 @@ function VectorSearch({
   const modelChoices = {
     OpenAI: [
       'gpt-4o',
+      'gpt-4.1-2025-04-14',
+      'o4-mini-2025-04-16',
+      'o3-2025-04-16',
+      'o3-mini-2025-01-31',
+      'o1-2024-12-17',
+      'o1-mini-2024-09-12',
+      'o1-pro-2025-03-19',
+
+      { value: 'separator', label: '──────────' },
       'gpt-4o-mini',
       'gpt-3.5-turbo',
       'gpt-4-turbo',
       'gpt-3.5-turbo-instruct',
-      { value: 'separator', label: '──────────' },
       'gpt-3.5-turbo-1106',
       'gpt-3.5-turbo-0125',
       'gpt-4-0125-preview',
@@ -126,6 +134,8 @@ function VectorSearch({
       "deepseek/deepseek-chat",
     ], 
     Google: [
+      'gemini-2.5-flash-preview-04-17',
+      'gemini-2.5-pro-preview-03-25',
       'gemini-2.0-flash-thinking-exp-01-21',
       'gemini-2.0-pro-exp-02-05',
       'gemini-2.0-flash',
