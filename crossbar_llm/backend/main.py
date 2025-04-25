@@ -237,11 +237,11 @@ def check_rate_limit(request: Request):
         
         # Create appropriate error message based on limit type
         if limit_type == "minute":
-            detail_message = "Minute rate limit exceeded (6 requests per minute)."
+            detail_message = "Minute rate limit exceeded (3 requests per minute)."
         elif limit_type == "hour":
-            detail_message = "Hour rate limit exceeded (20 requests per hour)."
+            detail_message = "Hour rate limit exceeded (10 requests per hour)."
         elif limit_type == "day":
-            detail_message = "Daily rate limit exceeded (50 requests per day)."
+            detail_message = "Daily rate limit exceeded (25 requests per day)."
         else:
             detail_message = "Rate limit exceeded."
             
