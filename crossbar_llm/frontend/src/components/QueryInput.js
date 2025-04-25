@@ -1108,11 +1108,17 @@ function QueryInput({
             </Paper>
           </Collapse>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <SampleQuestions onQuestionClick={handleSampleQuestionClick} />
-            </Box>
-            
+          {/* Sample Questions - Moved to top position for better visibility */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            mb: 3,
+            mt: !showSettings && !showWarning ? 1 : 0
+          }}>
+            <SampleQuestions onQuestionClick={handleSampleQuestionClick} />
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings first"}>
                 <Box 

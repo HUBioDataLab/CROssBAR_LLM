@@ -1286,11 +1286,17 @@ function VectorSearch({
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <SampleQuestions onQuestionClick={handleSampleQuestionClick} isVectorTab={true} />
-            </Box>
-            
+          {/* Sample Questions - Repositioned for better visibility */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            mb: 4,
+            mt: 1
+          }}>
+            <SampleQuestions onQuestionClick={handleSampleQuestionClick} isVectorTab={true} />
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings first"}>
                 <Box 
