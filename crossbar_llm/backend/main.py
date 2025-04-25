@@ -93,6 +93,7 @@ class RateLimiter:
         # Ensure ip is a string
         ip_str = str(ip)
         Logger.debug(f"Checking rate limit for IP: {ip_str}")
+        print(f"Checking rate limit for IP: {ip_str}")
         
         # If IP not in records, add it
         if ip_str not in self.request_records:
