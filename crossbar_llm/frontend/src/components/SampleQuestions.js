@@ -61,10 +61,10 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
       question: "What are the drugs that target proteins associated with Alzheimer's disease?"
     },
     {
-      question: "Which pathways are associated with both diabetes and obesity?"
+      question: "Which pathways are associated with both diabetes mellitus and T-cell non-Hodgkin lymphoma? Return only signaling pathways."
     },
     {
-      question: "What are the common side effects of drugs targeting the EGFR protein?"
+      question: "What are the common side effects of drugs targeting the EGFR gene's protein?"
     }
   ];
 
