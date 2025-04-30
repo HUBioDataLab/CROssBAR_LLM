@@ -735,9 +735,11 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
             mb: 2
           }}>
             <Typography component="ol" sx={{ pl: 2 }}>
-              <li>Click in the command input at the top of the Neo4j Browser</li>
-              <li>Paste the query (Ctrl+V or ⌘+V)</li>
-              <li>Press Enter or click the play button to run the query</li>
+              <li>Click the "Open Neo4j browser" button below,</li>
+              <li>On the Neo4j browser page, Connect to the database by clicking the respective button,</li>
+              <li>Click in the command input bar at the top of the Neo4j Browser,</li>
+              <li>Paste the copied cypher query using Ctrl+V (Windows/Linux) or ⌘+V (Mac),</li>
+              <li>Click the play button to run the query.</li>
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
