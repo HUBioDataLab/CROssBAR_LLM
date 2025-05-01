@@ -624,10 +624,7 @@ function VectorSearch({
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
       
-      // Check if we have a vector file
-      if (!vectorFile && vectorCategory) {
-        throw new Error('Vector file is required for vector search');
-      }
+      // Vector file is optional, no validation needed
       
       // Prepare the request data
       const requestData = {
@@ -866,8 +863,8 @@ function VectorSearch({
         }
       }
     } else if (sampleQuestionObj.vectorCategory) {
-      // If a vector category is specified but no file path, show a warning
-      const warningMsg = `No vector file specified for ${sampleQuestionObj.vectorCategory}. Please upload a vector file.`;
+      // If a vector category is specified but no file path, it's now optional so we don't need to show a warning
+      const warningMsg = `Using ${sampleQuestionObj.vectorCategory} category without a vector file. You can optionally upload a vector file to enhance results.`;
       console.warn(warningMsg);
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Warning: ${warningMsg}\n`);
@@ -1011,7 +1008,7 @@ function VectorSearch({
               }}
               icon={<LightbulbOutlinedIcon />}
             >
-              Ask any biomedical question with vector search to query the CROssBAR knowledge graph. Upload a vector file to enhance your search results.
+              Ask any biomedical question with vector search to query the CROssBAR knowledge graph. You can optionally upload a vector file to enhance your search results, but it's not required.
             </Alert>
           </Collapse>
 

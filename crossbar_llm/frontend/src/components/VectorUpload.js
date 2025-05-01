@@ -138,8 +138,8 @@ function VectorUpload({
       
       {showInfo && (
         <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-          Vector search enhances query results by finding semantically similar entities in the knowledge graph.
-          Select a category and embedding type, then upload your vector file.
+          Vector search can be used with or without a custom vector file. Uploading a vector enhances query results by finding 
+          semantically similar entities in the knowledge graph, but is completely optional.
         </Typography>
       )}
       
@@ -234,7 +234,7 @@ function VectorUpload({
           }
         }}
       >
-        Upload Vector File (.npy)
+        Upload Vector File (Optional)
         <input
           type="file"
           hidden
