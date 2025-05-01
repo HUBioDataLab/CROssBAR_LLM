@@ -1219,10 +1219,11 @@ function QueryInput({
                       sx={{ 
                         borderRadius: '12px',
                         px: 3,
-                        height: '44px'
+                        height: '44px',
+                        fontSize: '0.75rem',
                       }}
                     >
-                      Generate
+                      Only Generate Query
                     </Button>
                   )}
                 </Box>
@@ -1260,7 +1261,7 @@ function QueryInput({
                         height: '44px'
                       }}
                     >
-                      Generate & Run
+                      Generate & Run Query
                     </Button>
                   )}
                 </Box>

@@ -1375,10 +1375,11 @@ function VectorSearch({
                     sx={{ 
                       borderRadius: '12px',
                       px: 3,
-                      height: '44px'
+                      height: '44px',
+                      fontSize: '0.75rem'
                     }}
                   >
-                    {loading ? <CircularProgress size={24} /> : 'Generate'}
+                    {loading ? <CircularProgress size={24} /> : 'Only Generate Query'}
                   </Button>
                 </Box>
               </Tooltip>
@@ -1400,7 +1401,7 @@ function VectorSearch({
                       height: '44px'
                     }}
                   >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run'}
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run Query'}
                   </Button>
                 </Box>
               </Tooltip>
