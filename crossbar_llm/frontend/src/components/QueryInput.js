@@ -158,6 +158,7 @@ function QueryInput({
       'o1-mini-2024-09-12',
 
       { value: 'separator', label: '──────────' },
+      { value: 'label', label: 'Other models:' },
       'gpt-4o-mini',
       'o3-2025-04-16',
       'o1-2024-12-17',
@@ -987,10 +988,35 @@ function QueryInput({
                         <MenuItem value="">
                           <em>Select a model</em>
                         </MenuItem>
-                        {provider && modelChoices[provider].map((model) => (
-                          model.value === 'separator' ? (
-                            <Divider key={model.label} sx={{ my: 1 }} />
-                          ) : (
+                        {provider && modelChoices[provider].map((model) => {
+                          // For separator items, render a divider
+                          if (typeof model === 'object' && model.value === 'separator') {
+                            return <Divider key={model.label} sx={{ my: 1 }} />;
+                          }
+                          
+                          // For label items, render a non-selectable label
+                          if (typeof model === 'object' && model.value === 'label') {
+                            return (
+                              <MenuItem 
+                                key={`label-${model.label}`} 
+                                disabled
+                                sx={{ 
+                                  opacity: 0.7, 
+                                  fontWeight: 'bold', 
+                                  fontSize: '0.85rem',
+                                  pointerEvents: 'none',
+                                  '&.Mui-disabled': {
+                                    opacity: 0.7
+                                  }
+                                }}
+                              >
+                                {model.label}
+                              </MenuItem>
+                            );
+                          }
+                          
+                          // For regular model items
+                          return (
                             <MenuItem key={model} value={model}>
                               {model}
                               {supportedModels.includes(model) && (
@@ -1002,8 +1028,8 @@ function QueryInput({
                                 />
                               )}
                             </MenuItem>
-                          )
-                        ))}
+                          );
+                        })}
                       </Select>
                     </FormControl>
                   </Box>
