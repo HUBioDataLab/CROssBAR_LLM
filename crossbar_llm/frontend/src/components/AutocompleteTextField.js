@@ -26,6 +26,26 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import CloseIcon from '@mui/icons-material/Close';
 
+// Node type color mapping based on Neo4j style
+const nodeTypeColors = {
+  BiologicalProcess: { bg: '#ff8800', text: '#FFFFFF' },
+  CellularComponent: { bg: '#ffc300', text: '#FFFFFF' },
+  MolecularFunction: { bg: '#ffaa00', text: '#FFFFFF' },
+  Compound: { bg: '#d2b7e5', text: '#FFFFFF' },
+  Protein: { bg: '#3aa6a4', text: '#FFFFFF' },
+  ProteinDomain: { bg: '#6bbf59', text: '#FFFFFF' },
+  Gene: { bg: '#287271', text: '#FFFFFF' },
+  Drug: { bg: '#815ac0', text: '#000000' },
+  SideEffect: { bg: '#9ae9f8', text: '#FFFFFF' },
+  Phenotype: { bg: '#58d0e8', text: '#FFFFFF' },
+  Disease: { bg: '#079dbb', text: '#FFFFFF' },
+  Pathway: { bg: '#720026', text: '#FFFFFF' },
+  OrganismTaxon: { bg: '#a6a6a6', text: '#FFFFFF' },
+  Reaction: { bg: '#ce4257', text: '#FFFFFF' },
+  // Default for any type not listed
+  default: { bg: '#A5ABB6', text: '#FFFFFF' }
+};
+
 function AutocompleteTextField({ value, setValue, label, placeholder }) {
   const theme = useTheme();
   const [suggestions, setSuggestions] = useState([]);
@@ -565,7 +585,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
                   >
                     <ListItemText 
                       primary={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Typography 
                             variant="body1" 
                             sx={{ 
@@ -580,12 +600,13 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
                           <Typography 
                             variant="caption"
                             sx={{ 
-                              color: theme.palette.text.secondary,
-                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              color: nodeTypeColors[suggestion.type]?.text || nodeTypeColors.default.text,
+                              backgroundColor: nodeTypeColors[suggestion.type]?.bg || nodeTypeColors.default.bg,
                               borderRadius: '4px',
                               px: 1,
                               py: 0.5,
-                              ml: 1
+                              ml: 1,
+                              fontWeight: 500
                             }}
                           >
                             {suggestion.type}
