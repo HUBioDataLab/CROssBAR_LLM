@@ -67,7 +67,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     threshold: 0.5,
     ignoreLocation: true,
     minMatchCharLength: 2,
-    keys: ['name'],
+    keys: ['term'],
   });
 
   const debounceTimeoutRef = useRef(null);
@@ -193,10 +193,10 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
           // First try direct inclusion for exact matches
           if (query.length > 3) {
             matchedSuggestions = suggestions.filter(s => 
-              s.toLowerCase().includes(formattedQuery.toLowerCase())
+              s.term.toLowerCase().includes(formattedQuery.toLowerCase())
             )
             // Sort by length to prioritize shorter suggestions
-            .sort((a, b) => a.length - b.length)
+            .sort((a, b) => a.term.length - b.term.length)
             .slice(0, 15); // Limit to 15 results
           }
           
@@ -205,7 +205,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
             const results = fuse.search(formattedQuery);
             matchedSuggestions = results.map((result) => result.item)
               // Sort by length to prioritize shorter suggestions
-              .sort((a, b) => a.length - b.length)
+              .sort((a, b) => a.term.length - b.term.length)
               .slice(0, 15);
           }
           
@@ -303,7 +303,9 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
 
   const handleSuggestionClick = (suggestion) => {
     // Replace underscores with spaces when using the suggestion in the text field
-    const displaySuggestion = suggestion.replaceAll('_', ' ');
+    const displayTerm = suggestion.term.replaceAll('_', ' ');
+    // Format as "Term (Type)"
+    const displaySuggestion = `${displayTerm} (${suggestion.type})`;
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
     const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
@@ -563,17 +565,32 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
                   >
                     <ListItemText 
                       primary={
-                        <Typography 
-                          variant="body1" 
-                          sx={{ 
-                            fontWeight: index === selectedIndex ? 500 : 400,
-                            color: index === selectedIndex 
-                              ? theme.palette.primary.main 
-                              : theme.palette.text.primary
-                          }}
-                        >
-                          {suggestion.replace(/_/g, ' ')}
-                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              fontWeight: index === selectedIndex ? 500 : 400,
+                              color: index === selectedIndex 
+                                ? theme.palette.primary.main 
+                                : theme.palette.text.primary
+                            }}
+                          >
+                            {suggestion.term.replace(/_/g, ' ')}
+                          </Typography>
+                          <Typography 
+                            variant="caption"
+                            sx={{ 
+                              color: theme.palette.text.secondary,
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              borderRadius: '4px',
+                              px: 1,
+                              py: 0.5,
+                              ml: 1
+                            }}
+                          >
+                            {suggestion.type}
+                          </Typography>
+                        </Box>
                       } 
                     />
                   </ListItem>

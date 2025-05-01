@@ -3,34 +3,6 @@ import axios from 'axios';
 const CACHE_KEY = 'crossbar_suggestions_cache';
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000;
 
-const computeSuggestions = async () => {
-  const fileNames = [];
-  const context = require.context('../../public', false, /\.txt$/);
-  context.keys().forEach((key) => {
-    fileNames.push(key.replace('./', ''));
-  });
-
-  const suggestionsSet = new Set();
-
-  for (const fileName of fileNames) {
-    try {
-      const response = await axios.get(`${process.env.PUBLIC_URL}/${fileName}`);
-      const fileContent = response.data;
-      const words = fileContent.split(/\s+/).filter(Boolean);
-      words.forEach((word) => {
-        if (word.length > 2) {
-          suggestionsSet.add(word);
-        }
-      });
-    } catch (error) {
-      console.error(`Error loading ${fileName}:`, error);
-    }
-  }
-
-  const suggestionsArray = Array.from(suggestionsSet);
-  return suggestionsArray;
-};
-
 const fetchSuggestions = async () => {
   const response = await axios.get(`${process.env.PUBLIC_URL}/suggestions.json`);
   console.log('Fetched suggestions count:', response.data.length);
