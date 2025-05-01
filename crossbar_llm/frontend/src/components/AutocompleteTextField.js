@@ -28,22 +28,29 @@ import CloseIcon from '@mui/icons-material/Close';
 
 // Node type color mapping based on Neo4j style
 const nodeTypeColors = {
-  BiologicalProcess: { bg: '#ff8800', text: '#FFFFFF' },
-  CellularComponent: { bg: '#ffc300', text: '#FFFFFF' },
-  MolecularFunction: { bg: '#ffaa00', text: '#FFFFFF' },
-  Compound: { bg: '#d2b7e5', text: '#FFFFFF' },
-  Protein: { bg: '#3aa6a4', text: '#FFFFFF' },
-  ProteinDomain: { bg: '#6bbf59', text: '#FFFFFF' },
-  Gene: { bg: '#287271', text: '#FFFFFF' },
-  Drug: { bg: '#815ac0', text: '#000000' },
-  SideEffect: { bg: '#9ae9f8', text: '#FFFFFF' },
-  Phenotype: { bg: '#58d0e8', text: '#FFFFFF' },
-  Disease: { bg: '#079dbb', text: '#FFFFFF' },
-  Pathway: { bg: '#720026', text: '#FFFFFF' },
-  OrganismTaxon: { bg: '#a6a6a6', text: '#FFFFFF' },
-  Reaction: { bg: '#ce4257', text: '#FFFFFF' },
+  // Handle both formats: with and without spaces
+  "BiologicalProcess": { bg: '#ff8800', text: '#FFFFFF' },
+  "Biological Process": { bg: '#ff8800', text: '#FFFFFF' },
+  "CellularComponent": { bg: '#ffc300', text: '#FFFFFF' },
+  "Cellular Component": { bg: '#ffc300', text: '#FFFFFF' },
+  "MolecularFunction": { bg: '#ffaa00', text: '#FFFFFF' },
+  "Molecular Function": { bg: '#ffaa00', text: '#FFFFFF' },
+  "Compound": { bg: '#d2b7e5', text: '#FFFFFF' },
+  "Protein": { bg: '#3aa6a4', text: '#FFFFFF' },
+  "ProteinDomain": { bg: '#6bbf59', text: '#FFFFFF' },
+  "Protein Domain": { bg: '#6bbf59', text: '#FFFFFF' },
+  "Gene": { bg: '#287271', text: '#FFFFFF' },
+  "Drug": { bg: '#815ac0', text: '#000000' },
+  "SideEffect": { bg: '#9ae9f8', text: '#FFFFFF' },
+  "Side Effect": { bg: '#9ae9f8', text: '#FFFFFF' },
+  "Phenotype": { bg: '#58d0e8', text: '#FFFFFF' },
+  "Disease": { bg: '#079dbb', text: '#FFFFFF' },
+  "Pathway": { bg: '#720026', text: '#FFFFFF' },
+  "OrganismTaxon": { bg: '#a6a6a6', text: '#FFFFFF' },
+  "Organism Taxon": { bg: '#a6a6a6', text: '#FFFFFF' },
+  "Reaction": { bg: '#ce4257', text: '#FFFFFF' },
   // Default for any type not listed
-  default: { bg: '#A5ABB6', text: '#FFFFFF' }
+  "default": { bg: '#A5ABB6', text: '#FFFFFF' }
 };
 
 function AutocompleteTextField({ value, setValue, label, placeholder }) {
