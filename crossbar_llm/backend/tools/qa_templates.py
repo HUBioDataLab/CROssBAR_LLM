@@ -73,6 +73,8 @@ On top of that, you may need to create a normal cypher query after performing a 
     - Do not capitalize given biological entity names in question. Use it as is.
     - Make sure relationship is correct in generated Cypher query.
 
+Note: Do not use Neo4j's gds library, use db.index.vector.queryNodes instead.
+
 Vector index:
 {vector_index}   
 Nodes:
@@ -107,7 +109,7 @@ WHERE score < 1
 MATCH (similar_proteins)-[:Drug_targets_protein]-(d:Drug)
 RETURN similar_proteins.id AS id, similar_proteins.primary_protein_name AS primary_protein_name, score, d.name AS drug_name, d.id AS drug_id 
 
-# In the case where embeddings are given by the user as follows, define a variable named `user_input` in the query. 
+# In the case where embeddings are given by the user, define a variable named `user_input` in the query. Follow the same format as in the example below.
 # This variable will be filled with the embedding provided by the user.
 # Question: From given embedding, find the names of most similar reactions
 # Vector index: RxnfpEmbeddings
