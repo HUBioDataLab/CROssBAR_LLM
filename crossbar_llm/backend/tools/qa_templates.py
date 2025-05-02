@@ -74,7 +74,10 @@ On top of that, you may need to create a normal cypher query after performing a 
     - Make sure relationship is correct in generated Cypher query.
 
 Note: Do not use Neo4j's gds library, use db.index.vector.queryNodes instead.
-
+Note: Do not include any explanations or apologies in your responses. Just return cypher query
+Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
+Note: Always use vector search first and then normal cypher query if needed. If you think user is provided embedding, use it in the query.
+    
 Vector index:
 {vector_index}   
 Nodes:
@@ -85,8 +88,7 @@ Relationship properties:
 {edge_properties}
 Relationships:
 {edges}
-Note: Do not include any explanations or apologies in your responses. Just return cypher query
-Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
+
 
 Here are a few examples use similar concepts when you are creating cypher queries for vector search:
 
