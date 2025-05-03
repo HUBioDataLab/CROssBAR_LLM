@@ -641,21 +641,12 @@ function VectorSearch({
       
       // Add vector data if available
       if (vectorFile) {
-        requestData.vector_category = vectorCategory;
-        requestData.embedding_type = embeddingType;
-        
-        // If vectorFile has vector_data property, use it
-        if (vectorFile.vector_data) {
-          requestData.vector_data = vectorFile.vector_data;
-        } else {
-          // Otherwise, use the entire vectorFile as the data
-          requestData.vector_data = vectorFile;
-        }
+        requestData.embedding = JSON.stringify(vectorFile);
+        requestData.vector_index = embeddingType;
       } else if (selectedFile) {
         // If we have a selected file but no vectorFile data yet,
         // we need to include the file in the request
-        requestData.vector_category = vectorCategory;
-        requestData.embedding_type = embeddingType;
+        requestData.vector_index = embeddingType;
         
         // Create a FormData object to send the file
         const formData = new FormData();
@@ -680,7 +671,7 @@ function VectorSearch({
           }
           
           // Use the uploaded vector data
-          requestData.vector_data = uploadResponse.data.vector_data;
+          requestData.embedding = JSON.stringify(uploadResponse.data);
           setVectorFile(uploadResponse.data);
         } catch (error) {
           throw new Error(`Error uploading vector file: ${error.message}`);
@@ -731,16 +722,8 @@ function VectorSearch({
       
       // Add vector data if available
       if (vectorFile) {
-        runRequestData.vector_category = vectorCategory;
-        runRequestData.embedding_type = embeddingType;
-        
-        // If vectorFile has vector_data property, use it
-        if (vectorFile.vector_data) {
-          runRequestData.vector_data = vectorFile.vector_data;
-        } else {
-          // Otherwise, use the entire vectorFile as the data
-          runRequestData.vector_data = vectorFile;
-        }
+        runRequestData.embedding = JSON.stringify(vectorFile);
+        requestData.vector_index = embeddingType;
       } else if (selectedFile) {
         // If we have a selected file but no vectorFile data yet,
         // we should have already uploaded it in the generate step
