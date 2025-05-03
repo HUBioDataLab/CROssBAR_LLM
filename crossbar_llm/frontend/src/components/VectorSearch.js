@@ -715,26 +715,13 @@ function VectorSearch({
       
       // Prepare the run query request
       const runRequestData = {
-        query: queryString,
         question: question,
+        query: queryString,
         llm_type: llmType,
         top_k: topK,
         api_key: effectiveApiKey,
         verbose: verbose
       };
-      
-      // Add vector data if available
-      if (vectorFile) {
-        runRequestData.embedding = JSON.stringify(vectorFile);
-        requestData.vector_index = embeddingType;
-      } else if (selectedFile) {
-        // If we have a selected file but no vectorFile data yet,
-        // we should have already uploaded it in the generate step
-        // and stored the result in vectorFile
-        if (verbose) {
-          updateRealtimeLogs(prev => prev + `Warning: Selected file exists but no vector data available\n`);
-        }
-      }
       
       const runResponse = await axios.post('/run_query/', runRequestData);
       
