@@ -725,9 +725,13 @@ function VectorSearch({
       
       const runResponse = await axios.post('/run_query/', runRequestData);
       
-      setRunnedQuery(true);
+      setExecutionResult({
+        result: runResponse.data.result,
+        response: runResponse.data.response
+      });
       setQueryResult(queryString);
-      setExecutionResult(runResponse.data.response);
+      setRunnedQuery(true);
+      setError(null);
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Query execution completed successfully!\n`);
