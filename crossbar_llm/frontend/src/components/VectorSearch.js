@@ -716,7 +716,10 @@ function VectorSearch({
       // Prepare the run query request
       const runRequestData = {
         query: queryString,
+        question: question,
+        llm_type: llmType,
         top_k: topK,
+        api_key: effectiveApiKey,
         verbose: verbose
       };
       
