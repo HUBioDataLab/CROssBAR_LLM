@@ -572,6 +572,82 @@ function NodeVisualization({ executionResult }) {
         });
       }
       
+      // Handle property-based results (like "d.name", "d.id")
+      // Group properties that belong to the same entity
+      const propertyGroups = {};
+      
+      if (Array.isArray(result)) {
+        result.forEach((item) => {
+          // Scan for properties that use dot notation
+          Object.entries(item).forEach(([key, value]) => {
+            if (key.includes('.')) {
+              // Extract entity prefix and property name
+              const [prefix, prop] = key.split('.');
+              
+              // Initialize group if not exists
+              if (!propertyGroups[prefix]) {
+                propertyGroups[prefix] = [];
+              }
+              
+              // Find or create an entity for this row
+              let entity = propertyGroups[prefix].find(e => 
+                // Try to match based on ID if it exists
+                (item[`${prefix}.id`] && e.id === item[`${prefix}.id`]) ||
+                // Otherwise try to match based on name
+                (item[`${prefix}.name`] && e.name === item[`${prefix}.name`])
+              );
+              
+              // If no existing entity found, create a new one
+              if (!entity) {
+                entity = {};
+                propertyGroups[prefix].push(entity);
+              }
+              
+              // Add the property to the entity
+              entity[prop] = value;
+            }
+          });
+        });
+        
+        // Process all property groups as entities
+        Object.entries(propertyGroups).forEach(([prefix, entities]) => {
+          entities.forEach(entity => {
+            // Only process entities with at least an ID or name
+            if (entity.id || entity.name) {
+              // Determine entity type based on prefix and properties
+              let entityType = null;
+              
+              // Try to determine entity type from prefix
+              if (prefix === 'd') {
+                // Check if it's a disease by ID pattern
+                if (entity.id && entity.id.toLowerCase().includes('mondo')) {
+                  entityType = 'diseases';
+                } 
+                // If we have a name with disease-related terms
+                else if (entity.name && /disease|syndrome|disorder/i.test(entity.name)) {
+                  entityType = 'diseases';
+                }
+                // Otherwise could be drug or disease
+                else {
+                  entityType = entity.id && (
+                    entity.id.includes('drug') || 
+                    entity.id.includes('chembl') || 
+                    entity.id.includes('pubchem')
+                  ) ? 'drugs' : 'diseases';
+                }
+              } else if (prefix === 'p') {
+                entityType = 'proteins';
+              } else if (prefix === 'g') {
+                entityType = 'genes';
+              }
+              
+              // Add to the appropriate collection
+              addEntityToCollection(entity, entityType);
+            }
+          });
+        });
+      }
+      
       setEntities(extractedEntities);
     } catch (error) {
       console.error("Error parsing query results:", error);
@@ -1094,6 +1170,69 @@ function NodeVisualization({ executionResult }) {
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Molecular Weight:</strong> {entity.molecularWeight} Da
                                         </Typography>
+                                      )}
+                                    </Box>
+                                  )}
+                                  
+                                  {/* Disease details */}
+                                  {type === 'diseases' && (
+                                    <Box sx={{ mt: 2 }}>
+                                      {entity.synonyms && entity.synonyms.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Alternative disease names:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entity.synonyms.slice(0, 5).map((name, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={name} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.error.main, 0.1),
+                                                  color: 'error.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entity.synonyms.length > 5 && (
+                                              <Chip 
+                                                label={`+${entity.synonyms.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Disease-specific fields */}
+                                      {entity.type && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Type:</strong> {entity.type}
+                                        </Typography>
+                                      )}
+                                      
+                                      {entity.category && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Category:</strong> {entity.category}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* MONDO-specific links */}
+                                      {entity.id && entity.id.toLowerCase().includes('mondo') && (
+                                        <Box sx={{ mt: 1 }}>
+                                          <Link 
+                                            href={`https://monarchinitiative.org/disease/${entity.id}`}
+                                            target="_blank"
+                                            rel="noopener"
+                                            sx={{ display: 'flex', alignItems: 'center', fontSize: '0.8rem' }}
+                                          >
+                                            <OpenInNewIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+                                            View in Monarch Initiative
+                                          </Link>
+                                        </Box>
                                       )}
                                     </Box>
                                   )}
