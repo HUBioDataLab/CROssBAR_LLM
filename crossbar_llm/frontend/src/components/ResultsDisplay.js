@@ -35,6 +35,7 @@ import TerminalIcon from '@mui/icons-material/Terminal';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import LaunchIcon from '@mui/icons-material/Launch';
 import EditIcon from '@mui/icons-material/Edit';
+import NodeVisualization from './NodeVisualization';
 
 function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   const theme = useTheme();
@@ -215,6 +216,9 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
               </Collapse>
             </Paper>
           )}
+
+          {/* Node Visualization Component */}
+          {executionResult?.result && <NodeVisualization executionResult={executionResult} />}
 
           {processedQueryResult && (
             <Paper 
