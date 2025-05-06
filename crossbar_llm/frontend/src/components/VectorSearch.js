@@ -84,6 +84,9 @@ function VectorSearch({
   const [retryCountdown, setRetryCountdown] = useState(0);
   const [limitType, setLimitType] = useState('');
   const [originalQuery, setOriginalQuery] = useState('');
+  // Refs for scroll sync between textarea and syntax highlighter
+  const textareaRef = useRef(null);
+  const highlighterRef = useRef(null);
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const theme = useTheme();
@@ -1435,6 +1438,7 @@ function VectorSearch({
                 }}
               >
                 <Box
+                  ref={highlighterRef}
                   sx={{
                     position: 'absolute',
                     top: 0,
@@ -1473,8 +1477,16 @@ function VectorSearch({
                   </SyntaxHighlighter>
                 </Box>
                 <textarea
+                  ref={textareaRef}
                   value={generatedQuery}
                   onChange={(e) => setGeneratedQuery(e.target.value)}
+                  onScroll={(e) => {
+                    // Sync scroll position with highlighter
+                    if (highlighterRef.current) {
+                      highlighterRef.current.scrollTop = e.target.scrollTop;
+                      highlighterRef.current.scrollLeft = e.target.scrollLeft;
+                    }
+                  }}
                   style={{
                     position: 'absolute',
                     top: 0,

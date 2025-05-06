@@ -97,6 +97,10 @@ function QueryInput({
   const countdownTimerRef = useRef(null);
   const theme = useTheme();
 
+  // Refs for scroll sync between textarea and syntax highlighter
+  const textareaRef = useRef(null);
+  const highlighterRef = useRef(null);
+
   // Create a custom syntax highlighting theme based on current theme
   const syntaxTheme = theme.palette.mode === 'dark' ? dracula : docco;
 
@@ -1319,6 +1323,7 @@ function QueryInput({
                 }}
               >
                 <Box
+                  ref={highlighterRef}
                   sx={{
                     position: 'absolute',
                     top: 0,
@@ -1357,8 +1362,16 @@ function QueryInput({
                   </SyntaxHighlighter>
                 </Box>
                 <textarea
+                  ref={textareaRef}
                   value={editableQuery}
                   onChange={(e) => setEditableQuery(e.target.value)}
+                  onScroll={(e) => {
+                    // Sync scroll position with highlighter
+                    if (highlighterRef.current) {
+                      highlighterRef.current.scrollTop = e.target.scrollTop;
+                      highlighterRef.current.scrollLeft = e.target.scrollLeft;
+                    }
+                  }}
                   style={{
                     position: 'absolute',
                     top: 0,
