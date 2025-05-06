@@ -181,13 +181,13 @@ function QueryInput({
       'claude-3-haiku-20240307',
     ],
     OpenRouter: [
+      "deepseek/deepseek-chat",
       "deepseek/deepseek-r1",
       "qwen/qwen-2.5-72b-instruct",
       "qwen/qwen-2.5-coder-32b-instruct",
       "deepseek/deepseek-r1-distill-llama-70b",
       "deepseek/deepseek-r1:free",
       "deepseek/deepseek-r1:nitro",
-      "deepseek/deepseek-chat",
     ], 
     Google: [
       'gemini-2.5-flash-preview-04-17',
