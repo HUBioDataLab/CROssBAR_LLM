@@ -759,7 +759,7 @@ function NodeVisualization({ executionResult }) {
             color: theme => theme.palette.mode === 'dark' ? theme.palette.info.light : theme.palette.info.main 
           }} />
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Node Visualization
+            Node Information
           </Typography>
           <Chip 
             label={`${totalEntityCount} entities`}
