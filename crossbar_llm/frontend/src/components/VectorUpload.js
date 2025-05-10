@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DownloadIcon from '@mui/icons-material/Download';
 import axios from '../services/api';
 
 // Helper function to extract text and URL from markdown [text](url)
@@ -108,6 +109,26 @@ function VectorUpload({
     }
   }
   const { text: paperText, url: paperUrl } = extractMarkdownLink(currentPaperMarkdown);
+
+  // Map of example embeddings for different categories
+  const exampleEmbeddings = {
+    "Protein": "protein_embedding.npy",
+    "SmallMolecule": "small_molecule_embedding.npy",
+    "Drug": "small_molecule_embedding.npy",
+    "Compound": "small_molecule_embedding.npy"
+  };
+
+  const handleExampleDownload = () => {
+    if (vectorCategory && exampleEmbeddings[vectorCategory]) {
+      const fileUrl = `/${exampleEmbeddings[vectorCategory]}`;
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = exampleEmbeddings[vectorCategory];
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   return (
     <Paper 
@@ -217,32 +238,57 @@ function VectorUpload({
         </Typography>
       )}
 
-      <Button 
-        variant="outlined" 
-        component="label" 
-        fullWidth
-        startIcon={<UploadFileIcon />}
-        disabled={!vectorCategory || !embeddingType || vectorFile}
-        sx={{ 
-          mt: 1,
-          borderRadius: '12px',
-          height: '44px',
-          borderColor: theme => theme.palette.primary.main,
-          color: theme => theme.palette.primary.main,
-          '&:hover': {
-            backgroundColor: theme => alpha(theme.palette.primary.main, 0.04),
-          }
-        }}
-      >
-        Upload Vector File (.npy)
-        <input
-          type="file"
-          hidden
-          onChange={handleFileChange}
-          accept=".npy,.csv"
-        />
-      </Button>
-      
+      <Grid container spacing={2} sx={{ mt: 0.5 }}>
+        <Grid item xs={12} md={vectorCategory && exampleEmbeddings[vectorCategory] ? 6 : 12}>
+          <Button 
+            variant="outlined" 
+            component="label" 
+            fullWidth
+            startIcon={<UploadFileIcon />}
+            disabled={!vectorCategory || !embeddingType || vectorFile}
+            sx={{ 
+              borderRadius: '12px',
+              height: '44px',
+              borderColor: theme => theme.palette.primary.main,
+              color: theme => theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: theme => alpha(theme.palette.primary.main, 0.04),
+              }
+            }}
+          >
+            Upload Vector File (.npy)
+            <input
+              type="file"
+              hidden
+              onChange={handleFileChange}
+              accept=".npy,.csv"
+            />
+          </Button>
+        </Grid>
+        
+        {vectorCategory && exampleEmbeddings[vectorCategory] && (
+          <Grid item xs={12} md={6}>
+            <Button 
+              variant="outlined"
+              fullWidth
+              startIcon={<DownloadIcon />}
+              onClick={handleExampleDownload}
+              sx={{ 
+                borderRadius: '12px',
+                height: '44px',
+                borderColor: theme => theme.palette.secondary.main,
+                color: theme => theme.palette.secondary.main,
+                '&:hover': {
+                  backgroundColor: theme => alpha(theme.palette.secondary.main, 0.04),
+                }
+              }}
+            >
+              Download Example
+            </Button>
+          </Grid>
+        )}
+      </Grid>
+    
       {selectedFile && (
         <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
           Selected file: {selectedFile.name}
