@@ -864,7 +864,7 @@ function QueryInput({
               }}
               icon={<LightbulbOutlinedIcon />}
             >
-              Ask any biomedical question to query the CROssBAR knowledge graph. For example, "What are the drugs that target proteins associated with Alzheimer's disease?"
+              Ask any biomedical question to query the CROssBAR knowledge graph. For example, "Which drugs target proteins associated with Alzheimer disease?"
             </Alert>
           </Collapse>
 
@@ -878,7 +878,7 @@ function QueryInput({
                   handleGenerateAndRun();
                 }
               }}
-              placeholder="E.g., What are the drugs that target proteins associated with Alzheimer's disease?"
+              placeholder="E.g., Which drugs target proteins associated with Alzheimer disease?"
               fullWidth
               multiline
               rows={3}
