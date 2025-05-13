@@ -1251,32 +1251,65 @@ function NodeVisualization({ executionResult }) {
                                     </Box>
                                   )}
                                   
-                                  {/* Other entity types */}
-                                  {(type === 'drugs' || type === 'compounds') && entity.synonyms && entity.synonyms.length > 0 && (
+                                  {/* Drug details */}
+                                  {(type === 'drugs' || type === 'compounds') && (
                                     <Box sx={{ mt: 2 }}>
-                                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                                        Alternative names:
-                                      </Typography>
-                                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {entity.synonyms.slice(0, 5).map((name, i) => (
-                                          <Chip 
-                                            key={i} 
-                                            label={name} 
-                                            size="small" 
-                                            sx={{ 
-                                              height: '20px', 
-                                              fontSize: '0.7rem' 
-                                            }}
-                                          />
-                                        ))}
-                                        {entity.synonyms.length > 5 && (
-                                          <Chip 
-                                            label={`+${entity.synonyms.length - 5} more`}
-                                            size="small"
-                                            sx={{ height: '20px', fontSize: '0.7rem' }}
-                                          />
-                                        )}
-                                      </Box>
+                                      {/* SMILES */}
+                                      {entitySummaries[entity.id]?.data?.smiles && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>SMILES:</strong> {entitySummaries[entity.id].data.smiles}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Summary */}
+                                      {entitySummaries[entity.id]?.data?.summary && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Summary:</strong> {entitySummaries[entity.id].data.summary}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Groups */}
+                                      {entitySummaries[entity.id]?.data?.groups && entitySummaries[entity.id].data.groups.length > 0 && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Groups:</strong> {entitySummaries[entity.id].data.groups.join(', ')}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Chemical Formula */}
+                                      {entitySummaries[entity.id]?.data?.chemicalFormula && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Chemical Formula:</strong> {entitySummaries[entity.id].data.chemicalFormula}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Alternative names */}
+                                      {entity.synonyms && entity.synonyms.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Alternative names:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                            {entity.synonyms.slice(0, 5).map((name, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={name} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem' 
+                                                }}
+                                              />
+                                            ))}
+                                            {entity.synonyms.length > 5 && (
+                                              <Chip 
+                                                label={`+${entity.synonyms.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
                                     </Box>
                                   )}
                                   

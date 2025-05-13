@@ -307,39 +307,152 @@ export const fetchDrugData = async (drugId) => {
   
   // Extract the type and ID
   const [type, id] = drugId.includes(':') ? drugId.split(':') : ['unknown', drugId];
+  let dbType = type.toLowerCase();
   
-  // Different handling based on drug database
-  switch(type.toLowerCase()) {
-    case 'drugbank':
-      // DrugBank doesn't have a public API, so we're using placeholder data
-      return {
-        id: drugId,
-        name: `DrugBank ${id}`,
-        description: `Pharmaceutical compound with ID ${id} from DrugBank.`
-      };
-      
-    case 'chembl':
-      // For ChEMBL compounds
-      return {
-        id: drugId,
-        name: `ChEMBL Compound ${id}`,
-        description: `Chemical compound with ID ${id} from ChEMBL database.`
-      };
-      
-    case 'pubchem.compound':
-      // PubChem does have a REST API, but for simplicity we're using placeholder data
-      return {
-        id: drugId,
-        name: `PubChem Compound ${id}`,
-        description: `Chemical compound with ID ${id} from PubChem.`
-      };
-      
-    default:
-      return {
-        id: drugId,
-        name: `Drug/Compound ${id}`,
-        description: `Pharmaceutical compound or chemical with ID ${drugId}.`
-      };
+  try {
+    // Different handling based on drug database
+    switch(dbType) {
+      case 'drugbank':
+        // DrugBank requires authentication API key, using placeholder data
+        return {
+          id: drugId,
+          name: `DrugBank ${id}`,
+          description: `Pharmaceutical compound with ID ${id} from DrugBank.`,
+          smiles: "No SMILES available", 
+          summary: `A pharmaceutical compound from DrugBank with ID ${id}. This drug may be used for various therapeutic purposes.`,
+          groups: ["Small molecule", "Approved", "Investigational"],
+          chemicalFormula: "Not available" 
+        };
+        
+      case 'chembl':
+        // ChEMBL has a public REST API
+        const chemblResponse = await fetch(`https://www.ebi.ac.uk/chembl/api/data/molecule/${id}.json`);
+        
+        if (!chemblResponse.ok) {
+          throw new Error(`Failed to fetch ChEMBL data: ${chemblResponse.status}`);
+        }
+        
+        const chemblData = await chemblResponse.json();
+        
+        return {
+          id: drugId,
+          name: chemblData.pref_name || `ChEMBL Compound ${id}`,
+          description: chemblData.molecule_properties?.full_molformula ? 
+            `Chemical compound ${chemblData.pref_name || id} with formula ${chemblData.molecule_properties.full_molformula}` : 
+            `Chemical compound with ID ${id} from ChEMBL database.`,
+          smiles: chemblData.molecule_structures?.canonical_smiles || "Not available",
+          summary: chemblData.molecule_properties?.full_mwt ? 
+            `${chemblData.pref_name || 'Chemical compound'} with molecular weight of ${chemblData.molecule_properties.full_mwt} from ChEMBL database.` :
+            `A chemical compound from ChEMBL database with ID ${id}.`,
+          groups: [
+            chemblData.molecule_type || "Small molecule",
+            ...(chemblData.black_box_warning ? ["Black box warning"] : []),
+            ...(chemblData.chirality === 1 ? ["Chiral compound"] : []),
+            ...(chemblData.oral ? ["Oral administration"] : []),
+            ...(chemblData.parenteral ? ["Parenteral administration"] : []),
+            ...(chemblData.topical ? ["Topical administration"] : []),
+            ...(chemblData.first_approval ? [`Approved in ${chemblData.first_approval}`] : [])
+          ],
+          chemicalFormula: chemblData.molecule_properties?.full_molformula || "Not available"
+        };
+        
+      case 'pubchem.compound':
+        // PubChem has a public REST API
+        const pubchemResponse = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${id}/property/IUPACName,MolecularFormula,MolecularWeight,CanonicalSMILES/JSON`);
+        
+        if (!pubchemResponse.ok) {
+          throw new Error(`Failed to fetch PubChem data: ${pubchemResponse.status}`);
+        }
+        
+        const pubchemData = await pubchemResponse.json();
+        const compound = pubchemData.PropertyTable.Properties[0];
+        
+        // Get additional information for the summary
+        const pubchemClassificationResponse = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${id}/classification/JSON`);
+        let classification = [];
+        
+        if (pubchemClassificationResponse.ok) {
+          const classData = await pubchemClassificationResponse.json();
+          if (classData.Hierarchies && classData.Hierarchies.length > 0) {
+            classification = classData.Hierarchies.map(h => 
+              h.Node?.Information?.Name || h.Node?.Information?.Description
+            ).filter(Boolean);
+          }
+        }
+        
+        return {
+          id: drugId,
+          name: compound.IUPACName || `PubChem Compound ${id}`,
+          description: `Chemical compound with ID ${id} from PubChem with formula ${compound.MolecularFormula || 'unknown'}.`,
+          smiles: compound.CanonicalSMILES || "Not available",
+          summary: `${compound.IUPACName || 'Chemical compound'} with molecular weight of ${compound.MolecularWeight || 'unknown'} from PubChem.`,
+          groups: classification.length > 0 ? classification : ["Chemical compound"],
+          chemicalFormula: compound.MolecularFormula || "Not available"
+        };
+        
+      case 'chebi':
+        // ChEBI has a public REST API with JSON endpoint
+        const chebiId = id.replace('CHEBI:', ''); // Remove CHEBI: prefix if present
+        const chebiResponse = await fetch(`https://www.ebi.ac.uk/chebi/webServices/rest/getCompleteEntity?chebiId=${chebiId}&format=json`);
+        
+        if (!chebiResponse.ok) {
+          throw new Error(`Failed to fetch ChEBI data: ${chebiResponse.status}`);
+        }
+        
+        const chebiData = await chebiResponse.json();
+        
+        // Extract relevant fields from the JSON response
+        const chebiEntity = chebiData?.chebiEntity || {};
+        const chebiName = chebiEntity?.chebiAsciiName;
+        const chebiFormula = chebiEntity?.molecularFormula;
+        const chebiSmiles = chebiEntity?.smiles;
+        const chebiDefinition = chebiEntity?.definition;
+        
+        // Extract ChEBI classes from ontology parents
+        const chebiClasses = [];
+        if (chebiEntity?.ontologyParents?.length > 0) {
+          chebiEntity.ontologyParents.forEach(parent => {
+            if (parent?.chebiName) {
+              chebiClasses.push(parent.chebiName);
+            }
+          });
+        }
+        
+        return {
+          id: drugId,
+          name: chebiName || `ChEBI ${id}`,
+          description: chebiDefinition || `Chemical compound with ID ${id} from ChEBI.`,
+          smiles: chebiSmiles || "Not available",
+          summary: chebiDefinition || `A chemical compound from Chemical Entities of Biological Interest (ChEBI) with ID ${id}.`,
+          groups: chebiClasses.length > 0 ? chebiClasses.slice(0, 5) : ["ChEBI compound"],
+          chemicalFormula: chebiFormula || "Not available"
+        };
+        
+        
+      default:
+        return {
+          id: drugId,
+          name: `Drug/Compound ${id}`,
+          description: `Pharmaceutical compound or chemical with ID ${drugId}.`,
+          smiles: "Not available",
+          summary: `A pharmaceutical compound or chemical substance with identifier ${drugId}.`,
+          groups: ["Unknown"],
+          chemicalFormula: "Unknown"
+        };
+    }
+  } catch (error) {
+    console.error(`Error fetching drug data for ${drugId}:`, error);
+    // Return a fallback object with error information
+    return {
+      id: drugId,
+      name: `${dbType.toUpperCase()} ${id}`,
+      description: `Error retrieving information: ${error.message}`,
+      smiles: "Not available",
+      summary: `Unable to fetch data for this compound from ${dbType}.`,
+      groups: ["Error"],
+      chemicalFormula: "Not available",
+      error: true
+    };
   }
 };
 
