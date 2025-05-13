@@ -143,7 +143,7 @@ export const fetchPathwayData = async (keggId) => {
   return {
     id: pathwayId,
     name: `KEGG Pathway ${pathwayId}`,
-    description: `This is a placeholder for pathway ${pathwayId}. In a production environment, you would use KEGG API or tools like BioPython to fetch real pathway data.`,
+    description: `${pathwayId}`,
     url: `https://www.genome.jp/kegg-bin/show_pathway?${pathwayId}`
   };
 };
