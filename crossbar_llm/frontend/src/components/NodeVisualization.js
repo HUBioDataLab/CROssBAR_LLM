@@ -113,7 +113,7 @@ function NodeVisualization({ executionResult }) {
               ...prev,
               [id]: { 
                 loading: false, 
-                text: summaryData.description || summaryData.summary,
+                text: summaryData.description || '',
                 data: summaryData
               }
             }));
@@ -1028,8 +1028,8 @@ function NodeVisualization({ executionResult }) {
                                             flexDirection: 'row',
                                             flexWrap: 'wrap'
                                           }}>
-                                            {/* Gene-specific metadata */}
-                                            {entitySummaries[entity.id].data.symbol && (
+                                            {/* Gene-specific metadata - We've moved this to detail section */}
+                                            {entitySummaries[entity.id].data.symbol && type !== 'genes' && (
                                               <Chip 
                                                 label={`Symbol: ${entitySummaries[entity.id].data.symbol}`}
                                                 size="small"
@@ -1076,6 +1076,20 @@ function NodeVisualization({ executionResult }) {
                                   {/* Gene details */}
                                   {type === 'genes' && (
                                     <Box sx={{ mt: 2 }}>
+                                      {/* Official Symbol */}
+                                      {entitySummaries[entity.id]?.data?.symbol && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Official Symbol:</strong> {entitySummaries[entity.id].data.symbol}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Summary */}
+                                      {entitySummaries[entity.id]?.data?.summary && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Summary:</strong> {entitySummaries[entity.id].data.summary}
+                                        </Typography>
+                                      )}
+                                      
                                       {entity.all_names && entity.all_names.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
