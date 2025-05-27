@@ -292,7 +292,7 @@ function VectorUpload({
                 }
               }}
             >
-              Download Example
+              Download Vector File
             </Button>
           </Grid>
         )}
