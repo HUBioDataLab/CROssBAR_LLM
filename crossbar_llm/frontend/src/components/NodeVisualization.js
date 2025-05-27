@@ -19,7 +19,8 @@ import {
   Grid,
   Card,
   CardContent,
-  Badge
+  Badge,
+  Button
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -1010,19 +1011,27 @@ function NodeVisualization({ executionResult }) {
                         />
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           {entity.id && (
-                            <Tooltip title="View in external database">
-                              <IconButton 
-                                size="small" 
-                                component={Link}
-                                href={generateExternalLink(entity.id)}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                sx={{ mr: 1, fontSize: '0.9rem' }}
-                              >
-                                <OpenInNewIcon fontSize="inherit" />
-                              </IconButton>
-                            </Tooltip>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              component={Link}
+                              href={generateExternalLink(entity.id)}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              startIcon={<OpenInNewIcon />}
+                              sx={{ 
+                                mr: 1, 
+                                fontSize: '0.75rem',
+                                textTransform: 'none',
+                                borderRadius: '8px',
+                                minWidth: 'auto',
+                                px: 1.5,
+                                py: 0.5
+                              }}
+                            >
+                              View in External Database
+                            </Button>
                           )}
                           <IconButton 
                             size="small"
