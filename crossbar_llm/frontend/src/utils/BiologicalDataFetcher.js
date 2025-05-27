@@ -793,3 +793,98 @@ export const fetchOrganismData = async (taxonId) => {
     return null;
   }
 };
+
+/**
+ * Fetch side effect information from BioPortal MedDRA ontology
+ * @param {string} sideEffectId - The side effect ID (e.g., "meddra:10063296")
+ */
+export const fetchSideEffectData = async (sideEffectId) => {
+  if (!sideEffectId) return null;
+  
+  // Extract the numeric ID from formats like "meddra:10063296"
+  const numericId = sideEffectId.includes(':') ? sideEffectId.split(':')[1] : sideEffectId;
+  
+  try {
+    // BioPortal API endpoint for MedDRA terms
+    // The URL needs to be encoded for the API call
+    const medDRAUrl = `http://purl.bioontology.org/ontology/MEDDRA/${numericId}`;
+    const encodedUrl = encodeURIComponent(medDRAUrl);
+    
+    // BioPortal REST API call
+    const response = await fetch(`https://data.bioontology.org/ontologies/MEDDRA/classes/${encodedUrl}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch MedDRA data: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data) {
+      // Extract relevant information from BioPortal response
+      const prefLabel = data.prefLabel || `MedDRA Term ${numericId}`;
+      const definition = data.definition && data.definition.length > 0 ? data.definition[0] : null;
+      const synonyms = data.synonym || [];
+      
+      // Extract additional properties if available
+      const properties = data.properties || {};
+      const notation = properties['http://www.w3.org/2004/02/skos/core#notation'] || [];
+      const broader = data.parents || [];
+      const narrower = data.children || [];
+      
+      // Get hierarchy information
+      const hierarchyInfo = [];
+      if (broader && broader.length > 0) {
+        hierarchyInfo.push(`Parent terms: ${broader.length}`);
+      }
+      if (narrower && narrower.length > 0) {
+        hierarchyInfo.push(`Child terms: ${narrower.length}`);
+      }
+      
+      // Create a comprehensive description
+      let description = definition || 
+        `${prefLabel} is a standardized medical terminology for regulatory activities from the Medical Dictionary for Regulatory Activities (MedDRA).`;
+      
+      if (hierarchyInfo.length > 0) {
+        description += ` This term has ${hierarchyInfo.join(' and ')}.`;
+      }
+      
+      return {
+        id: sideEffectId,
+        name: prefLabel,
+        description: description,
+        definition: definition,
+        synonyms: synonyms.slice(0, 10), // Limit synonyms for display
+        notation: notation.length > 0 ? notation[0] : numericId,
+        hierarchy: {
+          parents: broader.slice(0, 5), // Limit for performance
+          children: narrower.slice(0, 5)
+        },
+        database: 'MedDRA',
+        displayName: prefLabel,
+        url: `https://bioportal.bioontology.org/ontologies/MEDDRA?p=classes&conceptid=${encodeURIComponent(medDRAUrl)}`
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching MedDRA data for ${sideEffectId}:`, error);
+    
+    // Return fallback data with error indication
+    return {
+      id: sideEffectId,
+      name: `MedDRA Term ${numericId}`,
+      description: `Side effect or adverse reaction with MedDRA ID ${numericId}. This is a standardized medical terminology from the Medical Dictionary for Regulatory Activities used for regulatory reporting of medical products.`,
+      definition: 'Unable to fetch detailed definition from BioPortal.',
+      synonyms: [],
+      database: 'MedDRA',
+      error: true,
+      displayName: `MedDRA ${numericId}`,
+      url: `https://bioportal.bioontology.org/ontologies/MEDDRA?p=classes&conceptid=${encodeURIComponent(`http://purl.bioontology.org/ontology/MEDDRA/${numericId}`)}`
+    };
+  }
+};

@@ -45,7 +45,8 @@ import {
   fetchDomainData,
   fetchGOTermData,
   fetchPhenotypeData,
-  fetchOrganismData
+  fetchOrganismData,
+  fetchSideEffectData
 } from '../utils/BiologicalDataFetcher';
 
 // Import helpers
@@ -242,16 +243,17 @@ function NodeVisualization({ executionResult }) {
           
         case 'meddra':
           // MedDRA side effects
-          setTimeout(() => {
+          summaryData = await fetchSideEffectData(id);
+          if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
               [id]: { 
                 loading: false, 
-                text: `Side effect or adverse reaction with ID ${id.split(':')[1]} from the Medical Dictionary for Regulatory Activities.`,
-                data: { id }
+                text: summaryData.description,
+                data: summaryData
               }
             }));
-          }, 500);
+          }
           break;
           
         case 'eccode':
@@ -1670,6 +1672,149 @@ function NodeVisualization({ executionResult }) {
                                           >
                                             <OpenInNewIcon fontSize="inherit" sx={{ mr: 0.5 }} />
                                             View in AmiGO
+                                          </Link>
+                                        </Box>
+                                      )}
+                                    </Box>
+                                  )}
+                                  
+                                  {/* Side Effect (MedDRA) details */}
+                                  {type === 'sideeffects' && (
+                                    <Box sx={{ mt: 2 }}>
+                                      {/* MedDRA notation */}
+                                      {entitySummaries[entity.id]?.data?.notation && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>MedDRA Code:</strong> {entitySummaries[entity.id].data.notation}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Definition (separate from description) */}
+                                      {entitySummaries[entity.id]?.data?.definition && 
+                                       entitySummaries[entity.id].data.definition !== 'Unable to fetch detailed definition from BioPortal.' && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Definition:</strong> {entitySummaries[entity.id].data.definition}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Database source */}
+                                      {entitySummaries[entity.id]?.data?.database && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Source:</strong> {entitySummaries[entity.id].data.database} (Medical Dictionary for Regulatory Activities)
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* MedDRA synonyms */}
+                                      {entitySummaries[entity.id]?.data?.synonyms && 
+                                       entitySummaries[entity.id].data.synonyms.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Alternative terms:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.synonyms.slice(0, 5).map((synonym, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={synonym} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.warning.main, 0.1),
+                                                  color: 'warning.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entitySummaries[entity.id].data.synonyms.length > 5 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.synonyms.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Hierarchy information */}
+                                      {entitySummaries[entity.id]?.data?.hierarchy && (
+                                        <>
+                                          {/* Parent terms */}
+                                          {entitySummaries[entity.id].data.hierarchy.parents && 
+                                           entitySummaries[entity.id].data.hierarchy.parents.length > 0 && (
+                                            <>
+                                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                                Parent terms ({entitySummaries[entity.id].data.hierarchy.parents.length}):
+                                              </Typography>
+                                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                                                {entitySummaries[entity.id].data.hierarchy.parents.slice(0, 3).map((parent, i) => (
+                                                  <Chip 
+                                                    key={i} 
+                                                    label={parent.prefLabel || parent}
+                                                    size="small" 
+                                                    sx={{ 
+                                                      height: '20px', 
+                                                      fontSize: '0.7rem',
+                                                      backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
+                                                      color: 'primary.main'
+                                                    }}
+                                                  />
+                                                ))}
+                                                {entitySummaries[entity.id].data.hierarchy.parents.length > 3 && (
+                                                  <Chip 
+                                                    label={`+${entitySummaries[entity.id].data.hierarchy.parents.length - 3} more`}
+                                                    size="small"
+                                                    sx={{ height: '20px', fontSize: '0.7rem' }}
+                                                  />
+                                                )}
+                                              </Box>
+                                            </>
+                                          )}
+                                          
+                                          {/* Child terms */}
+                                          {entitySummaries[entity.id].data.hierarchy.children && 
+                                           entitySummaries[entity.id].data.hierarchy.children.length > 0 && (
+                                            <>
+                                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                                Child terms ({entitySummaries[entity.id].data.hierarchy.children.length}):
+                                              </Typography>
+                                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                                {entitySummaries[entity.id].data.hierarchy.children.slice(0, 3).map((child, i) => (
+                                                  <Chip 
+                                                    key={i} 
+                                                    label={child.prefLabel || child}
+                                                    size="small" 
+                                                    sx={{ 
+                                                      height: '20px', 
+                                                      fontSize: '0.7rem',
+                                                      backgroundColor: theme => alpha(theme.palette.secondary.main, 0.1),
+                                                      color: 'secondary.main'
+                                                    }}
+                                                  />
+                                                ))}
+                                                {entitySummaries[entity.id].data.hierarchy.children.length > 3 && (
+                                                  <Chip 
+                                                    label={`+${entitySummaries[entity.id].data.hierarchy.children.length - 3} more`}
+                                                    size="small"
+                                                    sx={{ height: '20px', fontSize: '0.7rem' }}
+                                                  />
+                                                )}
+                                              </Box>
+                                            </>
+                                          )}
+                                        </>
+                                      )}
+                                      
+                                      {/* Link to BioPortal */}
+                                      {entitySummaries[entity.id]?.data?.url && (
+                                        <Box sx={{ mt: 1 }}>
+                                          <Link 
+                                            href={entitySummaries[entity.id].data.url}
+                                            target="_blank"
+                                            rel="noopener"
+                                            sx={{ display: 'flex', alignItems: 'center', fontSize: '0.8rem' }}
+                                          >
+                                            <OpenInNewIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+                                            View in BioPortal
                                           </Link>
                                         </Box>
                                       )}

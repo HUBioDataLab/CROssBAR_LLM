@@ -67,7 +67,8 @@ export const generateExternalLink = (id) => {
     case 'icd9':
       return `https://icd9.chrisendres.com/index.php?action=child&recordid=${identifier}`;
     case 'meddra':
-      return `https://identifiers.org/meddra:${identifier}`;
+      const medDRAUrl = `http://purl.bioontology.org/ontology/MEDDRA/${identifier}`;
+      return `https://bioportal.bioontology.org/ontologies/MEDDRA?p=classes&conceptid=${encodeURIComponent(medDRAUrl)}`;
     default:
       // Try to guess based on ID format
       if (identifier && identifier.match(/^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$/)) {
