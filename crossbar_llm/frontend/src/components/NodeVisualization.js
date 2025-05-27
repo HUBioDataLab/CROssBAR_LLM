@@ -1395,6 +1395,156 @@ function NodeVisualization({ executionResult }) {
                                     </Box>
                                   )}
                                   
+                                  {/* Domain details */}
+                                  {type === 'domains' && (
+                                    <Box sx={{ mt: 2 }}>
+                                      {/* Entry Type */}
+                                      {entitySummaries[entity.id]?.data?.entryType && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Entry Type:</strong> {entitySummaries[entity.id].data.entryTypeName || entitySummaries[entity.id].data.entryType}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Entry Type Description */}
+                                      {entitySummaries[entity.id]?.data?.entryTypeDescription && (
+                                        <Typography variant="body2" sx={{ mb: 1, fontStyle: 'italic', color: 'text.secondary' }}>
+                                          {entitySummaries[entity.id].data.entryTypeDescription}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Database source */}
+                                      {entitySummaries[entity.id]?.data?.database && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Database:</strong> {entitySummaries[entity.id].data.database}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Pfam clan information */}
+                                      {entitySummaries[entity.id]?.data?.clan && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Clan:</strong> {entitySummaries[entity.id].data.clan}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Source databases */}
+                                      {entitySummaries[entity.id]?.data?.sourceDatabases && 
+                                       entitySummaries[entity.id].data.sourceDatabases.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Source databases:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.sourceDatabases.slice(0, 5).map((source, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={source} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
+                                                  color: 'primary.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entitySummaries[entity.id].data.sourceDatabases.length > 5 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.sourceDatabases.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Cross-references */}
+                                      {entitySummaries[entity.id]?.data?.crossReferences && 
+                                       entitySummaries[entity.id].data.crossReferences.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Cross-references:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.crossReferences.slice(0, 5).map((xref, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={xref} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.secondary.main, 0.1),
+                                                  color: 'secondary.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entitySummaries[entity.id].data.crossReferences.length > 5 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.crossReferences.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Associated GO terms */}
+                                      {entitySummaries[entity.id]?.data?.goTerms && 
+                                       entitySummaries[entity.id].data.goTerms.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Associated GO terms:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.goTerms.slice(0, 3).map((goTerm, i) => (
+                                              <Tooltip 
+                                                key={i} 
+                                                title={`${goTerm.name} (${goTerm.category})`}
+                                                arrow
+                                              >
+                                                <Chip 
+                                                  label={goTerm.id} 
+                                                  size="small" 
+                                                  sx={{ 
+                                                    height: '20px', 
+                                                    fontSize: '0.7rem',
+                                                    backgroundColor: theme => alpha(theme.palette.success.main, 0.1),
+                                                    color: 'success.main',
+                                                    cursor: 'help'
+                                                  }}
+                                                />
+                                              </Tooltip>
+                                            ))}
+                                            {entitySummaries[entity.id].data.goTerms.length > 3 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.goTerms.length - 3} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Link to source database */}
+                                      {entitySummaries[entity.id]?.data?.url && (
+                                        <Box sx={{ mt: 1 }}>
+                                          <Link 
+                                            href={entitySummaries[entity.id].data.url}
+                                            target="_blank"
+                                            rel="noopener"
+                                            sx={{ display: 'flex', alignItems: 'center', fontSize: '0.8rem' }}
+                                          >
+                                            <OpenInNewIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+                                            View in {entitySummaries[entity.id].data.database || 'Database'}
+                                          </Link>
+                                        </Box>
+                                      )}
+                                    </Box>
+                                  )}
+                                  
                                   {/* GO Term details */}
                                   {type === 'goterms' && (
                                     <Box sx={{ mt: 2 }}>

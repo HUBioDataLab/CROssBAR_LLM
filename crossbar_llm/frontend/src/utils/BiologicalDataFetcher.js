@@ -273,37 +273,169 @@ export const generateEntityUrl = (id) => {
 };
 
 /**
- * Fetch protein domain information from InterPro
- * @param {string} domainId - The InterPro ID
+ * Fetch protein domain information from InterPro and Pfam
+ * Enhanced to include entry type information like "Domain", "Family", "Homologous_superfamily", etc.
+ * Also fetches source databases, cross-references, and associated GO terms
+ * @param {string} domainId - The domain ID (e.g., "interpro:IPR000001", "pfam:PF00001")
  */
 export const fetchDomainData = async (domainId) => {
   if (!domainId) return null;
   
-  // Extract just the ID part
-  const id = domainId.includes(':') ? domainId.split(':')[1] : domainId;
+  // Extract the database type and ID
+  const [dbType, id] = domainId.includes(':') ? domainId.split(':') : ['interpro', domainId];
+  const dbTypeLower = dbType.toLowerCase();
   
   try {
-    // InterPro provides a REST API
-    const response = await fetch(`https://www.ebi.ac.uk/interpro/api/entry/interpro/${id}?format=json`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch domain data: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (data) {
-      return {
-        name: data.metadata?.name || 'Unknown',
-        type: data.metadata?.type || 'Unknown type',
-        description: data.metadata?.description?.[0]?.text || 'No description available'
-      };
+    // Handle different domain databases
+    switch(dbTypeLower) {
+      case 'interpro':
+        // InterPro provides a comprehensive REST API
+        const interproResponse = await fetch(`https://www.ebi.ac.uk/interpro/api/entry/interpro/${id}?format=json`);
+        
+        if (!interproResponse.ok) {
+          throw new Error(`Failed to fetch InterPro data: ${interproResponse.status}`);
+        }
+        
+        const interproData = await interproResponse.json();
+        
+        if (interproData) {
+          // Extract entry type and its description
+          const entryType = interproData.metadata?.type || 'Unknown type';
+          const entryTypeName = interproData.metadata?.type?.name || entryType;
+          
+          // Map InterPro entry types to more readable descriptions
+          const entryTypeDescriptions = {
+            'Domain': 'Protein domain - a distinct functional and/or structural unit in a protein',
+            'Family': 'Protein family - a group of proteins that share common ancestry',
+            'Homologous_superfamily': 'Homologous superfamily - proteins with common structural and evolutionary origin',
+            'Repeat': 'Protein repeat - a short amino acid sequence that occurs multiple times',
+            'Site': 'Active site - region of an enzyme where substrate molecules bind and undergo a chemical reaction',
+            'Conserved_site': 'Conserved site - amino acid positions that are conserved across related proteins',
+            'Binding_site': 'Binding site - region that binds to specific molecules',
+            'PTM': 'Post-translational modification site - amino acid residues that undergo chemical modifications'
+          };
+          
+          const entryTypeDescription = entryTypeDescriptions[entryType] || `${entryType} entry type`;
+          
+          // Extract source databases and cross-references
+          const sourceDatabases = [];
+          const crossReferences = [];
+          
+          if (interproData.metadata?.source_database) {
+            sourceDatabases.push(interproData.metadata.source_database);
+          }
+          
+          // Get member database entries (Pfam, PRINTS, etc.)
+          if (interproData.metadata?.member_databases) {
+            Object.entries(interproData.metadata.member_databases).forEach(([db, entries]) => {
+              if (Array.isArray(entries)) {
+                entries.forEach(entry => {
+                  sourceDatabases.push(`${db}: ${entry}`);
+                  crossReferences.push(`${db}:${entry}`);
+                });
+              }
+            });
+          }
+          
+          // Extract GO terms if available
+          const goTerms = [];
+          if (interproData.metadata?.go_terms && Array.isArray(interproData.metadata.go_terms)) {
+            interproData.metadata.go_terms.forEach(go => {
+              if (go.identifier && go.name) {
+                goTerms.push({
+                  id: go.identifier,
+                  name: go.name,
+                  category: go.category || 'Unknown'
+                });
+              }
+            });
+          }
+          
+          return {
+            id: domainId,
+            name: interproData.metadata?.name || 'Unknown',
+            entryType: entryType,
+            entryTypeName: entryTypeName,
+            entryTypeDescription: entryTypeDescription,
+            description: interproData.metadata?.description?.[0]?.text || 'No description available',
+            sourceDatabases: sourceDatabases,
+            crossReferences: crossReferences,
+            goTerms: goTerms,
+            database: 'InterPro',
+            displayName: interproData.metadata?.name || `InterPro ${id}`,
+            url: `https://www.ebi.ac.uk/interpro/entry/InterPro/${id}/`
+          };
+        }
+        break;
+        
+      case 'pfam':
+        // For Pfam entries, we can also use InterPro API since Pfam is integrated
+        const pfamResponse = await fetch(`https://www.ebi.ac.uk/interpro/api/entry/pfam/${id}?format=json`);
+        
+        if (!pfamResponse.ok) {
+          throw new Error(`Failed to fetch Pfam data: ${pfamResponse.status}`);
+        }
+        
+        const pfamData = await pfamResponse.json();
+        
+        if (pfamData) {
+          // Pfam entries are typically protein families
+          const entryType = pfamData.metadata?.type || 'Family';
+          const entryTypeName = 'Protein Family';
+          const entryTypeDescription = 'Protein family - a group of proteins that share sequence homology and often similar function';
+          
+          // Extract clan information if available (Pfam clans are superfamilies)
+          const clanInfo = pfamData.metadata?.clan || null;
+          
+          return {
+            id: domainId,
+            name: pfamData.metadata?.name || 'Unknown',
+            entryType: entryType,
+            entryTypeName: entryTypeName,
+            entryTypeDescription: entryTypeDescription,
+            description: pfamData.metadata?.description?.[0]?.text || 'No description available',
+            clan: clanInfo,
+            database: 'Pfam',
+            displayName: pfamData.metadata?.name || `Pfam ${id}`,
+            url: `https://pfam.xfam.org/family/${id}`
+          };
+        }
+        break;
+        
+      default:
+        // Generic domain entry
+        return {
+          id: domainId,
+          name: `Domain ${id}`,
+          entryType: 'Unknown',
+          entryTypeName: 'Unknown type',
+          entryTypeDescription: 'Protein domain or functional region',
+          description: `Protein domain with ID ${domainId}`,
+          database: dbType.toUpperCase(),
+          displayName: `Domain ${id}`,
+          url: generateEntityUrl(domainId) || '#'
+        };
     }
     
     return null;
   } catch (error) {
-    console.error('Error fetching protein domain data:', error);
-    return null;
+    console.error(`Error fetching domain data for ${domainId}:`, error);
+    
+    // Return fallback data with error indication
+    const cleanId = domainId.includes(':') ? domainId.split(':')[1] : domainId;
+    
+    return {
+      id: domainId,
+      name: `Domain ${cleanId}`,
+      entryType: 'Unknown',
+      entryTypeName: 'Unknown type',
+      entryTypeDescription: 'Unable to fetch entry type information',
+      description: `Error retrieving domain information: ${error.message}`,
+      database: dbType.toUpperCase(),
+      error: true,
+      displayName: `Domain ${cleanId}`,
+      url: generateEntityUrl(domainId) || '#'
+    };
   }
 };
 
