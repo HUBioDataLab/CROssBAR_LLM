@@ -58,7 +58,7 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
       question: "What proteins does the drug named Caffeine target?"
     },
     {
-      question: "What are the drugs that target proteins associated with Alzheimer disease?"
+      question: "Which drugs target proteins associated with Alzheimer disease?"
     },
     {
       question: "Which pathways are associated with both diabetes mellitus and T-cell non-Hodgkin lymphoma? Return only signaling pathways."
