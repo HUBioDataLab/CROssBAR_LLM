@@ -440,6 +440,7 @@ class GenerateQueryRequest(BaseModel):
     verbose: bool = False
     vector_index: Optional[str] = None
     embedding: Optional[str] = None
+    vector_category: Optional[str] = None
 
 class RunQueryRequest(BaseModel):
     query: str
@@ -544,6 +545,25 @@ async def generate_query(
                 api_key=api_key,
                 vector_index=vector_index,
                 embedding=embedding,
+                reset_llm_type=True
+            )
+            
+        elif generate_query_request.vector_index and generate_query_request.vector_category:
+            Logger.info("Processing category-based vector search without specific embedding")
+            Logger.debug(f"Vector index: {generate_query_request.vector_index}")
+            Logger.debug(f"Vector category: {generate_query_request.vector_category}")
+            
+            vector_index = f"{generate_query_request.vector_index}Embeddings"
+            rp.search_type = "vector_search"
+            rp.top_k = generate_query_request.top_k
+            
+            Logger.info("Generating query with category-based vector search")
+            query = rp.run_for_query(
+                question=generate_query_request.question,
+                model_name=generate_query_request.llm_type,
+                api_key=api_key,
+                vector_index=vector_index,
+                embedding=None,  # No specific embedding, use category-based search
                 reset_llm_type=True
             )
             

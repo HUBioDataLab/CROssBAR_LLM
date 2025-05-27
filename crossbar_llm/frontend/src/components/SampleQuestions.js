@@ -70,6 +70,11 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
 
   const vectorExamples = [
     {
+      question: "Give me distinct Biological Processes that are similar to 'cell growth' Biological Process and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
+      vectorCategory: "BiologicalProcess",
+      embeddingType: "Anc2vec"
+    },
+    {
       question: "Give me the names of top 10 Proteins that are targeted by Small Molecules similar to the given embedding.",
       vectorCategory: "SmallMolecule",
       embeddingType: "Selformer",

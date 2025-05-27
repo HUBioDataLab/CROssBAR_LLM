@@ -19,6 +19,7 @@ import {
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DownloadIcon from '@mui/icons-material/Download';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import axios from '../services/api';
 
 // Helper function to extract text and URL from markdown [text](url)
@@ -160,7 +161,7 @@ function VectorUpload({
       {showInfo && (
         <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
           Vector search enhances query results by finding semantically similar entities in the knowledge graph.
-          Select a category and embedding type, then upload your vector file.
+          Select a category and embedding type to use existing embeddings, or upload your own vector file for custom searches.
         </Typography>
       )}
       
@@ -238,6 +239,14 @@ function VectorUpload({
         </Typography>
       )}
 
+      {/* Show ready status when category and embedding type are selected */}
+      {vectorCategory && embeddingType && !vectorFile && !selectedFile && (
+        <Typography variant="body2" sx={{ mt: 2, color: 'success.main', display: 'flex', alignItems: 'center' }}>
+          <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} />
+          Ready for vector search with {vectorCategory} ({embeddingType}) embeddings
+        </Typography>
+      )}
+
       <Grid container spacing={2} sx={{ mt: 0.5 }}>
         <Grid item xs={12} md={vectorCategory && exampleEmbeddings[vectorCategory] ? 6 : 12}>
           <Button 
@@ -245,7 +254,7 @@ function VectorUpload({
             component="label" 
             fullWidth
             startIcon={<UploadFileIcon />}
-            disabled={!vectorCategory || !embeddingType || vectorFile}
+            disabled={!vectorCategory || !embeddingType}
             sx={{ 
               borderRadius: '12px',
               height: '44px',
@@ -256,7 +265,7 @@ function VectorUpload({
               }
             }}
           >
-            Upload Vector File (.npy)
+            Upload Custom Vector File (.npy) - Optional
             <input
               type="file"
               hidden
