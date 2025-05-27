@@ -128,24 +128,70 @@ export const fetchProteinData = async (uniprotId) => {
 };
 
 /**
- * Fetch pathway information from KEGG
- * @param {string} keggId - The KEGG pathway ID
+ * Fetch pathway information from KEGG or Reactome
+ * @param {string} pathwayId - The pathway ID (e.g., "kegg.pathway:hsa04010", "reactome:R-HSA-123")
  */
-export const fetchPathwayData = async (keggId) => {
-  if (!keggId) return null;
+export const fetchPathwayData = async (pathwayId) => {
+  if (!pathwayId) return null;
   
-  // KEGG pathways are often in format "kegg.pathway:hsa04010"
-  // Extract just the ID part
-  const pathwayId = keggId.includes(':') ? keggId.split(':')[1] : keggId;
+  // Extract the database type and ID
+  const [dbType, id] = pathwayId.includes(':') ? pathwayId.split(':') : ['kegg', pathwayId];
+  const dbTypeLower = dbType.toLowerCase();
   
-  // Note: KEGG doesn't have a public REST API, we would typically use a service like BioPython
-  // or a dedicated KEGG API wrapper. For simplicity, we're returning placeholder data.
-  return {
-    id: pathwayId,
-    name: `KEGG Pathway ${pathwayId}`,
-    description: `${pathwayId}`,
-    url: `https://www.genome.jp/kegg-bin/show_pathway?${pathwayId}`
-  };
+  try {
+    // Handle different pathway databases
+    switch(dbTypeLower) {
+      case 'kegg.pathway':
+      case 'kegg':
+        // KEGG pathways are often in format "kegg.pathway:hsa04010"
+        return {
+          id: pathwayId,
+          name: `KEGG Pathway ${id}`,
+          description: `Biological pathway from KEGG database with ID ${id}. KEGG pathways represent molecular interaction, reaction and relation networks for metabolism, genetic information processing, environmental information processing and cellular processes.`,
+          url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
+          database: 'KEGG'
+        };
+        
+      case 'reactome':
+        // Reactome pathways
+        return {
+          id: pathwayId,
+          name: `Reactome Pathway ${id}`,
+          description: `Biological pathway from Reactome database with ID ${id}. Reactome is a free, open-source, curated and peer-reviewed pathway database providing intuitive bioinformatics tools for the visualization, interpretation and analysis of pathway knowledge.`,
+          url: `https://reactome.org/content/detail/${id}`,
+          database: 'Reactome'
+        };
+        
+      case 'wikipathways':
+        // WikiPathways
+        return {
+          id: pathwayId,
+          name: `WikiPathways ${id}`,
+          description: `Biological pathway from WikiPathways database with ID ${id}. WikiPathways is an open, collaborative platform dedicated to the curation of biological pathways.`,
+          url: `https://www.wikipathways.org/pathways/${id}`,
+          database: 'WikiPathways'
+        };
+        
+      default:
+        // Generic pathway
+        return {
+          id: pathwayId,
+          name: `Pathway ${id}`,
+          description: `Biological pathway with ID ${pathwayId}. Pathways represent series of interactions between molecules in a cell that leads to a certain product or a change in the cell.`,
+          url: generateEntityUrl(pathwayId) || '#',
+          database: dbType.toUpperCase()
+        };
+    }
+  } catch (error) {
+    console.error(`Error fetching pathway data for ${pathwayId}:`, error);
+    return {
+      id: pathwayId,
+      name: `Pathway ${id}`,
+      description: `Error retrieving pathway information: ${error.message}`,
+      database: dbType.toUpperCase(),
+      error: true
+    };
+  }
 };
 
 /**

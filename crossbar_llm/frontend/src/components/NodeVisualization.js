@@ -347,6 +347,7 @@ function NodeVisualization({ executionResult }) {
             return 'diseases';
           case 'kegg.pathway':
           case 'reactome':
+          case 'kegg':
             return 'pathways';
           case 'interpro':
           case 'pfam':
@@ -363,9 +364,12 @@ function NodeVisualization({ executionResult }) {
             return 'ecnumbers';
           default:
             // Try to infer type from keys or patterns
-            if (id.includes('pathway')) return 'pathways';
+            if (id.includes('pathway') || id.includes('path:')) return 'pathways';
             if (id.includes('gene')) return 'genes';
             if (id.includes('protein')) return 'proteins';
+            if (id.includes('phenotype') || id.includes('HP:')) return 'phenotypes';
+            if (id.includes('GO:')) return 'goterms';
+            if (id.includes('disease') || id.includes('disorder')) return 'diseases';
             return null;
         }
       };
@@ -374,12 +378,12 @@ function NodeVisualization({ executionResult }) {
       const addEntityToCollection = (entity, entityTypeHint = null) => {
         if (!entity || !entity.id) return;
         
-        // Determine the entity type
-        let entityType = entityTypeHint;
+        // Determine the entity type - FIRST check the ID to get the correct type
+        let entityType = getEntityTypeFromId(entity.id);
         
-        // If no type hint provided, try to determine from ID
-        if (!entityType) {
-          entityType = getEntityTypeFromId(entity.id);
+        // Only use the hint if we couldn't determine from ID
+        if (!entityType && entityTypeHint) {
+          entityType = entityTypeHint;
         }
         
         // If we still don't know the type, try to infer from other properties
@@ -388,18 +392,20 @@ function NodeVisualization({ executionResult }) {
             entityType = 'genes';
           } else if (entity.sequences) {
             entityType = 'proteins';
-          } else if (entity.synonyms && (entity.id.includes('drug') || entity.id.includes('DB'))) {
+          } else if (entity.id.includes('drug') || entity.id.includes('DB')) {
             entityType = 'drugs';
-          } else if (entity.id.includes('pathway') || entity.name?.includes('pathway')) {
+          } else if (entity.id.includes('pathway') || entity.name?.toLowerCase().includes('pathway')) {
             entityType = 'pathways';
-          } else if (entity.id.includes('IPR')) {
+          } else if (entity.id.includes('IPR') || entity.id.includes('pfam')) {
             entityType = 'domains';
-          } else if (entity.id.includes('HP:')) {
+          } else if (entity.id.includes('HP:') || entity.name?.toLowerCase().includes('phenotype')) {
             entityType = 'phenotypes';
           } else if (entity.id.includes('GO:')) {
             entityType = 'goterms';
           } else if (entity.id.includes('taxon')) {
             entityType = 'organisms';
+          } else if (entity.id.includes('disease') || entity.name?.toLowerCase().includes('disease')) {
+            entityType = 'diseases';
           }
         }
         
@@ -407,7 +413,7 @@ function NodeVisualization({ executionResult }) {
         if (!entityType || !extractedEntities[entityType]) {
           // Default to most general category based on what properties we have
           if (entity.sequences) entityType = 'proteins';
-          else if (entity.synonyms) entityType = 'compounds';
+          else if (entity.synonyms && (entity.id.includes('chem') || entity.id.includes('drug'))) entityType = 'compounds';
           else entityType = 'genes'; // Default fallback
         }
         
@@ -467,25 +473,43 @@ function NodeVisualization({ executionResult }) {
             addEntityToCollection(gene, 'genes');
           }
           
-          // Protein objects (p or p.id + p.name)
+          // Check for entities with 'p' property - need to determine if it's protein or pathway
           if (item.p && typeof item.p === 'object') {
-            // Full protein object
-            addEntityToCollection(item.p, 'proteins');
+            // Check if this is actually a pathway based on ID
+            const entityType = getEntityTypeFromId(item.p.id);
+            if (entityType === 'pathways') {
+              addEntityToCollection(item.p, 'pathways');
+            } else if (entityType === 'phenotypes') {
+              addEntityToCollection(item.p, 'phenotypes');
+            } else {
+              // Default to protein if no clear type detected
+              addEntityToCollection(item.p, 'proteins');
+            }
           } else if (item['p.id']) {
-            // Protein ID and possibly name format
-            addEntityToCollection({
+            // Protein/Pathway ID and possibly name format - check ID first
+            const entity = {
               id: item['p.id'],
               name: item['p.name'] || item['p.id'].split(':')[1]
-            }, 'proteins');
+            };
+            const entityType = getEntityTypeFromId(entity.id);
+            if (entityType === 'pathways') {
+              addEntityToCollection(entity, 'pathways');
+            } else if (entityType === 'phenotypes') {
+              addEntityToCollection(entity, 'phenotypes');
+            } else {
+              addEntityToCollection(entity, 'proteins');
+            }
           }
           
-          // Drug/Chemical objects
+          // Drug/Chemical/Disease objects
           if (item.d && item.d.id) {
             const entityType = getEntityTypeFromId(item.d.id);
             if (entityType === 'drugs' || entityType === 'compounds') {
               addEntityToCollection(item.d, entityType);
             } else if (entityType === 'diseases') {
               addEntityToCollection(item.d, 'diseases');
+            } else if (entityType === 'pathways') {
+              addEntityToCollection(item.d, 'pathways');
             } else {
               // Try to determine if it's a drug or disease from context
               if (item.d.id.includes('drug') || item.d.id.includes('chembl') || 
@@ -495,16 +519,6 @@ function NodeVisualization({ executionResult }) {
                 addEntityToCollection(item.d, 'diseases');
               }
             }
-          }
-          
-          // Pathway objects
-          if ((item.p && item.p.name && item.p.id && item.p.id.includes('pathway')) ||
-              (item['p.id'] && item['p.name'] && item['p.id'].includes('pathway'))) {
-            const pathway = {
-              id: item.p?.id || item['p.id'],
-              name: item.p?.name || item['p.name']
-            };
-            addEntityToCollection(pathway, 'pathways');
           }
           
           // Process direct key-value pairs for any entity type
@@ -617,28 +631,57 @@ function NodeVisualization({ executionResult }) {
               // Determine entity type based on prefix and properties
               let entityType = null;
               
-              // Try to determine entity type from prefix
-              if (prefix === 'd') {
-                // Check if it's a disease by ID pattern
-                if (entity.id && entity.id.toLowerCase().includes('mondo')) {
-                  entityType = 'diseases';
-                } 
-                // If we have a name with disease-related terms
-                else if (entity.name && /disease|syndrome|disorder/i.test(entity.name)) {
-                  entityType = 'diseases';
+              // First, try to determine entity type from the ID if available
+              if (entity.id) {
+                entityType = getEntityTypeFromId(entity.id);
+              }
+              
+              // If we couldn't determine from ID, try to determine from prefix
+              if (!entityType) {
+                if (prefix === 'd') {
+                  // Check if it's a disease by ID pattern or name
+                  if (entity.id && (entity.id.toLowerCase().includes('mondo') || 
+                                   entity.id.toLowerCase().includes('mesh') ||
+                                   entity.id.toLowerCase().includes('omim'))) {
+                    entityType = 'diseases';
+                  } 
+                  // If we have a name with disease-related terms
+                  else if (entity.name && /disease|syndrome|disorder/i.test(entity.name)) {
+                    entityType = 'diseases';
+                  }
+                  // Check for pathway patterns
+                  else if ((entity.id && entity.id.toLowerCase().includes('pathway')) ||
+                          (entity.name && entity.name.toLowerCase().includes('pathway'))) {
+                    entityType = 'pathways';
+                  }
+                  // Otherwise could be drug or disease
+                  else {
+                    entityType = entity.id && (
+                      entity.id.includes('drug') || 
+                      entity.id.includes('chembl') || 
+                      entity.id.includes('pubchem') ||
+                      entity.id.includes('chebi')
+                    ) ? 'drugs' : 'diseases';
+                  }
+                } else if (prefix === 'p') {
+                  // 'p' could be protein, pathway, or phenotype - check ID/name
+                  if (entity.id) {
+                    const detectedType = getEntityTypeFromId(entity.id);
+                    entityType = detectedType || 'proteins'; // default to proteins for 'p' prefix
+                  } else if (entity.name && entity.name.toLowerCase().includes('pathway')) {
+                    entityType = 'pathways';
+                  } else if (entity.name && entity.name.toLowerCase().includes('phenotype')) {
+                    entityType = 'phenotypes';
+                  } else {
+                    entityType = 'proteins';
+                  }
+                } else if (prefix === 'g') {
+                  entityType = 'genes';
+                } else if (prefix === 'pathway') {
+                  entityType = 'pathways';
+                } else if (prefix === 'phenotype') {
+                  entityType = 'phenotypes';
                 }
-                // Otherwise could be drug or disease
-                else {
-                  entityType = entity.id && (
-                    entity.id.includes('drug') || 
-                    entity.id.includes('chembl') || 
-                    entity.id.includes('pubchem')
-                  ) ? 'drugs' : 'diseases';
-                }
-              } else if (prefix === 'p') {
-                entityType = 'proteins';
-              } else if (prefix === 'g') {
-                entityType = 'genes';
               }
               
               // Add to the appropriate collection
