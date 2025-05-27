@@ -246,7 +246,7 @@ export const generateEntityUrl = (id) => {
       
     // GO Terms
     case 'go':
-      return `http://amigo.geneontology.org/amigo/term/GO:${value}`;
+      return `https://www.ebi.ac.uk/QuickGO/term/GO:${value}`;
       
     // Diseases & Phenotypes
     case 'mesh':
@@ -718,7 +718,7 @@ export const fetchGOTermData = async (goId) => {
         synonyms: synonyms,
         crossReferences: xrefs.slice(0, 10), // Limit to first 10 xrefs
         displayName: name,
-        url: `http://amigo.geneontology.org/amigo/term/${cleanId}`
+        url: `https://www.ebi.ac.uk/QuickGO/term/${cleanId}`
       };
     }
     
@@ -739,7 +739,7 @@ export const fetchGOTermData = async (goId) => {
       namespace: 'Unknown',
       error: true,
       displayName: `GO Term ${cleanId}`,
-      url: `http://amigo.geneontology.org/amigo/term/${formattedId}`
+      url: `https://www.ebi.ac.uk/QuickGO/term/${formattedId}`
     };
   }
 };

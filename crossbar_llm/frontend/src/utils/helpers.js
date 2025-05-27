@@ -47,7 +47,7 @@ export const generateExternalLink = (id) => {
     case 'go':
       // Handle GO IDs with proper formatting
       const goId = identifier.startsWith('GO:') ? identifier : `GO:${identifier.padStart(7, '0')}`;
-      return `http://amigo.geneontology.org/amigo/term/${goId}`;
+      return `https://www.ebi.ac.uk/QuickGO/term/${goId}`;
     case 'hp':
       return `https://hpo.jax.org/app/browse/term/HP:${identifier}`;
     case 'taxon':
@@ -82,12 +82,12 @@ export const generateExternalLink = (id) => {
       } else if (id.startsWith('HP:')) {
         return `https://hpo.jax.org/app/browse/term/${id}`;
       } else if (id.startsWith('GO:')) {
-        return `http://amigo.geneontology.org/amigo/term/${id}`;
+        return `https://www.ebi.ac.uk/QuickGO/term/${id}`;
       } else if (id.match(/^go:\d+$/i) || id.match(/^\d{7}$/)) {
         // Handle formats like "go:0008150" or just "0008150"
         const numericPart = id.replace(/^go:/i, '');
         const formattedId = `GO:${numericPart.padStart(7, '0')}`;
-        return `http://amigo.geneontology.org/amigo/term/${formattedId}`;
+        return `https://www.ebi.ac.uk/QuickGO/term/${formattedId}`;
       }
       return '#';
   }
