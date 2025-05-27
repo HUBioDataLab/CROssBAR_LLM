@@ -503,25 +503,112 @@ export const fetchDrugData = async (drugId) => {
 };
 
 /**
- * Fetch GO term information
- * @param {string} goId - The Gene Ontology term ID
+ * Fetch GO term information from QuickGO API
+ * @param {string} goId - The Gene Ontology term ID (e.g., "go:0008150" or "GO:0008150")
  */
 export const fetchGOTermData = async (goId) => {
   if (!goId) return null;
   
-  // Extract the numeric part of the GO ID
-  const id = goId.includes(':') ? goId.split(':')[1] : goId;
+  // Extract the numeric part of the GO ID and ensure proper format
+  let cleanId = goId.includes(':') ? goId.split(':')[1] : goId;
+  
+  // Ensure GO ID has proper format (GO:0000000)
+  if (!cleanId.startsWith('GO:')) {
+    // Pad with zeros if needed to make it 7 digits after GO:
+    const numericPart = cleanId.replace(/^GO:?/, '');
+    cleanId = `GO:${numericPart.padStart(7, '0')}`;
+  }
   
   try {
-    // QuickGO API could be used here
+    // QuickGO API endpoint for GO term information
+    const response = await fetch(`https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/${cleanId}`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch GO term data: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data && data.results && data.results.length > 0) {
+      const goTerm = data.results[0];
+      
+      // Extract relevant information
+      const name = goTerm.name || 'Unknown GO term';
+      const definition = goTerm.definition?.text || 'No definition available';
+      const namespace = goTerm.aspect || 'Unknown';
+      const isObsolete = goTerm.isObsolete || false;
+      
+      // Map aspect to readable namespace
+      const namespaceMap = {
+        'biological_process': 'Biological Process',
+        'molecular_function': 'Molecular Function', 
+        'cellular_component': 'Cellular Component',
+        'F': 'Molecular Function',
+        'P': 'Biological Process',
+        'C': 'Cellular Component'
+      };
+      
+      const readableNamespace = namespaceMap[namespace] || namespace;
+      
+      // Extract synonyms if available
+      const synonyms = [];
+      if (goTerm.synonyms) {
+        goTerm.synonyms.forEach(syn => {
+          if (syn.name && syn.name !== name) {
+            synonyms.push(syn.name);
+          }
+        });
+      }
+      
+      // Extract cross-references if available
+      const xrefs = [];
+      if (goTerm.xrefs) {
+        goTerm.xrefs.forEach(xref => {
+          if (xref.db && xref.id) {
+            xrefs.push(`${xref.db}:${xref.id}`);
+          }
+        });
+      }
+      
+      return {
+        id: goId,
+        goId: cleanId,
+        name: name,
+        description: `${name}. ${definition}`,
+        definition: definition,
+        namespace: readableNamespace,
+        aspect: namespace,
+        isObsolete: isObsolete,
+        synonyms: synonyms,
+        crossReferences: xrefs.slice(0, 10), // Limit to first 10 xrefs
+        displayName: name,
+        url: `http://amigo.geneontology.org/amigo/term/${cleanId}`
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching GO term data for ${goId}:`, error);
+    
+    // Return fallback data with error indication
+    const cleanId = goId.includes(':') ? goId.split(':')[1] : goId;
+    const formattedId = cleanId.startsWith('GO:') ? cleanId : `GO:${cleanId.padStart(7, '0')}`;
+    
     return {
       id: goId,
-      name: `GO Term ${id}`,
-      description: `Gene Ontology term with ID ${id}.`
+      goId: formattedId,
+      name: `GO Term ${cleanId}`,
+      description: `Gene Ontology term with ID ${formattedId}. Unable to fetch detailed information from QuickGO.`,
+      definition: 'Unable to fetch definition from QuickGO API.',
+      namespace: 'Unknown',
+      error: true,
+      displayName: `GO Term ${cleanId}`,
+      url: `http://amigo.geneontology.org/amigo/term/${formattedId}`
     };
-  } catch (error) {
-    console.error('Error fetching GO term data:', error);
-    return null;
   }
 };
 

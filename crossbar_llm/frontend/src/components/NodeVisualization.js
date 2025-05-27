@@ -1394,6 +1394,128 @@ function NodeVisualization({ executionResult }) {
                                       </Box>
                                     </Box>
                                   )}
+                                  
+                                  {/* GO Term details */}
+                                  {type === 'goterms' && (
+                                    <Box sx={{ mt: 2 }}>
+                                      {/* GO Term namespace/aspect */}
+                                      {entitySummaries[entity.id]?.data?.namespace && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Namespace:</strong> {entitySummaries[entity.id].data.namespace}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* GO ID */}
+                                      {entitySummaries[entity.id]?.data?.goId && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>GO ID:</strong> {entitySummaries[entity.id].data.goId}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Definition (separate from description) */}
+                                      {entitySummaries[entity.id]?.data?.definition && 
+                                       entitySummaries[entity.id].data.definition !== 'No definition available' && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Definition:</strong> {entitySummaries[entity.id].data.definition}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Obsolete status warning */}
+                                      {entitySummaries[entity.id]?.data?.isObsolete && (
+                                        <Box sx={{ mb: 1 }}>
+                                          <Chip 
+                                            label="Obsolete Term"
+                                            size="small"
+                                            color="warning"
+                                            sx={{ 
+                                              fontSize: '0.7rem',
+                                              backgroundColor: theme => alpha(theme.palette.warning.main, 0.2),
+                                              color: 'warning.main'
+                                            }}
+                                          />
+                                        </Box>
+                                      )}
+                                      
+                                      {/* GO Term synonyms */}
+                                      {entitySummaries[entity.id]?.data?.synonyms && 
+                                       entitySummaries[entity.id].data.synonyms.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Synonyms:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.synonyms.slice(0, 5).map((synonym, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={synonym} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.info.main, 0.1),
+                                                  color: 'info.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entitySummaries[entity.id].data.synonyms.length > 5 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.synonyms.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Cross-references */}
+                                      {entitySummaries[entity.id]?.data?.crossReferences && 
+                                       entitySummaries[entity.id].data.crossReferences.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Cross-references:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.crossReferences.slice(0, 3).map((xref, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={xref} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.secondary.main, 0.1),
+                                                  color: 'secondary.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entitySummaries[entity.id].data.crossReferences.length > 3 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.crossReferences.length - 3} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Link to AmiGO */}
+                                      {entitySummaries[entity.id]?.data?.url && (
+                                        <Box sx={{ mt: 1 }}>
+                                          <Link 
+                                            href={entitySummaries[entity.id].data.url}
+                                            target="_blank"
+                                            rel="noopener"
+                                            sx={{ display: 'flex', alignItems: 'center', fontSize: '0.8rem' }}
+                                          >
+                                            <OpenInNewIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+                                            View in AmiGO
+                                          </Link>
+                                        </Box>
+                                      )}
+                                    </Box>
+                                  )}
                                 </CardContent>
                               </Card>
                             </Grid>

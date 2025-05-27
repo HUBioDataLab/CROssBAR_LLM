@@ -45,7 +45,9 @@ export const generateExternalLink = (id) => {
     case 'pubchem.compound':
       return `https://pubchem.ncbi.nlm.nih.gov/compound/${identifier}`;
     case 'go':
-      return `http://amigo.geneontology.org/amigo/term/GO:${identifier}`;
+      // Handle GO IDs with proper formatting
+      const goId = identifier.startsWith('GO:') ? identifier : `GO:${identifier.padStart(7, '0')}`;
+      return `http://amigo.geneontology.org/amigo/term/${goId}`;
     case 'hp':
       return `https://hpo.jax.org/app/browse/term/HP:${identifier}`;
     case 'taxon':
@@ -80,6 +82,11 @@ export const generateExternalLink = (id) => {
         return `https://hpo.jax.org/app/browse/term/${id}`;
       } else if (id.startsWith('GO:')) {
         return `http://amigo.geneontology.org/amigo/term/${id}`;
+      } else if (id.match(/^go:\d+$/i) || id.match(/^\d{7}$/)) {
+        // Handle formats like "go:0008150" or just "0008150"
+        const numericPart = id.replace(/^go:/i, '');
+        const formattedId = `GO:${numericPart.padStart(7, '0')}`;
+        return `http://amigo.geneontology.org/amigo/term/${formattedId}`;
       }
       return '#';
   }
