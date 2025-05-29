@@ -121,8 +121,25 @@ YIELD node AS similar_reactions, score
 WHERE score < 1
 RETURN similar_reactions.id, similar_reactions.name, score
 
+# Question: Find protein domains that are similar to the ProteinDomain with ID 'interpro:IPR000719' (with a similarity score less than 1).
+# Then, for each of those similar domains, find other protein domains that are indirectly connected through protein-protein interactions — specifically, domains that are connected to proteins which interact with other proteins that contain the similar domain.
+# Return the name of each similar domain, the name of its corresponding indirectly related domain, and the cosine similarity between their embeddings.
+# Vector index: Dom2vecEmbeddings
+MATCH (pd:ProteinDomain {{id:'interpro:IPR000719'}})
+CALL db.index.vector.queryNodes('Dom2vecEmbeddings', 5, pd.dom2vec_embedding)
+YIELD node AS similar_protein_domains, score AS dom_score
+WHERE dom_score < 1
+CALL {{
+    MATCH (similar_protein_domains)<-[:Protein_has_domain]-(:Protein)-[:Protein_interacts_with_protein]-(:Protein)-[:Protein_has_domain]->(indirect_domains:ProteinDomain)
+    WHERE indirect_domains.id <> similar_protein_domains.id
+    RETURN DISTINCT indirect_domains LIMIT 5
+}}
+RETURN similar_protein_domains.name, indirect_domains.name, vector.similarity.cosine(similar_protein_domains.dom2vec_embedding, indirect_domains.dom2vec_embedding) AS cosine_similarity_of_domains
+
+
 The question is:
 {question}
+"""
 """
 
 VECTOR_SEARCH_CYPHER_GENERATION_PROMPT = PromptTemplate(
