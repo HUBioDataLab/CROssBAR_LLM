@@ -89,9 +89,9 @@ class Config(BaseModel):
     replicate_api_key: str = os.getenv("REPLICATE_API_KEY", "default")
     nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", "default")
     openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "default")
-    neo4j_usr: str = os.getenv("NEO4J_USER")
+    neo4j_usr: str = os.getenv("NEO4J_USERNAME")
     neo4j_password: str = os.getenv("MY_NEO4J_PASSWORD")
-    neo4j_db_name: str = os.getenv("NEO4J_DB_NAME")
+    neo4j_db_name: str = os.getenv("NEO4J_DATABASE_NAME")
     neo4j_uri: str = os.getenv("NEO4J_URI")
 
 

@@ -53,9 +53,9 @@ ANTHROPIC_API_KEY="sk-ant-***-***********************-****"
 NVIDIA_API_KEY="nvapi-************************************"
 GROQ_API_KEY="gsk_****************************************"
 REPLICATE_API_KEY="***************************************"
-NEO4J_USER="user"
+NEO4J_USERNAME="user"
 MY_NEO4J_PASSWORD="password"
-NEO4J_DB_NAME="neo4j"
+NEO4J_DATABASE_NAME="neo4j"
 NEO4J_URI="neo4j://localhost:7687"
 ```
 

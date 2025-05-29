@@ -241,10 +241,10 @@ def get_csrf_token(csrf_protect: CsrfProtect = Depends()):
     return response
 
 # Neo4j connection details
-neo4j_user = os.getenv("NEO4J_USER", "neo4j")
+neo4j_user = os.getenv("NEO4J_USERNAME", "neo4j")
 neo4j_uri = os.getenv("NEO4J_URI", "neo4j://localhost:7687")
 neo4j_password = os.getenv("MY_NEO4J_PASSWORD", "password")
-neo4j_db_name = os.getenv("NEO4J_DB_NAME", "neo4j")
+neo4j_db_name = os.getenv("NEO4J_DATABASE_NAME", "neo4j")
 
 # Initialize RunPipeline instances cache
 pipeline_instances = {}
