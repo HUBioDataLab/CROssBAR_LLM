@@ -22,6 +22,9 @@ import logging
 import time
 from datetime import datetime, timedelta
 
+# Import configuration
+from config import IS_PRODUCTION, IS_DEVELOPMENT, get_setting
+
 # Load environment variables
 load_dotenv()
 
@@ -102,14 +105,32 @@ def get_client_ip(request: Request, x_forwarded_for: Optional[str] = Header(None
 class RateLimiter:
     def __init__(self):
         self.request_records: Dict[str, List[datetime]] = {}  # IP -> list of request timestamps
+        # Get rate limits from configuration
+        self.minute_limit = get_setting('rate_limits', {}).get('minute', 6)
+        self.hour_limit = get_setting('rate_limits', {}).get('hour', 20)
+        self.day_limit = get_setting('rate_limits', {}).get('day', 50)
+        self.enabled = get_setting('rate_limiting_enabled', True)
+        
+        # Log with readable rate limit values
+        if not self.enabled:
+            Logger.info("Rate limiting is disabled (development mode)")
+        else:
+            # Consider very high limits as effectively unlimited for display purposes
+            minute_display = "unlimited" if self.minute_limit >= 1000000 else self.minute_limit
+            hour_display = "unlimited" if self.hour_limit >= 1000000 else self.hour_limit
+            day_display = "unlimited" if self.day_limit >= 1000000 else self.day_limit
+            Logger.info(f"Rate limiting is enabled with limits: {minute_display}/min, {hour_display}/hr, {day_display}/day")
     
     def is_rate_limited(self, ip: str) -> tuple[bool, str, int]:
+        # If rate limiting is disabled, immediately return not limited
+        if not self.enabled:
+            return False, "", 0
+            
         current_time = datetime.now()
 
         # Ensure ip is a string
         ip_str = str(ip)
         Logger.debug(f"Checking rate limit for IP: {ip_str}")
-        print(f"Checking rate limit for IP: {ip_str}")
         
         # If IP not in records, add it
         if ip_str not in self.request_records:
@@ -119,44 +140,59 @@ class RateLimiter:
         # Add current timestamp to tracking
         self.request_records[ip_str].append(current_time)
         
-        # Check minute limit (6 requests per minute)
-        minute_ago = current_time - timedelta(minutes=1)
-        minute_requests = [ts for ts in self.request_records[ip_str] if ts > minute_ago]
-        if len(minute_requests) > 6:
-            # Keep only requests from the last day for storage efficiency
-            self.request_records[ip_str] = [
-                ts for ts in self.request_records[ip_str] 
-                if ts > (current_time - timedelta(days=1))
-            ]
-            return True, "minute", 60
+        # Check minute limit - skip check if limit is effectively unlimited
+        if self.minute_limit < 1000000:  # Threshold for "unlimited"
+            minute_ago = current_time - timedelta(minutes=1)
+            minute_requests = [ts for ts in self.request_records[ip_str] if ts > minute_ago]
+            if len(minute_requests) > self.minute_limit:
+                # Keep only requests from the last day for storage efficiency
+                self.request_records[ip_str] = [
+                    ts for ts in self.request_records[ip_str] 
+                    if ts > (current_time - timedelta(days=1))
+                ]
+                return True, "minute", 60
         
-        # Check hour limit (20 requests per hour)
-        hour_ago = current_time - timedelta(hours=1)
-        hour_requests = [ts for ts in self.request_records[ip_str] if ts > hour_ago]
-        if len(hour_requests) > 20:
-            # Keep only requests from the last day for storage efficiency
-            self.request_records[ip_str] = [
-                ts for ts in self.request_records[ip_str] 
-                if ts > (current_time - timedelta(days=1))
-            ]
-            return True, "hour", 3600
+        # Check hour limit - skip check if limit is effectively unlimited
+        if self.hour_limit < 1000000:  # Threshold for "unlimited"
+            hour_ago = current_time - timedelta(hours=1)
+            hour_requests = [ts for ts in self.request_records[ip_str] if ts > hour_ago]
+            if len(hour_requests) > self.hour_limit:
+                # Keep only requests from the last day for storage efficiency
+                self.request_records[ip_str] = [
+                    ts for ts in self.request_records[ip_str] 
+                    if ts > (current_time - timedelta(days=1))
+                ]
+                return True, "hour", 3600
             
-        # Check day limit (50 requests per day)
-        day_ago = current_time - timedelta(days=1)
-        day_requests = [ts for ts in self.request_records[ip_str] if ts > day_ago]
-        if len(day_requests) > 50:
-            # Keep last 30 days of requests
-            self.request_records[ip_str] = [
-                ts for ts in self.request_records[ip_str] 
-                if ts > (current_time - timedelta(days=30))
-            ]
-            return True, "day", 86400
+        # Check day limit - skip check if limit is effectively unlimited
+        if self.day_limit < 1000000:  # Threshold for "unlimited"
+            day_ago = current_time - timedelta(days=1)
+            day_requests = [ts for ts in self.request_records[ip_str] if ts > day_ago]
+            if len(day_requests) > self.day_limit:
+                # Keep last 30 days of requests
+                self.request_records[ip_str] = [
+                    ts for ts in self.request_records[ip_str] 
+                    if ts > (current_time - timedelta(days=30))
+                ]
+                return True, "day", 86400
             
         # No rate limit exceeded
         return False, "", 0
 
 # Create rate limiter instance
 rate_limiter = RateLimiter()
+
+# Helper function for conditional CSRF validation
+async def validate_csrf_if_enabled(request: Request, csrf_token: CsrfProtect = Depends()):
+    if get_setting('csrf_enabled', True):
+        try:
+            await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
+        except ValueError as e:
+            Logger.error(f"CSRF validation failed: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+    else:
+        Logger.debug("CSRF validation skipped (development mode)")
+    return True
 
 # Enable CORS
 app.add_middleware(
@@ -183,8 +219,23 @@ def get_csrf_config():
 @app.get("/csrf-token/")
 def get_csrf_token(csrf_protect: CsrfProtect = Depends()):
     Logger.debug("Getting CSRF token")
+    
+    # If CSRF is disabled (development mode), return a dummy token
+    if not get_setting('csrf_enabled', True):
+        Logger.info("CSRF protection is disabled (development mode), returning dummy token")
+        return JSONResponse({
+            "detail": "CSRF protection is disabled in development mode",
+            "csrf_token": "development-mode-no-csrf-required",
+            "environment": "development"
+        })
+    
+    # Production mode - generate real CSRF token
     csrf_token, signed_token = csrf_protect.generate_csrf_tokens()
-    response = JSONResponse({"detail": "CSRF cookie set" ,"csrf_token": csrf_token})
+    response = JSONResponse({
+        "detail": "CSRF cookie set",
+        "csrf_token": csrf_token,
+        "environment": "production"
+    })
     csrf_protect.set_csrf_cookie(signed_token, response)
     Logger.info("CSRF token generated and set in cookie")
     return response
@@ -200,6 +251,10 @@ pipeline_instances = {}
 
 # Helper function to check rate limits and return appropriate error
 def check_rate_limit(request: Request):
+    # Skip rate limiting check if disabled in config
+    if not get_setting('rate_limiting_enabled', True):
+        return
+        
     # Get actual client IP from headers or fallback to direct client IP (without Header dependency)
     # Try getting X-Forwarded-For from the request headers directly
     client_ip = None
@@ -233,20 +288,29 @@ def check_rate_limit(request: Request):
     # Ensure client_ip is a string
     client_ip_str = str(client_ip)
     Logger.debug(f"Client IP for rate limiting: {client_ip_str}")
-    print(f"Client IP for rate limiting: {client_ip_str}")
     
     is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip_str)
     
     if is_limited:
         Logger.warning(f"Rate limit exceeded for IP: {client_ip_str} ({limit_type} limit)")
         
+        # Get current limits from rate limiter
+        minute_limit = rate_limiter.minute_limit
+        hour_limit = rate_limiter.hour_limit
+        day_limit = rate_limiter.day_limit
+        
+        # Format limit values for display (consider very large numbers as "unlimited")
+        minute_display = "unlimited" if minute_limit >= 1000000 else minute_limit
+        hour_display = "unlimited" if hour_limit >= 1000000 else hour_limit
+        day_display = "unlimited" if day_limit >= 1000000 else day_limit
+        
         # Create appropriate error message based on limit type
         if limit_type == "minute":
-            detail_message = "Minute rate limit exceeded (3 requests per minute)."
+            detail_message = f"Minute rate limit exceeded ({minute_display} requests per minute)."
         elif limit_type == "hour":
-            detail_message = "Hour rate limit exceeded (10 requests per hour)."
+            detail_message = f"Hour rate limit exceeded ({hour_display} requests per hour)."
         elif limit_type == "day":
-            detail_message = "Daily rate limit exceeded (25 requests per day)."
+            detail_message = f"Daily rate limit exceeded ({day_display} requests per day)."
         else:
             detail_message = "Rate limit exceeded."
             
@@ -376,6 +440,7 @@ class GenerateQueryRequest(BaseModel):
     verbose: bool = False
     vector_index: Optional[str] = None
     embedding: Optional[str] = None
+    vector_category: Optional[str] = None
 
 class RunQueryRequest(BaseModel):
     query: str
@@ -389,17 +454,15 @@ class RunQueryRequest(BaseModel):
 async def generate_query(
     request: Request,
     generate_query_request: GenerateQueryRequest,
-    csrf_token: CsrfProtect = Depends()
+    csrf_token: CsrfProtect = Depends(),
+    _: bool = Depends(validate_csrf_if_enabled)
     ):
     # Apply rate limiting
     check_rate_limit(request)
     
     setup_logging(generate_query_request.verbose)
-    try:
-        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
-    except ValueError as e:
-        Logger.error(f"CSRF validation failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+    
+    # CSRF is now validated by the dependency
     
     Logger.info(f"Generating query for question: '{generate_query_request.question}'")
     Logger.debug(f"Using LLM: {generate_query_request.llm_type}, top_k: {generate_query_request.top_k}")
@@ -485,6 +548,25 @@ async def generate_query(
                 reset_llm_type=True
             )
             
+        elif generate_query_request.vector_index and generate_query_request.vector_category:
+            Logger.info("Processing category-based vector search without specific embedding")
+            Logger.debug(f"Vector index: {generate_query_request.vector_index}")
+            Logger.debug(f"Vector category: {generate_query_request.vector_category}")
+            
+            vector_index = f"{generate_query_request.vector_index}Embeddings"
+            rp.search_type = "vector_search"
+            rp.top_k = generate_query_request.top_k
+            
+            Logger.info("Generating query with category-based vector search")
+            query = rp.run_for_query(
+                question=generate_query_request.question,
+                model_name=generate_query_request.llm_type,
+                api_key=api_key,
+                vector_index=vector_index,
+                embedding=None,  # No specific embedding, use category-based search
+                reset_llm_type=True
+            )
+            
         else:
             Logger.info("Processing standard database search")
             rp.search_type = "db_search"
@@ -524,18 +606,15 @@ async def generate_query(
 async def run_query(
     request: Request,
     run_query_request: RunQueryRequest,
-    csrf_token: CsrfProtect = Depends()
+    csrf_token: CsrfProtect = Depends(),
+    _: bool = Depends(validate_csrf_if_enabled)
     ):
     # Apply rate limiting
     check_rate_limit(request)
     
     setup_logging(run_query_request.verbose)
-    try:
-        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
     
-    except ValueError as e:
-        Logger.error(f"CSRF validation failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+    # CSRF is now validated by the dependency
     
     Logger.info(f"Running query for question: '{run_query_request.question}'")
     Logger.debug(f"Query to execute: {run_query_request.query}")
@@ -638,7 +717,8 @@ async def upload_vector(
     vector_category: str = Form(...),
     embedding_type: Optional[str] = Form(None),
     client_ip: Optional[str] = Form(None),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    _: bool = Depends(validate_csrf_if_enabled)
 ):
     # Apply rate limiting
     check_rate_limit(request)
@@ -646,13 +726,6 @@ async def upload_vector(
     Logger.info(f"Vector upload requested for category: {vector_category}")
     Logger.debug(f"Embedding type: {embedding_type}")
     Logger.debug(f"Filename: {file.filename}")
-    
-    try:
-        await csrf_token.validate_csrf(request, cookie_key="fastapi-csrf-token")
-        
-    except ValueError as e:
-        Logger.error(f"CSRF validation failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
     try:
         contents = await file.read()
         filename = file.filename
@@ -711,6 +784,35 @@ async def get_api_keys_status(request: Request):
     
     Logger.debug(f"API keys status: {api_keys_status}")
     return api_keys_status
+
+@app.get("/environment-info/")
+def get_environment_info():
+    """
+    Get information about the current environment configuration.
+    This is useful for debugging and development.
+    """
+    environment = "production" if IS_PRODUCTION else "development"
+    
+    # Get rate limits and convert very large numbers to "unlimited" for display
+    rate_limits = get_setting('rate_limits', {})
+    json_safe_rate_limits = {}
+    
+    for key, value in rate_limits.items():
+        if value >= 1000000:  # Threshold for considering a limit as "unlimited"
+            json_safe_rate_limits[key] = "unlimited"
+        else:
+            json_safe_rate_limits[key] = value
+    
+    return {
+        "environment": environment,
+        "isProduction": IS_PRODUCTION,
+        "isDevelopment": IS_DEVELOPMENT,
+        "settings": {
+            "csrf_enabled": get_setting('csrf_enabled'),
+            "rate_limiting_enabled": get_setting('rate_limiting_enabled'),
+            "rate_limits": json_safe_rate_limits
+        }
+    }
 
 # Initialize logging on startup
 @app.on_event("startup")

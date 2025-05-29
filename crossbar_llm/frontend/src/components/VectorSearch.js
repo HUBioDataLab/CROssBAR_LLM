@@ -84,6 +84,9 @@ function VectorSearch({
   const [retryCountdown, setRetryCountdown] = useState(0);
   const [limitType, setLimitType] = useState('');
   const [originalQuery, setOriginalQuery] = useState('');
+  // Refs for scroll sync between textarea and syntax highlighter
+  const textareaRef = useRef(null);
+  const highlighterRef = useRef(null);
   const eventSourceRef = useRef(null);
   const logContainerRef = useRef(null);
   const theme = useTheme();
@@ -464,7 +467,7 @@ function VectorSearch({
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
       
-      const embedding = JSON.stringify(vectorFile);
+      const embedding = vectorFile ? JSON.stringify(vectorFile) : null;
       const response = await axios.post('/generate_query/', {
         question,
         llm_type: llmType,
@@ -473,6 +476,7 @@ function VectorSearch({
         verbose,
         vector_index: embeddingType,
         embedding: embedding,
+        vector_category: vectorCategory,
       });
       
       // Process the query result before setting it
@@ -624,11 +628,6 @@ function VectorSearch({
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
       
-      // Check if we have a vector file
-      if (!vectorFile && vectorCategory) {
-        throw new Error('Vector file is required for vector search');
-      }
-      
       // Prepare the request data
       const requestData = {
         question,
@@ -639,7 +638,7 @@ function VectorSearch({
         verbose,
       };
       
-      // Add vector data if available
+      // Add vector data if available, otherwise just use vector index for category-based search
       if (vectorFile) {
         requestData.embedding = JSON.stringify(vectorFile);
         requestData.vector_index = embeddingType;
@@ -675,6 +674,13 @@ function VectorSearch({
           setVectorFile(uploadResponse.data);
         } catch (error) {
           throw new Error(`Error uploading vector file: ${error.message}`);
+        }
+      } else if (vectorCategory && embeddingType) {
+        // Use category-based vector search without specific embedding
+        requestData.vector_index = embeddingType;
+        requestData.vector_category = vectorCategory;
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `Using category-based vector search for ${vectorCategory} with ${embeddingType} embeddings\n`);
         }
       }
       
@@ -843,11 +849,9 @@ function VectorSearch({
         }
       }
     } else if (sampleQuestionObj.vectorCategory) {
-      // If a vector category is specified but no file path, show a warning
-      const warningMsg = `No vector file specified for ${sampleQuestionObj.vectorCategory}. Please upload a vector file.`;
-      console.warn(warningMsg);
+      // If a vector category is specified, no warning needed since file upload is optional
       if (verbose) {
-        updateRealtimeLogs(prev => prev + `Warning: ${warningMsg}\n`);
+        updateRealtimeLogs(prev => prev + `Vector category set to ${sampleQuestionObj.vectorCategory}. Ready for category-based vector search.\n`);
       }
     }
   };
@@ -1435,6 +1439,7 @@ function VectorSearch({
                 }}
               >
                 <Box
+                  ref={highlighterRef}
                   sx={{
                     position: 'absolute',
                     top: 0,
@@ -1473,8 +1478,16 @@ function VectorSearch({
                   </SyntaxHighlighter>
                 </Box>
                 <textarea
+                  ref={textareaRef}
                   value={generatedQuery}
                   onChange={(e) => setGeneratedQuery(e.target.value)}
+                  onScroll={(e) => {
+                    // Sync scroll position with highlighter
+                    if (highlighterRef.current) {
+                      highlighterRef.current.scrollTop = e.target.scrollTop;
+                      highlighterRef.current.scrollLeft = e.target.scrollLeft;
+                    }
+                  }}
                   style={{
                     position: 'absolute',
                     top: 0,

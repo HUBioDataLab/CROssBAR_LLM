@@ -54,7 +54,7 @@ function App() {
   const [llmType, setLlmType] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerVisible, setDrawerVisible] = useState(true);
+  const [drawerVisible, setDrawerVisible] = useState(false); // Default to false, will be updated in useEffect
   const [clientIP, setClientIP] = useState('');
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('theme-mode');
@@ -66,6 +66,11 @@ function App() {
 
   const theme = React.useMemo(() => getTheme(mode), [mode]);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Update drawer visibility based on screen size
+  useEffect(() => {
+    setDrawerVisible(!isMobile);
+  }, [isMobile]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

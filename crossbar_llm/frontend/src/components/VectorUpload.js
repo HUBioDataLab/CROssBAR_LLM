@@ -18,6 +18,8 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DownloadIcon from '@mui/icons-material/Download';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import axios from '../services/api';
 
 // Helper function to extract text and URL from markdown [text](url)
@@ -109,6 +111,26 @@ function VectorUpload({
   }
   const { text: paperText, url: paperUrl } = extractMarkdownLink(currentPaperMarkdown);
 
+  // Map of example embeddings for different categories
+  const exampleEmbeddings = {
+    "Protein": "protein_embedding.npy",
+    "SmallMolecule": "small_molecule_embedding.npy",
+    "Drug": "small_molecule_embedding.npy",
+    "Compound": "small_molecule_embedding.npy"
+  };
+
+  const handleExampleDownload = () => {
+    if (vectorCategory && exampleEmbeddings[vectorCategory]) {
+      const fileUrl = `/${exampleEmbeddings[vectorCategory]}`;
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = exampleEmbeddings[vectorCategory];
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <Paper 
       elevation={0} 
@@ -139,7 +161,7 @@ function VectorUpload({
       {showInfo && (
         <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
           Vector search enhances query results by finding semantically similar entities in the knowledge graph.
-          Select a category and embedding type, then upload your vector file.
+          Select a category and embedding type to use existing embeddings, or upload your own vector file for custom searches.
         </Typography>
       )}
       
@@ -217,32 +239,65 @@ function VectorUpload({
         </Typography>
       )}
 
-      <Button 
-        variant="outlined" 
-        component="label" 
-        fullWidth
-        startIcon={<UploadFileIcon />}
-        disabled={!vectorCategory || !embeddingType || vectorFile}
-        sx={{ 
-          mt: 1,
-          borderRadius: '12px',
-          height: '44px',
-          borderColor: theme => theme.palette.primary.main,
-          color: theme => theme.palette.primary.main,
-          '&:hover': {
-            backgroundColor: theme => alpha(theme.palette.primary.main, 0.04),
-          }
-        }}
-      >
-        Upload Vector File (.npy)
-        <input
-          type="file"
-          hidden
-          onChange={handleFileChange}
-          accept=".npy,.csv"
-        />
-      </Button>
-      
+      {/* Show ready status when category and embedding type are selected */}
+      {vectorCategory && embeddingType && !vectorFile && !selectedFile && (
+        <Typography variant="body2" sx={{ mt: 2, color: 'success.main', display: 'flex', alignItems: 'center' }}>
+          <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} />
+          Ready for vector search with {vectorCategory} ({embeddingType}) embeddings
+        </Typography>
+      )}
+
+      <Grid container spacing={2} sx={{ mt: 0.5 }}>
+        <Grid item xs={12} md={vectorCategory && exampleEmbeddings[vectorCategory] ? 6 : 12}>
+          <Button 
+            variant="outlined" 
+            component="label" 
+            fullWidth
+            startIcon={<UploadFileIcon />}
+            disabled={!vectorCategory || !embeddingType}
+            sx={{ 
+              borderRadius: '12px',
+              height: '44px',
+              borderColor: theme => theme.palette.primary.main,
+              color: theme => theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: theme => alpha(theme.palette.primary.main, 0.04),
+              }
+            }}
+          >
+            Upload Custom Vector File (.npy) - Optional
+            <input
+              type="file"
+              hidden
+              onChange={handleFileChange}
+              accept=".npy,.csv"
+            />
+          </Button>
+        </Grid>
+        
+        {vectorCategory && exampleEmbeddings[vectorCategory] && (
+          <Grid item xs={12} md={6}>
+            <Button 
+              variant="outlined"
+              fullWidth
+              startIcon={<DownloadIcon />}
+              onClick={handleExampleDownload}
+              sx={{ 
+                borderRadius: '12px',
+                height: '44px',
+                borderColor: theme => theme.palette.secondary.main,
+                color: theme => theme.palette.secondary.main,
+                '&:hover': {
+                  backgroundColor: theme => alpha(theme.palette.secondary.main, 0.04),
+                }
+              }}
+            >
+              Download Vector File
+            </Button>
+          </Grid>
+        )}
+      </Grid>
+    
       {selectedFile && (
         <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
           Selected file: {selectedFile.name}

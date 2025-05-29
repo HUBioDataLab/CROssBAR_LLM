@@ -41,6 +41,10 @@ pip install -r requirements.txt
 To use this package, ensure that you have `.env` file present in the root folder of it. You should use the template below:
 
 ```env
+# Environment: 'development' (default) or 'production'
+# See ENVIRONMENT.md for more details
+CROSSBAR_ENV=development
+
 OPENAI_API_KEY="sk-************************************************"
 GEMINI_API_KEY="AI*****************-**-******-*********"
 ANTHROPIC_API_KEY="sk-ant-***-***********************-****"
@@ -52,5 +56,14 @@ MY_NEO4J_PASSWORD="password"
 NEO4J_DB_NAME="neo4j"
 NEO4J_URI="neo4j://localhost:7687"
 ```
+
+## Environment Configuration
+
+The application supports both development and production environments with different security settings:
+
+- **Development mode** (default): Disables CSRF protection and rate limiting for easier local development
+- **Production mode**: Enables full security features
+
+For details on configuring the environment, see [ENVIRONMENT.md](ENVIRONMENT.md).
 
 ## This repo is currently under development. Therefore, you may encounter some problems while replicating this repo. Feel free to open issue about it.
