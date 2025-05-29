@@ -52,7 +52,7 @@ export const generateExternalLink = (id) => {
       return `https://hpo.jax.org/app/browse/term/HP:${identifier}`;
     case 'taxon':
     case 'ncbitaxon':
-      return `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${identifier}`;
+      return `https://www.uniprot.org/taxonomy/${identifier}`;
     case 'ensembl':
       return `https://www.ensembl.org/id/${identifier}`;
     case 'ec':

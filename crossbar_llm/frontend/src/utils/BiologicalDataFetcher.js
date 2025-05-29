@@ -770,8 +770,8 @@ export const fetchPhenotypeData = async (phenotypeId) => {
 };
 
 /**
- * Fetch organism information from NCBI Taxonomy
- * @param {string} taxonId - The NCBI Taxonomy ID
+ * Fetch organism information from UniProt Taxonomy API
+ * @param {string} taxonId - The NCBI Taxonomy ID (e.g., "ncbitaxon:9606")
  */
 export const fetchOrganismData = async (taxonId) => {
   if (!taxonId) return null;
@@ -780,17 +780,119 @@ export const fetchOrganismData = async (taxonId) => {
   const numericId = taxonId.includes(':') ? taxonId.split(':')[1] : taxonId;
   
   try {
-    // NCBI's E-utilities API could be used here
+    // UniProt Taxonomy API
+    const response = await fetch(`https://rest.uniprot.org/taxonomy/${numericId}.json`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch taxonomy data: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data) {
+      // Extract taxonomic information
+      const scientificName = data.scientificName || 'Unknown organism';
+      const commonName = data.commonName || null;
+      const rank = data.rank || 'Unknown rank';
+      
+      // Extract lineage information
+      const lineage = [];
+      if (data.lineage && Array.isArray(data.lineage)) {
+        data.lineage.forEach(ancestor => {
+          if (ancestor.scientificName) {
+            lineage.push({
+              name: ancestor.scientificName,
+              rank: ancestor.rank || 'Unknown',
+              taxonId: ancestor.taxonId || null
+            });
+          }
+        });
+      }
+      
+      // Extract synonyms/other names
+      const synonyms = [];
+      if (data.otherNames && Array.isArray(data.otherNames)) {
+        data.otherNames.forEach(name => {
+          if (name.name && name.name !== scientificName && name.name !== commonName) {
+            synonyms.push(name.name);
+          }
+        });
+      }
+      
+      // Create a comprehensive description
+      let description = `${scientificName}`;
+      if (commonName && commonName !== scientificName) {
+        description += ` (${commonName})`;
+      }
+      description += ` is a ${rank.toLowerCase()} organism`;
+      
+      if (lineage.length > 0) {
+        // Get some key taxonomic levels for the description
+        const domain = lineage.find(l => l.rank === 'superkingdom' || l.rank === 'domain');
+        const kingdom = lineage.find(l => l.rank === 'kingdom');
+        const phylum = lineage.find(l => l.rank === 'phylum');
+        const order = lineage.find(l => l.rank === 'order');
+        const family = lineage.find(l => l.rank === 'family');
+        
+        const taxonomicInfo = [];
+        if (domain) taxonomicInfo.push(domain.name);
+        if (kingdom && kingdom.name !== domain?.name) taxonomicInfo.push(kingdom.name);
+        if (phylum) taxonomicInfo.push(phylum.name);
+        if (order) taxonomicInfo.push(order.name);
+        if (family) taxonomicInfo.push(family.name);
+        
+        if (taxonomicInfo.length > 0) {
+          description += ` belonging to the taxonomic lineage: ${taxonomicInfo.join(' > ')}.`;
+        }
+      }
+      
+      // Extract additional properties
+      const mnemonic = data.mnemonic || null; // UniProt organism mnemonic code
+      const taxonNode = data.taxonNode || null; // Additional node information
+      
+      return {
+        id: taxonId,
+        taxonId: numericId,
+        name: commonName || scientificName,
+        scientificName: scientificName,
+        commonName: commonName,
+        displayName: commonName || scientificName,
+        description: description,
+        rank: rank,
+        lineage: lineage,
+        synonyms: synonyms.slice(0, 10), // Limit synonyms for display
+        mnemonic: mnemonic,
+        database: 'UniProt Taxonomy',
+        url: `https://www.uniprot.org/taxonomy/${numericId}`,
+        // Additional properties for detailed view
+        fullLineage: lineage,
+        parentTaxonId: data.parent?.taxonId || null,
+        parentName: data.parent?.scientificName || null
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching taxonomy data for ${taxonId}:`, error);
+    
+    // Return fallback data with error indication
     return {
       id: taxonId,
+      taxonId: numericId,
       name: numericId === '9606' ? 'Homo sapiens' : `Organism ${numericId}`,
+      scientificName: numericId === '9606' ? 'Homo sapiens' : `Unknown organism`,
+      commonName: numericId === '9606' ? 'Human' : null,
+      displayName: numericId === '9606' ? 'Human' : `Organism ${numericId}`,
       description: numericId === '9606' 
-        ? 'Human (Homo sapiens)' 
-        : `Organism with taxonomy ID ${numericId}.`
+        ? 'Homo sapiens (Human) - error fetching detailed taxonomy information from UniProt' 
+        : `Organism with taxonomy ID ${numericId} - error fetching information from UniProt: ${error.message}`,
+      rank: 'Unknown',
+      lineage: [],
+      synonyms: [],
+      database: 'UniProt Taxonomy',
+      error: true,
+      url: `https://www.uniprot.org/taxonomy/${numericId}`
     };
-  } catch (error) {
-    console.error('Error fetching organism data:', error);
-    return null;
   }
 };
 

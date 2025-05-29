@@ -1884,6 +1884,154 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
+                                  
+                                  {/* Organism (Taxonomy) details */}
+                                  {type === 'organisms' && (
+                                    <Box sx={{ mt: 2 }}>
+                                      {/* Scientific and common names */}
+                                      {entitySummaries[entity.id]?.data?.scientificName && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Scientific Name:</strong> {entitySummaries[entity.id].data.scientificName}
+                                        </Typography>
+                                      )}
+                                      
+                                      {entitySummaries[entity.id]?.data?.commonName && 
+                                       entitySummaries[entity.id].data.commonName !== entitySummaries[entity.id].data?.scientificName && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Common Name:</strong> {entitySummaries[entity.id].data.commonName}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Taxonomic rank */}
+                                      {entitySummaries[entity.id]?.data?.rank && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Rank:</strong> {entitySummaries[entity.id].data.rank}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* UniProt mnemonic code */}
+                                      {entitySummaries[entity.id]?.data?.mnemonic && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>UniProt Code:</strong> {entitySummaries[entity.id].data.mnemonic}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Parent taxon information */}
+                                      {entitySummaries[entity.id]?.data?.parentName && (
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                          <strong>Parent Taxon:</strong> {entitySummaries[entity.id].data.parentName}
+                                        </Typography>
+                                      )}
+                                      
+                                      {/* Taxonomic lineage */}
+                                      {entitySummaries[entity.id]?.data?.lineage && 
+                                       entitySummaries[entity.id].data.lineage.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, mt: 1.5 }}>
+                                            Taxonomic lineage:
+                                          </Typography>
+                                          <Box sx={{ 
+                                            display: 'flex', 
+                                            flexDirection: 'column', 
+                                            gap: 0.5, 
+                                            mb: 1.5,
+                                            p: 1,
+                                            backgroundColor: theme => alpha(theme.palette.background.default, 0.6),
+                                            borderRadius: 1,
+                                            border: theme => `1px solid ${alpha(theme.palette.divider, 0.3)}`
+                                          }}>
+                                            {entitySummaries[entity.id].data.lineage.slice().reverse().slice(0, 8).map((ancestor, i) => (
+                                              <Box key={i} sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <Typography variant="caption" sx={{ 
+                                                  minWidth: '80px',
+                                                  fontWeight: 500,
+                                                  color: 'text.secondary',
+                                                  textTransform: 'capitalize'
+                                                }}>
+                                                  {ancestor.rank}:
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ 
+                                                  ml: 1,
+                                                  fontStyle: ancestor.rank === 'species' ? 'italic' : 'normal'
+                                                }}>
+                                                  {ancestor.name}
+                                                </Typography>
+                                                {ancestor.taxonId && (
+                                                  <Chip 
+                                                    label={ancestor.taxonId}
+                                                    size="small"
+                                                    sx={{ 
+                                                      ml: 1, 
+                                                      height: '16px', 
+                                                      fontSize: '0.6rem',
+                                                      backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
+                                                      color: 'primary.main'
+                                                    }}
+                                                  />
+                                                )}
+                                              </Box>
+                                            ))}
+                                            {entitySummaries[entity.id].data.lineage.length > 8 && (
+                                              <Typography variant="caption" sx={{ 
+                                                color: 'text.secondary', 
+                                                fontStyle: 'italic',
+                                                textAlign: 'center'
+                                              }}>
+                                                ... and {entitySummaries[entity.id].data.lineage.length - 8} more ancestral taxa
+                                              </Typography>
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Alternative names/synonyms */}
+                                      {entitySummaries[entity.id]?.data?.synonyms && 
+                                       entitySummaries[entity.id].data.synonyms.length > 0 && (
+                                        <>
+                                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                            Alternative names:
+                                          </Typography>
+                                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                                            {entitySummaries[entity.id].data.synonyms.slice(0, 5).map((synonym, i) => (
+                                              <Chip 
+                                                key={i} 
+                                                label={synonym} 
+                                                size="small" 
+                                                sx={{ 
+                                                  height: '20px', 
+                                                  fontSize: '0.7rem',
+                                                  backgroundColor: theme => alpha(theme.palette.success.main, 0.1),
+                                                  color: 'success.main'
+                                                }}
+                                              />
+                                            ))}
+                                            {entitySummaries[entity.id].data.synonyms.length > 5 && (
+                                              <Chip 
+                                                label={`+${entitySummaries[entity.id].data.synonyms.length - 5} more`}
+                                                size="small"
+                                                sx={{ height: '20px', fontSize: '0.7rem' }}
+                                              />
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                      
+                                      {/* Link to UniProt Taxonomy */}
+                                      {entitySummaries[entity.id]?.data?.url && (
+                                        <Box sx={{ mt: 1 }}>
+                                          <Link 
+                                            href={entitySummaries[entity.id].data.url}
+                                            target="_blank"
+                                            rel="noopener"
+                                            sx={{ display: 'flex', alignItems: 'center', fontSize: '0.8rem' }}
+                                          >
+                                            <OpenInNewIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+                                            View in UniProt Taxonomy
+                                          </Link>
+                                        </Box>
+                                      )}
+                                    </Box>
+                                  )}
                                 </CardContent>
                               </Card>
                             </Grid>
