@@ -99,7 +99,7 @@ export const fetchProteinData = async (uniprotId) => {
       
       return {
         name: proteinName,
-        displayName: geneSymbol || proteinName.split(' ')[0] || accession,
+        displayName: geneSymbol || proteinName || accession,
         function: functionText,
         geneName: geneSymbol || 'Unknown',
         geneNames: data.genes?.map(g => g.geneName?.value).filter(Boolean) || [],

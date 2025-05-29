@@ -378,7 +378,7 @@ function NodeVisualization({ executionResult }) {
       };
       
       // Helper to add an entity to the right category
-      const addEntityToCollection = (entity, entityTypeHint = null) => {
+      const addEntityToCollection = async (entity, entityTypeHint = null) => {
         if (!entity || !entity.id) return;
         
         // Determine the entity type - FIRST check the ID to get the correct type
@@ -454,26 +454,55 @@ function NodeVisualization({ executionResult }) {
             displayName = formatEntityName(entity.id, null);
           }
           
-          extractedEntities[entityType].push({
+          const newEntity = {
             id: entity.id,
             name: displayName,
             // Include any additional properties the entity has
             ...entity,
             // Make sure the display name is properly set
             displayName: displayName
-          });
+          };
+          
+          extractedEntities[entityType].push(newEntity);
+          
+          // For protein entities, fetch the actual protein name in the background
+          if (entityType === 'proteins' && (!entity.name || entity.name === displayName)) {
+            fetchProteinData(entity.id).then(proteinData => {
+              if (proteinData && proteinData.name) {
+                // Update the entity with the fetched protein name
+                const entityIndex = extractedEntities.proteins.findIndex(e => e.id === entity.id);
+                if (entityIndex !== -1) {
+                  extractedEntities.proteins[entityIndex] = {
+                    ...extractedEntities.proteins[entityIndex],
+                    name: proteinData.name,
+                    displayName: proteinData.name,
+                    ...proteinData
+                  };
+                  // Trigger a re-render by updating the state
+                  setEntities(prevEntities => ({
+                    ...prevEntities,
+                    proteins: [...extractedEntities.proteins]
+                  }));
+                }
+              }
+            }).catch(error => {
+              console.error(`Error fetching protein name for ${entity.id}:`, error);
+            });
+          }
         }
       };
       
       // Process the result array
       if (Array.isArray(result)) {
+        const entityPromises = [];
+        
         result.forEach(item => {
           // Check for various entity formats
           
           // Gene objects (g)
           if (item.g) {
             const gene = item.g;
-            addEntityToCollection(gene, 'genes');
+            entityPromises.push(addEntityToCollection(gene, 'genes'));
           }
           
           // Check for entities with 'p' property - need to determine if it's protein or pathway
@@ -481,12 +510,12 @@ function NodeVisualization({ executionResult }) {
             // Check if this is actually a pathway based on ID
             const entityType = getEntityTypeFromId(item.p.id);
             if (entityType === 'pathways') {
-              addEntityToCollection(item.p, 'pathways');
+              entityPromises.push(addEntityToCollection(item.p, 'pathways'));
             } else if (entityType === 'phenotypes') {
-              addEntityToCollection(item.p, 'phenotypes');
+              entityPromises.push(addEntityToCollection(item.p, 'phenotypes'));
             } else {
               // Default to protein if no clear type detected
-              addEntityToCollection(item.p, 'proteins');
+              entityPromises.push(addEntityToCollection(item.p, 'proteins'));
             }
           } else if (item['p.id']) {
             // Protein/Pathway ID and possibly name format - check ID first
@@ -496,11 +525,11 @@ function NodeVisualization({ executionResult }) {
             };
             const entityType = getEntityTypeFromId(entity.id);
             if (entityType === 'pathways') {
-              addEntityToCollection(entity, 'pathways');
+              entityPromises.push(addEntityToCollection(entity, 'pathways'));
             } else if (entityType === 'phenotypes') {
-              addEntityToCollection(entity, 'phenotypes');
+              entityPromises.push(addEntityToCollection(entity, 'phenotypes'));
             } else {
-              addEntityToCollection(entity, 'proteins');
+              entityPromises.push(addEntityToCollection(entity, 'proteins'));
             }
           }
           
@@ -508,18 +537,18 @@ function NodeVisualization({ executionResult }) {
           if (item.d && item.d.id) {
             const entityType = getEntityTypeFromId(item.d.id);
             if (entityType === 'drugs' || entityType === 'compounds') {
-              addEntityToCollection(item.d, entityType);
+              entityPromises.push(addEntityToCollection(item.d, entityType));
             } else if (entityType === 'diseases') {
-              addEntityToCollection(item.d, 'diseases');
+              entityPromises.push(addEntityToCollection(item.d, 'diseases'));
             } else if (entityType === 'pathways') {
-              addEntityToCollection(item.d, 'pathways');
+              entityPromises.push(addEntityToCollection(item.d, 'pathways'));
             } else {
               // Try to determine if it's a drug or disease from context
               if (item.d.id.includes('drug') || item.d.id.includes('chembl') || 
                   item.d.id.includes('pubchem') || item.d.id.includes('chebi')) {
-                addEntityToCollection(item.d, 'drugs');
+                entityPromises.push(addEntityToCollection(item.d, 'drugs'));
               } else {
-                addEntityToCollection(item.d, 'diseases');
+                entityPromises.push(addEntityToCollection(item.d, 'diseases'));
               }
             }
           }
@@ -531,7 +560,7 @@ function NodeVisualization({ executionResult }) {
             
             // If the value has an id property, try to classify and add it
             if (value.id) {
-              addEntityToCollection(value);
+              entityPromises.push(addEntityToCollection(value));
             }
           });
           
@@ -540,52 +569,65 @@ function NodeVisualization({ executionResult }) {
                (item.d.id.includes('interpro') || item.d.id.includes('pfam'))) || 
               (item.domain && item.domain.id)) {
             const domain = item.domain || item.d;
-            addEntityToCollection(domain, 'domains');
+            entityPromises.push(addEntityToCollection(domain, 'domains'));
           }
           
           // GO Term objects
           if (item.go || item.goterm || 
               (item.g && item.g.id && item.g.id.includes('GO:'))) {
             const goTerm = item.go || item.goterm || item.g;
-            addEntityToCollection(goTerm, 'goterms');
+            entityPromises.push(addEntityToCollection(goTerm, 'goterms'));
           }
           
           // Phenotype objects
           if (item.phenotype || (item.p && item.p.id && item.p.id.includes('HP:'))) {
             const phenotype = item.phenotype || item.p;
-            addEntityToCollection(phenotype, 'phenotypes');
+            entityPromises.push(addEntityToCollection(phenotype, 'phenotypes'));
           }
           
           // Side effect objects
           if (item.se || item.sideeffect ||
               (item.s && item.s.id && item.s.id.includes('meddra'))) {
             const sideEffect = item.se || item.sideeffect || item.s;
-            addEntityToCollection(sideEffect, 'sideeffects');
+            entityPromises.push(addEntityToCollection(sideEffect, 'sideeffects'));
           }
           
           // EC Number objects
           if (item.ec || (item.e && item.e.id && item.e.id.includes('eccode'))) {
             const ecNumber = item.ec || item.e;
-            addEntityToCollection(ecNumber, 'ecnumbers');
+            entityPromises.push(addEntityToCollection(ecNumber, 'ecnumbers'));
           }
           
           // Organism objects
           if (item.organism || (item.o && item.o.id && item.o.id.includes('taxon'))) {
             const organism = item.organism || item.o;
-            addEntityToCollection(organism, 'organisms');
+            entityPromises.push(addEntityToCollection(organism, 'organisms'));
           }
+        });
+        
+        // Wait for all entity processing to complete
+        Promise.all(entityPromises).then(() => {
+          setEntities(extractedEntities);
+          setLoading(false);
         });
       }
       
       // Also handle flat result JSON structures (no array)
       else if (result && typeof result === 'object') {
+        const entityPromises = [];
         Object.entries(result).forEach(([key, value]) => {
           if (value && typeof value === 'object') {
             // If the value has an id property, try to classify and add it
             if (value.id) {
-              addEntityToCollection(value);
+              entityPromises.push(addEntityToCollection(value));
             }
           }
+        });
+        
+        // Wait for processing
+        Promise.all(entityPromises).then(() => {
+          setEntities(extractedEntities);
+          setLoading(false);
         });
       }
       
@@ -627,6 +669,7 @@ function NodeVisualization({ executionResult }) {
         });
         
         // Process all property groups as entities
+        const propertyEntityPromises = [];
         Object.entries(propertyGroups).forEach(([prefix, entities]) => {
           entities.forEach(entity => {
             // Only process entities with at least an ID or name
@@ -688,18 +731,32 @@ function NodeVisualization({ executionResult }) {
               }
               
               // Add to the appropriate collection
-              addEntityToCollection(entity, entityType);
+              propertyEntityPromises.push(addEntityToCollection(entity, entityType));
             }
           });
         });
+        
+        // Wait for property-based entities to be processed
+        if (propertyEntityPromises.length > 0) {
+          Promise.all(propertyEntityPromises).then(() => {
+            setEntities(extractedEntities);
+            setLoading(false);
+          });
+        } else if (Object.keys(propertyGroups).length === 0) {
+          // No property groups found, set entities and stop loading
+          setEntities(extractedEntities);
+          setLoading(false);
+        }
+      } else {
+        // No arrays to process, set entities and stop loading
+        setEntities(extractedEntities);
+        setLoading(false);
       }
-      
-      setEntities(extractedEntities);
     } catch (error) {
       console.error("Error parsing query results:", error);
+      setLoading(false);
     }
     
-    setLoading(false);
   }, [executionResult]);
   
   // Check if we have any entities to display
@@ -931,10 +988,17 @@ function NodeVisualization({ executionResult }) {
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {entity.displayName || 
-                                 entity.name || 
-                                 (entity.genes && entity.genes.length > 0 ? entity.genes[0] : null) || 
-                                 formatEntityName(entity.id, null)}
+                                {/* For protein entities, prioritize the protein name over gene symbol */}
+                                {type === 'proteins' ? (
+                                  entity.name || 
+                                  entity.displayName || 
+                                  formatEntityName(entity.id, null)
+                                ) : (
+                                  entity.displayName || 
+                                  entity.name || 
+                                  (entity.genes && entity.genes.length > 0 ? entity.genes[0] : null) || 
+                                  formatEntityName(entity.id, null)
+                                )}
                               </Typography>
                               {entity.id && (
                                 <Chip 
