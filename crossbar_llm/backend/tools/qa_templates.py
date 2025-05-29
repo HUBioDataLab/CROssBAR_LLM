@@ -140,7 +140,7 @@ RETURN similar_protein_domains.name, indirect_domains.name, vector.similarity.co
 The question is:
 {question}
 """
-"""
+
 
 VECTOR_SEARCH_CYPHER_GENERATION_PROMPT = PromptTemplate(
     input_variables=["vector_index","node_types", "node_properties", "edge_properties", "edges", "question",], 
