@@ -258,6 +258,9 @@ function VectorSearch({
     // Check if topK is set
     if (!topK) return false;
     
+    // Check if embedding type is set (required for vector search)
+    if (!embeddingType) return false;
+    
     return true;
   };
   
@@ -440,7 +443,7 @@ function VectorSearch({
 
   const handleGenerateQuery = async () => {
     if (!isSettingsValid()) {
-      alert("Please configure the LLM settings first");
+      alert("Please configure the LLM settings and select a vector type first");
       setShowSettings(true);
       setHighlightSettings(true);
       return;
@@ -536,7 +539,7 @@ function VectorSearch({
     if (!generatedQuery) return;
     
     if (!isSettingsValid()) {
-      alert("Please configure the LLM settings first");
+      alert("Please configure the LLM settings and select a vector type first");
       setShowSettings(true);
       setHighlightSettings(true);
       return;
@@ -617,7 +620,7 @@ function VectorSearch({
   
   const handleGenerateAndRun = async () => {
     if (!isSettingsValid()) {
-      alert("Please configure the LLM settings first");
+      alert("Please configure the LLM settings and select a vector type first");
       setShowSettings(true);
       setHighlightSettings(true);
       return;
@@ -1395,7 +1398,7 @@ function VectorSearch({
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings first"}>
+              <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings and select vector type first"}>
                 <Box 
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
@@ -1417,7 +1420,7 @@ function VectorSearch({
                 </Box>
               </Tooltip>
               
-              <Tooltip title={isSettingsValid() ? "Generate and Run Query" : "Configure settings first"}>
+              <Tooltip title={isSettingsValid() ? "Generate and Run Query" : "Configure settings and select vector type first"}>
                 <Box
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
