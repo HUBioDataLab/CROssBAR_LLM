@@ -40,7 +40,7 @@ export const fetchGeneSummary = async (geneId) => {
         geneType: gene.type || null,
         organism: gene.organism?.scientificname || null,
         genomicLocation: gene.mapLocation || null,
-        displayName: symbol || gene.name || `Gene ${numericId}`
+        displayName: symbol || gene.name || `Gene ID: ${numericId}`
       };
     }
     
