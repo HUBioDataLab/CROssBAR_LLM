@@ -72,6 +72,7 @@ function VectorSearch({
   const [generatedQuery, setGeneratedQuery] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeButton, setActiveButton] = useState(null);
   const [showWarning, setShowWarning] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showDebugLogs, setShowDebugLogs] = useState(false);
@@ -454,6 +455,7 @@ function VectorSearch({
     setError(null);
     
     setLoading(true);
+    setActiveButton('generate');
     updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
     setLogs('');
     
@@ -526,6 +528,7 @@ function VectorSearch({
       }
     } finally {
       setLoading(false);
+      setActiveButton(null);
     }
   };
   
@@ -548,6 +551,7 @@ function VectorSearch({
     setError(null);
     
     setLoading(true);
+    setActiveButton('run');
     setLogs('');
     updateRealtimeLogs(prev => prev + 'Executing Cypher query from vector search...\n');
     
@@ -607,6 +611,7 @@ function VectorSearch({
       }
     } finally {
       setLoading(false);
+      setActiveButton(null);
     }
   };
   
@@ -627,6 +632,7 @@ function VectorSearch({
     setError(null);
     
     setLoading(true);
+    setActiveButton('generateAndRun');
     updateRealtimeLogs(verbose ? 'Generating and running Cypher query...\n' : '');
     setRunnedQuery(false);
     setGeneratedQuery('');
@@ -788,6 +794,7 @@ function VectorSearch({
       }
     } finally {
       setLoading(false);
+      setActiveButton(null);
     }
   };
   
@@ -1396,7 +1403,7 @@ function VectorSearch({
                   <Button
                     variant="outlined"
                     onClick={handleGenerateQuery}
-                    disabled={loading || !question || !isSettingsValid()}
+                    disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generate')}
                     startIcon={<SendIcon />}
                     sx={{ 
                       borderRadius: '12px',
@@ -1405,7 +1412,7 @@ function VectorSearch({
                       fontSize: '0.75rem'
                     }}
                   >
-                    {loading ? <CircularProgress size={24} /> : 'Only Generate Query'}
+                    {loading && activeButton === 'generate' ? <CircularProgress size={24} /> : 'Only Generate Query'}
                   </Button>
                 </Box>
               </Tooltip>
@@ -1419,7 +1426,7 @@ function VectorSearch({
                     variant="contained"
                     color="primary"
                     onClick={handleGenerateAndRun}
-                    disabled={loading || !question || !isSettingsValid()}
+                    disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generateAndRun')}
                     startIcon={<PlayArrowIcon />}
                     sx={{ 
                       borderRadius: '12px',
@@ -1427,7 +1434,7 @@ function VectorSearch({
                       height: '44px'
                     }}
                   >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run Query'}
+                    {loading && activeButton === 'generateAndRun' ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run Query'}
                   </Button>
                 </Box>
               </Tooltip>
@@ -1552,7 +1559,7 @@ function VectorSearch({
               <Button
                 variant="outlined"
                 onClick={() => setGeneratedQuery(originalQuery)}
-                disabled={loading}
+                disabled={false}
                 startIcon={<RestoreIcon />}
                 sx={{ 
                   borderRadius: '12px',
@@ -1565,8 +1572,8 @@ function VectorSearch({
                 variant="contained"
                 color="primary"
                 onClick={handleRunGeneratedQuery}
-                disabled={loading || !isSettingsValid()}
-                startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowIcon />}
+                disabled={!isSettingsValid() || (loading && activeButton !== 'run')}
+                startIcon={loading && activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
                 sx={{ 
                   borderRadius: '12px',
                   px: 3

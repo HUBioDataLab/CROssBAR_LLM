@@ -1250,7 +1250,7 @@ function QueryInput({
                     <Button
                       variant="outlined"
                       onClick={handleGenerateQuery}
-                      disabled={!question || !isSettingsValid() || loading}
+                      disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generate')}
                       startIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
                       sx={{ 
                         borderRadius: '12px',
@@ -1289,7 +1289,7 @@ function QueryInput({
                       variant="contained"
                       color="primary"
                       onClick={handleGenerateAndRun}
-                      disabled={!question || !isSettingsValid() || loading}
+                      disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generateAndRun')}
                       startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowIcon />}
                       sx={{ 
                         borderRadius: '12px',
@@ -1423,7 +1423,7 @@ function QueryInput({
               <Button
                 variant="outlined"
                 onClick={() => setEditableQuery(generatedQuery)}
-                disabled={loading}
+                disabled={false}
                 startIcon={<RestoreIcon />}
                 sx={{ 
                   borderRadius: '12px',
@@ -1450,7 +1450,7 @@ function QueryInput({
                   variant="contained"
                   color="primary"
                   onClick={handleRunGeneratedQuery}
-                  disabled={!isSettingsValid() || !editableQuery.trim() || loading}
+                  disabled={!isSettingsValid() || !editableQuery.trim() || (loading && activeButton !== 'run')}
                   startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowIcon />}
                   sx={{ 
                     borderRadius: '12px',
