@@ -46,6 +46,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import RestoreIcon from '@mui/icons-material/Restore';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import NodeVisualization from './NodeVisualization';
 
 function VectorSearch({ 
   setQueryResult, 
@@ -84,6 +85,8 @@ function VectorSearch({
   const [retryCountdown, setRetryCountdown] = useState(0);
   const [limitType, setLimitType] = useState('');
   const [originalQuery, setOriginalQuery] = useState('');
+  // Local state for displaying NodeVisualization
+  const [localExecutionResult, setLocalExecutionResult] = useState(null);
   // Refs for scroll sync between textarea and syntax highlighter
   const textareaRef = useRef(null);
   const highlighterRef = useRef(null);
@@ -489,6 +492,7 @@ function VectorSearch({
       // Set the query result for display
       setQueryResult(queryData);
       setExecutionResult(null);
+      setLocalExecutionResult(null);
       setRunnedQuery(false);
       setError(null);
       
@@ -563,6 +567,10 @@ function VectorSearch({
         result: response.data.result,
         response: response.data.response
       });
+      setLocalExecutionResult({
+        result: response.data.result,
+        response: response.data.response
+      });
       setRunnedQuery(true);
       setError(null);
       
@@ -617,6 +625,7 @@ function VectorSearch({
     setGeneratedQuery('');
     setQueryResult(null);
     setExecutionResult(null);
+    setLocalExecutionResult(null);
     setLogs('');
     clearLogs();
     
@@ -732,6 +741,10 @@ function VectorSearch({
       const runResponse = await axios.post('/run_query/', runRequestData);
       
       setExecutionResult({
+        result: runResponse.data.result,
+        response: runResponse.data.response
+      });
+      setLocalExecutionResult({
         result: runResponse.data.result,
         response: runResponse.data.response
       });
@@ -1559,6 +1572,11 @@ function VectorSearch({
           </>
         )}
       </Paper>
+
+      {/* Node Visualization for execution results */}
+      {localExecutionResult && (
+        <NodeVisualization executionResult={localExecutionResult} />
+      )}
 
       {error && (
         <Zoom in={!!error}>
