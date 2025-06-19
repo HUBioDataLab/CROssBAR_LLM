@@ -1079,8 +1079,22 @@ function VectorSearch({
                         labelId="provider-label"
                         value={provider}
                         onChange={(e) => {
-                          setProvider(e.target.value);
-                          setLlmType('');
+                          const selectedProvider = e.target.value;
+                          setProvider(selectedProvider);
+                          
+                          // Automatically select the first available model for the provider
+                          if (selectedProvider && modelChoices[selectedProvider]) {
+                            const firstModel = modelChoices[selectedProvider].find(model => 
+                              typeof model === 'string' // Skip separator and label objects
+                            );
+                            if (firstModel) {
+                              setLlmType(firstModel);
+                            } else {
+                              setLlmType('');
+                            }
+                          } else {
+                            setLlmType('');
+                          }
                         }}
                         label="Provider"
                       >
