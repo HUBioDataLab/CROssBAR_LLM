@@ -62,7 +62,7 @@ function VectorSearch({
   setQuestion,
   setRealtimeLogs
 }) {
-  const [topK, setTopK] = useState(5);
+  const [topK, setTopK] = useState(10);
   const [verbose, setVerbose] = useState(false);
   const [vectorCategory, setVectorCategory] = useState('');
   const [embeddingType, setEmbeddingType] = useState('');
@@ -450,6 +450,9 @@ function VectorSearch({
       return;
     }
     
+    // Clear any previous errors at the start of the operation
+    setError(null);
+    
     setLoading(true);
     updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
     setLogs('');
@@ -494,7 +497,6 @@ function VectorSearch({
       setExecutionResult(null);
       setLocalExecutionResult(null);
       setRunnedQuery(false);
-      setError(null);
       
       if (verbose) {
         if (response.data.logs) {
@@ -542,6 +544,9 @@ function VectorSearch({
       return;
     }
     
+    // Clear any previous errors at the start of the operation
+    setError(null);
+    
     setLoading(true);
     setLogs('');
     updateRealtimeLogs(prev => prev + 'Executing Cypher query from vector search...\n');
@@ -572,7 +577,6 @@ function VectorSearch({
         response: response.data.response
       });
       setRunnedQuery(true);
-      setError(null);
       
       if (verbose) {
         if (response.data.logs) {
@@ -618,6 +622,9 @@ function VectorSearch({
     if (rateLimited) {
       return;
     }
+    
+    // Clear any previous errors at the start of the operation
+    setError(null);
     
     setLoading(true);
     updateRealtimeLogs(verbose ? 'Generating and running Cypher query...\n' : '');
@@ -750,7 +757,6 @@ function VectorSearch({
       });
       setQueryResult(queryString);
       setRunnedQuery(true);
-      setError(null);
       
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Query execution completed successfully!\n`);

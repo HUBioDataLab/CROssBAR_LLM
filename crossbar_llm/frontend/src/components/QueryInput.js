@@ -70,7 +70,7 @@ function QueryInput({
   setQuestion,
   setRealtimeLogs
 }) {
-  const [topK, setTopK] = useState(5);
+  const [topK, setTopK] = useState(10);
   const [verbose, setVerbose] = useState(false);
   const [runnedQuery, setRunnedQuery] = useState(false);
   const [generatedQuery, setGeneratedQuery] = useState('');
@@ -460,6 +460,9 @@ function QueryInput({
       return;
     }
     
+    // Clear any previous errors at the start of the operation
+    setError(null);
+    
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -495,7 +498,6 @@ function QueryInput({
       setQueryResult(null);
       setExecutionResult(null);
       setRunnedQuery(false);
-      setError(null);
       
       // Collapse settings panel to show results
       if (showSettings) {
@@ -554,6 +556,9 @@ function QueryInput({
       return;
     }
     
+    // Clear any previous errors at the start of the operation
+    setError(null);
+    
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -583,7 +588,6 @@ function QueryInput({
         response: response.data.response
       });
       setRunnedQuery(true);
-      setError(null);
       
       // Collapse settings panel to show results
       if (showSettings) {
@@ -641,6 +645,9 @@ function QueryInput({
     if (rateLimited) {
       return;
     }
+    
+    // Clear any previous errors at the start of the operation
+    setError(null);
     
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -711,7 +718,6 @@ function QueryInput({
         response: runResponse.data.response
       });
       setRunnedQuery(true);
-      setError(null);
       
       // Collapse settings panel to show results
       if (showSettings) {
