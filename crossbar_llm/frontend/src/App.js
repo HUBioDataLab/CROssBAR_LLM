@@ -668,6 +668,11 @@ function App() {
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               © {new Date().getFullYear()} CROssBAR
             </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              <a href="https://www.flaticon.com/free-icons/chatbot" title="chatbot icons" style={{ color: 'inherit', textDecoration: 'none' }}>
+                Chatbot icons created by rukanicon - Flaticon
+              </a>
+            </Typography>
           </Box>
         </Box>
       </Box>
