@@ -48,9 +48,9 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
 
-function VectorSearch({ 
-  setQueryResult, 
-  setExecutionResult, 
+function VectorSearch({
+  setQueryResult,
+  setExecutionResult,
   addLatestQuery,
   provider,
   setProvider,
@@ -140,21 +140,21 @@ function VectorSearch({
       "deepseek/deepseek-r1-distill-llama-70b",
       "deepseek/deepseek-r1:free",
       "deepseek/deepseek-r1:nitro",
-    ], 
+    ],
     Google: [
+      'gemini-2.0-flash',
       'gemini-2.5-flash-preview-04-17',
       'gemini-2.5-pro-preview-03-25',
       'gemini-2.0-flash-thinking-exp-01-21',
       'gemini-2.0-pro-exp-02-05',
-      'gemini-2.0-flash',
       'gemini-2.0-flash-lite',
       'gemini-pro',
       'gemini-1.5-pro-latest',
       'gemini-1.5-flash-latest',
     ],
     Groq: [
-      'llama3-8b-8192',
       'llama3-70b-8192',
+      'llama3-8b-8192',
       'mixtral-8x7b-32768',
       'gemma-7b-it',
       'gemma2-9b-it',
@@ -169,9 +169,9 @@ function VectorSearch({
       'nvidia/nemotron-4-340b-instruct',
     ],
   };
-  
+
   const supportedModels = ['gpt-4o', 'claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.0-flash'];
-  
+
   // Fetch API keys status on component mount
   useEffect(() => {
     const fetchApiKeysStatus = async () => {
@@ -181,7 +181,7 @@ function VectorSearch({
           console.log('API keys status:', response.data);
           setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
-          
+
           // Set API key to "env" if the selected provider has an API key in .env
           if (provider && response.data[provider]) {
             setApiKey('env');
@@ -191,22 +191,22 @@ function VectorSearch({
         console.error('Error fetching API keys status:', error);
       }
     };
-    
+
     fetchApiKeysStatus();
   }, [provider, setApiKey]);
-  
+
   // Check if the selected provider requires an API key to be entered
   const providerNeedsApiKey = useCallback(() => {
     if (!apiKeysLoaded) return true;
-    
+
     // If the provider has an API key in .env and user wants to use it,
     // no need to enter one
     if (apiKeysStatus[provider] && apiKey === 'env') {
       return false;
     }
-    
+
     // These providers always need an API key if not in .env
-    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' || 
+    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' ||
            provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
   }, [provider, apiKeysStatus, apiKeysLoaded, apiKey]);
 
@@ -222,7 +222,7 @@ function VectorSearch({
       }
     }
   }, [provider, apiKeysStatus, apiKeysLoaded, setApiKey]);
-  
+
   // Update both local and app-level realtime logs
   const updateRealtimeLogs = useCallback((newLogs) => {
     if (typeof newLogs === 'function') {
@@ -233,37 +233,37 @@ function VectorSearch({
       setRealtimeLogs(newLogs);
     }
   }, [setRealtimeLogs]);
-  
+
   // Clear logs
   const clearLogs = useCallback(() => {
     setLocalRealtimeLogs('');
     setRealtimeLogs('');
     console.log('Logs cleared');
   }, [setRealtimeLogs]);
-  
+
   // Function to check if settings are valid
   const isSettingsValid = () => {
     // Check if provider is selected
     if (!provider) return false;
-    
+
     // Check if model is selected
     if (!llmType) return false;
-    
+
     // Check if API key is provided for providers that need it
     // Only check if provider needs a key AND user is not using the env key
     if (providerNeedsApiKey() && apiKey !== 'env' && !apiKey) {
       return false;
     }
-    
+
     // Check if topK is set
     if (!topK) return false;
-    
+
     // Check if embedding type is set (required for vector search)
     if (!embeddingType) return false;
-    
+
     return true;
   };
-  
+
   // Highlight settings button when hovering over action buttons if settings are not valid
   const handleActionButtonHover = (isHovering) => {
     if (!isSettingsValid() && isHovering) {
@@ -275,32 +275,32 @@ function VectorSearch({
       }, 300);
     }
   };
-  
+
   // Reset highlight when settings become valid
   useEffect(() => {
     if (isSettingsValid()) {
       setHighlightSettings(false);
     }
   }, [provider, llmType, apiKey, topK]);
-  
+
   // Enhanced log streaming setup with better error handling and reconnection
   const setupLogStream = () => {
     if (verbose) {
       console.log('Setting up log stream for vector search verbose mode');
-      
+
       // Close any existing connection but don't clear logs
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
-      
+
       // Don't add any initialization messages
-      
+
       try {
         // Create new EventSource connection with a timestamp to avoid caching
         const timestamp = new Date().getTime();
         eventSourceRef.current = new EventSource(`/stream-logs?t=${timestamp}`);
-        
+
         // Connection opened successfully - no message needed
         eventSourceRef.current.onopen = () => {
           // Just auto-scroll to bottom of log container
@@ -308,14 +308,14 @@ function VectorSearch({
             logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
           }
         };
-        
+
         // Handle incoming messages
         eventSourceRef.current.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
             if (data.log) {
               updateRealtimeLogs(prev => prev + data.log + '\n');
-              
+
               // Auto-scroll to bottom of log container
               if (logContainerRef.current) {
                 logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
@@ -326,17 +326,17 @@ function VectorSearch({
             // Don't add error messages to the logs
           }
         };
-        
+
         // Handle connection errors - don't add messages about connection issues
         eventSourceRef.current.onerror = (error) => {
           console.error('EventSource failed:', error);
-          
+
           // Try to reconnect after a delay if verbose is still enabled
           if (eventSourceRef.current) {
             eventSourceRef.current.close();
             eventSourceRef.current = null;
           }
-          
+
           setTimeout(() => {
             if (verbose && !eventSourceRef.current) {
               setupLogStream();
@@ -349,7 +349,7 @@ function VectorSearch({
       }
     }
   };
-  
+
   // Improved cleanup function - don't clear logs when cleaning up
   const cleanupLogStream = () => {
     if (eventSourceRef.current) {
@@ -370,25 +370,25 @@ function VectorSearch({
       clearLogs();
     }
   }, [verbose, clearLogs]);
-  
+
   // Cleanup on component unmount
   useEffect(() => {
     return () => cleanupLogStream();
   }, []);
-  
+
   // Listen for clear logs event
   useEffect(() => {
     const handleClearLogs = () => {
       clearLogs();
     };
-    
+
     window.addEventListener('clearDebugLogs', handleClearLogs);
-    
+
     return () => {
       window.removeEventListener('clearDebugLogs', handleClearLogs);
     };
   }, [clearLogs]);
-  
+
   // Helper function to handle rate limiting errors
   const handleRateLimitError = (error) => {
     if (error.response && error.response.status === 429) {
@@ -398,12 +398,12 @@ function VectorSearch({
       setRetryAfter(retrySeconds);
       setRetryCountdown(retrySeconds);
       setLimitType(limitType);
-      
+
       // Clear any existing countdown timer
       if (countdownTimerRef.current) {
         clearInterval(countdownTimerRef.current);
       }
-      
+
       // Set up countdown timer
       countdownTimerRef.current = setInterval(() => {
         setRetryCountdown(prev => {
@@ -415,23 +415,23 @@ function VectorSearch({
           return prev - 1;
         });
       }, 1000);
-      
+
       return error.response.data.detail?.error || `Rate limit exceeded. Please try again in ${retrySeconds} seconds.`;
     }
-    
+
     // Handle other types of errors
     if (error.response?.data?.detail) {
       if (typeof error.response.data.detail === 'object') {
-        return error.response.data.detail.error || 
-               error.response.data.detail.msg || 
+        return error.response.data.detail.error ||
+               error.response.data.detail.msg ||
                JSON.stringify(error.response.data.detail);
       }
       return error.response.data.detail;
     }
-    
+
     return error.message || 'An unknown error occurred';
   };
-  
+
   // Clean up the countdown timer on unmount
   useEffect(() => {
     return () => {
@@ -448,20 +448,20 @@ function VectorSearch({
       setHighlightSettings(true);
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
     // Clear any previous errors at the start of the operation
     setError(null);
-    
+
     setLoading(true);
     setActiveButton('generate');
     updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
     setLogs('');
-    
+
     try {
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Sending request with parameters:
@@ -474,10 +474,10 @@ function VectorSearch({
 - Vector file size: ${vectorFile ? JSON.stringify(vectorFile).length : 0} bytes
 `);
       }
-      
+
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
-      
+
       const embedding = vectorFile ? JSON.stringify(vectorFile) : null;
       const response = await axios.post('/generate_query/', {
         question,
@@ -489,20 +489,20 @@ function VectorSearch({
         embedding: embedding,
         vector_category: vectorCategory,
       });
-      
+
       // Process the query result before setting it
       const queryData = response.data.query;
-      
+
       // Set the generated query regardless of type
       setGeneratedQuery(queryData);
       setOriginalQuery(queryData);
-      
+
       // Set the query result for display
       setQueryResult(queryData);
       setExecutionResult(null);
       setLocalExecutionResult(null);
       setRunnedQuery(false);
-      
+
       if (verbose) {
         if (response.data.logs) {
           setLogs(response.data.logs);
@@ -511,7 +511,7 @@ function VectorSearch({
           updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
-      
+
       addLatestQuery({
         question: question,
         query: queryData,
@@ -525,7 +525,7 @@ function VectorSearch({
       // Use the rate limit handler
       const errorMessage = handleRateLimitError(err);
       setError(errorMessage);
-      
+
       if (verbose) {
         updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
       }
@@ -534,38 +534,38 @@ function VectorSearch({
       setActiveButton(null);
     }
   };
-  
+
   const handleRunGeneratedQuery = async () => {
     if (!generatedQuery) return;
-    
+
     if (!isSettingsValid()) {
       alert("Please configure the LLM settings and select a vector type first");
       setShowSettings(true);
       setHighlightSettings(true);
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
     // Clear any previous errors at the start of the operation
     setError(null);
-    
+
     setLoading(true);
     setActiveButton('run');
     setLogs('');
     updateRealtimeLogs(prev => prev + 'Executing Cypher query from vector search...\n');
-    
+
     try {
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Query to execute:\n${generatedQuery}\n\n`);
       }
-      
+
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
-      
+
       const response = await axios.post('/run_query/', {
         query: generatedQuery,
         question,
@@ -574,7 +574,7 @@ function VectorSearch({
         api_key: effectiveApiKey,
         verbose,
       });
-      
+
       setExecutionResult({
         result: response.data.result,
         response: response.data.response
@@ -584,7 +584,7 @@ function VectorSearch({
         response: response.data.response
       });
       setRunnedQuery(true);
-      
+
       if (verbose) {
         if (response.data.logs) {
           setLogs(response.data.logs);
@@ -593,7 +593,7 @@ function VectorSearch({
           updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
-      
+
       addLatestQuery({
         question: question,
         query: generatedQuery,
@@ -608,7 +608,7 @@ function VectorSearch({
       // Use the rate limit handler
       const errorMessage = handleRateLimitError(err);
       setError(errorMessage);
-      
+
       if (verbose) {
         updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
       }
@@ -617,7 +617,7 @@ function VectorSearch({
       setActiveButton(null);
     }
   };
-  
+
   const handleGenerateAndRun = async () => {
     if (!isSettingsValid()) {
       alert("Please configure the LLM settings and select a vector type first");
@@ -625,15 +625,15 @@ function VectorSearch({
       setHighlightSettings(true);
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
     // Clear any previous errors at the start of the operation
     setError(null);
-    
+
     setLoading(true);
     setActiveButton('generateAndRun');
     updateRealtimeLogs(verbose ? 'Generating and running Cypher query...\n' : '');
@@ -644,15 +644,15 @@ function VectorSearch({
     setLocalExecutionResult(null);
     setLogs('');
     clearLogs();
-    
+
     if (verbose) {
       updateRealtimeLogs('Starting vector search query generation...\n');
     }
-    
+
     try {
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
-      
+
       // Prepare the request data
       const requestData = {
         question,
@@ -662,7 +662,7 @@ function VectorSearch({
         top_k: topK,
         verbose,
       };
-      
+
       // Add vector data if available, otherwise just use vector index for category-based search
       if (vectorFile) {
         requestData.embedding = JSON.stringify(vectorFile);
@@ -671,17 +671,17 @@ function VectorSearch({
         // If we have a selected file but no vectorFile data yet,
         // we need to include the file in the request
         requestData.vector_index = embeddingType;
-        
+
         // Create a FormData object to send the file
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('vector_category', vectorCategory);
         formData.append('embedding_type', embeddingType);
-        
+
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Uploading vector file: ${selectedFile.name}\n`);
         }
-        
+
         try {
           // Upload the file first
           const uploadResponse = await axios.post('/upload_vector/', formData, {
@@ -689,11 +689,11 @@ function VectorSearch({
               'Content-Type': 'multipart/form-data',
             },
           });
-          
+
           if (verbose) {
             updateRealtimeLogs(prev => prev + `File uploaded successfully\n`);
           }
-          
+
           // Use the uploaded vector data
           requestData.embedding = JSON.stringify(uploadResponse.data);
           setVectorFile(uploadResponse.data);
@@ -708,7 +708,7 @@ function VectorSearch({
           updateRealtimeLogs(prev => prev + `Using category-based vector search for ${vectorCategory} with ${embeddingType} embeddings\n`);
         }
       }
-      
+
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Generating vector search query with parameters:\n` +
           `Question: ${question}\n` +
@@ -719,31 +719,31 @@ function VectorSearch({
           `Embedding Type: ${embeddingType || 'N/A'}\n` +
           `Vector Data: ${vectorFile ? 'Provided' : 'Not provided'}\n\n`);
       }
-      
+
       const response = await axios.post('/generate_query/', requestData);
-      
+
       // Process the query result
       const generatedQuery = response.data.query;
-      
+
       // Handle case where generatedQuery is an object
       const queryString = typeof generatedQuery === 'object' ? JSON.stringify(generatedQuery) : generatedQuery;
-      
+
       setGeneratedQuery(queryString);
       setOriginalQuery(queryString);
-      
+
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Generated query: ${queryString}\n\n`);
-        
+
         if (response.data.logs) {
           setLogs(response.data.logs);
         }
       }
-      
+
       // Now run the generated query
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Running the generated query...\n`);
       }
-      
+
       // Prepare the run query request
       const runRequestData = {
         question: question,
@@ -753,9 +753,9 @@ function VectorSearch({
         api_key: effectiveApiKey,
         verbose: verbose
       };
-      
+
       const runResponse = await axios.post('/run_query/', runRequestData);
-      
+
       setExecutionResult({
         result: runResponse.data.result,
         response: runResponse.data.response
@@ -766,15 +766,15 @@ function VectorSearch({
       });
       setQueryResult(queryString);
       setRunnedQuery(true);
-      
+
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Query execution completed successfully!\n`);
-        
+
         if (runResponse.data.logs) {
           setLogs(prev => prev + '\n\n' + runResponse.data.logs);
         }
       }
-      
+
       // Update the latest queries
       addLatestQuery({
         question: question,
@@ -787,11 +787,11 @@ function VectorSearch({
       });
     } catch (err) {
       console.error('Error in vector search:', err);
-      
+
       // Use the rate limit handler
       const errorMessage = handleRateLimitError(err);
       setError(errorMessage);
-      
+
       if (verbose) {
         updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
       }
@@ -800,46 +800,46 @@ function VectorSearch({
       setActiveButton(null);
     }
   };
-  
+
   const handleSampleQuestionClick = async (sampleQuestionObj) => {
     if (!sampleQuestionObj) return;
-    
+
     // Clear any previous errors
     setError(null);
-    
+
     // Handle both string and object formats for backward compatibility
     if (typeof sampleQuestionObj === 'string') {
       setQuestion(sampleQuestionObj);
       return;
     }
-    
+
     // Set the question
     setQuestion(sampleQuestionObj.question || '');
-    
+
     // Reset vector-related state
     setVectorCategory('');
     setEmbeddingType('');
     setVectorFile(null);
     setSelectedFile(null);
-    
+
     // Set vector category if provided
     if (sampleQuestionObj.vectorCategory) {
       console.log('Setting vector category:', sampleQuestionObj.vectorCategory);
       setVectorCategory(sampleQuestionObj.vectorCategory);
     }
-    
+
     // Set embedding type if provided
     if (sampleQuestionObj.embeddingType) {
       console.log('Setting embedding type:', sampleQuestionObj.embeddingType);
       setEmbeddingType(sampleQuestionObj.embeddingType);
     }
-    
+
     // Set vector data if provided
     if (sampleQuestionObj.vectorData) {
       console.log('Setting vector data');
       setVectorFile(sampleQuestionObj.vectorData);
     }
-    
+
     // Load vector file if path is provided
     if (sampleQuestionObj.vectorFilePath) {
       try {
@@ -847,9 +847,9 @@ function VectorSearch({
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Loading vector file from public folder: ${sampleQuestionObj.vectorFilePath}\n`);
         }
-        
+
         const response = await fetch(`${process.env.PUBLIC_URL}/${sampleQuestionObj.vectorFilePath}`);
-        
+
         if (!response.ok) {
           const errorMsg = `Failed to fetch vector file: ${response.status} ${response.statusText}`;
           console.error(errorMsg);
@@ -859,14 +859,14 @@ function VectorSearch({
           }
           return;
         }
-        
+
         // For NPY files, we need to handle them as binary data
         const blob = await response.blob();
         const file = new File([blob], sampleQuestionObj.vectorFilePath);
-        
+
         // Set the selected file for upload
         setSelectedFile(file);
-        
+
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Vector file loaded successfully: ${file.name}\n`);
         }
@@ -884,7 +884,7 @@ function VectorSearch({
       }
     }
   };
-  
+
   const handleUpload = () => {
     const file = selectedFile;
     console.log('Uploading file:', file);
@@ -892,23 +892,23 @@ function VectorSearch({
       alert('Please select a file and vector category.');
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
     if (verbose) {
       updateRealtimeLogs(prev => prev + `Uploading vector file: ${file.name} (${file.size} bytes)\nCategory: ${vectorCategory}\nEmbedding Type: ${embeddingType || 'N/A'}\n`);
     }
-    
+
     const formData = new FormData();
     formData.append('vector_category', vectorCategory);
     if (embeddingType) {
       formData.append('embedding_type', embeddingType);
     }
     formData.append('file', file);
-    
+
     axios
       .post('/upload_vector/', formData, {
         headers: {
@@ -927,29 +927,29 @@ function VectorSearch({
         // Use the rate limit handler
         const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
-        
+
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Error uploading file: ${errorMessage}\n`);
         }
       });
   };
-  
+
   const toggleSettings = () => {
     setShowSettings(!showSettings);
   };
 
   return (
     <Box>
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 0, 
-          mb: 4, 
+      <Paper
+        elevation={0}
+        sx={{
+          p: 0,
+          mb: 4,
           borderRadius: '24px',
           overflow: 'hidden',
           border: theme => `1px solid ${theme.palette.divider}`,
           backdropFilter: 'blur(10px)',
-          backgroundColor: theme => theme.palette.mode === 'dark' 
+          backgroundColor: theme => theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.background.paper, 0.8),
         }}
@@ -961,13 +961,13 @@ function VectorSearch({
             </Typography>
             <Box>
               <Tooltip title="Model Settings">
-                <Button 
-                  onClick={toggleSettings} 
+                <Button
+                  onClick={toggleSettings}
                   color={showSettings || highlightSettings ? "primary" : "default"}
                   startIcon={<TuneIcon />}
                   variant={showSettings ? "contained" : "text"}
                   size="small"
-                  sx={{ 
+                  sx={{
                     borderRadius: '12px',
                     backgroundColor: (showSettings && !highlightSettings)
                       ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
@@ -992,13 +992,13 @@ function VectorSearch({
                 </Button>
               </Tooltip>
               <Tooltip title="Help">
-                <IconButton 
+                <IconButton
                   onClick={() => setShowWarning(!showWarning)}
                   color={showWarning ? "primary" : "default"}
-                  sx={{ 
+                  sx={{
                     ml: 1,
                     borderRadius: '12px',
-                    backgroundColor: showWarning 
+                    backgroundColor: showWarning
                       ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
                       : 'transparent'
                   }}
@@ -1010,10 +1010,10 @@ function VectorSearch({
           </Box>
 
           <Collapse in={showWarning}>
-            <Alert 
-              severity="info" 
-              sx={{ 
-                mb: 3, 
+            <Alert
+              severity="info"
+              sx={{
+                mb: 3,
                 borderRadius: '16px',
                 '& .MuiAlert-icon': {
                   alignItems: 'center'
@@ -1045,7 +1045,7 @@ function VectorSearch({
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '16px',
                   fontSize: '1rem',
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                  backgroundColor: theme => theme.palette.mode === 'dark'
                     ? alpha(theme.palette.background.subtle, 0.3)
                     : alpha(theme.palette.background.subtle, 0.3),
                 }
@@ -1054,13 +1054,13 @@ function VectorSearch({
           </Box>
 
           <Collapse in={showSettings}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 3, 
-                mb: 3, 
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                mb: 3,
                 borderRadius: '16px',
-                backgroundColor: theme => theme.palette.mode === 'dark' 
+                backgroundColor: theme => theme.palette.mode === 'dark'
                   ? alpha(theme.palette.background.subtle, 0.5)
                   : alpha(theme.palette.background.subtle, 0.5),
               }}
@@ -1068,7 +1068,7 @@ function VectorSearch({
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 3 }}>
                 Model Settings
               </Typography>
-              
+
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {/* First row - Provider and Model */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -1081,10 +1081,10 @@ function VectorSearch({
                         onChange={(e) => {
                           const selectedProvider = e.target.value;
                           setProvider(selectedProvider);
-                          
+
                           // Automatically select the first available model for the provider
                           if (selectedProvider && modelChoices[selectedProvider]) {
-                            const firstModel = modelChoices[selectedProvider].find(model => 
+                            const firstModel = modelChoices[selectedProvider].find(model =>
                               typeof model === 'string' // Skip separator and label objects
                             );
                             if (firstModel) {
@@ -1109,7 +1109,7 @@ function VectorSearch({
                       </Select>
                     </FormControl>
                   </Box>
-                  
+
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small" disabled={!provider}>
                       <InputLabel id="model-label">Model</InputLabel>
@@ -1137,16 +1137,16 @@ function VectorSearch({
                           if (typeof model === 'object' && model.value === 'separator') {
                             return <Divider key={model.label} sx={{ my: 1 }} />;
                           }
-                          
+
                           // For label items, render a non-selectable label
                           if (typeof model === 'object' && model.value === 'label') {
                             return (
-                              <MenuItem 
-                                key={`label-${model.label}`} 
+                              <MenuItem
+                                key={`label-${model.label}`}
                                 disabled
-                                sx={{ 
-                                  opacity: 0.7, 
-                                  fontWeight: 'bold', 
+                                sx={{
+                                  opacity: 0.7,
+                                  fontWeight: 'bold',
                                   fontSize: '0.85rem',
                                   pointerEvents: 'none',
                                   '&.Mui-disabled': {
@@ -1158,17 +1158,17 @@ function VectorSearch({
                               </MenuItem>
                             );
                           }
-                          
+
                           // For regular model items
                           return (
                             <MenuItem key={model} value={model}>
                               {model}
                               {supportedModels.includes(model) && (
-                                <Chip 
-                                  label="Recommended" 
-                                  size="small" 
-                                  color="primary" 
-                                  sx={{ ml: 1, height: '20px', fontSize: '0.65rem' }} 
+                                <Chip
+                                  label="Recommended"
+                                  size="small"
+                                  color="primary"
+                                  sx={{ ml: 1, height: '20px', fontSize: '0.65rem' }}
                                 />
                               )}
                             </MenuItem>
@@ -1178,7 +1178,7 @@ function VectorSearch({
                     </FormControl>
                   </Box>
                 </Box>
-                
+
                 {/* Second row - API Key and Results Limit */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   {/* Only show API Key field if provider needs it */}
@@ -1208,9 +1208,9 @@ function VectorSearch({
                     <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                       <Paper
                         variant="outlined"
-                        sx={{ 
-                          p: 1.5, 
-                          display: 'flex', 
+                        sx={{
+                          p: 1.5,
+                          display: 'flex',
                           flexDirection: 'column',
                           backgroundColor: theme => theme.palette.mode === 'dark' ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.main, 0.05),
                           border: theme => `1px solid ${alpha(theme.palette.success.main, 0.3)}`
@@ -1223,9 +1223,9 @@ function VectorSearch({
                           </Box>
                           <FormControlLabel
                             control={
-                              <Checkbox 
-                                size="small" 
-                                checked={apiKey !== 'env'} 
+                              <Checkbox
+                                size="small"
+                                checked={apiKey !== 'env'}
                                 onChange={(e) => {
                                   setApiKey(e.target.checked ? '' : 'env');
                                 }}
@@ -1236,7 +1236,7 @@ function VectorSearch({
                             sx={{ m: 0, '& .MuiTypography-root': { fontSize: '0.7rem', opacity: 0.7 } }}
                           />
                         </Box>
-                        
+
                         {/* Show API key input if user wants to use custom key */}
                         {apiKey !== 'env' && (
                           <TextField
@@ -1254,7 +1254,7 @@ function VectorSearch({
                                 </InputAdornment>
                               ),
                             }}
-                            sx={{ 
+                            sx={{
                               mt: 1.5,
                               '& .MuiOutlinedInput-root': {
                                 backgroundColor: 'background.paper',
@@ -1265,7 +1265,7 @@ function VectorSearch({
                       </Paper>
                     </Box>
                   )}
-                  
+
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small">
                       <InputLabel id="top-k-label">Results Limit</InputLabel>
@@ -1284,23 +1284,23 @@ function VectorSearch({
                     </FormControl>
                   </Box>
                 </Box>
-                
+
                 {/* Third row - Debug Mode */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl component="fieldset" variant="outlined" fullWidth>
-                      <Box 
+                      <Box
                         onClick={() => setVerbose(!verbose)}
-                        sx={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
                           justifyContent: 'space-between',
                           p: 1.5,
                           height: '40px',
                           borderRadius: '8px',
                           border: theme => `1px solid ${theme.palette.divider}`,
-                          backgroundColor: verbose ? 
-                            (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.main, 0.05)) : 
+                          backgroundColor: verbose ?
+                            (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.main, 0.05)) :
                             'transparent',
                           transition: 'all 0.2s ease-in-out',
                           cursor: 'pointer',
@@ -1312,13 +1312,13 @@ function VectorSearch({
                         }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Tooltip title="Enable to see detailed logs of the vector search process">
-                            <InfoOutlinedIcon 
-                              fontSize="small" 
-                              sx={{ 
-                                mr: 1.5, 
+                            <InfoOutlinedIcon
+                              fontSize="small"
+                              sx={{
+                                mr: 1.5,
                                 color: verbose ? 'info.main' : 'text.secondary',
                                 transition: 'color 0.2s ease-in-out',
-                              }} 
+                              }}
                             />
                           </Tooltip>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -1373,8 +1373,8 @@ function VectorSearch({
                 fullWidth
                 startIcon={<TuneIcon />}
                 onClick={toggleSettings}
-                sx={{ 
-                  borderRadius: '12px', 
+                sx={{
+                  borderRadius: '12px',
                   py: 1.2,
                   boxShadow: 2,
                   bgcolor: theme => theme.palette.primary.main,
@@ -1401,9 +1401,9 @@ function VectorSearch({
           )}
 
           {/* Sample Questions - Repositioned for better visibility */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
             mb: 4,
             mt: 1
           }}>
@@ -1413,7 +1413,7 @@ function VectorSearch({
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings and select vector type first"}>
-                <Box 
+                <Box
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
                 >
@@ -1422,7 +1422,7 @@ function VectorSearch({
                     onClick={handleGenerateQuery}
                     disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generate')}
                     startIcon={<SendIcon />}
-                    sx={{ 
+                    sx={{
                       borderRadius: '12px',
                       px: 3,
                       height: '44px',
@@ -1433,7 +1433,7 @@ function VectorSearch({
                   </Button>
                 </Box>
               </Tooltip>
-              
+
               <Tooltip title={isSettingsValid() ? "Generate and Run Query" : "Configure settings and select vector type first"}>
                 <Box
                   onMouseEnter={() => handleActionButtonHover(true)}
@@ -1445,7 +1445,7 @@ function VectorSearch({
                     onClick={handleGenerateAndRun}
                     disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generateAndRun')}
                     startIcon={<PlayArrowIcon />}
-                    sx={{ 
+                    sx={{
                       borderRadius: '12px',
                       px: 3,
                       height: '44px'
@@ -1458,13 +1458,13 @@ function VectorSearch({
             </Box>
           </Box>
         </Box>
-        
+
         {generatedQuery && !runnedQuery && (
           <>
-            <Box sx={{ 
-              p: 3, 
+            <Box sx={{
+              p: 3,
               borderTop: theme => `1px solid ${theme.palette.divider}`,
-              backgroundColor: theme => theme.palette.mode === 'dark' 
+              backgroundColor: theme => theme.palette.mode === 'dark'
                 ? alpha(theme.palette.background.subtle, 0.3)
                 : alpha(theme.palette.background.subtle, 0.3),
             }}>
@@ -1472,7 +1472,7 @@ function VectorSearch({
                 <CodeIcon fontSize="small" sx={{ mr: 1 }} />
                 Generated Query (Editable)
               </Typography>
-              <Box 
+              <Box
                 sx={{
                   position: 'relative',
                   borderRadius: '12px',
@@ -1560,14 +1560,14 @@ function VectorSearch({
                 />
               </Box>
             </Box>
-            <Box 
+            <Box
               onMouseEnter={() => handleActionButtonHover(true)}
               onMouseLeave={() => handleActionButtonHover(false)}
-              sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                p: 2, 
-                backgroundColor: theme => theme.palette.mode === 'dark' 
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                p: 2,
+                backgroundColor: theme => theme.palette.mode === 'dark'
                   ? alpha(theme.palette.primary.main, 0.1)
                   : alpha(theme.palette.primary.main, 0.05),
                 borderTop: theme => `1px solid ${theme.palette.divider}`
@@ -1578,7 +1578,7 @@ function VectorSearch({
                 onClick={() => setGeneratedQuery(originalQuery)}
                 disabled={false}
                 startIcon={<RestoreIcon />}
-                sx={{ 
+                sx={{
                   borderRadius: '12px',
                   px: 3
                 }}
@@ -1591,7 +1591,7 @@ function VectorSearch({
                 onClick={handleRunGeneratedQuery}
                 disabled={!isSettingsValid() || (loading && activeButton !== 'run')}
                 startIcon={loading && activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                sx={{ 
+                sx={{
                   borderRadius: '12px',
                   px: 3
                 }}
@@ -1610,20 +1610,20 @@ function VectorSearch({
 
       {error && (
         <Zoom in={!!error}>
-          <Alert 
-            severity="error" 
-            sx={{ 
-              mb: 3, 
+          <Alert
+            severity="error"
+            sx={{
+              mb: 3,
               borderRadius: '16px',
-              boxShadow: theme => theme.palette.mode === 'dark' 
-                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+              boxShadow: theme => theme.palette.mode === 'dark'
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)'
                 : '0 4px 20px rgba(0, 0, 0, 0.05)',
             }}
           >
-            {typeof error === 'object' && error !== null 
-              ? (error.msg || JSON.stringify(error)) 
+            {typeof error === 'object' && error !== null
+              ? (error.msg || JSON.stringify(error))
               : error}
-              
+
             {/* Countdown timer for rate limiting */}
             {rateLimited && retryCountdown > 0 && (
               <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
@@ -1639,17 +1639,17 @@ function VectorSearch({
           </Alert>
         </Zoom>
       )}
-      
+
       {/* Rate limiting warning without other errors */}
       {rateLimited && !error && (
         <Zoom in={rateLimited}>
-          <Alert 
-            severity="warning" 
-            sx={{ 
-              mb: 3, 
+          <Alert
+            severity="warning"
+            sx={{
+              mb: 3,
               borderRadius: '16px',
-              boxShadow: theme => theme.palette.mode === 'dark' 
-                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+              boxShadow: theme => theme.palette.mode === 'dark'
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)'
                 : '0 4px 20px rgba(0, 0, 0, 0.05)',
             }}
           >
