@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Typography, 
-  Box, 
-  Paper, 
-  Chip, 
-  IconButton, 
-  Tooltip, 
-  Collapse, 
+import {
+  Typography,
+  Box,
+  Paper,
+  Chip,
+  IconButton,
+  Tooltip,
+  Collapse,
   Divider,
   alpha,
   useTheme,
@@ -35,10 +35,10 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 // Import data fetching utilities
-import { 
-  fetchGeneSummary, 
-  fetchProteinData, 
-  fetchPathwayData, 
+import {
+  fetchGeneSummary,
+  fetchProteinData,
+  fetchPathwayData,
   generateEntityUrl,
   fetchDrugData,
   fetchDiseaseData,
@@ -73,39 +73,39 @@ function NodeVisualization({ executionResult }) {
   const [expandedEntities, setExpandedEntities] = useState({});
   const [loading, setLoading] = useState(false);
   const [entitySummaries, setEntitySummaries] = useState({});
-  
+
   // Toggle expanded state for the whole component
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
-  
+
   // Toggle expanded state for an individual entity
   const toggleEntityExpanded = (id) => {
     setExpandedEntities(prev => ({
       ...prev,
       [id]: !prev[id]
     }));
-    
+
     // If we're expanding and don't have a summary yet, we could fetch it here
     if (!expandedEntities[id] && !entitySummaries[id]) {
       fetchEntitySummary(id);
     }
   };
-  
+
   // Fetch a summary for an entity from appropriate biological databases
   const fetchEntitySummary = async (id) => {
     if (!id) return;
-    
+
     setEntitySummaries(prev => ({
       ...prev,
       [id]: { loading: true }
     }));
-    
+
     try {
       // Determine which type of entity this is and call appropriate data fetcher
       const [type] = id.split(':');
       let summaryData = null;
-      
+
       // Call the appropriate data fetcher based on entity type
       switch (type.toLowerCase()) {
         case 'ncbigene':
@@ -113,59 +113,59 @@ function NodeVisualization({ executionResult }) {
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description || '',
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'uniprot':
           summaryData = await fetchProteinData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.function,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'kegg.pathway':
         case 'reactome':
           summaryData = await fetchPathwayData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'interpro':
         case 'pfam':
           summaryData = await fetchDomainData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'mondo':
         case 'mesh':
         case 'omim':
@@ -173,15 +173,15 @@ function NodeVisualization({ executionResult }) {
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'drugbank':
         case 'chembl':
         case 'pubchem.compound':
@@ -190,93 +190,93 @@ function NodeVisualization({ executionResult }) {
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'go':
           summaryData = await fetchGOTermData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'hp':
           summaryData = await fetchPhenotypeData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'ncbitaxon':
           summaryData = await fetchOrganismData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'meddra':
           // MedDRA side effects
           summaryData = await fetchSideEffectData(id);
           if (summaryData) {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: summaryData.description,
                 data: summaryData
               }
             }));
           }
           break;
-          
+
         case 'eccode':
           // Enzyme Commission numbers
           setTimeout(() => {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: `Enzyme classified with EC number ${id.split(':')[1]}.`,
                 data: { id }
               }
             }));
           }, 500);
           break;
-          
+
         default:
           // For other entity types, provide a generic message
           setTimeout(() => {
             setEntitySummaries(prev => ({
               ...prev,
-              [id]: { 
-                loading: false, 
+              [id]: {
+                loading: false,
                 text: `View detailed information about this ${type.toUpperCase()} entity by clicking the external link.`,
                 data: { id }
               }
@@ -287,28 +287,28 @@ function NodeVisualization({ executionResult }) {
       console.error(`Error fetching summary for ${id}:`, error);
       setEntitySummaries(prev => ({
         ...prev,
-        [id]: { 
-          loading: false, 
+        [id]: {
+          loading: false,
           error: true,
           text: 'Error fetching entity information. Please try again or click the external link to view details.'
         }
       }));
     }
   };
-  
+
   // Generate URLs for external resources based on identifier format
   // Using our imported helper function directly
-  
+
   // Parse result to extract entities
   useEffect(() => {
     if (!executionResult?.result) return;
-    
+
     setLoading(true);
-    
+
     // Extract entities from results based on structure
     try {
       const result = executionResult.result;
-      
+
       // Initialize entity containers
       const extractedEntities = {
         genes: [],
@@ -324,13 +324,13 @@ function NodeVisualization({ executionResult }) {
         sideeffects: [],
         ecnumbers: []
       };
-      
+
       // Helper function to identify entity type from ID
       const getEntityTypeFromId = (id) => {
         if (!id || typeof id !== 'string') return null;
-        
+
         const prefix = id.split(':')[0].toLowerCase();
-        
+
         // Determine entity type based on ID prefix
         switch(prefix) {
           case 'ncbigene':
@@ -376,19 +376,19 @@ function NodeVisualization({ executionResult }) {
             return null;
         }
       };
-      
+
       // Helper to add an entity to the right category
       const addEntityToCollection = async (entity, entityTypeHint = null) => {
         if (!entity || !entity.id) return;
-        
+
         // Determine the entity type - FIRST check the ID to get the correct type
         let entityType = getEntityTypeFromId(entity.id);
-        
+
         // Only use the hint if we couldn't determine from ID
         if (!entityType && entityTypeHint) {
           entityType = entityTypeHint;
         }
-        
+
         // If we still don't know the type, try to infer from other properties
         if (!entityType) {
           if (entity.ensembl || entity.ensembl_gene_ids) {
@@ -411,7 +411,7 @@ function NodeVisualization({ executionResult }) {
             entityType = 'diseases';
           }
         }
-        
+
         // If we still can't determine the type, use a fallback
         if (!entityType || !extractedEntities[entityType]) {
           // Default to most general category based on what properties we have
@@ -419,12 +419,12 @@ function NodeVisualization({ executionResult }) {
           else if (entity.synonyms && (entity.id.includes('chem') || entity.id.includes('drug'))) entityType = 'compounds';
           else entityType = 'genes'; // Default fallback
         }
-        
+
         // Check if entity already exists in its category
         if (!extractedEntities[entityType].some(e => e.id === entity.id)) {
           // Extract a meaningful display name based on entity type
           let displayName = 'Unknown';
-          
+
           if (entity.name) {
             // If name property exists, use it
             displayName = entity.name;
@@ -441,19 +441,19 @@ function NodeVisualization({ executionResult }) {
             // For proteins with recommended names
             displayName = entity.proteinDescription.recommendedName.fullName.value;
           } else if (entity.synonyms && entity.synonyms.length > 0) {
-            // Use first synonym if available 
+            // Use first synonym if available
             // But only use if it's not just a number or ID
             const firstSynonym = entity.synonyms[0];
             if (firstSynonym && !/^[0-9.]+$/.test(firstSynonym) && firstSynonym.length > 1) {
               displayName = firstSynonym;
             }
-          } 
-          
+          }
+
           // If we still don't have a good display name, use the formatEntityName helper
           if (displayName === 'Unknown' || !displayName || displayName === entity.id) {
             displayName = formatEntityName(entity.id, null);
           }
-          
+
           const newEntity = {
             id: entity.id,
             name: displayName,
@@ -462,9 +462,9 @@ function NodeVisualization({ executionResult }) {
             // Make sure the display name is properly set
             displayName: displayName
           };
-          
+
           extractedEntities[entityType].push(newEntity);
-          
+
           // For protein entities, fetch the actual protein name in the background
           if (entityType === 'proteins' && (!entity.name || entity.name === displayName)) {
             fetchProteinData(entity.id).then(proteinData => {
@@ -491,20 +491,20 @@ function NodeVisualization({ executionResult }) {
           }
         }
       };
-      
+
       // Process the result array
       if (Array.isArray(result)) {
         const entityPromises = [];
-        
+
         result.forEach(item => {
           // Check for various entity formats
-          
+
           // Gene objects (g)
           if (item.g) {
             const gene = item.g;
             entityPromises.push(addEntityToCollection(gene, 'genes'));
           }
-          
+
           // Check for entities with 'p' property - need to determine if it's protein or pathway
           if (item.p && typeof item.p === 'object') {
             // Check if this is actually a pathway based on ID
@@ -532,7 +532,7 @@ function NodeVisualization({ executionResult }) {
               entityPromises.push(addEntityToCollection(entity, 'proteins'));
             }
           }
-          
+
           // Drug/Chemical/Disease objects
           if (item.d && item.d.id) {
             const entityType = getEntityTypeFromId(item.d.id);
@@ -544,7 +544,7 @@ function NodeVisualization({ executionResult }) {
               entityPromises.push(addEntityToCollection(item.d, 'pathways'));
             } else {
               // Try to determine if it's a drug or disease from context
-              if (item.d.id.includes('drug') || item.d.id.includes('chembl') || 
+              if (item.d.id.includes('drug') || item.d.id.includes('chembl') ||
                   item.d.id.includes('pubchem') || item.d.id.includes('chebi')) {
                 entityPromises.push(addEntityToCollection(item.d, 'drugs'));
               } else {
@@ -552,66 +552,66 @@ function NodeVisualization({ executionResult }) {
               }
             }
           }
-          
+
           // Process direct key-value pairs for any entity type
           Object.entries(item).forEach(([key, value]) => {
             // Skip if not an object or if key contains a dot (property path)
             if (!value || typeof value !== 'object' || key.includes('.')) return;
-            
+
             // If the value has an id property, try to classify and add it
             if (value.id) {
               entityPromises.push(addEntityToCollection(value));
             }
           });
-          
+
           // Domain objects
-          if ((item.d && item.d.id && 
-               (item.d.id.includes('interpro') || item.d.id.includes('pfam'))) || 
+          if ((item.d && item.d.id &&
+               (item.d.id.includes('interpro') || item.d.id.includes('pfam'))) ||
               (item.domain && item.domain.id)) {
             const domain = item.domain || item.d;
             entityPromises.push(addEntityToCollection(domain, 'domains'));
           }
-          
+
           // GO Term objects
-          if (item.go || item.goterm || 
+          if (item.go || item.goterm ||
               (item.g && item.g.id && item.g.id.includes('GO:'))) {
             const goTerm = item.go || item.goterm || item.g;
             entityPromises.push(addEntityToCollection(goTerm, 'goterms'));
           }
-          
+
           // Phenotype objects
           if (item.phenotype || (item.p && item.p.id && item.p.id.includes('HP:'))) {
             const phenotype = item.phenotype || item.p;
             entityPromises.push(addEntityToCollection(phenotype, 'phenotypes'));
           }
-          
+
           // Side effect objects
           if (item.se || item.sideeffect ||
               (item.s && item.s.id && item.s.id.includes('meddra'))) {
             const sideEffect = item.se || item.sideeffect || item.s;
             entityPromises.push(addEntityToCollection(sideEffect, 'sideeffects'));
           }
-          
+
           // EC Number objects
           if (item.ec || (item.e && item.e.id && item.e.id.includes('eccode'))) {
             const ecNumber = item.ec || item.e;
             entityPromises.push(addEntityToCollection(ecNumber, 'ecnumbers'));
           }
-          
+
           // Organism objects
           if (item.organism || (item.o && item.o.id && item.o.id.includes('taxon'))) {
             const organism = item.organism || item.o;
             entityPromises.push(addEntityToCollection(organism, 'organisms'));
           }
         });
-        
+
         // Wait for all entity processing to complete
         Promise.all(entityPromises).then(() => {
           setEntities(extractedEntities);
           setLoading(false);
         });
       }
-      
+
       // Also handle flat result JSON structures (no array)
       else if (result && typeof result === 'object') {
         const entityPromises = [];
@@ -623,18 +623,18 @@ function NodeVisualization({ executionResult }) {
             }
           }
         });
-        
+
         // Wait for processing
         Promise.all(entityPromises).then(() => {
           setEntities(extractedEntities);
           setLoading(false);
         });
       }
-      
+
       // Handle property-based results (like "d.name", "d.id")
       // Group properties that belong to the same entity
       const propertyGroups = {};
-      
+
       if (Array.isArray(result)) {
         result.forEach((item) => {
           // Scan for properties that use dot notation
@@ -642,32 +642,32 @@ function NodeVisualization({ executionResult }) {
             if (key.includes('.')) {
               // Extract entity prefix and property name
               const [prefix, prop] = key.split('.');
-              
+
               // Initialize group if not exists
               if (!propertyGroups[prefix]) {
                 propertyGroups[prefix] = [];
               }
-              
+
               // Find or create an entity for this row
-              let entity = propertyGroups[prefix].find(e => 
+              let entity = propertyGroups[prefix].find(e =>
                 // Try to match based on ID if it exists
                 (item[`${prefix}.id`] && e.id === item[`${prefix}.id`]) ||
                 // Otherwise try to match based on name
                 (item[`${prefix}.name`] && e.name === item[`${prefix}.name`])
               );
-              
+
               // If no existing entity found, create a new one
               if (!entity) {
                 entity = {};
                 propertyGroups[prefix].push(entity);
               }
-              
+
               // Add the property to the entity
               entity[prop] = value;
             }
           });
         });
-        
+
         // Process all property groups as entities
         const propertyEntityPromises = [];
         Object.entries(propertyGroups).forEach(([prefix, entities]) => {
@@ -676,21 +676,21 @@ function NodeVisualization({ executionResult }) {
             if (entity.id || entity.name) {
               // Determine entity type based on prefix and properties
               let entityType = null;
-              
+
               // First, try to determine entity type from the ID if available
               if (entity.id) {
                 entityType = getEntityTypeFromId(entity.id);
               }
-              
+
               // If we couldn't determine from ID, try to determine from prefix
               if (!entityType) {
                 if (prefix === 'd') {
                   // Check if it's a disease by ID pattern or name
-                  if (entity.id && (entity.id.toLowerCase().includes('mondo') || 
+                  if (entity.id && (entity.id.toLowerCase().includes('mondo') ||
                                    entity.id.toLowerCase().includes('mesh') ||
                                    entity.id.toLowerCase().includes('omim'))) {
                     entityType = 'diseases';
-                  } 
+                  }
                   // If we have a name with disease-related terms
                   else if (entity.name && /disease|syndrome|disorder/i.test(entity.name)) {
                     entityType = 'diseases';
@@ -703,8 +703,8 @@ function NodeVisualization({ executionResult }) {
                   // Otherwise could be drug or disease
                   else {
                     entityType = entity.id && (
-                      entity.id.includes('drug') || 
-                      entity.id.includes('chembl') || 
+                      entity.id.includes('drug') ||
+                      entity.id.includes('chembl') ||
                       entity.id.includes('pubchem') ||
                       entity.id.includes('chebi')
                     ) ? 'drugs' : 'diseases';
@@ -729,13 +729,13 @@ function NodeVisualization({ executionResult }) {
                   entityType = 'phenotypes';
                 }
               }
-              
+
               // Add to the appropriate collection
               propertyEntityPromises.push(addEntityToCollection(entity, entityType));
             }
           });
         });
-        
+
         // Wait for property-based entities to be processed
         if (propertyEntityPromises.length > 0) {
           Promise.all(propertyEntityPromises).then(() => {
@@ -756,20 +756,20 @@ function NodeVisualization({ executionResult }) {
       console.error("Error parsing query results:", error);
       setLoading(false);
     }
-    
+
   }, [executionResult]);
-  
+
   // Check if we have any entities to display
   const hasEntities = Object.values(entities).some(arr => arr.length > 0);
-  
+
   if (!hasEntities && !loading) return null;
-  
+
   // Get the count of all entities
   const totalEntityCount = Object.values(entities).reduce((total, arr) => total + arr.length, 0);
-  
+
   // Get the count of populated entity types
   const entityTypeCount = Object.values(entities).filter(arr => arr.length > 0).length;
-  
+
   // Helper to get icon for entity type
   const getEntityIcon = (type) => {
     switch (type) {
@@ -801,7 +801,7 @@ function NodeVisualization({ executionResult }) {
         return <AccountTreeIcon />;
     }
   };
-  
+
   // Helper for entity type labels
   const getEntityTypeLabel = (type) => {
     switch (type) {
@@ -820,17 +820,17 @@ function NodeVisualization({ executionResult }) {
       default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
-  
+
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        mb: 4, 
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 4,
         borderRadius: '20px',
         border: theme => `1px solid ${theme.palette.divider}`,
         overflow: 'hidden',
         backdropFilter: 'blur(10px)',
-        backgroundColor: theme => theme.palette.mode === 'dark' 
+        backgroundColor: theme => theme.palette.mode === 'dark'
           ? alpha(theme.palette.background.paper, 0.8)
           : alpha(theme.palette.background.paper, 0.8),
         transition: 'all 0.3s ease',
@@ -839,66 +839,66 @@ function NodeVisualization({ executionResult }) {
         }
       }}
     >
-      <Box 
+      <Box
         onClick={toggleExpanded}
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           px: 3,
           py: 2.5,
           borderBottom: expanded ? theme => `1px solid ${theme.palette.divider}` : 'none',
           cursor: 'pointer',
           '&:hover': {
-            backgroundColor: theme => theme.palette.mode === 'dark' 
+            backgroundColor: theme => theme.palette.mode === 'dark'
               ? alpha(theme.palette.primary.main, 0.05)
               : alpha(theme.palette.primary.main, 0.03),
           }
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <AccountTreeIcon sx={{ 
-            mr: 1.5, 
-            color: theme => theme.palette.mode === 'dark' ? theme.palette.info.light : theme.palette.info.main 
+          <AccountTreeIcon sx={{
+            mr: 1.5,
+            color: theme => theme.palette.mode === 'dark' ? theme.palette.info.light : theme.palette.info.main
           }} />
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Node Information
           </Typography>
-          <Chip 
+          <Chip
             label={`${totalEntityCount} entities`}
-            size="small" 
-            color="info" 
-            sx={{ 
-              ml: 1.5, 
+            size="small"
+            color="info"
+            sx={{
+              ml: 1.5,
               height: '20px',
               fontSize: '0.7rem',
               fontWeight: 600,
-              backgroundColor: theme => theme.palette.mode === 'dark' 
+              backgroundColor: theme => theme.palette.mode === 'dark'
                 ? alpha(theme.palette.info.main, 0.2)
                 : alpha(theme.palette.info.main, 0.1),
-              color: theme => theme.palette.mode === 'dark' 
+              color: theme => theme.palette.mode === 'dark'
                 ? theme.palette.info.light
                 : theme.palette.info.main,
-            }} 
+            }}
           />
-          <Chip 
+          <Chip
             label={`${entityTypeCount} categories`}
-            size="small" 
-            sx={{ 
-              ml: 0.5, 
+            size="small"
+            sx={{
+              ml: 0.5,
               height: '20px',
               fontSize: '0.7rem',
-              backgroundColor: theme => theme.palette.mode === 'dark' 
+              backgroundColor: theme => theme.palette.mode === 'dark'
                 ? alpha(theme.palette.background.default, 0.4)
                 : alpha(theme.palette.background.default, 0.4),
               color: 'text.secondary',
-            }} 
+            }}
           />
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title="Filter results">
-            <IconButton 
-              size="small" 
+            <IconButton
+              size="small"
               onClick={(e) => {
                 e.stopPropagation();
                 // Add filter functionality if needed
@@ -908,8 +908,8 @@ function NodeVisualization({ executionResult }) {
               <FilterAltIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             onClick={(e) => {
               e.stopPropagation();
               toggleExpanded();
@@ -920,7 +920,7 @@ function NodeVisualization({ executionResult }) {
           </IconButton>
         </Box>
       </Box>
-      
+
       <Collapse in={expanded}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
@@ -933,14 +933,14 @@ function NodeVisualization({ executionResult }) {
           <List sx={{ py: 0 }}>
             {Object.entries(entities).map(([type, items]) => {
               if (items.length === 0) return null;
-              
+
               return (
                 <React.Fragment key={type}>
-                  <ListItemButton 
-                    sx={{ 
+                  <ListItemButton
+                    sx={{
                       py: 1.5,
                       px: 3,
-                      backgroundColor: theme => theme.palette.mode === 'dark' 
+                      backgroundColor: theme => theme.palette.mode === 'dark'
                         ? alpha(theme.palette.background.default, 0.4)
                         : alpha(theme.palette.background.default, 0.4),
                     }}
@@ -948,65 +948,65 @@ function NodeVisualization({ executionResult }) {
                     <ListItemIcon sx={{ minWidth: 40 }}>
                       {getEntityIcon(type)}
                     </ListItemIcon>
-                    <ListItemText 
+                    <ListItemText
                       primary={
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {getEntityTypeLabel(type)}
                         </Typography>
-                      } 
+                      }
                     />
-                    <Chip 
-                      label={items.length} 
-                      size="small" 
-                      sx={{ 
-                        height: '20px', 
+                    <Chip
+                      label={items.length}
+                      size="small"
+                      sx={{
+                        height: '20px',
                         minWidth: '20px',
                         fontSize: '0.7rem',
                         backgroundColor: theme => alpha(theme.palette.background.paper, 0.7),
-                      }} 
+                      }}
                     />
                   </ListItemButton>
-                  
+
                   <Divider />
-                  
+
                   {items.map((entity, index) => (
                     <React.Fragment key={entity.id || index}>
-                      <ListItemButton 
+                      <ListItemButton
                         onClick={() => toggleEntityExpanded(entity.id)}
-                        sx={{ 
+                        sx={{
                           py: 2,
                           px: 3,
                           pl: 4,
                           '&:hover': {
-                            backgroundColor: theme => theme.palette.mode === 'dark' 
+                            backgroundColor: theme => theme.palette.mode === 'dark'
                               ? alpha(theme.palette.primary.main, 0.1)
                               : alpha(theme.palette.primary.main, 0.05),
                           }
                         }}
                       >
-                        <ListItemText 
+                        <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                 {/* For protein entities, prioritize the protein name over gene symbol */}
                                 {type === 'proteins' ? (
-                                  entity.name || 
-                                  entity.displayName || 
+                                  entity.name ||
+                                  entity.displayName ||
                                   formatEntityName(entity.id, null)
                                 ) : (
-                                  entity.displayName || 
-                                  entity.name || 
-                                  (entity.genes && entity.genes.length > 0 ? entity.genes[0] : null) || 
+                                  entity.displayName ||
+                                  entity.name ||
+                                  (entity.genes && entity.genes.length > 0 ? entity.genes[0] : null) ||
                                   formatEntityName(entity.id, null)
                                 )}
                               </Typography>
                               {entity.id && (
-                                <Chip 
-                                  label={entity.id.split(':')[0]} 
-                                  size="small" 
-                                  sx={{ 
-                                    ml: 1, 
-                                    height: '18px', 
+                                <Chip
+                                  label={entity.id.split(':')[0]}
+                                  size="small"
+                                  sx={{
+                                    ml: 1,
+                                    height: '18px',
                                     fontSize: '0.65rem',
                                     backgroundColor: theme => {
                                       // Color based on entity type
@@ -1036,17 +1036,17 @@ function NodeVisualization({ executionResult }) {
                                       }
                                       return theme.palette.info.main;
                                     }
-                                  }} 
+                                  }}
                                 />
                               )}
-                              
+
                               {entity.symbol && entity.symbol !== entity.displayName && (
-                                <Chip 
+                                <Chip
                                   label={entity.symbol}
                                   size="small"
-                                  sx={{ 
-                                    ml: 1, 
-                                    height: '18px', 
+                                  sx={{
+                                    ml: 1,
+                                    height: '18px',
                                     fontSize: '0.65rem',
                                     backgroundColor: theme => alpha(theme.palette.success.light, 0.1),
                                     color: 'success.main'
@@ -1060,12 +1060,12 @@ function NodeVisualization({ executionResult }) {
                               <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
                                 {entity.id}
                               </Typography>
-                              
+
                               {entity.organism && (
-                                <Chip 
+                                <Chip
                                   label={entity.organism.includes('sapiens') ? 'Human' : entity.organism.split(' ')[0]}
                                   size="small"
-                                  sx={{ 
+                                  sx={{
                                     height: '16px',
                                     fontSize: '0.6rem',
                                     backgroundColor: theme => alpha(theme.palette.background.default, 0.8)
@@ -1086,8 +1086,8 @@ function NodeVisualization({ executionResult }) {
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
                               startIcon={<OpenInNewIcon />}
-                              sx={{ 
-                                mr: 1, 
+                              sx={{
+                                mr: 1,
                                 fontSize: '0.75rem',
                                 textTransform: 'none',
                                 borderRadius: '8px',
@@ -1099,7 +1099,7 @@ function NodeVisualization({ executionResult }) {
                               View in External Database
                             </Button>
                           )}
-                          <IconButton 
+                          <IconButton
                             size="small"
                             sx={{ transform: expandedEntities[entity.id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
                           >
@@ -1107,7 +1107,7 @@ function NodeVisualization({ executionResult }) {
                           </IconButton>
                         </Box>
                       </ListItemButton>
-                      
+
                       <Collapse in={expandedEntities[entity.id]}>
                         <Box sx={{ px: 3, py: 2, backgroundColor: theme => alpha(theme.palette.background.default, 0.3) }}>
                           <Grid container spacing={2}>
@@ -1118,7 +1118,7 @@ function NodeVisualization({ executionResult }) {
                                     <InfoOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'info.main' }} />
                                     Entity Information
                                   </Typography>
-                                  
+
                                   <Box sx={{ mb: 2 }}>
                                     {entitySummaries[entity.id]?.loading ? (
                                       <Box sx={{ display: 'flex', alignItems: 'center', my: 1 }}>
@@ -1130,17 +1130,17 @@ function NodeVisualization({ executionResult }) {
                                     ) : entitySummaries[entity.id]?.text ? (
                                       <Box>
                                         <Typography variant="body2" sx={{ mb: 2 }} component="div">
-                                          <div dangerouslySetInnerHTML={{ 
+                                          <div dangerouslySetInnerHTML={{
                                             __html: entitySummaries[entity.id].text
                                                     .replace(/\(cite:.+?\)/g, '')
-                                                    .replace(/([A-Z][A-Z0-9_-]+\d*)/g, '<strong>$1</strong>') 
+                                                    .replace(/([A-Z][A-Z0-9_-]+\d*)/g, '<strong>$1</strong>')
                                           }} />
                                         </Typography>
-                                        
+
                                         {/* Display entity metadata from fetched data */}
                                         {entitySummaries[entity.id].data && (
-                                          <Box sx={{ 
-                                            mt: 2, 
+                                          <Box sx={{
+                                            mt: 2,
                                             display: 'flex',
                                             gap: 1,
                                             flexDirection: 'row',
@@ -1148,33 +1148,33 @@ function NodeVisualization({ executionResult }) {
                                           }}>
                                             {/* Gene-specific metadata - We've moved this to detail section */}
                                             {entitySummaries[entity.id].data.symbol && type !== 'genes' && (
-                                              <Chip 
+                                              <Chip
                                                 label={`Symbol: ${entitySummaries[entity.id].data.symbol}`}
                                                 size="small"
                                                 sx={{ fontSize: '0.7rem' }}
                                               />
                                             )}
-                                            
+
                                             {/* Protein-specific metadata */}
                                             {entitySummaries[entity.id].data.geneName && (
-                                              <Chip 
-                                                label={`Gene: ${entitySummaries[entity.id].data.geneName}`}
+                                              <Chip
+                                                label={`Gene ID: ${entitySummaries[entity.id].data.geneName}`}
                                                 size="small"
                                                 sx={{ fontSize: '0.7rem' }}
                                               />
                                             )}
-                                            
+
                                             {/* Length info (e.g. for proteins) */}
                                             {entitySummaries[entity.id].data.length && (
-                                              <Chip 
+                                              <Chip
                                                 label={`Length: ${entitySummaries[entity.id].data.length} aa`}
                                                 size="small"
                                                 sx={{ fontSize: '0.7rem' }}
                                               />
                                             )}
-                                            
+
                                             {entitySummaries[entity.id].data.organism && (
-                                              <Chip 
+                                              <Chip
                                                 label={entitySummaries[entity.id].data.organism}
                                                 size="small"
                                                 sx={{ fontSize: '0.7rem' }}
@@ -1189,7 +1189,7 @@ function NodeVisualization({ executionResult }) {
                                       </Typography>
                                     )}
                                   </Box>
-                                  
+
                                   {/* Display entity-specific details */}
                                   {/* Gene details */}
                                   {type === 'genes' && (
@@ -1200,14 +1200,14 @@ function NodeVisualization({ executionResult }) {
                                           <strong>Official Symbol:</strong> {entitySummaries[entity.id].data.symbol}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Summary */}
                                       {entitySummaries[entity.id]?.data?.summary && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Summary:</strong> {entitySummaries[entity.id].data.summary}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.all_names && entity.all_names.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1215,38 +1215,38 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entity.all_names.map((name, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={name} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
-                                                  fontSize: '0.7rem' 
+                                              <Chip
+                                                key={i}
+                                                label={name}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
+                                                  fontSize: '0.7rem'
                                                 }}
                                               />
                                             ))}
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {entity.chromosome && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Chromosome:</strong> {entity.chromosome}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.ensembl && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Ensembl ID:</strong> {entity.ensembl}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.genes && entity.genes.length > 0 && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Gene Symbol:</strong> {entity.genes.join(', ')}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.organism && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Organism:</strong> {entity.organism}
@@ -1254,7 +1254,7 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {/* Protein details */}
                                   {type === 'proteins' && (
                                     <Box sx={{ mt: 2 }}>
@@ -1265,18 +1265,18 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entity.synonyms.slice(0, 5).map((name, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={name} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
-                                                  fontSize: '0.7rem' 
+                                              <Chip
+                                                key={i}
+                                                label={name}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
+                                                  fontSize: '0.7rem'
                                                 }}
                                               />
                                             ))}
                                             {entity.synonyms.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entity.synonyms.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1285,19 +1285,19 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {entity.genes && entity.genes.length > 0 && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                          <strong>Gene:</strong> {entity.genes.join(', ')}
+                                          <strong>Gene ID:</strong> {entity.genes.join(', ')}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.organism && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Organism:</strong> {entity.organism}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.molecularWeight && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Molecular Weight:</strong> {entity.molecularWeight} Da
@@ -1305,7 +1305,7 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {/* Disease details */}
                                   {type === 'diseases' && (
                                     <Box sx={{ mt: 2 }}>
@@ -1316,12 +1316,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entity.synonyms.slice(0, 5).map((name, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={name} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={name}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.error.main, 0.1),
                                                   color: 'error.main'
@@ -1329,7 +1329,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entity.synonyms.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entity.synonyms.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1338,24 +1338,24 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Disease-specific fields */}
                                       {entity.type && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Type:</strong> {entity.type}
                                         </Typography>
                                       )}
-                                      
+
                                       {entity.category && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Category:</strong> {entity.category}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* MONDO-specific links */}
                                       {entity.id && entity.id.toLowerCase().includes('mondo') && (
                                         <Box sx={{ mt: 1 }}>
-                                          <Link 
+                                          <Link
                                             href={`https://monarchinitiative.org/disease/${entity.id}`}
                                             target="_blank"
                                             rel="noopener"
@@ -1368,7 +1368,7 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {/* Drug details */}
                                   {(type === 'drugs' || type === 'compounds') && (
                                     <Box sx={{ mt: 2 }}>
@@ -1378,28 +1378,28 @@ function NodeVisualization({ executionResult }) {
                                           <strong>SMILES:</strong> {entitySummaries[entity.id].data.smiles}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Summary */}
                                       {entitySummaries[entity.id]?.data?.summary && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Summary:</strong> {entitySummaries[entity.id].data.summary}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Groups */}
                                       {entitySummaries[entity.id]?.data?.groups && entitySummaries[entity.id].data.groups.length > 0 && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Groups:</strong> {entitySummaries[entity.id].data.groups.join(', ')}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Chemical Formula */}
                                       {entitySummaries[entity.id]?.data?.chemicalFormula && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Chemical Formula:</strong> {entitySummaries[entity.id].data.chemicalFormula}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Alternative names */}
                                       {entity.synonyms && entity.synonyms.length > 0 && (
                                         <>
@@ -1408,18 +1408,18 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                             {entity.synonyms.slice(0, 5).map((name, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={name} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
-                                                  fontSize: '0.7rem' 
+                                              <Chip
+                                                key={i}
+                                                label={name}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
+                                                  fontSize: '0.7rem'
                                                 }}
                                               />
                                             ))}
                                             {entity.synonyms.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entity.synonyms.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1430,14 +1430,14 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {type === 'proteins' && entity.sequences && entity.sequences.length > 0 && (
                                     <Box sx={{ mt: 2 }}>
                                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                                         Sequence preview:
                                       </Typography>
-                                      <Box sx={{ 
-                                        p: 1, 
+                                      <Box sx={{
+                                        p: 1,
                                         backgroundColor: theme => alpha(theme.palette.background.default, 0.6),
                                         borderRadius: 1,
                                         overflowX: 'auto'
@@ -1448,7 +1448,7 @@ function NodeVisualization({ executionResult }) {
                                       </Box>
                                     </Box>
                                   )}
-                                  
+
                                   {(type === 'drugs' || type === 'diseases') && entity.synonyms && entity.synonyms.length > 0 && (
                                     <Box sx={{ mt: 2 }}>
                                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1456,20 +1456,20 @@ function NodeVisualization({ executionResult }) {
                                       </Typography>
                                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                         {entity.synonyms.map((synonym, i) => (
-                                          <Chip 
-                                            key={i} 
-                                            label={synonym} 
-                                            size="small" 
-                                            sx={{ 
-                                              height: '20px', 
-                                              fontSize: '0.7rem' 
+                                          <Chip
+                                            key={i}
+                                            label={synonym}
+                                            size="small"
+                                            sx={{
+                                              height: '20px',
+                                              fontSize: '0.7rem'
                                             }}
                                           />
                                         ))}
                                       </Box>
                                     </Box>
                                   )}
-                                  
+
                                   {/* Domain details */}
                                   {type === 'domains' && (
                                     <Box sx={{ mt: 2 }}>
@@ -1479,30 +1479,30 @@ function NodeVisualization({ executionResult }) {
                                           <strong>Entry Type:</strong> {entitySummaries[entity.id].data.entryTypeName || entitySummaries[entity.id].data.entryType}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Entry Type Description */}
                                       {entitySummaries[entity.id]?.data?.entryTypeDescription && (
                                         <Typography variant="body2" sx={{ mb: 1, fontStyle: 'italic', color: 'text.secondary' }}>
                                           {entitySummaries[entity.id].data.entryTypeDescription}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Database source */}
                                       {entitySummaries[entity.id]?.data?.database && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Database:</strong> {entitySummaries[entity.id].data.database}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Pfam clan information */}
                                       {entitySummaries[entity.id]?.data?.clan && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Clan:</strong> {entitySummaries[entity.id].data.clan}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Source databases */}
-                                      {entitySummaries[entity.id]?.data?.sourceDatabases && 
+                                      {entitySummaries[entity.id]?.data?.sourceDatabases &&
                                        entitySummaries[entity.id].data.sourceDatabases.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1510,12 +1510,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.sourceDatabases.slice(0, 5).map((source, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={source} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={source}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
                                                   color: 'primary.main'
@@ -1523,7 +1523,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entitySummaries[entity.id].data.sourceDatabases.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.sourceDatabases.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1532,9 +1532,9 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Cross-references */}
-                                      {entitySummaries[entity.id]?.data?.crossReferences && 
+                                      {entitySummaries[entity.id]?.data?.crossReferences &&
                                        entitySummaries[entity.id].data.crossReferences.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1542,12 +1542,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.crossReferences.slice(0, 5).map((xref, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={xref} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={xref}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.secondary.main, 0.1),
                                                   color: 'secondary.main'
@@ -1555,7 +1555,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entitySummaries[entity.id].data.crossReferences.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.crossReferences.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1564,9 +1564,9 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Associated GO terms */}
-                                      {entitySummaries[entity.id]?.data?.goTerms && 
+                                      {entitySummaries[entity.id]?.data?.goTerms &&
                                        entitySummaries[entity.id].data.goTerms.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1574,16 +1574,16 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.goTerms.slice(0, 3).map((goTerm, i) => (
-                                              <Tooltip 
-                                                key={i} 
+                                              <Tooltip
+                                                key={i}
                                                 title={`${goTerm.name} (${goTerm.category})`}
                                                 arrow
                                               >
-                                                <Chip 
-                                                  label={goTerm.id} 
-                                                  size="small" 
-                                                  sx={{ 
-                                                    height: '20px', 
+                                                <Chip
+                                                  label={goTerm.id}
+                                                  size="small"
+                                                  sx={{
+                                                    height: '20px',
                                                     fontSize: '0.7rem',
                                                     backgroundColor: theme => alpha(theme.palette.success.main, 0.1),
                                                     color: 'success.main',
@@ -1593,7 +1593,7 @@ function NodeVisualization({ executionResult }) {
                                               </Tooltip>
                                             ))}
                                             {entitySummaries[entity.id].data.goTerms.length > 3 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.goTerms.length - 3} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1602,11 +1602,11 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Link to source database */}
                                       {entitySummaries[entity.id]?.data?.url && (
                                         <Box sx={{ mt: 1 }}>
-                                          <Link 
+                                          <Link
                                             href={entitySummaries[entity.id].data.url}
                                             target="_blank"
                                             rel="noopener"
@@ -1619,7 +1619,7 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {/* GO Term details */}
                                   {type === 'goterms' && (
                                     <Box sx={{ mt: 2 }}>
@@ -1629,30 +1629,30 @@ function NodeVisualization({ executionResult }) {
                                           <strong>Namespace:</strong> {entitySummaries[entity.id].data.namespace}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* GO ID */}
                                       {entitySummaries[entity.id]?.data?.goId && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>GO ID:</strong> {entitySummaries[entity.id].data.goId}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Definition (separate from description) */}
-                                      {entitySummaries[entity.id]?.data?.definition && 
+                                      {entitySummaries[entity.id]?.data?.definition &&
                                        entitySummaries[entity.id].data.definition !== 'No definition available' && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Definition:</strong> {entitySummaries[entity.id].data.definition}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Obsolete status warning */}
                                       {entitySummaries[entity.id]?.data?.isObsolete && (
                                         <Box sx={{ mb: 1 }}>
-                                          <Chip 
+                                          <Chip
                                             label="Obsolete Term"
                                             size="small"
                                             color="warning"
-                                            sx={{ 
+                                            sx={{
                                               fontSize: '0.7rem',
                                               backgroundColor: theme => alpha(theme.palette.warning.main, 0.2),
                                               color: 'warning.main'
@@ -1660,9 +1660,9 @@ function NodeVisualization({ executionResult }) {
                                           />
                                         </Box>
                                       )}
-                                      
+
                                       {/* GO Term synonyms */}
-                                      {entitySummaries[entity.id]?.data?.synonyms && 
+                                      {entitySummaries[entity.id]?.data?.synonyms &&
                                        entitySummaries[entity.id].data.synonyms.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1670,12 +1670,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.synonyms.slice(0, 5).map((synonym, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={synonym} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={synonym}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.info.main, 0.1),
                                                   color: 'info.main'
@@ -1683,7 +1683,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entitySummaries[entity.id].data.synonyms.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.synonyms.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1692,9 +1692,9 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Cross-references */}
-                                      {entitySummaries[entity.id]?.data?.crossReferences && 
+                                      {entitySummaries[entity.id]?.data?.crossReferences &&
                                        entitySummaries[entity.id].data.crossReferences.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1702,12 +1702,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.crossReferences.slice(0, 3).map((xref, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={xref} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={xref}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.secondary.main, 0.1),
                                                   color: 'secondary.main'
@@ -1715,7 +1715,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entitySummaries[entity.id].data.crossReferences.length > 3 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.crossReferences.length - 3} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1724,11 +1724,11 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Link to AmiGO */}
                                       {entitySummaries[entity.id]?.data?.url && (
                                         <Box sx={{ mt: 1 }}>
-                                          <Link 
+                                          <Link
                                             href={entitySummaries[entity.id].data.url}
                                             target="_blank"
                                             rel="noopener"
@@ -1741,7 +1741,7 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {/* Side Effect (MedDRA) details */}
                                   {type === 'sideeffects' && (
                                     <Box sx={{ mt: 2 }}>
@@ -1751,24 +1751,24 @@ function NodeVisualization({ executionResult }) {
                                           <strong>MedDRA Code:</strong> {entitySummaries[entity.id].data.notation}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Definition (separate from description) */}
-                                      {entitySummaries[entity.id]?.data?.definition && 
+                                      {entitySummaries[entity.id]?.data?.definition &&
                                        entitySummaries[entity.id].data.definition !== 'Unable to fetch detailed definition from BioPortal.' && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Definition:</strong> {entitySummaries[entity.id].data.definition}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Database source */}
                                       {entitySummaries[entity.id]?.data?.database && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Source:</strong> {entitySummaries[entity.id].data.database} (Medical Dictionary for Regulatory Activities)
                                         </Typography>
                                       )}
-                                      
+
                                       {/* MedDRA synonyms */}
-                                      {entitySummaries[entity.id]?.data?.synonyms && 
+                                      {entitySummaries[entity.id]?.data?.synonyms &&
                                        entitySummaries[entity.id].data.synonyms.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1776,12 +1776,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.synonyms.slice(0, 5).map((synonym, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={synonym} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={synonym}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.warning.main, 0.1),
                                                   color: 'warning.main'
@@ -1789,7 +1789,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entitySummaries[entity.id].data.synonyms.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.synonyms.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1798,12 +1798,12 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Hierarchy information */}
                                       {entitySummaries[entity.id]?.data?.hierarchy && (
                                         <>
                                           {/* Parent terms */}
-                                          {entitySummaries[entity.id].data.hierarchy.parents && 
+                                          {entitySummaries[entity.id].data.hierarchy.parents &&
                                            entitySummaries[entity.id].data.hierarchy.parents.length > 0 && (
                                             <>
                                               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1811,12 +1811,12 @@ function NodeVisualization({ executionResult }) {
                                               </Typography>
                                               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
                                                 {entitySummaries[entity.id].data.hierarchy.parents.slice(0, 3).map((parent, i) => (
-                                                  <Chip 
-                                                    key={i} 
+                                                  <Chip
+                                                    key={i}
                                                     label={parent.prefLabel || parent}
-                                                    size="small" 
-                                                    sx={{ 
-                                                      height: '20px', 
+                                                    size="small"
+                                                    sx={{
+                                                      height: '20px',
                                                       fontSize: '0.7rem',
                                                       backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
                                                       color: 'primary.main'
@@ -1824,7 +1824,7 @@ function NodeVisualization({ executionResult }) {
                                                   />
                                                 ))}
                                                 {entitySummaries[entity.id].data.hierarchy.parents.length > 3 && (
-                                                  <Chip 
+                                                  <Chip
                                                     label={`+${entitySummaries[entity.id].data.hierarchy.parents.length - 3} more`}
                                                     size="small"
                                                     sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1833,9 +1833,9 @@ function NodeVisualization({ executionResult }) {
                                               </Box>
                                             </>
                                           )}
-                                          
+
                                           {/* Child terms */}
-                                          {entitySummaries[entity.id].data.hierarchy.children && 
+                                          {entitySummaries[entity.id].data.hierarchy.children &&
                                            entitySummaries[entity.id].data.hierarchy.children.length > 0 && (
                                             <>
                                               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1843,12 +1843,12 @@ function NodeVisualization({ executionResult }) {
                                               </Typography>
                                               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                                 {entitySummaries[entity.id].data.hierarchy.children.slice(0, 3).map((child, i) => (
-                                                  <Chip 
-                                                    key={i} 
+                                                  <Chip
+                                                    key={i}
                                                     label={child.prefLabel || child}
-                                                    size="small" 
-                                                    sx={{ 
-                                                      height: '20px', 
+                                                    size="small"
+                                                    sx={{
+                                                      height: '20px',
                                                       fontSize: '0.7rem',
                                                       backgroundColor: theme => alpha(theme.palette.secondary.main, 0.1),
                                                       color: 'secondary.main'
@@ -1856,7 +1856,7 @@ function NodeVisualization({ executionResult }) {
                                                   />
                                                 ))}
                                                 {entitySummaries[entity.id].data.hierarchy.children.length > 3 && (
-                                                  <Chip 
+                                                  <Chip
                                                     label={`+${entitySummaries[entity.id].data.hierarchy.children.length - 3} more`}
                                                     size="small"
                                                     sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -1867,11 +1867,11 @@ function NodeVisualization({ executionResult }) {
                                           )}
                                         </>
                                       )}
-                                      
+
                                       {/* Link to BioPortal */}
                                       {entitySummaries[entity.id]?.data?.url && (
                                         <Box sx={{ mt: 1 }}>
-                                          <Link 
+                                          <Link
                                             href={entitySummaries[entity.id].data.url}
                                             target="_blank"
                                             rel="noopener"
@@ -1884,7 +1884,7 @@ function NodeVisualization({ executionResult }) {
                                       )}
                                     </Box>
                                   )}
-                                  
+
                                   {/* Organism (Taxonomy) details */}
                                   {type === 'organisms' && (
                                     <Box sx={{ mt: 2 }}>
@@ -1894,46 +1894,46 @@ function NodeVisualization({ executionResult }) {
                                           <strong>Scientific Name:</strong> {entitySummaries[entity.id].data.scientificName}
                                         </Typography>
                                       )}
-                                      
-                                      {entitySummaries[entity.id]?.data?.commonName && 
+
+                                      {entitySummaries[entity.id]?.data?.commonName &&
                                        entitySummaries[entity.id].data.commonName !== entitySummaries[entity.id].data?.scientificName && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Common Name:</strong> {entitySummaries[entity.id].data.commonName}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Taxonomic rank */}
                                       {entitySummaries[entity.id]?.data?.rank && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Rank:</strong> {entitySummaries[entity.id].data.rank}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* UniProt mnemonic code */}
                                       {entitySummaries[entity.id]?.data?.mnemonic && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>UniProt Code:</strong> {entitySummaries[entity.id].data.mnemonic}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Parent taxon information */}
                                       {entitySummaries[entity.id]?.data?.parentName && (
                                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                                           <strong>Parent Taxon:</strong> {entitySummaries[entity.id].data.parentName}
                                         </Typography>
                                       )}
-                                      
+
                                       {/* Taxonomic lineage */}
-                                      {entitySummaries[entity.id]?.data?.lineage && 
+                                      {entitySummaries[entity.id]?.data?.lineage &&
                                        entitySummaries[entity.id].data.lineage.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, mt: 1.5 }}>
                                             Taxonomic lineage:
                                           </Typography>
-                                          <Box sx={{ 
-                                            display: 'flex', 
-                                            flexDirection: 'column', 
-                                            gap: 0.5, 
+                                          <Box sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 0.5,
                                             mb: 1.5,
                                             p: 1,
                                             backgroundColor: theme => alpha(theme.palette.background.default, 0.6),
@@ -1942,7 +1942,7 @@ function NodeVisualization({ executionResult }) {
                                           }}>
                                             {entitySummaries[entity.id].data.lineage.slice().reverse().slice(0, 8).map((ancestor, i) => (
                                               <Box key={i} sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <Typography variant="caption" sx={{ 
+                                                <Typography variant="caption" sx={{
                                                   minWidth: '80px',
                                                   fontWeight: 500,
                                                   color: 'text.secondary',
@@ -1950,19 +1950,19 @@ function NodeVisualization({ executionResult }) {
                                                 }}>
                                                   {ancestor.rank}:
                                                 </Typography>
-                                                <Typography variant="caption" sx={{ 
+                                                <Typography variant="caption" sx={{
                                                   ml: 1,
                                                   fontStyle: ancestor.rank === 'species' ? 'italic' : 'normal'
                                                 }}>
                                                   {ancestor.name}
                                                 </Typography>
                                                 {ancestor.taxonId && (
-                                                  <Chip 
+                                                  <Chip
                                                     label={ancestor.taxonId}
                                                     size="small"
-                                                    sx={{ 
-                                                      ml: 1, 
-                                                      height: '16px', 
+                                                    sx={{
+                                                      ml: 1,
+                                                      height: '16px',
                                                       fontSize: '0.6rem',
                                                       backgroundColor: theme => alpha(theme.palette.primary.main, 0.1),
                                                       color: 'primary.main'
@@ -1972,8 +1972,8 @@ function NodeVisualization({ executionResult }) {
                                               </Box>
                                             ))}
                                             {entitySummaries[entity.id].data.lineage.length > 8 && (
-                                              <Typography variant="caption" sx={{ 
-                                                color: 'text.secondary', 
+                                              <Typography variant="caption" sx={{
+                                                color: 'text.secondary',
                                                 fontStyle: 'italic',
                                                 textAlign: 'center'
                                               }}>
@@ -1983,9 +1983,9 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Alternative names/synonyms */}
-                                      {entitySummaries[entity.id]?.data?.synonyms && 
+                                      {entitySummaries[entity.id]?.data?.synonyms &&
                                        entitySummaries[entity.id].data.synonyms.length > 0 && (
                                         <>
                                           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
@@ -1993,12 +1993,12 @@ function NodeVisualization({ executionResult }) {
                                           </Typography>
                                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
                                             {entitySummaries[entity.id].data.synonyms.slice(0, 5).map((synonym, i) => (
-                                              <Chip 
-                                                key={i} 
-                                                label={synonym} 
-                                                size="small" 
-                                                sx={{ 
-                                                  height: '20px', 
+                                              <Chip
+                                                key={i}
+                                                label={synonym}
+                                                size="small"
+                                                sx={{
+                                                  height: '20px',
                                                   fontSize: '0.7rem',
                                                   backgroundColor: theme => alpha(theme.palette.success.main, 0.1),
                                                   color: 'success.main'
@@ -2006,7 +2006,7 @@ function NodeVisualization({ executionResult }) {
                                               />
                                             ))}
                                             {entitySummaries[entity.id].data.synonyms.length > 5 && (
-                                              <Chip 
+                                              <Chip
                                                 label={`+${entitySummaries[entity.id].data.synonyms.length - 5} more`}
                                                 size="small"
                                                 sx={{ height: '20px', fontSize: '0.7rem' }}
@@ -2015,11 +2015,11 @@ function NodeVisualization({ executionResult }) {
                                           </Box>
                                         </>
                                       )}
-                                      
+
                                       {/* Link to UniProt Taxonomy */}
                                       {entitySummaries[entity.id]?.data?.url && (
                                         <Box sx={{ mt: 1 }}>
-                                          <Link 
+                                          <Link
                                             href={entitySummaries[entity.id].data.url}
                                             target="_blank"
                                             rel="noopener"
@@ -2038,14 +2038,14 @@ function NodeVisualization({ executionResult }) {
                           </Grid>
                         </Box>
                       </Collapse>
-                      
+
                       {index < items.length - 1 && (
                         <Divider sx={{ ml: 4 }} />
                       )}
                     </React.Fragment>
                   ))}
-                  
-                  {Object.entries(entities).findIndex(([t]) => t === type) < 
+
+                  {Object.entries(entities).findIndex(([t]) => t === type) <
                    Object.entries(entities).filter(([_, arr]) => arr.length > 0).length - 1 && (
                     <Divider />
                   )}

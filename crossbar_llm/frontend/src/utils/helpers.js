@@ -9,10 +9,10 @@
  */
 export const generateExternalLink = (id) => {
   if (!id) return '#';
-  
+
   // Extract prefix and identifier
   const [prefix, identifier] = id.includes(':') ? id.split(':') : ['unknown', id];
-  
+
   switch(prefix.toLowerCase()) {
     case 'ncbigene':
       return `https://www.ncbi.nlm.nih.gov/gene/${identifier}`;
@@ -95,25 +95,25 @@ export const generateExternalLink = (id) => {
 
 /**
  * Format an entity name for display from a raw database ID
- * @param {string} id - The entity ID (e.g., "uniprot:P12345") 
- * @param {string} displayName - The name to display (may be null) 
+ * @param {string} id - The entity ID (e.g., "uniprot:P12345")
+ * @param {string} displayName - The name to display (may be null)
  * @returns {string} - A formatted display name
  */
 export const formatEntityName = (id, displayName) => {
   if (displayName && displayName !== 'Unknown') {
     return displayName;
   }
-  
+
   if (!id) return 'Unknown';
-  
+
   // Extract the ID part without the database prefix
   const parts = id.split(':');
   const idPart = parts.length > 1 ? parts[1] : id;
   const prefix = parts.length > 1 ? parts[0].toLowerCase() : '';
-  
+
   switch(prefix) {
     case 'ncbigene':
-      return `Gene ${idPart}`;
+      return `Gene ID: ${idPart}`;
     case 'uniprot':
       return `Protein ${idPart}`;
     case 'kegg':
