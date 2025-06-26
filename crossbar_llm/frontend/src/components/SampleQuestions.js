@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Button, 
-  Box, 
-  Typography, 
-  Chip, 
-  Tooltip, 
-  Menu, 
-  MenuItem, 
+import {
+  Button,
+  Box,
+  Typography,
+  Chip,
+  Tooltip,
+  Menu,
+  MenuItem,
   IconButton,
   alpha,
   useTheme,
@@ -49,7 +49,7 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const theme = useTheme();
-  
+
   const examples = [
     {
       question: "Which Gene is related to the Disease named psoriasis?"
@@ -75,6 +75,11 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
       embeddingType: "Anc2vec"
     },
     {
+      question: "Find a protein domain that is similar to the domain with ID 'interpro:IPR000719' (do not return 'interpro:IPR000719' among the results). Then, find a protein that possesses this similar domain, and two proteins that interact with this protein, and three proteins associated phenotypes for each interacting protein. Return the names (and ids inside parentheses) of all proteins, phenotypes, and the similar domain.",
+      vectorCategory: "ProteinDomain",
+      embeddingType: "Dom2vec"
+    },
+    {
       question: "Give me the names of top 10 Proteins that are targeted by Small Molecules similar to the given embedding.",
       vectorCategory: "SmallMolecule",
       embeddingType: "Selformer",
@@ -95,15 +100,15 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
   ];
 
   const currentExamples = isVectorTab ? vectorExamples : examples;
-  
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleClose = () => {
     setAnchorEl(null);
   };
-  
+
   const handleSelectQuestion = (question) => {
     if (isVectorTab) {
       onQuestionClick(question);
@@ -131,7 +136,7 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
             borderRadius: '14px',
             padding: '8px 16px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-            background: theme => theme.palette.mode === 'dark' 
+            background: theme => theme.palette.mode === 'dark'
               ? `linear-gradient(45deg, ${theme.palette.secondary.dark}, ${theme.palette.primary.dark})`
               : `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
             backgroundSize: '200% 200%',
@@ -151,7 +156,7 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
           Explore Sample Questions
         </Button>
       </Tooltip>
-      
+
       <Menu
         anchorEl={anchorEl}
         open={open}
@@ -166,7 +171,7 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
             width: 400,
             padding: '12px',
             backdropFilter: 'blur(10px)',
-            backgroundColor: theme => theme.palette.mode === 'dark' 
+            backgroundColor: theme => theme.palette.mode === 'dark'
               ? alpha(theme.palette.background.paper, 0.95)
               : alpha(theme.palette.background.paper, 0.95),
             '& .MuiMenuItem-root': {
@@ -191,11 +196,11 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Box sx={{ px: 2, pb: 2, pt: 1 }}>
-          <Typography 
-            variant="subtitle1" 
-            color="primary" 
-            sx={{ 
-              fontWeight: 700, 
+          <Typography
+            variant="subtitle1"
+            color="primary"
+            sx={{
+              fontWeight: 700,
               fontSize: '1rem',
               display: 'flex',
               alignItems: 'center',
@@ -209,10 +214,10 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
             Click on any question to try it out
           </Typography>
         </Box>
-        
+
         {currentExamples.map((question, index) => (
-          <MenuItem 
-            key={index} 
+          <MenuItem
+            key={index}
             onClick={() => handleSelectQuestion(question)}
             sx={{
               transition: 'all 0.2s ease',
@@ -223,12 +228,12 @@ function SampleQuestions({ onQuestionClick, isVectorTab }) {
               }
             }}
           >
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                lineHeight: 1.5, 
-                wordBreak: 'break-word', 
-                overflowWrap: 'break-word', 
+            <Typography
+              variant="body2"
+              sx={{
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
                 whiteSpace: 'normal',
                 fontWeight: 500
               }}
