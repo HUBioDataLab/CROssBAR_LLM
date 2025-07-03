@@ -1589,7 +1589,7 @@ function VectorSearch({
                 variant="contained"
                 color="primary"
                 onClick={handleRunGeneratedQuery}
-                disabled={!isSettingsValid() || !editableQuery.trim() || loading}
+                disabled={!isSettingsValid() || !generatedQuery.trim() || loading}
                 startIcon={activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
                 sx={{
                   borderRadius: '12px',
