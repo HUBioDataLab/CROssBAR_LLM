@@ -1420,8 +1420,8 @@ function VectorSearch({
                   <Button
                     variant="outlined"
                     onClick={handleGenerateQuery}
-                    disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generate')}
-                    startIcon={<SendIcon />}
+                    disabled={!question || !isSettingsValid() || loading}
+                    startIcon={activeButton === 'generate' ? <CircularProgress size={20} /> : <SendIcon />}
                     sx={{
                       borderRadius: '12px',
                       px: 3,
@@ -1443,8 +1443,8 @@ function VectorSearch({
                     variant="contained"
                     color="primary"
                     onClick={handleGenerateAndRun}
-                    disabled={!question || !isSettingsValid() || (loading && activeButton !== 'generateAndRun')}
-                    startIcon={<PlayArrowIcon />}
+                    disabled={!question || !isSettingsValid() || loading}
+                    startIcon={activeButton === 'generateAndRun' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
                     sx={{
                       borderRadius: '12px',
                       px: 3,
@@ -1589,8 +1589,8 @@ function VectorSearch({
                 variant="contained"
                 color="primary"
                 onClick={handleRunGeneratedQuery}
-                disabled={!isSettingsValid() || (loading && activeButton !== 'run')}
-                startIcon={loading && activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
+                disabled={!isSettingsValid() || !editableQuery.trim() || loading}
+                startIcon={activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
                 sx={{
                   borderRadius: '12px',
                   px: 3
