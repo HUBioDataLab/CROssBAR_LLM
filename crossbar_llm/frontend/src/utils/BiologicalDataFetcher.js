@@ -144,13 +144,75 @@ export const fetchPathwayData = async (pathwayId) => {
       case 'kegg.pathway':
       case 'kegg':
         // KEGG pathways are often in format "kegg.pathway:hsa04010"
-        return {
-          id: pathwayId,
-          name: `KEGG Pathway ${id}`,
-          description: `Biological pathway from KEGG database with ID ${id}. KEGG pathways represent molecular interaction, reaction and relation networks for metabolism, genetic information processing, environmental information processing and cellular processes.`,
-          url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
-          database: 'KEGG'
-        };
+        try {
+          // Call KEGG REST API
+          const response = await fetch(`https://rest.kegg.jp/get/${id}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch KEGG data: ${response.status}`);
+          }
+          
+          const text = await response.text();
+          
+          // Parse KEGG flat file format
+          const lines = text.split('\n');
+          let name = '';
+          let description = '';
+          let class_info = '';
+          let diseases = [];
+          let modules = [];
+          
+          for (let line of lines) {
+            if (line.startsWith('NAME')) {
+              name = line.replace('NAME', '').trim();
+            } else if (line.startsWith('DESCRIPTION')) {
+              description = line.replace('DESCRIPTION', '').trim();
+            } else if (line.startsWith('CLASS')) {
+              class_info = line.replace('CLASS', '').trim();
+            } else if (line.startsWith('DISEASE')) {
+              diseases.push(line.replace('DISEASE', '').trim());
+            } else if (line.startsWith('MODULE')) {
+              modules.push(line.replace('MODULE', '').trim());
+            } else if (line.startsWith(' ')) {
+              // Continuation of previous field
+              const lastField = lines[lines.indexOf(line) - 1];
+              if (lastField.startsWith('DESCRIPTION')) {
+                description += ' ' + line.trim();
+              } else if (lastField.startsWith('CLASS')) {
+                class_info += ' ' + line.trim();
+              }
+            }
+          }
+          
+          return {
+            id: pathwayId,
+            name: name || `KEGG Pathway ${id}`,
+            description: description || `Biological pathway from KEGG database with ID ${id}`,
+            class: class_info,
+            diseases: diseases,
+            modules: modules,
+            url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
+            database: 'KEGG',
+            displayName: name || `KEGG ${id}`,
+            type: 'pathway',
+            source: {
+              name: 'KEGG',
+              version: 'current',
+              url: 'https://www.genome.jp/kegg/'
+            }
+          };
+        } catch (error) {
+          console.error('Error fetching from KEGG API:', error);
+          // Fallback to basic information if API fails
+          return {
+            id: pathwayId,
+            name: `KEGG Pathway ${id}`,
+            description: `Biological pathway from KEGG database with ID ${id}. KEGG pathways represent molecular interaction, reaction and relation networks for metabolism, genetic information processing, environmental information processing and cellular processes.`,
+            url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
+            database: 'KEGG',
+            error: true
+          };
+        }
         
       case 'reactome':
         // Reactome pathways
