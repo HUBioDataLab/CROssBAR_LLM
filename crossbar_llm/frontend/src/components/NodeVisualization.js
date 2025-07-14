@@ -553,6 +553,19 @@ function NodeVisualization({ executionResult }) {
             }
           }
 
+          // Handle items with direct id property (like vector search results)
+          if (item.id && typeof item.id === 'string') {
+            // Create an entity object from the item
+            const entity = {
+              id: item.id,
+              // Include score if available
+              ...(item.score && { score: item.score }),
+              // Include any other properties
+              ...item
+            };
+            entityPromises.push(addEntityToCollection(entity));
+          }
+
           // Process direct key-value pairs for any entity type
           Object.entries(item).forEach(([key, value]) => {
             // Skip if not an object or if key contains a dot (property path)
