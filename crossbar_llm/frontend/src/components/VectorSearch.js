@@ -1603,11 +1603,6 @@ function VectorSearch({
         )}
       </Paper>
 
-      {/* Node Visualization for execution results */}
-      {localExecutionResult && (
-        <NodeVisualization executionResult={localExecutionResult} />
-      )}
-
       {error && (
         <Zoom in={!!error}>
           <Alert
