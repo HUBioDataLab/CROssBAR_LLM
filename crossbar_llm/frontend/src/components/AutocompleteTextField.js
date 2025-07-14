@@ -68,14 +68,23 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   const [mentions, setMentions] = useState([]); // [{start, end, state}] where state is 'typing', 'selecting', or 'completed'
   const [showHint, setShowHint] = useState(true);
   const [expandedHint, setExpandedHint] = useState(false);
+  
+  // Performance optimization: only activate complex rendering when @ is present
+  const hasAtSymbol = value.includes('@');
+  const debounceTimeoutRef = useRef(null);
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
-      const loadedSuggestions = await loadSuggestions();
-      setSuggestions(loadedSuggestions);
-    };
-    fetchSuggestions();
-  }, []);
+    // Only load suggestions if @ symbol is present
+    if (hasAtSymbol) {
+      const fetchSuggestions = async () => {
+        if (suggestions.length === 0) {
+          const loadedSuggestions = await loadSuggestions();
+          setSuggestions(loadedSuggestions);
+        }
+      };
+      fetchSuggestions();
+    }
+  }, [hasAtSymbol, suggestions.length]);
 
   // Update suggestions position when they are shown
   useEffect(() => {
@@ -97,9 +106,12 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     keys: ['term'],
   });
 
-  const debounceTimeoutRef = useRef(null);
-
   const renderStyledText = () => {
+    // Only render styled text if @ symbol is present
+    if (!hasAtSymbol) {
+      return value;
+    }
+
     const parts = [];
     let lastIndex = 0;
 
@@ -166,7 +178,19 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     setCursorPosition(cursorPos);
     setSelectedIndex(0);
     
-    // No longer hiding the hint when typing - it stays visible
+    // Clear existing timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Only do complex processing if @ symbol is present
+    if (!newValue.includes('@')) {
+      // Reset all mention-related state when no @ symbol
+      setMentions([]);
+      setShowSuggestions(false);
+      setDisplaySuggestions([]);
+      return;
+    }
 
     // Clean up mentions when text is deleted
     setMentions(prevMentions => 
@@ -202,10 +226,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
       );
     }
 
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
+    // Only set up debounce if @ symbol is present
     debounceTimeoutRef.current = setTimeout(() => {
       const lastAtSymbol = newValue.lastIndexOf('@', cursorPosition - 1);
 
@@ -389,7 +410,8 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
           margin="normal"
           sx={{
             '& .MuiInputBase-input': {
-              color: 'transparent',
+              // Only make text transparent if @ symbol is present
+              color: hasAtSymbol ? 'transparent' : theme.palette.text.primary,
               caretColor: theme.palette.primary.main,
               fontFamily: theme.typography.fontFamily,
               fontSize: '1rem',
@@ -406,28 +428,31 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
             },
           }}
         />
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            pointerEvents: 'none',
-            padding: '16.5px 14px',
-            marginTop: '16px',
-            fontFamily: theme.typography.fontFamily,
-            fontSize: '1rem',
-            lineHeight: '1.5',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          {value ? renderStyledText() : (
-            <span style={{ color: theme.palette.text.disabled }}>
-              {placeholder}
-            </span>
-          )}
-        </div>
+        {/* Only render overlay when @ symbol is present */}
+        {hasAtSymbol && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              pointerEvents: 'none',
+              padding: '16.5px 14px',
+              marginTop: '16px',
+              fontFamily: theme.typography.fontFamily,
+              fontSize: '1rem',
+              lineHeight: '1.5',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {value ? renderStyledText() : (
+              <span style={{ color: theme.palette.text.disabled }}>
+                {placeholder}
+              </span>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Enhanced Autocomplete hint with slide animation */}
