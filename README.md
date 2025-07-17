@@ -26,8 +26,14 @@ poetry install
 
 To get into the `poetry` virtual env:
 
+If poetry version <2 :
 ```prompt
 poetry shell
+```
+
+If poetry version 2>= :
+```prompt
+poetry env activate
 ```
 
 ### pip
