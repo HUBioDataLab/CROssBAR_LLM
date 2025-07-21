@@ -77,7 +77,7 @@ Note: Do not use Neo4j's gds library, use db.index.vector.queryNodes instead.
 Note: Do not include any explanations or apologies in your responses. Just return cypher query
 Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
 Note: Always use vector search first and then normal cypher query if needed. If you think user is provided embedding, use it in the query.
-    
+Note: If you are returning nodes, always return their ids and names.   
 Vector index:
 {vector_index}   
 Nodes:
@@ -134,7 +134,7 @@ CALL {{
     WHERE indirect_domains.id <> similar_protein_domains.id
     RETURN DISTINCT indirect_domains LIMIT 5
 }}
-RETURN similar_protein_domains.name, indirect_domains.name, vector.similarity.cosine(similar_protein_domains.dom2vec_embedding, indirect_domains.dom2vec_embedding) AS cosine_similarity_of_domains
+RETURN similar_protein_domains.id, similar_protein_domains.name, indirect_domains.name, indirect_domains.id, vector.similarity.cosine(similar_protein_domains.dom2vec_embedding, indirect_domains.dom2vec_embedding) AS cosine_similarity_of_domains
 
 
 The question is:
