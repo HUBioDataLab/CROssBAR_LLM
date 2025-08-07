@@ -179,6 +179,8 @@ function QueryInput({
       'claude-3-opus-20240229',
       'claude-3-sonnet-20240229',
       'claude-3-haiku-20240307',
+      "claude-opus-4-20250514",
+      "claude-sonnet-4-20250514",
     ],
     OpenRouter: [
       "deepseek/deepseek-r1-distill-llama-70b",
