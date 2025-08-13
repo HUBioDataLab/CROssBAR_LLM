@@ -484,6 +484,7 @@ function VectorSearch({
       const embedding = vectorFile ? JSON.stringify(vectorFile) : null;
       const response = await axios.post('/generate_query/', {
         question,
+        provider,
         llm_type: llmType,
         top_k: topK,
         api_key: effectiveApiKey,
@@ -572,6 +573,7 @@ function VectorSearch({
       const response = await axios.post('/run_query/', {
         query: generatedQuery,
         question,
+        provider,
         llm_type: llmType,
         top_k: topK,
         api_key: effectiveApiKey,
@@ -757,7 +759,8 @@ function VectorSearch({
         verbose: verbose
       };
 
-      const runResponse = await axios.post('/run_query/', runRequestData);
+      const runRequestDataWithProvider = { ...runRequestData, provider };
+      const runResponse = await axios.post('/run_query/', runRequestDataWithProvider);
 
       setExecutionResult({
         result: runResponse.data.result,

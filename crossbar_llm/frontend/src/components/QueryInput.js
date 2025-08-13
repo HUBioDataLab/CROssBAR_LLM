@@ -485,6 +485,7 @@ function QueryInput({
       const response = await api.post('/generate_query/', {
         question,
         llm_type: llmType,
+        provider,
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
@@ -580,6 +581,7 @@ function QueryInput({
         query: editableQuery,
         question: question,
         llm_type: llmType,
+        provider,
         api_key: effectiveApiKey,
         verbose,
       }, { signal });
@@ -672,6 +674,7 @@ function QueryInput({
       const generateResponse = await api.post('/generate_query/', {
         question,
         llm_type: llmType,
+        provider,
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
