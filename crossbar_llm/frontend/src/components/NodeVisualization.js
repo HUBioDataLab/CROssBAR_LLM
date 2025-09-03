@@ -616,6 +616,65 @@ function NodeVisualization({ executionResult }) {
             const organism = item.organism || item.o;
             entityPromises.push(addEntityToCollection(organism, 'organisms'));
           }
+
+          // Biological Process (GO term) from flat fields
+          if (item.biological_process_id) {
+            const goEntity = {
+              id: item.biological_process_id,
+              name: item.biological_process_name || formatEntityName(item.biological_process_id, null),
+              ...(item.score && { score: item.score })
+            };
+            entityPromises.push(addEntityToCollection(goEntity, 'goterms'));
+          }
+
+          // Drug from flat fields
+          if (item.drug_id) {
+            const drugEntity = {
+              id: item.drug_id,
+              name: item.drug_name || undefined,
+              ...(item.score && { score: item.score })
+            };
+            entityPromises.push(addEntityToCollection(drugEntity, 'drugs'));
+          }
+
+          // Generic flat *_id detection across common entity types
+          Object.entries(item).forEach(([key, value]) => {
+            if (!value || typeof value !== 'string') return;
+            if (key.includes('.')) return; // handled elsewhere
+
+            // Key patterns: *_id, *Id, *ID
+            const idKeyMatch = key.match(/^(.*?)(?:_id|Id|ID)$/);
+            if (!idKeyMatch) return;
+            const prefixRaw = idKeyMatch[1] || '';
+            const prefix = prefixRaw.toLowerCase();
+
+            // Determine entity type using ID first, then fall back to key prefix
+            let detectedType = getEntityTypeFromId(value);
+            if (!detectedType) {
+              if (['gene', 'genes', 'ncbigene', 'ensembl'].includes(prefix)) detectedType = 'genes';
+              else if (['protein', 'proteins', 'uniprot'].includes(prefix)) detectedType = 'proteins';
+              else if (['drug', 'drugs', 'compound', 'chembl', 'pubchem', 'chebi'].includes(prefix)) detectedType = 'drugs';
+              else if (['disease', 'diseases', 'mondo', 'mesh', 'omim'].includes(prefix)) detectedType = 'diseases';
+              else if (['pathway', 'pathways', 'kegg', 'reactome'].includes(prefix)) detectedType = 'pathways';
+              else if (['domain', 'domains', 'interpro', 'pfam'].includes(prefix)) detectedType = 'domains';
+              else if (['organism', 'organisms', 'taxon', 'taxonomy', 'ncbitaxon'].includes(prefix)) detectedType = 'organisms';
+              else if (['go', 'goterm', 'goterms', 'biological_process', 'biologicalprocess'].includes(prefix)) detectedType = 'goterms';
+              else if (['phenotype', 'phenotypes', 'hp'].includes(prefix)) detectedType = 'phenotypes';
+              else if (['sideeffect', 'side_effect', 'adverseevent', 'meddra'].includes(prefix)) detectedType = 'sideeffects';
+              else if (['ec', 'eccode', 'enzyme', 'ecnumber'].includes(prefix)) detectedType = 'ecnumbers';
+            }
+
+            if (!detectedType) return;
+
+            // Try to find a sibling name/label
+            const candidateName = item[`${prefixRaw}_name`] || item[`${prefixRaw}_label`] || item[`${prefixRaw}_symbol`] || item[`${prefixRaw}Name`] || item[`${prefixRaw}Label`];
+            const entity = {
+              id: value,
+              name: candidateName || formatEntityName(value, null),
+              ...(item.score && { score: item.score })
+            };
+            entityPromises.push(addEntityToCollection(entity, detectedType));
+          });
         });
 
         // Wait for all entity processing to complete
