@@ -69,7 +69,7 @@ MODEL_PROVIDER_RULES = [
     (lambda m: m.startswith("claude"), "anthropic"),
     (lambda m: m.startswith("gemini"), "google"),
     (lambda m: m.startswith("llama") or m.startswith("mixtral") or m.startswith("groq") or m.startswith("moonshotai") or m.startswith("meta-llama"), "groq"),
-    (lambda m: m.startswith("meta/llama") or m.startswith("mistralai"), "nvidia"),
+    (lambda m: m.startswith("meta/llama") or m.startswith("mistralai") or m.startswith("qwen") or m.startswith("deepseek-ai"), "nvidia"),
     (lambda m: m.startswith("deepseek"), "openrouter"),
 ]
 
