@@ -40,6 +40,7 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from tools.langchain_llm_qa_trial import RunPipeline, configure_logging
 from tools.utils import Logger
+from models_config import get_all_models
 
 # Load environment variables
 load_dotenv()
@@ -862,6 +863,18 @@ def get_environment_info():
             "rate_limits": json_safe_rate_limits,
         },
     }
+
+
+@app.get("/models/")
+def get_available_models():
+    """
+    Get all available LLM models organized by provider.
+    This provides a single source of truth for model choices in the frontend.
+    """
+    Logger.info("Available models requested")
+    models = get_all_models()
+    Logger.debug(f"Returning models configuration with {len(models)} providers")
+    return models
 
 
 # Initialize logging on startup

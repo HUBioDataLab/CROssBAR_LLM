@@ -195,6 +195,16 @@ export const streamLogs = (onMessage, onError) => {
   return eventSource;
 };
 
+export const getAvailableModels = async () => {
+  try {
+    const response = await instance.get('/models/');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching available models:', error);
+    throw error;
+  }
+};
+
 // Export the refreshCsrfToken function for explicit usage
 export { refreshCsrfToken };
 

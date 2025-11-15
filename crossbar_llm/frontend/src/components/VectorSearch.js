@@ -29,7 +29,7 @@ import {
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
-import api from '../services/api';
+import api, { getAvailableModels } from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -81,6 +81,8 @@ function VectorSearch({
   const [localRealtimeLogs, setLocalRealtimeLogs] = useState('');
   const [apiKeysStatus, setApiKeysStatus] = useState({});
   const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
+  const [modelChoices, setModelChoices] = useState({});
+  const [modelsLoaded, setModelsLoaded] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [retryAfter, setRetryAfter] = useState(0);
   const [retryCountdown, setRetryCountdown] = useState(0);
@@ -101,59 +103,26 @@ function VectorSearch({
   const abortControllerRef = useRef(null);
   const countdownTimerRef = useRef(null);
 
-  const modelChoices = {
-    OpenAI: [
-      'gpt-4.1',
-      'o4-mini-latest',
-      'o3-latest',
-      'o3-mini-latest',
-      'o1-latest',
-      'o1-mini-latest',
-      'o1-pro-latest',
-    ],
-    Anthropic: [
-      'claude-sonnet-4-5',
-      'claude-haiku-4-5',
-      'claude-opus-4-1',
-    ],
-    OpenRouter: [
-      "deepseek/deepseek-r1-distill-llama-70b",
-      "deepseek/deepseek-r1:free",
-      "deepseek/deepseek-r1",
-      "deepseek/deepseek-chat",
-      "qwen/qwen3-235b-a22b-2507",
-      "moonshotai/kimi-k2",
-      "x-ai/grok-4",
-      "x-ai/grok-3",
-      "tencent/hunyuan-a13b-instruct",
-    ],
-    Google: [
-      "gemini-2.5-pro",
-      "gemini-2.5-flash",
-    ],
-    Groq: [
-      "llama-3.3-70b-versatile",
-      "deepseek-r1-distill-llama-70b",
-      "meta-llama/llama-4-maverick-17b-128e-instruct",
-      "meta-llama/llama-4-scout-17b-16e-instruct",
-      "moonshotai/kimi-k2-instruct",
-      "groq/compound",
-      "groq/compound-mini",
-    ],
-    Nvidia: [
-      "meta/llama-3.1-405b-instruct",
-      "meta/llama-3.1-70b-instruct",
-      "meta/llama-3.1-8b-instruct",
-      "meta/llama-4-maverick-17b-128e-instruct",
-      "meta/llama-4-scout-17b-16e-instruct",
-      "mistralai/mixtral-8x22b-instruct-v0.1",
-      "qwen/qwen3-235b-a22b",
-      "moonshotai/kimi-k2-instruct",
-      "deepseek-ai/deepseek-r1",
-    ],
-  };
+  const supportedModels = ['gpt-4.1', 'claude-sonnet-4-5', 'claude-opus-4-1', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.5-pro', 'gemini-2.5-flash'];
 
-  const supportedModels = ['gpt-4o', 'claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.0-flash'];
+  // Fetch available models on component mount
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const models = await getAvailableModels();
+        console.log('Available models:', models);
+        setModelChoices(models);
+        setModelsLoaded(true);
+      } catch (error) {
+        console.error('Error fetching available models:', error);
+        // Fallback to empty object if fetch fails
+        setModelChoices({});
+        setModelsLoaded(true);
+      }
+    };
+
+    fetchModels();
+  }, []);
 
   // Fetch API keys status on component mount
   useEffect(() => {

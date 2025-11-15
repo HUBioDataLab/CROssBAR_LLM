@@ -51,28 +51,6 @@ PROVIDER_DISPLAY_NAME = {
     "openrouter": "OpenRouter",
 }
 
-# Optional: known model-to-provider hints for backward compatibility
-OPENAI_SPECIAL_MODELS = {
-    "gpt-4.1",
-    "o4-mini-latest",
-    "o3-latest",
-    "o3-mini-latest",
-    "o1-latest",
-    "o1-mini-latest",
-    "o1-pro-latest",
-}
-
-# Heuristics for model to provider mapping (best effort)
-# This should be used only as a fallback when provider is not supplied
-MODEL_PROVIDER_RULES = [
-    (lambda m: m.startswith("gpt") or m in OPENAI_SPECIAL_MODELS, "openai"),
-    (lambda m: m.startswith("claude"), "anthropic"),
-    (lambda m: m.startswith("gemini"), "google"),
-    (lambda m: m.startswith("llama") or m.startswith("mixtral") or m.startswith("groq") or m.startswith("moonshotai") or m.startswith("meta-llama"), "groq"),
-    (lambda m: m.startswith("meta/llama") or m.startswith("mistralai") or m.startswith("qwen") or m.startswith("deepseek-ai"), "nvidia"),
-    (lambda m: m.startswith("deepseek"), "openrouter"),
-]
-
 
 def get_setting(key, default=None):
     """Get a setting from the configuration."""
@@ -90,19 +68,29 @@ def get_provider_env_var(provider: str) -> str | None:
 
 
 def get_provider_for_model(model_name: str) -> str | None:
-    """Best-effort inference of provider from model name.
+    """Determine provider from model name using centralized configuration.
     Returns a provider identifier or None if not recognized.
     """
     if not model_name:
         return None
-    name = model_name.strip()
-    for predicate, provider in MODEL_PROVIDER_RULES:
-        try:
-            if predicate(name):
-                return provider
-        except Exception:
-            continue
-    return None
+    
+    from models_config import get_provider_for_model_name
+    
+    display_name = get_provider_for_model_name(model_name)
+    if not display_name:
+        return None
+    
+    display_to_provider = {
+        "OpenAI": "openai",
+        "Anthropic": "anthropic",
+        "Google": "google",
+        "Groq": "groq",
+        "Nvidia": "nvidia",
+        "OpenRouter": "openrouter",
+        "Ollama": "ollama",
+    }
+    
+    return display_to_provider.get(display_name)
 
 
 def get_api_keys_status() -> dict:

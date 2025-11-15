@@ -456,68 +456,34 @@ class RunPipeline:
         self.outputs = []
 
     def define_llm(self, model_name):
-
-        google_llm_models = [
-            "gemini-2.5-pro",
-            "gemini-2.5-flash",
-        ]
-        openai_llm_models = [
-            "gpt-4.1",
-            "o4-mini-latest",
-            "o3-latest",
-            "o3-mini-latest",
-            "o1-latest",
-            "o1-mini-latest",
-            "o1-pro-latest",
-        ]
-        antrophic_llm_models = [
-            "claude-sonnet-4-5",
-            "claude-haiku-4-5",
-            "claude-opus-4-1",
-        ]
-        groq_llm_models = [
-            "llama-3.3-70b-versatile",
-            "deepseek-r1-distill-llama-70b",
-            "meta-llama/llama-4-maverick-17b-128e-instruct",
-            "meta-llama/llama-4-scout-17b-16e-instruct",
-            "moonshotai/kimi-k2-instruct",
-            "groq/compound",
-            "groq/compound-mini",
-        ]
-
-        ollama_llm_models = [
-            "codestral:latest",
-            "llama3:instruct",
-            "tomasonjo/codestral-text2cypher:latest",
-            "tomasonjo/llama3-text2cypher-demo:latest",
-            "llama3.1:8b",
-            "qwen2:7b-instruct",
-            "gemma2:latest",
-        ]
-
-        nvidia_llm_models = [
-            "meta/llama-3.1-405b-instruct",
-            "meta/llama-3.1-70b-instruct",
-            "meta/llama-3.1-8b-instruct",
-            "meta/llama-4-maverick-17b-128e-instruct",
-            "meta/llama-4-scout-17b-16e-instruct",
-            "mistralai/mixtral-8x22b-instruct-v0.1",
-            "qwen/qwen3-235b-a22b",
-            "moonshotai/kimi-k2-instruct",
-            "deepseek-ai/deepseek-r1",
-        ]
+        from models_config import get_provider_for_model_name
+    
+        provider_model_map = {
+            "OpenAI": (OpenAILanguageModel, self.config.openai_api_key),
+            "Google": (GoogleGenerativeLanguageModel, self.config.gemini_api_key),
+            "Anthropic": (AnthropicLanguageModel, self.config.anthropic_api_key),
+            "Groq": (GroqLanguageModel, self.config.groq_api_key),
+            "Ollama": (OllamaLanguageModel, None),  # Ollama doesn't need an API key
+            "Nvidia": (NVIDIALanguageModel, self.config.nvidia_api_key),
+            "OpenRouter": (OpenRouterLanguageModel, self.config.openrouter_api_key),
+        }
         
-        openrouter_llm_models = [
-            "deepseek/deepseek-r1-distill-llama-70b",
-            "deepseek/deepseek-r1:free",
-            "deepseek/deepseek-r1",
-            "deepseek/deepseek-chat",
-            "qwen/qwen3-235b-a22b-2507",
-            "moonshotai/kimi-k2",
-            "x-ai/grok-4",
-            "x-ai/grok-3",
-            "tencent/hunyuan-a13b-instruct",
-        ] 
+        def get_llm_for_model(model_name_str):
+            """Helper function to get the appropriate LLM instance for a model name."""
+            provider = get_provider_for_model_name(model_name_str)
+            if not provider:
+                raise ValueError(f"Unsupported Language Model Name: {model_name_str}")
+            
+            if provider not in provider_model_map:
+                raise ValueError(f"Unsupported Provider: {provider}")
+            
+            model_class, api_key = provider_model_map[provider]
+            
+            # Ollama doesn't use an API key
+            if provider == "Ollama":
+                return model_class(model_name=model_name_str).llm
+            else:
+                return model_class(api_key, model_name=model_name_str).llm
 
         if isinstance(model_name, (dict, list)):
 
@@ -528,108 +494,16 @@ class RunPipeline:
                 model_name = dict(zip(["cypher_llm_model", "qa_llm_model"], model_name))
 
             self.llm = {}
-            for model_type, model_name in model_name.items():
+            for model_type, model_name_str in model_name.items():
                 if model_type == "cypher_llm_model":
-                    if model_name in openai_llm_models:
-                        self.llm["cypher_llm"] = OpenAILanguageModel(
-                            self.config.openai_api_key,
-                            model_name=model_name["cypher_llm_model"],
-                        ).llm
-                    elif model_name in google_llm_models:
-                        self.llm["cypher_llm"] = GoogleGenerativeLanguageModel(
-                            self.config.gemini_api_key,
-                            model_name=model_name["cypher_llm_model"],
-                        ).llm
-                    elif model_name in antrophic_llm_models:
-                        self.llm["cypher_llm"] = AnthropicLanguageModel(
-                            self.config.anthropic_api_key,
-                            model_name=model_name["cypher_llm_model"],
-                        ).llm
-                    elif model_name in groq_llm_models:
-                        self.llm["cypher_llm"] = GroqLanguageModel(
-                            self.config.groq_api_key,
-                            model_name=model_name["cypher_llm_model"],
-                        ).llm
-                    elif model_name in ollama_llm_models:
-                        self.llm["cypher_llm"] = OllamaLanguageModel(
-                            model_name=model_name["cypher_llm_model"]
-                        ).llm
-                    elif model_name in nvidia_llm_models:
-                        self.llm["cypher_llm"] = NVIDIALanguageModel(
-                            self.config.nvidia_api_key,
-                            model_name=model_name["cypher_llm_model"],
-                        ).llm
-                    if model_name in openrouter_llm_models:
-                        self.llm["cypher_llm"] = OpenRouterLanguageModel(
-                            self.config.openrouter_api_key,
-                            model_name=model_name["cypher_llm_model"],
-                        ).llm
-                    else:
-                        raise ValueError("Unsupported Language Model Name")
-                elif model_name in openai_llm_models:
-                    self.llm["qa_llm"] = OpenAILanguageModel(
-                        self.config.openai_api_key,
-                        model_name=model_name["qa_llm_model"],
-                    ).llm
-                elif model_name in google_llm_models:
-                    self.llm["qa_llm"] = GoogleGenerativeLanguageModel(
-                        self.config.gemini_api_key,
-                        model_name=model_name["qa_llm_model"],
-                    ).llm
-                elif model_name in antrophic_llm_models:
-                    self.llm["qa_llm"] = AnthropicLanguageModel(
-                        self.config.anthropic_api_key,
-                        model_name=model_name["qa_llm_model"],
-                    ).llm
-                elif model_name in groq_llm_models:
-                    self.llm["qa_llm"] = GroqLanguageModel(
-                        self.config.groq_api_key, model_name=model_name["qa_llm_model"]
-                    ).llm
-                elif model_name in ollama_llm_models:
-                    self.llm["qa_llm"] = OllamaLanguageModel(
-                        model_name=model_name["qa_llm_model"]
-                    ).llm
-                elif model_name in nvidia_llm_models:
-                    self.llm["qa_llm"] = NVIDIALanguageModel(
-                        self.config.nvidia_api_key,
-                        model_name=model_name["qa_llm_model"],
-                    ).llm
-                elif model_name in openrouter_llm_models:
-                    self.llm["qa_llm"] = OpenRouterLanguageModel(
-                        self.config.openrouter_api_key,
-                        model_name=model_name["qa_llm_model"],
-                    ).llm
+                    self.llm["cypher_llm"] = get_llm_for_model(model_name_str)
+                elif model_type == "qa_llm_model":
+                    self.llm["qa_llm"] = get_llm_for_model(model_name_str)
                 else:
-                    raise ValueError("Unsupported Language Model Name")
+                    raise ValueError(f"Unsupported model type: {model_type}")
 
-        elif model_name in google_llm_models:
-            self.llm = GoogleGenerativeLanguageModel(
-                self.config.gemini_api_key, model_name=model_name
-            ).llm
-        elif model_name in openai_llm_models:
-            self.llm = OpenAILanguageModel(
-                self.config.openai_api_key, model_name=model_name
-            ).llm
-        elif model_name in antrophic_llm_models:
-            self.llm = AnthropicLanguageModel(
-                self.config.anthropic_api_key, model_name=model_name
-            ).llm
-        elif model_name in groq_llm_models:
-            self.llm = GroqLanguageModel(
-                self.config.groq_api_key, model_name=model_name
-            ).llm
-        elif model_name in ollama_llm_models:
-            self.llm = OllamaLanguageModel(model_name=model_name).llm
-        elif model_name in nvidia_llm_models:
-            self.llm = NVIDIALanguageModel(
-                self.config.nvidia_api_key, model_name=model_name
-            ).llm
-        elif model_name in openrouter_llm_models:
-            self.llm = OpenRouterLanguageModel(
-                self.config.openrouter_api_key, model_name=model_name
-            ).llm
         else:
-            raise ValueError("Unsupported Language Model Name")
+            self.llm = get_llm_for_model(model_name)
 
     @validate_call(config=ConfigDict(arbitrary_types_allowed=True))
     def run_for_query(
