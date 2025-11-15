@@ -53,13 +53,13 @@ PROVIDER_DISPLAY_NAME = {
 
 # Optional: known model-to-provider hints for backward compatibility
 OPENAI_SPECIAL_MODELS = {
-    "gpt-4.1-2025-04-14",
-    "o4-mini-2025-04-16",
-    "o3-2025-04-16",
-    "o3-mini-2025-01-31",
-    "o1-2024-12-17",
-    "o1-mini-2024-09-12",
-    "o1-pro-2025-03-19",
+    "gpt-4.1",
+    "o4-mini-latest",
+    "o3-latest",
+    "o3-mini-latest",
+    "o1-latest",
+    "o1-mini-latest",
+    "o1-pro-latest",
 }
 
 # Heuristics for model to provider mapping (best effort)
@@ -68,7 +68,7 @@ MODEL_PROVIDER_RULES = [
     (lambda m: m.startswith("gpt") or m in OPENAI_SPECIAL_MODELS, "openai"),
     (lambda m: m.startswith("claude"), "anthropic"),
     (lambda m: m.startswith("gemini"), "google"),
-    (lambda m: m.startswith("llama") or m.startswith("mixtral"), "groq"),
+    (lambda m: m.startswith("llama") or m.startswith("mixtral") or m.startswith("groq"), "groq"),
     (lambda m: m.startswith("meta/llama") or m.startswith("mistralai"), "nvidia"),
     (lambda m: m.startswith("deepseek"), "openrouter"),
 ]
