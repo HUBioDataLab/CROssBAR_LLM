@@ -146,12 +146,12 @@ class OpenAILanguageModel:
         # Models that don't support temperature parameter
         no_temp_models = [
             "gpt-4.1",
-            "o4-mini-latest",
-            "o3-latest",
-            "o3-mini-latest",
-            "o1-latest",
-            "o1-mini-latest",
-            "o1-pro-latest",
+            "o4-mini",
+            "o3",
+            "o3-mini",
+            "o1",
+            "o1-mini",
+            "o1-pro",
         ]
         
         if self.model_name in no_temp_models:
