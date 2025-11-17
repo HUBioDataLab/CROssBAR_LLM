@@ -1445,7 +1445,9 @@ function VectorSearch({
                   position: 'relative',
                   borderRadius: '12px',
                   border: theme => `1px solid ${theme.palette.divider}`,
-                  height: '150px',
+                  maxHeight: '200px',
+                  minHeight: '120px',
+                  height: 'auto',
                   overflow: 'hidden',
                 }}
               >
@@ -1456,7 +1458,7 @@ function VectorSearch({
                     top: 0,
                     left: 0,
                     width: '100%',
-                    height: '100%',
+                    maxHeight: '200px',
                     padding: '16px 14px',
                     overflow: 'auto',
                     overflowX: 'hidden',
@@ -1504,7 +1506,7 @@ function VectorSearch({
                     top: 0,
                     left: 0,
                     width: '100%',
-                    height: '100%',
+                    maxHeight: '200px',
                     padding: '16px 14px',
                     fontFamily: 'monospace',
                     fontSize: '0.9rem',
