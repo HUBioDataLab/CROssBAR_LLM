@@ -103,7 +103,7 @@ function VectorSearch({
   const abortControllerRef = useRef(null);
   const countdownTimerRef = useRef(null);
 
-  const supportedModels = ['gpt-5', 'gpt-4o', 'o4-mini', 'claude-sonnet-4-5', 'claude-opus-4-1', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+  const supportedModels = ['gpt-5.1', 'gpt-5', 'gpt-4o', 'o4-mini', 'claude-sonnet-4-5', 'claude-opus-4-1', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.5-pro', 'gemini-2.5-flash'];
 
   // Fetch available models on component mount
   useEffect(() => {
