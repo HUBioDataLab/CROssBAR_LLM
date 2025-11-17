@@ -320,7 +320,7 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
               </Box>
               
               <Collapse in={expandedSections.query}>
-                <Box sx={{ p: 0 }}>
+                <Box sx={{ maxHeight: '250px', overflow: 'auto', p: 0 }}>
                   <SyntaxHighlighter 
                     language="cypher" 
                     style={syntaxTheme}
