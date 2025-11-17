@@ -963,19 +963,48 @@ function VectorSearch({
           position: 'relative',
         }}
       >
-        {/* Loading Progress Bar */}
+        {/* Loading Overlay */}
         {loading && (
-          <LinearProgress 
-            sx={{ 
+          <Box
+            sx={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
-              borderTopLeftRadius: '24px',
-              borderTopRightRadius: '24px',
-              zIndex: 10,
-            }} 
-          />
+              bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme => alpha(theme.palette.background.paper, 0.95),
+              backdropFilter: 'blur(8px)',
+              zIndex: 1000,
+              borderRadius: '24px',
+            }}
+          >
+            <CircularProgress size={60} thickness={4} />
+            <Typography variant="h6" sx={{ mt: 3, fontWeight: 500 }}>
+              {activeButton === 'generate' && 'Generating Query...'}
+              {activeButton === 'run' && 'Running Query...'}
+              {activeButton === 'generateAndRun' && 'Generating & Running Query...'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              This may take a few moments
+            </Typography>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleAbort}
+              startIcon={<StopIcon />}
+              sx={{
+                mt: 3,
+                borderRadius: '12px',
+                px: 3,
+              }}
+            >
+              Abort Operation
+            </Button>
+          </Box>
         )}
 
         <Box sx={{ p: 3 }}>
