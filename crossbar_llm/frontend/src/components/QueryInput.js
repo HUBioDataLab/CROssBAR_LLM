@@ -782,7 +782,7 @@ function QueryInput({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: theme => alpha(theme.palette.background.paper, 0.95),
+              backgroundColor: theme => alpha(theme.palette.background.paper, 0.85),
               backdropFilter: 'blur(8px)',
               zIndex: 1000,
               borderRadius: '24px',
