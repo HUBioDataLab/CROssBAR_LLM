@@ -406,8 +406,11 @@ function VectorSearch({
       return;
     }
 
-    // Clear any previous errors at the start of the operation
+    // Clear any previous errors and results at the start of the operation
     setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
+    setLocalExecutionResult(null);
 
     setLoading(true);
     setActiveButton('generate');
@@ -503,8 +506,11 @@ function VectorSearch({
       return;
     }
 
-    // Clear any previous errors at the start of the operation
+    // Clear any previous errors and results at the start of the operation
     setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
+    setLocalExecutionResult(null);
 
     setLoading(true);
     setActiveButton('run');
@@ -585,17 +591,17 @@ function VectorSearch({
       return;
     }
 
-    // Clear any previous errors at the start of the operation
+    // Clear any previous errors and results at the start of the operation
     setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
+    setLocalExecutionResult(null);
 
     setLoading(true);
     setActiveButton('generateAndRun');
     updateRealtimeLogs(verbose ? 'Generating and running Cypher query...\n' : '');
     setRunnedQuery(false);
     setGeneratedQuery('');
-    setQueryResult(null);
-    setExecutionResult(null);
-    setLocalExecutionResult(null);
     setLogs('');
     clearLogs();
 

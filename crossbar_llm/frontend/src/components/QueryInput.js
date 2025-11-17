@@ -411,8 +411,10 @@ function QueryInput({
       return;
     }
 
-    // Clear any previous errors at the start of the operation
+    // Clear any previous errors and results at the start of the operation
     setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -508,8 +510,10 @@ function QueryInput({
       return;
     }
 
-    // Clear any previous errors at the start of the operation
+    // Clear any previous errors and results at the start of the operation
     setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -599,8 +603,10 @@ function QueryInput({
       return;
     }
 
-    // Clear any previous errors at the start of the operation
+    // Clear any previous errors and results at the start of the operation
     setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
