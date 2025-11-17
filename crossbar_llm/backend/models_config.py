@@ -7,8 +7,6 @@ MODELS_CONFIG = {
         "o3",
         "o3-mini",
         "o1",
-        "o1-mini",
-        "o1-pro",
         "gpt-4.1-nano",
     ],
     "Anthropic": [
@@ -23,7 +21,6 @@ MODELS_CONFIG = {
     "Groq": [
         "openai/gpt-oss-120b",
         "llama-3.3-70b-versatile",
-        "meta-llama/llama-4-maverick-17b-128e-instruct",
         "meta-llama/llama-4-scout-17b-16e-instruct",
         "moonshotai/kimi-k2-instruct",
         "moonshotai/kimi-k2-instruct-0905",

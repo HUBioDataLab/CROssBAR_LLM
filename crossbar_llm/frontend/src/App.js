@@ -168,11 +168,14 @@ function App() {
   };
 
   const addLatestQuery = (queryDetails) => {
-    // Check if this is a duplicate query (same question and queryType)
-    const isDuplicate = latestQueries.some(q => 
-      q.question === queryDetails.question && 
-      q.queryType === queryDetails.queryType
-    );
+    const now = new Date(queryDetails.timestamp).getTime();
+    const isDuplicate = latestQueries.some(q => {
+      const queryTime = new Date(q.timestamp).getTime();
+      const timeDiff = now - queryTime;
+      return q.question === queryDetails.question && 
+             q.queryType === queryDetails.queryType &&
+             timeDiff < 2000; // Less than 2 seconds
+    });
     
     // If it's a duplicate, don't add it
     if (isDuplicate) return;
