@@ -35,7 +35,7 @@ import {
   CheckCircleIcon
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
-import api from '../services/api';
+import api, { getAvailableModels } from '../services/api';
 import axios from 'axios';
 import SampleQuestions from './SampleQuestions';
 import SendIcon from '@mui/icons-material/Send';
@@ -56,9 +56,9 @@ import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import StopIcon from '@mui/icons-material/Stop';
 import EditIcon from '@mui/icons-material/Edit';
 
-function QueryInput({ 
-  setQueryResult, 
-  setExecutionResult, 
+function QueryInput({
+  setQueryResult,
+  setExecutionResult,
   addLatestQuery,
   provider,
   setProvider,
@@ -70,7 +70,7 @@ function QueryInput({
   setQuestion,
   setRealtimeLogs
 }) {
-  const [topK, setTopK] = useState(5);
+  const [topK, setTopK] = useState(10);
   const [verbose, setVerbose] = useState(false);
   const [runnedQuery, setRunnedQuery] = useState(false);
   const [generatedQuery, setGeneratedQuery] = useState('');
@@ -86,6 +86,8 @@ function QueryInput({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKeysStatus, setApiKeysStatus] = useState({});
   const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
+  const [modelChoices, setModelChoices] = useState({});
+  const [modelsLoaded, setModelsLoaded] = useState(false);
   // Rate limiting states
   const [rateLimited, setRateLimited] = useState(false);
   const [retryAfter, setRetryAfter] = useState(0);
@@ -113,12 +115,12 @@ function QueryInput({
       setRetryAfter(retrySeconds);
       setRetryCountdown(retrySeconds);
       setLimitType(limitType);
-      
+
       // Clear any existing countdown timer
       if (countdownTimerRef.current) {
         clearInterval(countdownTimerRef.current);
       }
-      
+
       // Set up countdown timer
       countdownTimerRef.current = setInterval(() => {
         setRetryCountdown(prev => {
@@ -130,20 +132,20 @@ function QueryInput({
           return prev - 1;
         });
       }, 1000);
-      
+
       return error.response.data.detail?.error || `Rate limit exceeded. Please try again in ${retrySeconds} seconds.`;
     }
-    
+
     // Handle other types of errors
     if (error.response?.data?.detail) {
-      return typeof error.response.data.detail === 'object' 
+      return typeof error.response.data.detail === 'object'
         ? (error.response.data.detail.error || error.response.data.detail.msg || JSON.stringify(error.response.data.detail))
         : error.response.data.detail;
     }
-    
+
     return error.message || 'An unknown error occurred';
   };
-  
+
   // Clean up the countdown timer on unmount
   useEffect(() => {
     return () => {
@@ -153,76 +155,25 @@ function QueryInput({
     };
   }, []);
 
-  const modelChoices = {
-    OpenAI: [
-      'gpt-4o',
-      'gpt-4.1-2025-04-14',
-      'o4-mini-2025-04-16',
-      'o3-mini-2025-01-31',
-      'o1-mini-2024-09-12',
+  const supportedModels = ['gpt-5.1', 'gpt-4o', 'o4-mini', 'claude-sonnet-4-5', 'claude-opus-4-1', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.5-pro', 'gemini-2.5-flash'];
 
-      { value: 'separator', label: '──────────' },
-      { value: 'label', label: 'Other models:' },
-      'gpt-4o-mini',
-      'o3-2025-04-16',
-      'o1-2024-12-17',
-      'o1-pro-2025-03-19',
-      'gpt-3.5-turbo',
-      'gpt-4-turbo',
-      'gpt-3.5-turbo-instruct',
-      'gpt-3.5-turbo-1106',
-      'gpt-3.5-turbo-0125',
-      'gpt-4-0125-preview',
-      'gpt-4-turbo-preview',
-      'gpt-3.5-turbo-16k',
-    ],
-    Anthropic: [
-      'claude-3-5-sonnet-latest',
-      'claude-3-7-sonnet-latest',
-      'claude-3-5-sonnet-20240620',
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307',
-    ],
-    OpenRouter: [
-      "deepseek/deepseek-chat",
-      "deepseek/deepseek-r1",
-      "qwen/qwen-2.5-72b-instruct",
-      "qwen/qwen-2.5-coder-32b-instruct",
-      "deepseek/deepseek-r1-distill-llama-70b",
-      "deepseek/deepseek-r1:free",
-      "deepseek/deepseek-r1:nitro",
-    ], 
-    Google: [
-      'gemini-2.5-flash-preview-04-17',
-      'gemini-2.5-pro-preview-03-25',
-      'gemini-2.0-flash-thinking-exp-01-21',
-      'gemini-2.0-pro-exp-02-05',
-      'gemini-2.0-flash',
-      'gemini-2.0-flash-lite',
-      'gemini-pro',
-      'gemini-1.5-pro-latest',
-      'gemini-1.5-flash-latest',
-    ],
-    Groq: [
-      'llama3-8b-8192',
-      'llama3-70b-8192',
-      'mixtral-8x7b-32768',
-      'gemma-7b-it',
-      'gemma2-9b-it',
-    ],
-    Nvidia: [
-      'meta/llama-3.1-405b-instruct',
-      'meta/llama-3.1-70b-instruct',
-      'meta/llama-3.1-8b-instruct',
-      'nv-mistralai/mistral-nemo-12b-instruct',
-      'mistralai/mixtral-8x22b-instruct-v0.1',
-      'mistralai/mistral-large-2-instruct',
-      'nvidia/nemotron-4-340b-instruct',
-    ],
-  };
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const models = await getAvailableModels();
+        console.log('Available models:', models);
+        setModelChoices(models);
+        setModelsLoaded(true);
+      } catch (error) {
+        console.error('Error fetching available models:', error);
+        // Fallback to empty object if fetch fails
+        setModelChoices({});
+        setModelsLoaded(true);
+      }
+    };
 
-  const supportedModels = ['gpt-4o', 'claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.0-flash'];
+    fetchModels();
+  }, []);
 
   // Fetch API keys status on component mount
   useEffect(() => {
@@ -233,7 +184,7 @@ function QueryInput({
           console.log('API keys status:', response.data);
           setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
-          
+
           // Set API key to "env" if the selected provider has an API key in .env
           if (provider && response.data[provider]) {
             setApiKey('env');
@@ -243,22 +194,22 @@ function QueryInput({
         console.error('Error fetching API keys status:', error);
       }
     };
-    
+
     fetchApiKeysStatus();
   }, [provider, setApiKey]);
-  
+
   // Check if the selected provider requires an API key to be entered
   const providerNeedsApiKey = useCallback(() => {
     if (!apiKeysLoaded) return true;
-    
+
     // If the provider has an API key in .env and user wants to use it,
     // no need to enter one
     if (apiKeysStatus[provider] && apiKey === 'env') {
       return false;
     }
-    
+
     // These providers always need an API key if not in .env
-    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' || 
+    return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' ||
            provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
   }, [provider, apiKeysStatus, apiKeysLoaded, apiKey]);
 
@@ -279,16 +230,16 @@ function QueryInput({
   const isSettingsValid = () => {
     // Check if provider is selected
     if (!provider) return false;
-    
+
     // Check if model is selected
     if (!llmType) return false;
-    
+
     // Check if API key is provided for providers that need it
     // Only check if provider needs a key AND user is not using the env key
     if (providerNeedsApiKey() && apiKey !== 'env' && !apiKey) {
       return false;
     }
-    
+
     return true;
   };
 
@@ -302,7 +253,7 @@ function QueryInput({
       setRealtimeLogs(newLogs);
     }
   }, [setRealtimeLogs]);
-  
+
   // Clear logs
   const clearLogs = useCallback(() => {
     setLocalRealtimeLogs('');
@@ -321,20 +272,20 @@ function QueryInput({
   const setupLogStream = () => {
     if (verbose) {
       console.log('Setting up log stream for verbose mode');
-      
+
       // Close any existing connection but don't clear logs
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
-      
+
       // Don't add any initialization messages
-      
+
       try {
         // Create new EventSource connection with a timestamp to avoid caching
         const timestamp = new Date().getTime();
         eventSourceRef.current = new EventSource(`/stream-logs?t=${timestamp}`);
-        
+
         // Connection opened successfully - no message needed
         eventSourceRef.current.onopen = () => {
           // Just auto-scroll to bottom of log container
@@ -342,14 +293,14 @@ function QueryInput({
             logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
           }
         };
-        
+
         // Handle incoming messages
         eventSourceRef.current.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
             if (data.log) {
               updateRealtimeLogs(prev => prev + data.log + '\n');
-              
+
               // Auto-scroll to bottom of log container
               if (logContainerRef.current) {
                 logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
@@ -360,17 +311,17 @@ function QueryInput({
             // Don't add error messages to the logs
           }
         };
-        
+
         // Handle connection errors - don't add messages about connection issues
         eventSourceRef.current.onerror = (error) => {
           console.error('EventSource failed:', error);
-          
+
           // Try to reconnect after a delay if verbose is still enabled
           if (eventSourceRef.current) {
             eventSourceRef.current.close();
             eventSourceRef.current = null;
           }
-          
+
           setTimeout(() => {
             if (verbose && !eventSourceRef.current) {
               setupLogStream();
@@ -383,7 +334,7 @@ function QueryInput({
       }
     }
   };
-  
+
   // Improved cleanup function - don't clear logs when cleaning up
   const cleanupLogStream = () => {
     if (eventSourceRef.current) {
@@ -414,9 +365,9 @@ function QueryInput({
     const handleClearLogs = () => {
       clearLogs();
     };
-    
+
     window.addEventListener('clearDebugLogs', handleClearLogs);
-    
+
     return () => {
       window.removeEventListener('clearDebugLogs', handleClearLogs);
     };
@@ -429,9 +380,9 @@ function QueryInput({
         setRunnedQuery(false);
       }
     };
-    
+
     window.addEventListener('editQuery', handleEditQuery);
-    
+
     return () => {
       window.removeEventListener('editQuery', handleEditQuery);
     };
@@ -454,16 +405,21 @@ function QueryInput({
       setHighlightSettings(true);
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
+    // Clear any previous errors and results at the start of the operation
+    setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
+
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
-    
+
     setLoading(true);
     setActiveButton('generate');
     updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
@@ -472,36 +428,36 @@ function QueryInput({
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Sending request with parameters:\n- Question: ${question}\n- Model: ${llmType}\n- Top K: ${topK}\n- Verbose: ${verbose}\n`);
       }
-      
+
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
-      
+
       const response = await api.post('/generate_query/', {
         question,
         llm_type: llmType,
+        provider,
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
       }, { signal });
-      
+
       // Process the query result before setting it
       const queryData = response.data.query;
-      
+
       // Set the generated query regardless of type
       setGeneratedQuery(queryData);
       setEditableQuery(queryData);
-      
+
       // Set the query result to null to hide it from ResultsDisplay
       setQueryResult(null);
       setExecutionResult(null);
       setRunnedQuery(false);
-      setError(null);
-      
+
       // Collapse settings panel to show results
       if (showSettings) {
         setShowSettings(false);
       }
-      
+
       if (verbose) {
         if (response.data.logs) {
           setLogs(response.data.logs);
@@ -510,7 +466,7 @@ function QueryInput({
           updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
-      
+
       addLatestQuery({
         question: question,
         query: queryData,
@@ -525,7 +481,7 @@ function QueryInput({
         // Use the rate limit handler to process errors
         const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
-        
+
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Error: ${errorMessage}\n`);
         }
@@ -541,41 +497,47 @@ function QueryInput({
 
   const handleRunGeneratedQuery = async () => {
     if (!editableQuery) return;
-    
+
     if (!isSettingsValid()) {
       alert("Please configure the LLM settings first");
       setSettingsOpen(true);
       setHighlightSettings(true);
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
+    // Clear any previous errors and results at the start of the operation
+    setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
+
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
-    
+
     setLoading(true);
     setActiveButton('run');
     try {
       if (verbose) {
         updateRealtimeLogs(prev => prev + 'Executing generated Cypher query...\n');
       }
-      
+
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
-      
+
       const response = await api.post('/run_query/', {
         query: editableQuery,
         question: question,
         llm_type: llmType,
+        provider,
         api_key: effectiveApiKey,
         verbose,
       }, { signal });
-      
+
       // Now show the query in the results display
       setQueryResult(editableQuery);
       setExecutionResult({
@@ -583,13 +545,12 @@ function QueryInput({
         response: response.data.response
       });
       setRunnedQuery(true);
-      setError(null);
-      
+
       // Collapse settings panel to show results
       if (showSettings) {
         setShowSettings(false);
       }
-      
+
       if (verbose) {
         if (response.data.logs) {
           setLogs(prev => prev + '\n\n' + response.data.logs);
@@ -598,7 +559,7 @@ function QueryInput({
           updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
-      
+
       // Update the latest query with the run information
       addLatestQuery({
         question: question,
@@ -615,7 +576,7 @@ function QueryInput({
         // Use the rate limit handler to process errors
         const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
-        
+
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Error: ${errorMessage}\n`);
         }
@@ -636,16 +597,21 @@ function QueryInput({
       setHighlightSettings(true);
       return;
     }
-    
+
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
     }
-    
+
+    // Clear any previous errors and results at the start of the operation
+    setError(null);
+    setQueryResult(null);
+    setExecutionResult(null);
+
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
-    
+
     setLoading(true);
     setActiveButton('generateAndRun');
     updateRealtimeLogs(verbose ? 'Generating and running Cypher query...\n' : '');
@@ -654,29 +620,30 @@ function QueryInput({
       if (verbose) {
         updateRealtimeLogs(prev => prev + `Sending request with parameters:\n- Question: ${question}\n- Model: ${llmType}\n- Top K: ${topK}\n- Verbose: ${verbose}\n`);
       }
-      
+
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
-      
+
       // First generate the query
       const generateResponse = await api.post('/generate_query/', {
         question,
         llm_type: llmType,
+        provider,
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
       }, { signal });
-      
+
       // Process the query result
       const processedQuery = generateResponse.data.query;
-      
+
       // Set the generated query
       setGeneratedQuery(processedQuery);
       setEditableQuery(processedQuery);
-      
+
       // Initially set queryResult to null to hide it
       setQueryResult(null);
-      
+
       if (verbose) {
         if (generateResponse.data.logs) {
           setLogs(generateResponse.data.logs);
@@ -685,17 +652,17 @@ function QueryInput({
           updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
-      
+
       // Check if the request was aborted during generation
       if (signal.aborted) {
         throw new axios.Cancel('Operation canceled by the user');
       }
-      
+
       // Then run the query
       if (verbose) {
         updateRealtimeLogs(prev => prev + 'Executing generated Cypher query...\n');
       }
-      
+
       const runResponse = await api.post('/run_query/', {
         query: processedQuery,
         question: question,
@@ -703,7 +670,7 @@ function QueryInput({
         api_key: effectiveApiKey,
         verbose,
       }, { signal });
-      
+
       // Now show the query in the results display
       setQueryResult(processedQuery);
       setExecutionResult({
@@ -711,13 +678,12 @@ function QueryInput({
         response: runResponse.data.response
       });
       setRunnedQuery(true);
-      setError(null);
-      
+
       // Collapse settings panel to show results
       if (showSettings) {
         setShowSettings(false);
       }
-      
+
       if (verbose) {
         if (runResponse.data.logs) {
           setLogs(prev => prev + '\n\n' + runResponse.data.logs);
@@ -726,7 +692,7 @@ function QueryInput({
           updateRealtimeLogs(prev => prev + 'Warning: No logs returned from server despite verbose mode enabled\n');
         }
       }
-      
+
       // Update the latest queries with both generate and run information
       addLatestQuery({
         question: question,
@@ -734,7 +700,7 @@ function QueryInput({
         timestamp: new Date().toISOString(),
         queryType: 'generated'
       });
-      
+
       // After running the query, update with the run information
       addLatestQuery({
         question: question,
@@ -751,7 +717,7 @@ function QueryInput({
         // Use the rate limit handler to process errors
         const errorMessage = handleRateLimitError(error);
         setError(errorMessage);
-        
+
         if (verbose) {
           updateRealtimeLogs(prev => prev + `Error: ${errorMessage}\n`);
         }
@@ -787,16 +753,16 @@ function QueryInput({
 
   return (
     <Box>
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 0, 
-          mb: 4, 
+      <Paper
+        elevation={0}
+        sx={{
+          p: 0,
+          mb: 4,
           borderRadius: '24px',
           overflow: 'hidden',
           border: theme => `1px solid ${theme.palette.divider}`,
           backdropFilter: 'blur(10px)',
-          backgroundColor: theme => theme.palette.mode === 'dark' 
+          backgroundColor: theme => theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.background.paper, 0.8),
         }}
@@ -808,13 +774,13 @@ function QueryInput({
             </Typography>
             <Box>
               <Tooltip title="Model Settings">
-                <Button 
-                  onClick={toggleSettings} 
+                <Button
+                  onClick={toggleSettings}
                   color={showSettings || highlightSettings ? "primary" : "default"}
                   startIcon={<TuneIcon />}
                   variant={showSettings ? "contained" : "text"}
                   size="small"
-                  sx={{ 
+                  sx={{
                     borderRadius: '12px',
                     backgroundColor: (showSettings && !highlightSettings)
                       ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
@@ -839,13 +805,13 @@ function QueryInput({
                 </Button>
               </Tooltip>
               <Tooltip title="Help">
-                <IconButton 
+                <IconButton
                   onClick={() => setShowWarning(!showWarning)}
                   color={showWarning ? "primary" : "default"}
-                  sx={{ 
+                  sx={{
                     ml: 1,
                     borderRadius: '12px',
-                    backgroundColor: showWarning 
+                    backgroundColor: showWarning
                       ? (theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.15) : alpha(theme.palette.primary.main, 0.08))
                       : 'transparent'
                   }}
@@ -857,10 +823,10 @@ function QueryInput({
           </Box>
 
           <Collapse in={showWarning}>
-            <Alert 
-              severity="info" 
-              sx={{ 
-                mb: 3, 
+            <Alert
+              severity="info"
+              sx={{
+                mb: 3,
                 borderRadius: '16px',
                 '& .MuiAlert-icon': {
                   alignItems: 'center'
@@ -868,7 +834,7 @@ function QueryInput({
               }}
               icon={<LightbulbOutlinedIcon />}
             >
-              Ask any biomedical question to query the CROssBAR knowledge graph. For example, "What are the drugs that target proteins associated with Alzheimer's disease?"
+              Ask any biomedical question to query the CROssBAR knowledge graph. For example, "Which drugs target proteins associated with Alzheimer disease?"
             </Alert>
           </Collapse>
 
@@ -882,7 +848,7 @@ function QueryInput({
                   handleGenerateAndRun();
                 }
               }}
-              placeholder="E.g., What are the drugs that target proteins associated with Alzheimer's disease?"
+              placeholder="E.g., Which drugs target proteins associated with Alzheimer disease?"
               fullWidth
               multiline
               rows={3}
@@ -892,7 +858,7 @@ function QueryInput({
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '16px',
                   fontSize: '1rem',
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                  backgroundColor: theme => theme.palette.mode === 'dark'
                     ? alpha(theme.palette.background.subtle, 0.3)
                     : alpha(theme.palette.background.subtle, 0.3),
                 }
@@ -909,8 +875,8 @@ function QueryInput({
                 fullWidth
                 startIcon={<TuneIcon />}
                 onClick={toggleSettings}
-                sx={{ 
-                  borderRadius: '12px', 
+                sx={{
+                  borderRadius: '12px',
                   py: 1.2,
                   boxShadow: 2,
                   bgcolor: theme => theme.palette.primary.main,
@@ -938,13 +904,13 @@ function QueryInput({
 
           {/* Settings panel moved below the query input and Configure Settings button */}
           <Collapse in={showSettings}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 3, 
-                mb: 3, 
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                mb: 3,
                 borderRadius: '16px',
-                backgroundColor: theme => theme.palette.mode === 'dark' 
+                backgroundColor: theme => theme.palette.mode === 'dark'
                   ? alpha(theme.palette.background.subtle, 0.5)
                   : alpha(theme.palette.background.subtle, 0.5),
               }}
@@ -952,7 +918,7 @@ function QueryInput({
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 3 }}>
                 Model Settings
               </Typography>
-              
+
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {/* First row - Provider and Model */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -963,8 +929,22 @@ function QueryInput({
                         labelId="provider-label"
                         value={provider}
                         onChange={(e) => {
-                          setProvider(e.target.value);
-                          setLlmType('');
+                          const selectedProvider = e.target.value;
+                          setProvider(selectedProvider);
+
+                          // Automatically select the first available model for the provider
+                          if (selectedProvider && modelChoices[selectedProvider]) {
+                            const firstModel = modelChoices[selectedProvider].find(model =>
+                              typeof model === 'string' // Skip separator and label objects
+                            );
+                            if (firstModel) {
+                              setLlmType(firstModel);
+                            } else {
+                              setLlmType('');
+                            }
+                          } else {
+                            setLlmType('');
+                          }
                         }}
                         label="Provider"
                       >
@@ -979,7 +959,7 @@ function QueryInput({
                       </Select>
                     </FormControl>
                   </Box>
-                  
+
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small" disabled={!provider}>
                       <InputLabel id="model-label">Model</InputLabel>
@@ -997,16 +977,16 @@ function QueryInput({
                           if (typeof model === 'object' && model.value === 'separator') {
                             return <Divider key={model.label} sx={{ my: 1 }} />;
                           }
-                          
+
                           // For label items, render a non-selectable label
                           if (typeof model === 'object' && model.value === 'label') {
                             return (
-                              <MenuItem 
-                                key={`label-${model.label}`} 
+                              <MenuItem
+                                key={`label-${model.label}`}
                                 disabled
-                                sx={{ 
-                                  opacity: 0.7, 
-                                  fontWeight: 'bold', 
+                                sx={{
+                                  opacity: 0.7,
+                                  fontWeight: 'bold',
                                   fontSize: '0.85rem',
                                   pointerEvents: 'none',
                                   '&.Mui-disabled': {
@@ -1018,17 +998,17 @@ function QueryInput({
                               </MenuItem>
                             );
                           }
-                          
+
                           // For regular model items
                           return (
                             <MenuItem key={model} value={model}>
                               {model}
                               {supportedModels.includes(model) && (
-                                <Chip 
-                                  label="Recommended" 
-                                  size="small" 
-                                  color="primary" 
-                                  sx={{ ml: 1, height: '20px', fontSize: '0.65rem' }} 
+                                <Chip
+                                  label="Recommended"
+                                  size="small"
+                                  color="primary"
+                                  sx={{ ml: 1, height: '20px', fontSize: '0.65rem' }}
                                 />
                               )}
                             </MenuItem>
@@ -1038,7 +1018,14 @@ function QueryInput({
                     </FormControl>
                   </Box>
                 </Box>
-                
+
+                {/* Ollama Warning */}
+                {provider === 'Ollama' && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    Selected provider is only for local development, it will not work on cloud.
+                  </Alert>
+                )}
+
                 {/* Second row - API Key and Top K */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   {/* Show API Key field based on conditions */}
@@ -1062,15 +1049,15 @@ function QueryInput({
                       </FormControl>
                     </Box>
                   )}
-                  
+
                   {/* If provider has an API key in .env, show info with option to override */}
                   {apiKeysLoaded && apiKeysStatus[provider] && (
                     <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                       <Paper
                         variant="outlined"
-                        sx={{ 
-                          p: 1.5, 
-                          display: 'flex', 
+                        sx={{
+                          p: 1.5,
+                          display: 'flex',
                           flexDirection: 'column',
                           backgroundColor: theme => theme.palette.mode === 'dark' ? alpha('#4caf50', 0.1) : alpha('#4caf50', 0.05),
                           border: '1px solid rgba(76, 175, 80, 0.3)'
@@ -1087,9 +1074,9 @@ function QueryInput({
                           </Box>
                           <FormControlLabel
                             control={
-                              <Checkbox 
-                                size="small" 
-                                checked={apiKey !== 'env'} 
+                              <Checkbox
+                                size="small"
+                                checked={apiKey !== 'env'}
                                 onChange={(e) => {
                                   setApiKey(e.target.checked ? '' : 'env');
                                 }}
@@ -1100,7 +1087,7 @@ function QueryInput({
                             sx={{ m: 0, '& .MuiTypography-root': { fontSize: '0.7rem', opacity: 0.7 } }}
                           />
                         </Box>
-                        
+
                         {/* Show API key input if user wants to use custom key */}
                         {apiKey !== 'env' && (
                           <TextField
@@ -1118,7 +1105,7 @@ function QueryInput({
                                 </InputAdornment>
                               ),
                             }}
-                            sx={{ 
+                            sx={{
                               mt: 1.5,
                               '& .MuiOutlinedInput-root': {
                                 backgroundColor: 'background.paper',
@@ -1129,7 +1116,7 @@ function QueryInput({
                       </Paper>
                     </Box>
                   )}
-                  
+
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl fullWidth variant="outlined" size="small">
                       <TextField
@@ -1143,23 +1130,23 @@ function QueryInput({
                     </FormControl>
                   </Box>
                 </Box>
-                
+
                 {/* Third row - Debug Mode */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                     <FormControl component="fieldset" variant="outlined" fullWidth>
-                      <Box 
+                      <Box
                         onClick={() => setVerbose(!verbose)}
-                        sx={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
                           justifyContent: 'space-between',
                           p: 1.5,
                           height: '40px',
                           borderRadius: '8px',
                           border: theme => `1px solid ${theme.palette.divider}`,
-                          backgroundColor: verbose ? 
-                            (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.main, 0.05)) : 
+                          backgroundColor: verbose ?
+                            (theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.main, 0.05)) :
                             'transparent',
                           transition: 'all 0.2s ease-in-out',
                           cursor: 'pointer',
@@ -1171,13 +1158,13 @@ function QueryInput({
                         }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Tooltip title="Enable to see detailed logs of the query generation and execution process">
-                            <InfoOutlinedIcon 
-                              fontSize="small" 
-                              sx={{ 
-                                mr: 1.5, 
+                            <InfoOutlinedIcon
+                              fontSize="small"
+                              sx={{
+                                mr: 1.5,
                                 color: verbose ? 'info.main' : 'text.secondary',
                                 transition: 'color 0.2s ease-in-out',
-                              }} 
+                              }}
                             />
                           </Tooltip>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -1210,9 +1197,9 @@ function QueryInput({
           </Collapse>
 
           {/* Sample Questions - Moved to top position for better visibility */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
             mb: 3,
             mt: !showSettings && !showWarning ? 1 : 0
           }}>
@@ -1222,7 +1209,7 @@ function QueryInput({
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Tooltip title={isSettingsValid() ? "Generate Cypher Query" : "Configure settings first"}>
-                <Box 
+                <Box
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
                 >
@@ -1232,7 +1219,7 @@ function QueryInput({
                       color="error"
                       onClick={handleAbort}
                       startIcon={<StopIcon />}
-                      sx={{ 
+                      sx={{
                         borderRadius: '12px',
                         px: 3,
                         height: '44px'
@@ -1245,8 +1232,8 @@ function QueryInput({
                       variant="outlined"
                       onClick={handleGenerateQuery}
                       disabled={!question || !isSettingsValid() || loading}
-                      startIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
-                      sx={{ 
+                      startIcon={activeButton === 'generate' ? <CircularProgress size={20} /> : <SendIcon />}
+                      sx={{
                         borderRadius: '12px',
                         px: 3,
                         height: '44px',
@@ -1258,7 +1245,7 @@ function QueryInput({
                   )}
                 </Box>
               </Tooltip>
-              
+
               <Tooltip title={isSettingsValid() ? "Generate and Run Query" : "Configure settings first"}>
                 <Box
                   onMouseEnter={() => handleActionButtonHover(true)}
@@ -1270,7 +1257,7 @@ function QueryInput({
                       color="error"
                       onClick={handleAbort}
                       startIcon={<StopIcon />}
-                      sx={{ 
+                      sx={{
                         borderRadius: '12px',
                         px: 3,
                         height: '44px'
@@ -1284,8 +1271,8 @@ function QueryInput({
                       color="primary"
                       onClick={handleGenerateAndRun}
                       disabled={!question || !isSettingsValid() || loading}
-                      startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                      sx={{ 
+                      startIcon={activeButton === 'generateAndRun' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
+                      sx={{
                         borderRadius: '12px',
                         px: 3,
                         height: '44px'
@@ -1299,13 +1286,13 @@ function QueryInput({
             </Box>
           </Box>
         </Box>
-        
+
         {generatedQuery && !runnedQuery && (
           <>
-            <Box sx={{ 
-              p: 3, 
+            <Box sx={{
+              p: 3,
               borderTop: theme => `1px solid ${theme.palette.divider}`,
-              backgroundColor: theme => theme.palette.mode === 'dark' 
+              backgroundColor: theme => theme.palette.mode === 'dark'
                 ? alpha(theme.palette.background.subtle, 0.3)
                 : alpha(theme.palette.background.subtle, 0.3),
             }}>
@@ -1313,7 +1300,7 @@ function QueryInput({
                 <CodeIcon fontSize="small" sx={{ mr: 1 }} />
                 Generated Query (Editable)
               </Typography>
-              <Box 
+              <Box
                 sx={{
                   position: 'relative',
                   borderRadius: '12px',
@@ -1401,14 +1388,14 @@ function QueryInput({
                 />
               </Box>
             </Box>
-            <Box 
+            <Box
               onMouseEnter={() => handleActionButtonHover(true)}
               onMouseLeave={() => handleActionButtonHover(false)}
-              sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                p: 2, 
-                backgroundColor: theme => theme.palette.mode === 'dark' 
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                p: 2,
+                backgroundColor: theme => theme.palette.mode === 'dark'
                   ? alpha(theme.palette.primary.main, 0.1)
                   : alpha(theme.palette.primary.main, 0.05),
                 borderTop: theme => `1px solid ${theme.palette.divider}`
@@ -1417,9 +1404,9 @@ function QueryInput({
               <Button
                 variant="outlined"
                 onClick={() => setEditableQuery(generatedQuery)}
-                disabled={loading}
+                disabled={false}
                 startIcon={<RestoreIcon />}
-                sx={{ 
+                sx={{
                   borderRadius: '12px',
                   px: 3
                 }}
@@ -1432,7 +1419,7 @@ function QueryInput({
                   color="error"
                   onClick={handleAbort}
                   startIcon={<StopIcon />}
-                  sx={{ 
+                  sx={{
                     borderRadius: '12px',
                     px: 3
                   }}
@@ -1445,8 +1432,8 @@ function QueryInput({
                   color="primary"
                   onClick={handleRunGeneratedQuery}
                   disabled={!isSettingsValid() || !editableQuery.trim() || loading}
-                  startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                  sx={{ 
+                  startIcon={activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
+                  sx={{
                     borderRadius: '12px',
                     px: 3
                   }}
@@ -1461,20 +1448,20 @@ function QueryInput({
 
       {error && (
         <Zoom in={!!error}>
-          <Alert 
-            severity="error" 
-            sx={{ 
-              mb: 3, 
+          <Alert
+            severity="error"
+            sx={{
+              mb: 3,
               borderRadius: '16px',
-              boxShadow: theme => theme.palette.mode === 'dark' 
-                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+              boxShadow: theme => theme.palette.mode === 'dark'
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)'
                 : '0 4px 20px rgba(0, 0, 0, 0.05)',
             }}
           >
-            {typeof error === 'object' && error !== null 
-              ? (error.msg || JSON.stringify(error)) 
+            {typeof error === 'object' && error !== null
+              ? (error.msg || JSON.stringify(error))
               : error}
-            
+
             {/* Countdown timer for rate limiting */}
             {rateLimited && retryCountdown > 0 && (
               <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
@@ -1490,17 +1477,17 @@ function QueryInput({
           </Alert>
         </Zoom>
       )}
-      
+
       {/* Rate limiting warning without other errors */}
       {rateLimited && !error && (
         <Zoom in={rateLimited}>
-          <Alert 
-            severity="warning" 
-            sx={{ 
-              mb: 3, 
+          <Alert
+            severity="warning"
+            sx={{
+              mb: 3,
               borderRadius: '16px',
-              boxShadow: theme => theme.palette.mode === 'dark' 
-                ? '0 4px 20px rgba(0, 0, 0, 0.3)' 
+              boxShadow: theme => theme.palette.mode === 'dark'
+                ? '0 4px 20px rgba(0, 0, 0, 0.3)'
                 : '0 4px 20px rgba(0, 0, 0, 0.05)',
             }}
           >

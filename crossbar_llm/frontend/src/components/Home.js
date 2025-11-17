@@ -249,7 +249,7 @@ RETURN p`,
       color: "secondary"
     },
     {
-      question: "Find all pathways associated with Alzheimer's disease",
+      question: "Find all pathways associated with Alzheimer disease",
       query: `MATCH (d:Disease {name: "Alzheimer disease"})-[:Disease_modulates_pathway]->(p:Pathway)
 RETURN p`,
       result: "The pathways associated with Alzheimer disease are Fluid shear stress and atherosclerosis (kegg.pathway:hsa05418), Viral myocarditis (kegg.pathway:hsa05416), Dilated cardiomyopathy (kegg.pathway:hsa05414), Hypertrophic cardiomyopathy (kegg.pathway:hsa05410), and Graft (kegg.pathway:hsa05332).",

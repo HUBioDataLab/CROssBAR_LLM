@@ -168,11 +168,14 @@ function App() {
   };
 
   const addLatestQuery = (queryDetails) => {
-    // Check if this is a duplicate query (same question and queryType)
-    const isDuplicate = latestQueries.some(q => 
-      q.question === queryDetails.question && 
-      q.queryType === queryDetails.queryType
-    );
+    const now = new Date(queryDetails.timestamp).getTime();
+    const isDuplicate = latestQueries.some(q => {
+      const queryTime = new Date(q.timestamp).getTime();
+      const timeDiff = now - queryTime;
+      return q.question === queryDetails.question && 
+             q.queryType === queryDetails.queryType &&
+             timeDiff < 2000; // Less than 2 seconds
+    });
     
     // If it's a duplicate, don't add it
     if (isDuplicate) return;
@@ -667,6 +670,11 @@ function App() {
           }}>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               © {new Date().getFullYear()} CROssBAR
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              <a href="https://www.flaticon.com/free-icons/chatbot" title="chatbot icons" style={{ color: 'inherit', textDecoration: 'none' }}>
+                Chatbot icons created by rukanicon - Flaticon
+              </a>
             </Typography>
           </Box>
         </Box>

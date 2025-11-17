@@ -40,7 +40,7 @@ export const fetchGeneSummary = async (geneId) => {
         geneType: gene.type || null,
         organism: gene.organism?.scientificname || null,
         genomicLocation: gene.mapLocation || null,
-        displayName: symbol || gene.name || `Gene ${numericId}`
+        displayName: symbol || gene.name || `Gene ID: ${numericId}`
       };
     }
     
@@ -144,13 +144,75 @@ export const fetchPathwayData = async (pathwayId) => {
       case 'kegg.pathway':
       case 'kegg':
         // KEGG pathways are often in format "kegg.pathway:hsa04010"
-        return {
-          id: pathwayId,
-          name: `KEGG Pathway ${id}`,
-          description: `Biological pathway from KEGG database with ID ${id}. KEGG pathways represent molecular interaction, reaction and relation networks for metabolism, genetic information processing, environmental information processing and cellular processes.`,
-          url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
-          database: 'KEGG'
-        };
+        try {
+          // Call KEGG REST API
+          const response = await fetch(`https://rest.kegg.jp/get/${id}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch KEGG data: ${response.status}`);
+          }
+          
+          const text = await response.text();
+          
+          // Parse KEGG flat file format
+          const lines = text.split('\n');
+          let name = '';
+          let description = '';
+          let class_info = '';
+          let diseases = [];
+          let modules = [];
+          
+          for (let line of lines) {
+            if (line.startsWith('NAME')) {
+              name = line.replace('NAME', '').trim();
+            } else if (line.startsWith('DESCRIPTION')) {
+              description = line.replace('DESCRIPTION', '').trim();
+            } else if (line.startsWith('CLASS')) {
+              class_info = line.replace('CLASS', '').trim();
+            } else if (line.startsWith('DISEASE')) {
+              diseases.push(line.replace('DISEASE', '').trim());
+            } else if (line.startsWith('MODULE')) {
+              modules.push(line.replace('MODULE', '').trim());
+            } else if (line.startsWith(' ')) {
+              // Continuation of previous field
+              const lastField = lines[lines.indexOf(line) - 1];
+              if (lastField.startsWith('DESCRIPTION')) {
+                description += ' ' + line.trim();
+              } else if (lastField.startsWith('CLASS')) {
+                class_info += ' ' + line.trim();
+              }
+            }
+          }
+          
+          return {
+            id: pathwayId,
+            name: name || `KEGG Pathway ${id}`,
+            description: description || `Biological pathway from KEGG database with ID ${id}`,
+            class: class_info,
+            diseases: diseases,
+            modules: modules,
+            url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
+            database: 'KEGG',
+            displayName: name || `KEGG ${id}`,
+            type: 'pathway',
+            source: {
+              name: 'KEGG',
+              version: 'current',
+              url: 'https://www.genome.jp/kegg/'
+            }
+          };
+        } catch (error) {
+          console.error('Error fetching from KEGG API:', error);
+          // Fallback to basic information if API fails
+          return {
+            id: pathwayId,
+            name: `KEGG Pathway ${id}`,
+            description: `Biological pathway from KEGG database with ID ${id}. KEGG pathways represent molecular interaction, reaction and relation networks for metabolism, genetic information processing, environmental information processing and cellular processes.`,
+            url: `https://www.genome.jp/kegg-bin/show_pathway?${id}`,
+            database: 'KEGG',
+            error: true
+          };
+        }
         
       case 'reactome':
         // Reactome pathways
@@ -441,38 +503,87 @@ export const fetchDomainData = async (domainId) => {
 
 /**
  * Fetch disease information from MONDO
- * @param {string} mondoId - The MONDO ID
+ * @param {string} diseaseId - The disease identifier (e.g., "mondo:0000001")
  */
 export const fetchDiseaseData = async (diseaseId) => {
   if (!diseaseId) return null;
   
   // Extract the type and ID
   const [type, id] = diseaseId.includes(':') ? diseaseId.split(':') : ['unknown', diseaseId];
+  const dbTypeLower = type.toLowerCase();
   
-  // Different handling based on disease database
-  switch(type.toLowerCase()) {
-    case 'mondo':
-      // For MONDO IDs, we could use OLS API, but for this example we'll return placeholder data
-      return {
-        id: diseaseId,
-        name: `MONDO Disease ${id}`,
-        description: `Disease or disorder with ID ${id} from the Mondo Disease Ontology.`
-      };
-      
-    case 'mesh':
-      // For MeSH terms, similar placeholder
-      return {
-        id: diseaseId,
-        name: `MeSH Term ${id}`,
-        description: `Medical subject heading with ID ${id} from the Medical Subject Headings vocabulary.`
-      };
-      
-    default:
-      return {
-        id: diseaseId,
-        name: `Disease ${id}`,
-        description: `Disease or medical condition with ID ${diseaseId}.`
-      };
+  try {
+    // Different handling based on disease database
+    switch(dbTypeLower) {
+      case 'mondo':
+        // For MONDO IDs, use the BioPortal API
+        const mondoUrl = `http://purl.obolibrary.org/obo/MONDO_${id}`;
+        const encodedUrl = encodeURIComponent(mondoUrl);
+        const response = await fetch(`https://data.bioontology.org/ontologies/MONDO/classes/${encodedUrl}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch MONDO data: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data) {
+          const prefLabel = data.prefLabel || `MONDO Disease ${id}`;
+          const definition = data.definition && data.definition.length > 0 ? data.definition[0] : null;
+          const synonyms = data.synonym || [];
+          
+          return {
+            id: diseaseId,
+            name: prefLabel,
+            description: definition || `Disease or disorder with ID ${id} from the Mondo Disease Ontology.`,
+            synonyms: synonyms.slice(0, 10), // Limit synonyms for display
+            database: 'MONDO',
+            displayName: prefLabel,
+            url: `https://www.ebi.ac.uk/ols/ontologies/mondo/terms?iri=${encodeURIComponent(mondoUrl)}`
+          };
+        }
+        break;
+        
+      case 'mesh':
+        // For MeSH terms
+        return {
+          id: diseaseId,
+          name: `MeSH Term ${id}`,
+          description: `Medical subject heading with ID ${id} from the Medical Subject Headings vocabulary.`,
+          database: 'MeSH',
+          displayName: `MeSH ${id}`,
+          url: `https://meshb.nlm.nih.gov/record/ui?ui=${id}`
+        };
+        
+      default:
+        return {
+          id: diseaseId,
+          name: `Disease ${id}`,
+          description: `Disease or medical condition with ID ${diseaseId}.`,
+          database: type.toUpperCase(),
+          displayName: `Disease ${id}`,
+          url: generateEntityUrl(diseaseId) || '#'
+        };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching disease data for ${diseaseId}:`, error);
+    
+    // Return fallback data with error indication
+    return {
+      id: diseaseId,
+      name: `Disease ${id}`,
+      description: `Error retrieving disease information: ${error.message}`,
+      database: type.toUpperCase(),
+      error: true,
+      displayName: `Disease ${id}`,
+      url: generateEntityUrl(diseaseId) || '#'
+    };
   }
 };
 
