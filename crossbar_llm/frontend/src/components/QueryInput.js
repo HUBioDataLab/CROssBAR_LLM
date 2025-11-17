@@ -1019,6 +1019,13 @@ function QueryInput({
                   </Box>
                 </Box>
 
+                {/* Ollama Warning */}
+                {provider === 'Ollama' && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    Selected provider is only for local development, it will not work on cloud.
+                  </Alert>
+                )}
+
                 {/* Second row - API Key and Top K */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   {/* Show API Key field based on conditions */}

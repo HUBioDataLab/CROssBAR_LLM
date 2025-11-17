@@ -1140,6 +1140,13 @@ function VectorSearch({
                   </Box>
                 </Box>
 
+                {/* Ollama Warning */}
+                {provider === 'Ollama' && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    Selected provider is only for local development, it will not work on cloud.
+                  </Alert>
+                )}
+
                 {/* Second row - API Key and Results Limit */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   {/* Only show API Key field if provider needs it */}
