@@ -145,6 +145,10 @@ class OpenAILanguageModel:
         
         # Models that don't support temperature parameter
         no_temp_models = [
+            "gpt-5.1",
+            "gpt-5",
+            "gpt-5-nano",
+            "gpt-5-mini",
             "gpt-4.1",
             "o4-mini",
             "o3",
