@@ -26,6 +26,8 @@ import {
   Fade,
   InputAdornment,
   useMediaQuery,
+  Backdrop,
+  LinearProgress,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import axios from '../services/api';
@@ -44,6 +46,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CodeIcon from '@mui/icons-material/Code';
 import RestoreIcon from '@mui/icons-material/Restore';
+import StopIcon from '@mui/icons-material/Stop';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
@@ -393,6 +396,16 @@ function VectorSearch({
     };
   }, []);
 
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setLoading(false);
+      setActiveButton(null);
+      updateRealtimeLogs(prev => prev + 'Operation aborted by user.\n');
+    }
+  };
+
   const handleGenerateQuery = async () => {
     if (!isSettingsValid()) {
       alert("Please configure the LLM settings and select a vector type first");
@@ -411,6 +424,10 @@ function VectorSearch({
     setQueryResult(null);
     setExecutionResult(null);
     setLocalExecutionResult(null);
+
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     setLoading(true);
     setActiveButton('generate');
@@ -444,7 +461,7 @@ function VectorSearch({
         vector_index: embeddingType,
         embedding: embedding,
         vector_category: vectorCategory,
-      });
+      }, { signal });
 
       // Process the query result before setting it
       const queryData = response.data.query;
@@ -477,17 +494,24 @@ function VectorSearch({
         embedding: embeddingType
       });
     } catch (err) {
-      console.error(err);
-      // Use the rate limit handler
-      const errorMessage = handleRateLimitError(err);
-      setError(errorMessage);
+      if (axios.isCancel(err)) {
+        console.log('Request canceled:', err.message);
+      } else {
+        console.error(err);
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(err);
+        setError(errorMessage);
 
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        }
       }
     } finally {
-      setLoading(false);
-      setActiveButton(null);
+      if (!signal.aborted) {
+        setLoading(false);
+        setActiveButton(null);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -512,6 +536,10 @@ function VectorSearch({
     setExecutionResult(null);
     setLocalExecutionResult(null);
 
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setLoading(true);
     setActiveButton('run');
     setLogs('');
@@ -533,7 +561,7 @@ function VectorSearch({
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
-      });
+      }, { signal });
 
       setExecutionResult({
         result: response.data.result,
@@ -564,17 +592,24 @@ function VectorSearch({
         embedding: embeddingType
       });
     } catch (err) {
-      console.error(err);
-      // Use the rate limit handler
-      const errorMessage = handleRateLimitError(err);
-      setError(errorMessage);
+      if (axios.isCancel(err)) {
+        console.log('Request canceled:', err.message);
+      } else {
+        console.error(err);
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(err);
+        setError(errorMessage);
 
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        }
       }
     } finally {
-      setLoading(false);
-      setActiveButton(null);
+      if (!signal.aborted) {
+        setLoading(false);
+        setActiveButton(null);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -596,6 +631,10 @@ function VectorSearch({
     setQueryResult(null);
     setExecutionResult(null);
     setLocalExecutionResult(null);
+
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     setLoading(true);
     setActiveButton('generateAndRun');
@@ -648,6 +687,7 @@ function VectorSearch({
             headers: {
               'Content-Type': 'multipart/form-data',
             },
+            signal,
           });
 
           if (verbose) {
@@ -680,7 +720,7 @@ function VectorSearch({
           `Vector Data: ${vectorFile ? 'Provided' : 'Not provided'}\n\n`);
       }
 
-      const response = await axios.post('/generate_query/', requestData);
+      const response = await axios.post('/generate_query/', requestData, { signal });
 
       // Process the query result
       const generatedQuery = response.data.query;
@@ -715,7 +755,7 @@ function VectorSearch({
       };
 
       const runRequestDataWithProvider = { ...runRequestData, provider };
-      const runResponse = await axios.post('/run_query/', runRequestDataWithProvider);
+      const runResponse = await axios.post('/run_query/', runRequestDataWithProvider, { signal });
 
       setExecutionResult({
         result: runResponse.data.result,
@@ -747,18 +787,25 @@ function VectorSearch({
         embeddingType: embeddingType
       });
     } catch (err) {
-      console.error('Error in vector search:', err);
+      if (axios.isCancel(err)) {
+        console.log('Request canceled:', err.message);
+      } else {
+        console.error('Error in vector search:', err);
 
-      // Use the rate limit handler
-      const errorMessage = handleRateLimitError(err);
-      setError(errorMessage);
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(err);
+        setError(errorMessage);
 
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        }
       }
     } finally {
-      setLoading(false);
-      setActiveButton(null);
+      if (!signal.aborted) {
+        setLoading(false);
+        setActiveButton(null);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -913,8 +960,24 @@ function VectorSearch({
           backgroundColor: theme => theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.background.paper, 0.8),
+          position: 'relative',
         }}
       >
+        {/* Loading Progress Bar */}
+        {loading && (
+          <LinearProgress 
+            sx={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              zIndex: 10,
+            }} 
+          />
+        )}
+
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
@@ -1385,20 +1448,36 @@ function VectorSearch({
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
                 >
-                  <Button
-                    variant="outlined"
-                    onClick={handleGenerateQuery}
-                    disabled={!question || !isSettingsValid() || loading}
-                    startIcon={activeButton === 'generate' ? <CircularProgress size={20} /> : <SendIcon />}
-                    sx={{
-                      borderRadius: '12px',
-                      px: 3,
-                      height: '44px',
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    {loading && activeButton === 'generate' ? <CircularProgress size={24} /> : 'Only Generate Query'}
-                  </Button>
+                  {loading && activeButton === 'generate' ? (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleAbort}
+                      startIcon={<StopIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px'
+                      }}
+                    >
+                      Abort
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      onClick={handleGenerateQuery}
+                      disabled={!question || !isSettingsValid() || loading}
+                      startIcon={<SendIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      Only Generate Query
+                    </Button>
+                  )}
                 </Box>
               </Tooltip>
 
@@ -1407,20 +1486,36 @@ function VectorSearch({
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
                 >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleGenerateAndRun}
-                    disabled={!question || !isSettingsValid() || loading}
-                    startIcon={activeButton === 'generateAndRun' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                    sx={{
-                      borderRadius: '12px',
-                      px: 3,
-                      height: '44px'
-                    }}
-                  >
-                    {loading && activeButton === 'generateAndRun' ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run Query'}
-                  </Button>
+                  {loading && activeButton === 'generateAndRun' ? (
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleAbort}
+                      startIcon={<StopIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px'
+                      }}
+                    >
+                      Abort
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleGenerateAndRun}
+                      disabled={!question || !isSettingsValid() || loading}
+                      startIcon={<PlayArrowIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px'
+                      }}
+                    >
+                      Generate & Run Query
+                    </Button>
+                  )}
                 </Box>
               </Tooltip>
             </Box>
@@ -1555,19 +1650,34 @@ function VectorSearch({
               >
                 Reset to Original
               </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleRunGeneratedQuery}
-                disabled={!isSettingsValid() || !generatedQuery.trim() || loading}
-                startIcon={activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                sx={{
-                  borderRadius: '12px',
-                  px: 3
-                }}
-              >
-                Run Query
-              </Button>
+              {loading && activeButton === 'run' ? (
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleAbort}
+                  startIcon={<StopIcon />}
+                  sx={{
+                    borderRadius: '12px',
+                    px: 3
+                  }}
+                >
+                  Abort
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleRunGeneratedQuery}
+                  disabled={!isSettingsValid() || !generatedQuery.trim() || loading}
+                  startIcon={<PlayArrowIcon />}
+                  sx={{
+                    borderRadius: '12px',
+                    px: 3
+                  }}
+                >
+                  Run Query
+                </Button>
+              )}
             </Box>
           </>
         )}

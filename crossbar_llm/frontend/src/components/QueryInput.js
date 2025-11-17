@@ -32,7 +32,8 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  CheckCircleIcon
+  CheckCircleIcon,
+  LinearProgress,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import api, { getAvailableModels } from '../services/api';
@@ -765,8 +766,24 @@ function QueryInput({
           backgroundColor: theme => theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.background.paper, 0.8),
+          position: 'relative',
         }}
       >
+        {/* Loading Progress Bar */}
+        {loading && (
+          <LinearProgress 
+            sx={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              zIndex: 10,
+            }} 
+          />
+        )}
+
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
