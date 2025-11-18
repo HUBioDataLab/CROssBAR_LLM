@@ -30,7 +30,7 @@ import {
   LinearProgress,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
-import axios from '../services/api';
+import axios from 'axios';
 import api, { getAvailableModels } from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
@@ -113,7 +113,6 @@ function VectorSearch({
     const fetchModels = async () => {
       try {
         const models = await getAvailableModels();
-        console.log('Available models:', models);
         setModelChoices(models);
         setModelsLoaded(true);
       } catch (error) {
@@ -133,7 +132,6 @@ function VectorSearch({
       try {
         const response = await api.get('/api_keys_status/');
         if (response.data) {
-          console.log('API keys status:', response.data);
           setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
 
@@ -451,7 +449,7 @@ function VectorSearch({
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
 
       const embedding = vectorFile ? JSON.stringify(vectorFile) : null;
-      const response = await axios.post('/generate_query/', {
+      const response = await api.post('/generate_query/', {
         question,
         provider,
         llm_type: llmType,
@@ -553,7 +551,7 @@ function VectorSearch({
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
 
-      const response = await axios.post('/run_query/', {
+      const response = await api.post('/run_query/', {
         query: generatedQuery,
         question,
         provider,
@@ -683,7 +681,7 @@ function VectorSearch({
 
         try {
           // Upload the file first
-          const uploadResponse = await axios.post('/upload_vector/', formData, {
+          const uploadResponse = await api.post('/upload_vector/', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
@@ -720,7 +718,7 @@ function VectorSearch({
           `Vector Data: ${vectorFile ? 'Provided' : 'Not provided'}\n\n`);
       }
 
-      const response = await axios.post('/generate_query/', requestData, { signal });
+      const response = await api.post('/generate_query/', requestData, { signal });
 
       // Process the query result
       const generatedQuery = response.data.query;
@@ -755,7 +753,7 @@ function VectorSearch({
       };
 
       const runRequestDataWithProvider = { ...runRequestData, provider };
-      const runResponse = await axios.post('/run_query/', runRequestDataWithProvider, { signal });
+      const runResponse = await api.post('/run_query/', runRequestDataWithProvider, { signal });
 
       setExecutionResult({
         result: runResponse.data.result,
@@ -917,7 +915,7 @@ function VectorSearch({
     }
     formData.append('file', file);
 
-    axios
+    api
       .post('/upload_vector/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -976,7 +974,7 @@ function VectorSearch({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: theme => alpha(theme.palette.background.paper, 0.85),
+              backgroundColor: theme => alpha(theme.palette.background.paper, 0.6),
               backdropFilter: 'blur(8px)',
               zIndex: 1000,
               borderRadius: '24px',
@@ -1185,7 +1183,7 @@ function VectorSearch({
                         <MenuItem value="">
                           <em>Select a model</em>
                         </MenuItem>
-                        {provider && modelChoices[provider].map((model) => {
+                        {provider && modelChoices[provider] && modelChoices[provider].map((model) => {
                           // For separator items, render a divider
                           if (typeof model === 'object' && model.value === 'separator') {
                             return <Divider key={model.label} sx={{ my: 1 }} />;
@@ -1548,6 +1546,22 @@ function VectorSearch({
                 </Box>
               </Tooltip>
             </Box>
+          </Box>
+
+          {/* Disclaimer */}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <Typography 
+              variant="caption" 
+              color="text.secondary" 
+              sx={{ 
+                textAlign: 'center',
+                maxWidth: '600px',
+                lineHeight: 1.4,
+                fontStyle: 'italic'
+              }}
+            >
+              CROssBAR-LLM can make mistakes or miss answers; if something looks wrong, ask again (results can change), or switch to a recommended or alternative model for better reliability.
+            </Typography>
           </Box>
         </Box>
 

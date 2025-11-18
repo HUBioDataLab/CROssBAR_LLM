@@ -53,6 +53,7 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   });
   
   const logContainerRef = useRef(null);
+  const resultsContainerRef = useRef(null);
   
   const neo4jBrowserUrl = 'https://neo4j.crossbarv2.hubiodatalab.com/browser/?preselectAuthMethod=[NO_AUTH]&dbms=bolt://neo4j.crossbarv2.hubiodatalab.com';
   
@@ -62,6 +63,18 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [realtimeLogs, expandedSections.logs]);
+
+  useEffect(() => {
+    if (executionResult && resultsContainerRef.current) {
+      setTimeout(() => {
+        resultsContainerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [executionResult]);
 
   // Process queryResult to handle objects
   const processedQueryResult = React.useMemo(() => {
@@ -150,7 +163,7 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   };
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box ref={resultsContainerRef} sx={{ mb: 4 }}>
       <Fade in={true} timeout={800}>
         <Box>
           {executionResult && (
