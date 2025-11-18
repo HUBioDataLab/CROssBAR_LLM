@@ -163,11 +163,12 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   };
 
   return (
-    <Box ref={resultsContainerRef} sx={{ mb: 4 }}>
+    <Box sx={{ mb: 4 }}>
       <Fade in={true} timeout={800}>
         <Box>
           {executionResult && (
             <Paper 
+              ref={resultsContainerRef}
               elevation={0} 
               sx={{ 
                 mb: 4, 
