@@ -160,7 +160,7 @@ function VectorSearch({
 
     // These providers always need an API key if not in .env
     return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' ||
-           provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
+      provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
   }, [provider, apiKeysStatus, apiKeysLoaded, apiKey]);
 
   // When provider changes, update API key if needed
@@ -376,8 +376,8 @@ function VectorSearch({
     if (error.response?.data?.detail) {
       if (typeof error.response.data.detail === 'object') {
         return error.response.data.detail.error ||
-               error.response.data.detail.msg ||
-               JSON.stringify(error.response.data.detail);
+          error.response.data.detail.msg ||
+          JSON.stringify(error.response.data.detail);
       }
       return error.response.data.detail;
     }
@@ -974,7 +974,7 @@ function VectorSearch({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: theme => alpha(theme.palette.background.paper, 0.6),
+              backgroundColor: theme => alpha(theme.palette.background.paper, 0.4),
               backdropFilter: 'blur(8px)',
               zIndex: 1000,
               borderRadius: '24px',
@@ -1550,14 +1550,15 @@ function VectorSearch({
 
           {/* Disclaimer */}
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-            <Typography 
-              variant="caption" 
-              color="text.secondary" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
                 textAlign: 'center',
                 maxWidth: '600px',
                 lineHeight: 1.4,
-                fontStyle: 'italic'
+                fontStyle: 'normal',
+                fontSize: '0.85rem'
               }}
             >
               CROssBAR-LLM can make mistakes or miss answers; if something looks wrong, ask again (results can change), or switch to a recommended or alternative model for better reliability.
@@ -1748,8 +1749,8 @@ function VectorSearch({
                 <CircularProgress size={16} sx={{ mr: 1 }} />
                 <Typography variant="body2">
                   {limitType === "minute" && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
-                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown/60)} minute${Math.floor(retryCountdown/60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
-                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown/3600)} hour${Math.floor(retryCountdown/3600) !== 1 ? 's' : ''}).`}
+                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown / 60)} minute${Math.floor(retryCountdown / 60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
+                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown / 3600)} hour${Math.floor(retryCountdown / 3600) !== 1 ? 's' : ''}).`}
                   {!limitType && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
                 </Typography>
               </Box>
@@ -1782,8 +1783,8 @@ function VectorSearch({
                 <CircularProgress size={16} sx={{ mr: 1 }} />
                 <Typography variant="body2">
                   {limitType === "minute" && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
-                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown/60)} minute${Math.floor(retryCountdown/60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
-                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown/3600)} hour${Math.floor(retryCountdown/3600) !== 1 ? 's' : ''}).`}
+                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown / 60)} minute${Math.floor(retryCountdown / 60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
+                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown / 3600)} hour${Math.floor(retryCountdown / 3600) !== 1 ? 's' : ''}).`}
                   {!limitType && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
                 </Typography>
               </Box>

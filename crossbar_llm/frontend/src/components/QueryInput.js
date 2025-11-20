@@ -1335,11 +1335,12 @@ function QueryInput({
             <Typography 
               variant="caption" 
               color="text.secondary" 
-              sx={{ 
+              sx={{
                 textAlign: 'center',
                 maxWidth: '600px',
                 lineHeight: 1.4,
-                fontStyle: 'italic'
+                fontStyle: 'normal',
+                fontSize: '0.85rem'
               }}
             >
               CROssBAR-LLM can make mistakes or miss answers; if something looks wrong, ask again (results can change), or switch to a recommended or alternative model for better reliability.

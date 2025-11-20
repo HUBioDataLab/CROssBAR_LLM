@@ -67,10 +67,14 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
   useEffect(() => {
     if (executionResult && resultsContainerRef.current) {
       setTimeout(() => {
-        resultsContainerRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-          inline: 'nearest'
+        const element = resultsContainerRef.current;
+        const headerOffset = 100; // Adjust for fixed AppBar (approx 64px) + padding
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
         });
       }, 100);
     }
