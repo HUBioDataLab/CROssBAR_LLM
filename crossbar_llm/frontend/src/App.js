@@ -40,6 +40,7 @@ import About from './components/About';
 import VectorSearch from './components/VectorSearch';
 import LatestQueries from './components/LatestQueries';
 import Home from './components/Home';
+import ChatLayout from './components/ChatLayout';
 import axios, { refreshCsrfToken } from './services/api';
 
 function App() {
@@ -281,41 +282,31 @@ function App() {
         );
       case 'query':
         return (
-          <Fade in={true} timeout={500}>
-            <Box>
-              <QueryInput
-                setQueryResult={setQueryResult}
-                setExecutionResult={setExecutionResult}
-                setRealtimeLogs={setRealtimeLogs}
-                addLatestQuery={addLatestQuery}
-                provider={provider}
-                setProvider={setProvider}
-                llmType={llmType}
-                setLlmType={setLlmType}
-                apiKey={apiKey}
-                setApiKey={setApiKey}
-                question={question}
-                setQuestion={setQuestion}
-                sessionId={sessionId}
-                addConversationTurn={addConversationTurn}
-                startNewConversation={startNewConversation}
-                conversationHistory={conversationHistory}
-                pendingFollowUp={pendingFollowUp}
-                setPendingFollowUp={setPendingFollowUp}
-              />
-              <ResultsDisplay
-                queryResult={queryResult}
-                executionResult={executionResult}
-                realtimeLogs={realtimeLogs}
-                conversationHistory={conversationHistory}
-                onFollowUpClick={handleFollowUpClick}
-              />
-              <LatestQueries 
-                queries={latestQueries} 
-                onSelectQuery={handleSelectQuery}
-              />
-            </Box>
-          </Fade>
+          <ChatLayout
+            provider={provider}
+            setProvider={setProvider}
+            llmType={llmType}
+            setLlmType={setLlmType}
+            apiKey={apiKey}
+            setApiKey={setApiKey}
+            sessionId={sessionId}
+            conversationHistory={conversationHistory}
+            addConversationTurn={addConversationTurn}
+            startNewConversation={startNewConversation}
+            addLatestQuery={addLatestQuery}
+            question={question}
+            setQuestion={setQuestion}
+            queryResult={queryResult}
+            setQueryResult={setQueryResult}
+            executionResult={executionResult}
+            setExecutionResult={setExecutionResult}
+            realtimeLogs={realtimeLogs}
+            setRealtimeLogs={setRealtimeLogs}
+            latestQueries={latestQueries}
+            handleSelectQuery={handleSelectQuery}
+            pendingFollowUp={pendingFollowUp}
+            setPendingFollowUp={setPendingFollowUp}
+          />
         );
       case 'vectorSearch':
         return (
@@ -461,7 +452,7 @@ function App() {
                 <ChatOutlinedIcon />
               </ListItemIcon>
               <ListItemText 
-                primary="Graph Explorer" 
+                primary="CROssBAR Chat" 
                 primaryTypographyProps={{ 
                   fontWeight: tabValue === 'query' ? 600 : 400,
                   fontFamily: "'Poppins', 'Roboto', sans-serif",
@@ -555,16 +546,78 @@ function App() {
         </List>
       </Box>
       
+      {/* Bottom Section with Tips and Info */}
       <Box sx={{ 
         p: 2, 
         borderTop: theme => `1px solid ${theme.palette.divider}`,
         display: 'flex',
-        justifyContent: 'center'
+        flexDirection: 'column',
+        gap: 1.5,
       }}>
+        {/* Autocomplete Tip */}
+        <Box sx={{ 
+          p: 1.5, 
+          borderRadius: '10px',
+          backgroundColor: theme => theme.palette.mode === 'dark' 
+            ? 'rgba(100, 181, 246, 0.08)' 
+            : 'rgba(0, 113, 227, 0.04)',
+          border: theme => `1px solid ${theme.palette.mode === 'dark' 
+            ? 'rgba(100, 181, 246, 0.15)' 
+            : 'rgba(0, 113, 227, 0.1)'}`,
+        }}>
+          <Typography variant="caption" sx={{ 
+            color: 'text.secondary', 
+            display: 'block',
+            lineHeight: 1.5,
+            fontFamily: "'Poppins', 'Roboto', sans-serif"
+          }}>
+            <strong style={{ color: mode === 'dark' ? '#64B5F6' : '#0071e3' }}>Tip:</strong> Type <code style={{ 
+              backgroundColor: mode === 'dark' ? 'rgba(100, 181, 246, 0.2)' : 'rgba(0, 113, 227, 0.1)', 
+              padding: '2px 5px', 
+              borderRadius: '4px',
+              fontSize: '0.75rem',
+            }}>@</code> followed by an entity name for autocomplete suggestions
+          </Typography>
+        </Box>
+
+        {/* Privacy Notice */}
+        <Box sx={{ 
+          p: 1.5, 
+          borderRadius: '10px',
+          backgroundColor: theme => theme.palette.mode === 'dark' 
+            ? 'rgba(255, 255, 255, 0.03)' 
+            : 'rgba(0, 0, 0, 0.02)',
+        }}>
+          <Typography variant="caption" sx={{ 
+            color: 'text.secondary', 
+            display: 'block',
+            lineHeight: 1.5,
+            fontSize: '0.65rem',
+            fontFamily: "'Poppins', 'Roboto', sans-serif"
+          }}>
+            We save user queries and outputs, but remove all identifiable data once the session is finished. 
+            Data is never used for model training. Data is stored on the CROssBAR v2 server. 
+            We may analyze data globally to improve the user experience.
+          </Typography>
+        </Box>
+        
+        {/* Disclaimer */}
         <Typography variant="caption" sx={{ 
           color: 'text.secondary', 
           textAlign: 'center',
+          fontStyle: 'italic',
+          lineHeight: 1.5,
           fontFamily: "'Poppins', 'Roboto', sans-serif"
+        }}>
+          CROssBAR-LLM can make mistakes. If results seem wrong, try rephrasing or switch models.
+        </Typography>
+        
+        {/* Version */}
+        <Typography variant="caption" sx={{ 
+          color: 'text.secondary', 
+          textAlign: 'center',
+          fontFamily: "'Poppins', 'Roboto', sans-serif",
+          mt: 0.5,
         }}>
           CROssBAR-LLM v1.0
         </Typography>
@@ -702,87 +755,105 @@ function App() {
           </Drawer>
         )}
         
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            width: { xs: '100%', md: drawerVisible ? `calc(100% - 280px)` : '100%' },
-            mt: 6,
-            mb: 4,
-            maxWidth: drawerVisible ? '1200px' : '1480px',
-            mx: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            transition: 'all 0.3s ease-in-out'
-          }}
-        >
-          <Box sx={{ flexGrow: 1 }}>
-            {renderTabContent()}
-            
-            {showAboutModal && (
-              <About onClose={handleCloseModal} />
-            )}
-          </Box>
-          
-          {/* Privacy Banner */}
-          <Paper 
-            elevation={0}
-            sx={{ 
-              mt: 4,
-              p: 2,
-              backgroundColor: theme => theme.palette.mode === 'dark' 
-                ? 'rgba(100, 181, 246, 0.08)' 
-                : 'rgba(0, 113, 227, 0.04)',
-              borderRadius: '12px',
-              border: theme => `1px solid ${theme.palette.mode === 'dark' 
-                ? 'rgba(100, 181, 246, 0.2)' 
-                : 'rgba(0, 113, 227, 0.1)'}`,
+        {/* Conditionally render based on tab - ChatLayout uses full height */}
+        {tabValue === 'query' ? (
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              width: { xs: '100%', md: drawerVisible ? `calc(100% - 280px)` : '100%' },
               display: 'flex',
-              alignItems: 'flex-start',
-              gap: 1.5
+              flexDirection: 'column',
+              transition: 'all 0.3s ease-in-out',
+              overflow: 'hidden',
             }}
           >
-            <SecurityOutlinedIcon 
+            {renderTabContent()}
+            {showAboutModal && <About onClose={handleCloseModal} />}
+          </Box>
+        ) : (
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: { xs: '100%', md: drawerVisible ? `calc(100% - 280px)` : '100%' },
+              mt: 6,
+              mb: 4,
+              maxWidth: drawerVisible ? '1200px' : '1480px',
+              mx: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
+            <Box sx={{ flexGrow: 1 }}>
+              {renderTabContent()}
+              
+              {showAboutModal && (
+                <About onClose={handleCloseModal} />
+              )}
+            </Box>
+            
+            {/* Privacy Banner */}
+            <Paper 
+              elevation={0}
               sx={{ 
-                fontSize: 20, 
-                color: theme => theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3',
-                mt: 0.25,
-                flexShrink: 0
-              }} 
-            />
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: 'text.secondary',
-                lineHeight: 1.6,
-                fontFamily: "'Poppins', 'Roboto', sans-serif"
+                mt: 4,
+                p: 2,
+                backgroundColor: theme => theme.palette.mode === 'dark' 
+                  ? 'rgba(100, 181, 246, 0.08)' 
+                  : 'rgba(0, 113, 227, 0.04)',
+                borderRadius: '12px',
+                border: theme => `1px solid ${theme.palette.mode === 'dark' 
+                  ? 'rgba(100, 181, 246, 0.2)' 
+                  : 'rgba(0, 113, 227, 0.1)'}`,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1.5
               }}
             >
-              We save user queries and outputs, but remove all identifiable data once the session is finished. 
-              Data is never used for model training. Data is stored on the CROssBAR v2 server. 
-              We may analyze data globally to improve the user experience.
-            </Typography>
-          </Paper>
+              <SecurityOutlinedIcon 
+                sx={{ 
+                  fontSize: 20, 
+                  color: theme => theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3',
+                  mt: 0.25,
+                  flexShrink: 0
+                }} 
+              />
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'text.secondary',
+                  lineHeight: 1.6,
+                  fontFamily: "'Poppins', 'Roboto', sans-serif"
+                }}
+              >
+                We save user queries and outputs, but remove all identifiable data once the session is finished. 
+                Data is never used for model training. Data is stored on the CROssBAR v2 server. 
+                We may analyze data globally to improve the user experience.
+              </Typography>
+            </Paper>
 
-          <Box sx={{ 
-            mt: 2,
-            pt: 2, 
-            borderTop: theme => `1px solid ${theme.palette.divider}`,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              © {new Date().getFullYear()} CROssBAR
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              <a href="https://www.flaticon.com/free-icons/chatbot" title="chatbot icons" style={{ color: 'inherit', textDecoration: 'none' }}>
-                Chatbot icons created by rukanicon - Flaticon
-              </a>
-            </Typography>
+            <Box sx={{ 
+              mt: 2,
+              pt: 2, 
+              borderTop: theme => `1px solid ${theme.palette.divider}`,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                © {new Date().getFullYear()} CROssBAR
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                <a href="https://www.flaticon.com/free-icons/chatbot" title="chatbot icons" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  Chatbot icons created by rukanicon - Flaticon
+                </a>
+              </Typography>
+            </Box>
           </Box>
-        </Box>
+        )}
       </Box>
     </ThemeProvider>
   );

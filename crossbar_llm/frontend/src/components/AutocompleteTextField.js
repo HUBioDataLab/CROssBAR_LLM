@@ -53,7 +53,17 @@ const nodeTypeColors = {
   "default": { bg: '#A5ABB6', text: '#FFFFFF' }
 };
 
-function AutocompleteTextField({ value, setValue, label, placeholder }) {
+function AutocompleteTextField({ 
+  value, 
+  setValue, 
+  label, 
+  placeholder,
+  onKeyPress,
+  customStyles = {},
+  rows = 4,
+  hideHint = false,
+  disabled = false,
+}) {
   const theme = useTheme();
   const [suggestions, setSuggestions] = useState([]);
   const [displaySuggestions, setDisplaySuggestions] = useState([]);
@@ -153,15 +163,15 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
     return parts;
   };
 
-  // Initial setup - only show hint if field is empty
+  // Initial setup - only show hint if field is empty and hideHint is false
   useEffect(() => {
-    // Only show hint initially if the field is empty
-    if (!value) {
+    // Only show hint initially if the field is empty and hideHint is false
+    if (!value && !hideHint) {
       setShowHint(true);
     } else {
       setShowHint(false);
     }
-  }, []);
+  }, [hideHint]);
 
   // Additional effect to monitor value changes - show hint when field becomes empty
   useEffect(() => {
@@ -389,7 +399,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
   };
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative', ...(customStyles.container || {}) }}>
       <div style={{ position: 'relative' }}>
         <TextField
           inputRef={textFieldRef}
@@ -397,17 +407,24 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            handleKeyDown(e);
+            // Also call the custom onKeyPress handler if provided
+            if (onKeyPress && !showSuggestions) {
+              onKeyPress(e);
+            }
+          }}
           onFocus={() => {
             // Only show hint on focus if the field is empty and hint is not already shown
-            if (!value && !showHint) {
+            if (!value && !showHint && !hideHint) {
               setShowHint(true);
             }
           }}
           fullWidth
           multiline
-          rows={4}
+          rows={rows}
           margin="normal"
+          disabled={disabled}
           sx={{
             '& .MuiInputBase-input': {
               // Only make text transparent if @ symbol is present
@@ -426,6 +443,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
                 boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.2)}`,
               }
             },
+            ...(customStyles.container || {}),
           }}
         />
         {/* Only render overlay when @ symbol is present */}
@@ -456,7 +474,7 @@ function AutocompleteTextField({ value, setValue, label, placeholder }) {
       </div>
       
       {/* Enhanced Autocomplete hint with slide animation */}
-      {showHint && (
+      {showHint && !hideHint && (
         <Slide 
           direction="up" 
           in={showHint} 

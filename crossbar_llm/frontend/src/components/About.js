@@ -111,7 +111,7 @@ function About({ onClose }) {
                       color: theme.palette.primary.main
                     }} />
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      1. Graph Explorer Module
+                      1. CROssBAR Chat Module
                     </Typography>
                   </Box>
                   <Typography variant="body2">
