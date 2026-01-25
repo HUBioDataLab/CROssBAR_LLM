@@ -26,9 +26,11 @@ import {
   Fade,
   InputAdornment,
   useMediaQuery,
+  Backdrop,
+  LinearProgress,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
-import axios from '../services/api';
+import axios from 'axios';
 import api, { getAvailableModels } from '../services/api';
 import SampleQuestions from './SampleQuestions';
 import VectorUpload from './VectorUpload';
@@ -44,6 +46,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CodeIcon from '@mui/icons-material/Code';
 import RestoreIcon from '@mui/icons-material/Restore';
+import StopIcon from '@mui/icons-material/Stop';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
@@ -110,7 +113,6 @@ function VectorSearch({
     const fetchModels = async () => {
       try {
         const models = await getAvailableModels();
-        console.log('Available models:', models);
         setModelChoices(models);
         setModelsLoaded(true);
       } catch (error) {
@@ -130,7 +132,6 @@ function VectorSearch({
       try {
         const response = await api.get('/api_keys_status/');
         if (response.data) {
-          console.log('API keys status:', response.data);
           setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
 
@@ -159,7 +160,7 @@ function VectorSearch({
 
     // These providers always need an API key if not in .env
     return provider === 'OpenAI' || provider === 'Anthropic' || provider === 'OpenRouter' ||
-           provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
+      provider === 'Google' || provider === 'Groq' || provider === 'Nvidia';
   }, [provider, apiKeysStatus, apiKeysLoaded, apiKey]);
 
   // When provider changes, update API key if needed
@@ -375,8 +376,8 @@ function VectorSearch({
     if (error.response?.data?.detail) {
       if (typeof error.response.data.detail === 'object') {
         return error.response.data.detail.error ||
-               error.response.data.detail.msg ||
-               JSON.stringify(error.response.data.detail);
+          error.response.data.detail.msg ||
+          JSON.stringify(error.response.data.detail);
       }
       return error.response.data.detail;
     }
@@ -392,6 +393,16 @@ function VectorSearch({
       }
     };
   }, []);
+
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setLoading(false);
+      setActiveButton(null);
+      updateRealtimeLogs(prev => prev + 'Operation aborted by user.\n');
+    }
+  };
 
   const handleGenerateQuery = async () => {
     if (!isSettingsValid()) {
@@ -411,6 +422,10 @@ function VectorSearch({
     setQueryResult(null);
     setExecutionResult(null);
     setLocalExecutionResult(null);
+
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     setLoading(true);
     setActiveButton('generate');
@@ -434,7 +449,7 @@ function VectorSearch({
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
 
       const embedding = vectorFile ? JSON.stringify(vectorFile) : null;
-      const response = await axios.post('/generate_query/', {
+      const response = await api.post('/generate_query/', {
         question,
         provider,
         llm_type: llmType,
@@ -444,7 +459,7 @@ function VectorSearch({
         vector_index: embeddingType,
         embedding: embedding,
         vector_category: vectorCategory,
-      });
+      }, { signal });
 
       // Process the query result before setting it
       const queryData = response.data.query;
@@ -477,17 +492,24 @@ function VectorSearch({
         embedding: embeddingType
       });
     } catch (err) {
-      console.error(err);
-      // Use the rate limit handler
-      const errorMessage = handleRateLimitError(err);
-      setError(errorMessage);
+      if (axios.isCancel(err)) {
+        console.log('Request canceled:', err.message);
+      } else {
+        console.error(err);
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(err);
+        setError(errorMessage);
 
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        }
       }
     } finally {
-      setLoading(false);
-      setActiveButton(null);
+      if (!signal.aborted) {
+        setLoading(false);
+        setActiveButton(null);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -512,6 +534,10 @@ function VectorSearch({
     setExecutionResult(null);
     setLocalExecutionResult(null);
 
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setLoading(true);
     setActiveButton('run');
     setLogs('');
@@ -525,7 +551,7 @@ function VectorSearch({
       // Update API key to use from environment if available
       const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
 
-      const response = await axios.post('/run_query/', {
+      const response = await api.post('/run_query/', {
         query: generatedQuery,
         question,
         provider,
@@ -533,7 +559,7 @@ function VectorSearch({
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
-      });
+      }, { signal });
 
       setExecutionResult({
         result: response.data.result,
@@ -564,17 +590,24 @@ function VectorSearch({
         embedding: embeddingType
       });
     } catch (err) {
-      console.error(err);
-      // Use the rate limit handler
-      const errorMessage = handleRateLimitError(err);
-      setError(errorMessage);
+      if (axios.isCancel(err)) {
+        console.log('Request canceled:', err.message);
+      } else {
+        console.error(err);
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(err);
+        setError(errorMessage);
 
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        }
       }
     } finally {
-      setLoading(false);
-      setActiveButton(null);
+      if (!signal.aborted) {
+        setLoading(false);
+        setActiveButton(null);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -596,6 +629,10 @@ function VectorSearch({
     setQueryResult(null);
     setExecutionResult(null);
     setLocalExecutionResult(null);
+
+    // Create a new AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     setLoading(true);
     setActiveButton('generateAndRun');
@@ -644,10 +681,11 @@ function VectorSearch({
 
         try {
           // Upload the file first
-          const uploadResponse = await axios.post('/upload_vector/', formData, {
+          const uploadResponse = await api.post('/upload_vector/', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
+            signal,
           });
 
           if (verbose) {
@@ -680,7 +718,7 @@ function VectorSearch({
           `Vector Data: ${vectorFile ? 'Provided' : 'Not provided'}\n\n`);
       }
 
-      const response = await axios.post('/generate_query/', requestData);
+      const response = await api.post('/generate_query/', requestData, { signal });
 
       // Process the query result
       const generatedQuery = response.data.query;
@@ -715,7 +753,7 @@ function VectorSearch({
       };
 
       const runRequestDataWithProvider = { ...runRequestData, provider };
-      const runResponse = await axios.post('/run_query/', runRequestDataWithProvider);
+      const runResponse = await api.post('/run_query/', runRequestDataWithProvider, { signal });
 
       setExecutionResult({
         result: runResponse.data.result,
@@ -747,18 +785,25 @@ function VectorSearch({
         embeddingType: embeddingType
       });
     } catch (err) {
-      console.error('Error in vector search:', err);
+      if (axios.isCancel(err)) {
+        console.log('Request canceled:', err.message);
+      } else {
+        console.error('Error in vector search:', err);
 
-      // Use the rate limit handler
-      const errorMessage = handleRateLimitError(err);
-      setError(errorMessage);
+        // Use the rate limit handler
+        const errorMessage = handleRateLimitError(err);
+        setError(errorMessage);
 
-      if (verbose) {
-        updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        if (verbose) {
+          updateRealtimeLogs(prev => prev + `ERROR: ${errorMessage}\n`);
+        }
       }
     } finally {
-      setLoading(false);
-      setActiveButton(null);
+      if (!signal.aborted) {
+        setLoading(false);
+        setActiveButton(null);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -870,7 +915,7 @@ function VectorSearch({
     }
     formData.append('file', file);
 
-    axios
+    api
       .post('/upload_vector/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -913,8 +958,53 @@ function VectorSearch({
           backgroundColor: theme => theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.background.paper, 0.8),
+          position: 'relative',
         }}
       >
+        {/* Loading Overlay */}
+        {loading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme => alpha(theme.palette.background.paper, 0.4),
+              backdropFilter: 'blur(8px)',
+              zIndex: 1000,
+              borderRadius: '24px',
+            }}
+          >
+            <CircularProgress size={60} thickness={4} />
+            <Typography variant="h6" sx={{ mt: 3, fontWeight: 500 }}>
+              {activeButton === 'generate' && 'Generating Query...'}
+              {activeButton === 'run' && 'Running Query...'}
+              {activeButton === 'generateAndRun' && 'Generating & Running Query...'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              This may take a few moments
+            </Typography>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleAbort}
+              startIcon={<StopIcon />}
+              sx={{
+                mt: 3,
+                borderRadius: '12px',
+                px: 3,
+              }}
+            >
+              Abort Operation
+            </Button>
+          </Box>
+        )}
+
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
@@ -1093,7 +1183,7 @@ function VectorSearch({
                         <MenuItem value="">
                           <em>Select a model</em>
                         </MenuItem>
-                        {provider && modelChoices[provider].map((model) => {
+                        {provider && modelChoices[provider] && modelChoices[provider].map((model) => {
                           // For separator items, render a divider
                           if (typeof model === 'object' && model.value === 'separator') {
                             return <Divider key={model.label} sx={{ my: 1 }} />;
@@ -1385,20 +1475,36 @@ function VectorSearch({
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
                 >
-                  <Button
-                    variant="outlined"
-                    onClick={handleGenerateQuery}
-                    disabled={!question || !isSettingsValid() || loading}
-                    startIcon={activeButton === 'generate' ? <CircularProgress size={20} /> : <SendIcon />}
-                    sx={{
-                      borderRadius: '12px',
-                      px: 3,
-                      height: '44px',
-                      fontSize: '0.75rem'
-                    }}
-                  >
-                    {loading && activeButton === 'generate' ? <CircularProgress size={24} /> : 'Only Generate Query'}
-                  </Button>
+                  {loading && activeButton === 'generate' ? (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleAbort}
+                      startIcon={<StopIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px'
+                      }}
+                    >
+                      Abort
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      onClick={handleGenerateQuery}
+                      disabled={!question || !isSettingsValid() || loading}
+                      startIcon={<SendIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      Only Generate Query
+                    </Button>
+                  )}
                 </Box>
               </Tooltip>
 
@@ -1407,23 +1513,56 @@ function VectorSearch({
                   onMouseEnter={() => handleActionButtonHover(true)}
                   onMouseLeave={() => handleActionButtonHover(false)}
                 >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleGenerateAndRun}
-                    disabled={!question || !isSettingsValid() || loading}
-                    startIcon={activeButton === 'generateAndRun' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                    sx={{
-                      borderRadius: '12px',
-                      px: 3,
-                      height: '44px'
-                    }}
-                  >
-                    {loading && activeButton === 'generateAndRun' ? <CircularProgress size={24} color="inherit" /> : 'Generate & Run Query'}
-                  </Button>
+                  {loading && activeButton === 'generateAndRun' ? (
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleAbort}
+                      startIcon={<StopIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px'
+                      }}
+                    >
+                      Abort
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleGenerateAndRun}
+                      disabled={!question || !isSettingsValid() || loading}
+                      startIcon={<PlayArrowIcon />}
+                      sx={{
+                        borderRadius: '12px',
+                        px: 3,
+                        height: '44px'
+                      }}
+                    >
+                      Generate & Run Query
+                    </Button>
+                  )}
                 </Box>
               </Tooltip>
             </Box>
+          </Box>
+
+          {/* Disclaimer */}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                textAlign: 'center',
+                maxWidth: '600px',
+                lineHeight: 1.4,
+                fontStyle: 'normal',
+                fontSize: '0.85rem'
+              }}
+            >
+              CROssBAR-LLM can make mistakes or miss answers; if something looks wrong, ask again (results can change), or switch to a recommended or alternative model for better reliability.
+            </Typography>
           </Box>
         </Box>
 
@@ -1555,19 +1694,34 @@ function VectorSearch({
               >
                 Reset to Original
               </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleRunGeneratedQuery}
-                disabled={!isSettingsValid() || !generatedQuery.trim() || loading}
-                startIcon={activeButton === 'run' ? <CircularProgress size={20} /> : <PlayArrowIcon />}
-                sx={{
-                  borderRadius: '12px',
-                  px: 3
-                }}
-              >
-                Run Query
-              </Button>
+              {loading && activeButton === 'run' ? (
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleAbort}
+                  startIcon={<StopIcon />}
+                  sx={{
+                    borderRadius: '12px',
+                    px: 3
+                  }}
+                >
+                  Abort
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleRunGeneratedQuery}
+                  disabled={!isSettingsValid() || !generatedQuery.trim() || loading}
+                  startIcon={<PlayArrowIcon />}
+                  sx={{
+                    borderRadius: '12px',
+                    px: 3
+                  }}
+                >
+                  Run Query
+                </Button>
+              )}
             </Box>
           </>
         )}
@@ -1595,8 +1749,8 @@ function VectorSearch({
                 <CircularProgress size={16} sx={{ mr: 1 }} />
                 <Typography variant="body2">
                   {limitType === "minute" && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
-                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown/60)} minute${Math.floor(retryCountdown/60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
-                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown/3600)} hour${Math.floor(retryCountdown/3600) !== 1 ? 's' : ''}).`}
+                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown / 60)} minute${Math.floor(retryCountdown / 60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
+                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown / 3600)} hour${Math.floor(retryCountdown / 3600) !== 1 ? 's' : ''}).`}
                   {!limitType && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
                 </Typography>
               </Box>
@@ -1629,8 +1783,8 @@ function VectorSearch({
                 <CircularProgress size={16} sx={{ mr: 1 }} />
                 <Typography variant="body2">
                   {limitType === "minute" && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
-                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown/60)} minute${Math.floor(retryCountdown/60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
-                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown/3600)} hour${Math.floor(retryCountdown/3600) !== 1 ? 's' : ''}).`}
+                  {limitType === "hour" && `Please wait ${Math.floor(retryCountdown / 60)} minute${Math.floor(retryCountdown / 60) !== 1 ? 's' : ''} and ${retryCountdown % 60} second${retryCountdown % 60 !== 1 ? 's' : ''} before trying again.`}
+                  {limitType === "day" && `Daily limit reached. Please try again tomorrow (in ${Math.floor(retryCountdown / 3600)} hour${Math.floor(retryCountdown / 3600) !== 1 ? 's' : ''}).`}
                   {!limitType && `You can try again in ${retryCountdown} second${retryCountdown !== 1 ? 's' : ''}.`}
                 </Typography>
               </Box>

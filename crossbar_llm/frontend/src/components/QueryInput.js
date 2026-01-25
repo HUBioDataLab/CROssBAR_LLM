@@ -32,7 +32,8 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  CheckCircleIcon
+  CheckCircleIcon,
+  LinearProgress,
 } from '@mui/material';
 import AutocompleteTextField from './AutocompleteTextField';
 import api, { getAvailableModels } from '../services/api';
@@ -161,7 +162,6 @@ function QueryInput({
     const fetchModels = async () => {
       try {
         const models = await getAvailableModels();
-        console.log('Available models:', models);
         setModelChoices(models);
         setModelsLoaded(true);
       } catch (error) {
@@ -181,7 +181,6 @@ function QueryInput({
       try {
         const response = await api.get('/api_keys_status/');
         if (response.data) {
-          console.log('API keys status:', response.data);
           setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
 
@@ -765,8 +764,53 @@ function QueryInput({
           backgroundColor: theme => theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.background.paper, 0.8),
+          position: 'relative',
         }}
       >
+        {/* Loading Overlay */}
+        {loading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme => alpha(theme.palette.background.paper, 0.6),
+              backdropFilter: 'blur(8px)',
+              zIndex: 1000,
+              borderRadius: '24px',
+            }}
+          >
+            <CircularProgress size={60} thickness={4} />
+            <Typography variant="h6" sx={{ mt: 3, fontWeight: 500 }}>
+              {activeButton === 'generate' && 'Generating Query...'}
+              {activeButton === 'run' && 'Running Query...'}
+              {activeButton === 'generateAndRun' && 'Generating & Running Query...'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              This may take a few moments
+            </Typography>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleAbort}
+              startIcon={<StopIcon />}
+              sx={{
+                mt: 3,
+                borderRadius: '12px',
+                px: 3,
+              }}
+            >
+              Abort Operation
+            </Button>
+          </Box>
+        )}
+
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
@@ -972,7 +1016,7 @@ function QueryInput({
                         <MenuItem value="">
                           <em>Select a model</em>
                         </MenuItem>
-                        {provider && modelChoices[provider].map((model) => {
+                        {provider && modelChoices[provider] && modelChoices[provider].map((model) => {
                           // For separator items, render a divider
                           if (typeof model === 'object' && model.value === 'separator') {
                             return <Divider key={model.label} sx={{ my: 1 }} />;
@@ -1284,6 +1328,23 @@ function QueryInput({
                 </Box>
               </Tooltip>
             </Box>
+          </Box>
+
+          {/* Disclaimer */}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <Typography 
+              variant="caption" 
+              color="text.secondary" 
+              sx={{
+                textAlign: 'center',
+                maxWidth: '600px',
+                lineHeight: 1.4,
+                fontStyle: 'normal',
+                fontSize: '0.85rem'
+              }}
+            >
+              CROssBAR-LLM can make mistakes or miss answers; if something looks wrong, ask again (results can change), or switch to a recommended or alternative model for better reliability.
+            </Typography>
           </Box>
         </Box>
 
