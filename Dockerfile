@@ -21,13 +21,13 @@ RUN rm -rf static-web-server-* sws.tar.gz
 
 # Install backend requirements
 WORKDIR ..
-# Copy source
-COPY crossbar_llm crossbar_llm
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN pip install "uvicorn[standard]"
 RUN rm -f requirements.txt
 
+# Copy source
+COPY crossbar_llm crossbar_llm
 WORKDIR crossbar_llm
 
 # Install & build frontend
