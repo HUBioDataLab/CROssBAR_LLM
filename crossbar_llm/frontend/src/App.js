@@ -20,7 +20,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  ListItemButton
+  ListItemButton,
+  Collapse
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -33,6 +34,8 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { getTheme } from './theme';
 import QueryInput from './components/QueryInput';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -72,6 +75,9 @@ function App() {
   const [conversationHistory, setConversationHistory] = useState([]);
   // Each item: { question, cypherQuery, response, followUpQuestions, timestamp }
   const [pendingFollowUp, setPendingFollowUp] = useState(null); // Triggers auto-run
+  
+  // Autocomplete tip expanded state
+  const [autocompleteTipExpanded, setAutocompleteTipExpanded] = useState(false);
   
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('theme-mode');
@@ -554,9 +560,8 @@ function App() {
         flexDirection: 'column',
         gap: 1.5,
       }}>
-        {/* Autocomplete Tip */}
+        {/* Autocomplete Tip - Expandable */}
         <Box sx={{ 
-          p: 1.5, 
           borderRadius: '10px',
           backgroundColor: theme => theme.palette.mode === 'dark' 
             ? 'rgba(100, 181, 246, 0.08)' 
@@ -564,20 +569,119 @@ function App() {
           border: theme => `1px solid ${theme.palette.mode === 'dark' 
             ? 'rgba(100, 181, 246, 0.15)' 
             : 'rgba(0, 113, 227, 0.1)'}`,
+          overflow: 'hidden',
         }}>
-          <Typography variant="caption" sx={{ 
-            color: 'text.secondary', 
-            display: 'block',
-            lineHeight: 1.5,
-            fontFamily: "'Poppins', 'Roboto', sans-serif"
-          }}>
-            <strong style={{ color: mode === 'dark' ? '#64B5F6' : '#0071e3' }}>Tip:</strong> Type <code style={{ 
-              backgroundColor: mode === 'dark' ? 'rgba(100, 181, 246, 0.2)' : 'rgba(0, 113, 227, 0.1)', 
-              padding: '2px 5px', 
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-            }}>@</code> followed by an entity name for autocomplete suggestions
-          </Typography>
+          {/* Clickable Header */}
+          <Box 
+            onClick={() => setAutocompleteTipExpanded(!autocompleteTipExpanded)}
+            sx={{ 
+              p: 1.5, 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              '&:hover': {
+                backgroundColor: mode === 'dark' 
+                  ? 'rgba(100, 181, 246, 0.12)' 
+                  : 'rgba(0, 113, 227, 0.06)',
+              },
+              transition: 'background-color 0.2s ease',
+            }}
+          >
+            <Typography variant="caption" sx={{ 
+              color: 'text.secondary', 
+              lineHeight: 1.5,
+              fontFamily: "'Poppins', 'Roboto', sans-serif",
+              flex: 1,
+            }}>
+              <strong style={{ color: mode === 'dark' ? '#64B5F6' : '#0071e3' }}>
+                {autocompleteTipExpanded ? 'Entity Autocomplete Available' : 'Tip:'}
+              </strong>{' '}
+              {!autocompleteTipExpanded && (
+                <>
+                  Type <code style={{ 
+                    backgroundColor: mode === 'dark' ? 'rgba(100, 181, 246, 0.2)' : 'rgba(0, 113, 227, 0.1)', 
+                    padding: '2px 5px', 
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                  }}>@</code> followed by an entity name for autocomplete suggestions
+                </>
+              )}
+              {autocompleteTipExpanded && (
+                <span style={{ opacity: 0.7 }}>(click to collapse)</span>
+              )}
+            </Typography>
+            {autocompleteTipExpanded ? (
+              <ExpandLessIcon sx={{ fontSize: 18, color: mode === 'dark' ? '#64B5F6' : '#0071e3', ml: 1 }} />
+            ) : (
+              <ExpandMoreIcon sx={{ fontSize: 18, color: mode === 'dark' ? '#64B5F6' : '#0071e3', ml: 1 }} />
+            )}
+          </Box>
+          
+          {/* Expanded Content */}
+          <Collapse in={autocompleteTipExpanded}>
+            <Box sx={{ 
+              px: 1.5, 
+              pb: 1.5, 
+              borderTop: `1px solid ${mode === 'dark' ? 'rgba(100, 181, 246, 0.15)' : 'rgba(0, 113, 227, 0.1)'}`,
+            }}>
+              <Typography variant="caption" sx={{ 
+                color: 'text.secondary', 
+                display: 'block',
+                lineHeight: 1.6,
+                fontFamily: "'Poppins', 'Roboto', sans-serif",
+                mt: 1.5,
+                mb: 1,
+              }}>
+                Type <code style={{ 
+                  backgroundColor: mode === 'dark' ? 'rgba(100, 181, 246, 0.2)' : 'rgba(0, 113, 227, 0.1)', 
+                  padding: '2px 5px', 
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                }}>@</code> followed by at least 3 characters to search for biomedical entities.
+              </Typography>
+              
+              <Typography variant="caption" sx={{ 
+                color: mode === 'dark' ? '#64B5F6' : '#0071e3', 
+                display: 'block',
+                fontWeight: 600,
+                fontFamily: "'Poppins', 'Roboto', sans-serif",
+                mb: 0.75,
+              }}>
+                How to use autocomplete:
+              </Typography>
+              
+              <Box component="ul" sx={{ 
+                m: 0, 
+                pl: 2, 
+                '& li': { 
+                  mb: 0.5,
+                  fontSize: '0.7rem',
+                  color: 'text.secondary',
+                  fontFamily: "'Poppins', 'Roboto', sans-serif",
+                  lineHeight: 1.5,
+                } 
+              }}>
+                <li>Type <strong>@</strong> symbol followed by the entity name you're looking for.</li>
+                <li>After typing at least 3 characters, a dropdown menu will appear with matching entities.</li>
+                <li>Use <strong>arrow keys</strong> to navigate the suggestions, <strong>Enter</strong> or <strong>Tab</strong> to select.</li>
+                <li>You can also <strong>click</strong> on a suggestion to select it.</li>
+                <li>Available entity types include: <em>genes, proteins, diseases, drugs, pathways</em> and more.</li>
+              </Box>
+              
+              <Typography variant="caption" sx={{ 
+                color: 'text.secondary', 
+                display: 'block',
+                fontStyle: 'italic',
+                fontFamily: "'Poppins', 'Roboto', sans-serif",
+                mt: 1,
+                pt: 1,
+                borderTop: `1px dashed ${mode === 'dark' ? 'rgba(100, 181, 246, 0.15)' : 'rgba(0, 113, 227, 0.1)'}`,
+              }}>
+                This feature helps ensure accurate entity names in your queries and improves search results.
+              </Typography>
+            </Box>
+          </Collapse>
         </Box>
 
         {/* Privacy Notice */}

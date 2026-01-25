@@ -438,6 +438,11 @@ function QueryInput({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
+    // Collapse settings panel when submitting a question (like example questions)
+    if (showSettings) {
+      setShowSettings(false);
+    }
+
     setLoading(true);
     setActiveButton('generate');
     updateRealtimeLogs(verbose ? 'Generating Cypher query...\n' : '');
@@ -532,6 +537,11 @@ function QueryInput({
     // Clear any previous errors at the start of the operation
     // Keep previous results visible while loading new ones
     setError(null);
+
+    // Collapse settings panel when submitting a question (like example questions)
+    if (showSettings) {
+      setShowSettings(false);
+    }
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -632,6 +642,11 @@ function QueryInput({
     // Prevent submitting if rate limited
     if (rateLimited) {
       return;
+    }
+
+    // Collapse settings panel when submitting a question (like example questions)
+    if (showSettings) {
+      setShowSettings(false);
     }
 
     // Clear any previous errors at the start of the operation

@@ -427,6 +427,9 @@ function ChatLayout({
       return;
     }
 
+    // Collapse settings panel when submitting a question (like example questions)
+    setExpandedSections(prev => ({ ...prev, settings: false }));
+
     const userQuestion = question.trim();
     setPendingQuestion(userQuestion);
     setQuestion('');
@@ -599,6 +602,9 @@ function ChatLayout({
       setError('Please configure model settings first');
       return;
     }
+
+    // Collapse settings panel when submitting a question (like example questions)
+    setExpandedSections(prev => ({ ...prev, settings: false }));
 
     const userQuestion = question.trim();
     setQuestion('');
