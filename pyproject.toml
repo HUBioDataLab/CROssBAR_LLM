@@ -1,3 +1,35 @@
+[project]
+name = "crossbar_llm"
+version = "0.1.0"
+description = "CROssBAR LLM - Natural language interface for biomedical knowledge graph"
+authors = [
+    {name = "Melih DARCAN", email = "57872471+MelihDarcanxyz@users.noreply.github.com"},
+    {name = "Bünyamin Şen", email = "106750021+bnymnsen@users.noreply.github.com"}
+]
+license = {text = "GPL-3.0"}
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "langchain>=0.3.0",
+    "langchain-anthropic>=0.2.3",
+    "langchain-community>=0.3.0",
+    "langchain-google-genai>=2.0.1",
+    "langchain-groq>=0.2.0",
+    "neo4j>=5.20.0",
+    "numpy>=1.26.4",
+    "openai>=1.30.2",
+    "pandas>=2.2.2",
+    "pydantic>=2.7.1",
+    "python-dotenv>=1.0.1",
+    "langchain-nvidia-ai-endpoints>=0.3.0",
+    "wrapt-timeout-decorator>=1.5.1",
+    "langchain-openai>=0.3.0",
+    "fastapi>=0.115.5",
+    "fastapi-csrf-protect==0.3.2",
+    "python-multipart>=0.0.17",
+    "sse-starlette>=2.2.1",
+    "uvicorn>=0.35.0",
+]
+
 [tool.poetry]
 name = "crossbar_llm"
 version = "0.1.0"
@@ -35,6 +67,9 @@ output = "requirements.txt"
 without_hashes = true
 without = ["dev"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["crossbar_llm"]
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -5,9 +5,10 @@ import os
 import queue
 import threading
 import time
+import traceback
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import neo4j
 import numpy as np
@@ -40,18 +41,176 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from tools.langchain_llm_qa_trial import RunPipeline, configure_logging
 from tools.utils import Logger
+from tools.structured_logger import (
+    get_structured_logger,
+    create_query_log,
+    finalize_query_log,
+    log_error,
+    QueryLogEntry,
+)
 from models_config import get_all_models
 
 # Load environment variables
 load_dotenv()
 
 origins = [
-    "http://localhost:8501",  # React app running on localhost
+    "http://localhost:3000",  # React dev server
+    "http://127.0.0.1:3000",
+    "http://localhost:8501",
     "http://127.0.0.1:8501",
     f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}",
 ]
 
 app = FastAPI()
+
+
+# Global exception handler middleware for comprehensive error logging
+@app.middleware("http")
+async def log_requests_and_errors(request: Request, call_next):
+    """
+    Middleware to log all requests and catch unhandled exceptions.
+    
+    Provides comprehensive error logging with:
+    - Full request details
+    - Complete stack traces
+    - Request timing
+    - Error context
+    """
+    request_id = str(time.time())  # Simple request ID for middleware-level logging
+    request_start_time = time.time()
+    
+    # Get client IP
+    client_ip = "unknown"
+    try:
+        x_forwarded_for = request.headers.get("x-forwarded-for")
+        if x_forwarded_for:
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        elif hasattr(request, "client") and hasattr(request.client, "host"):
+            client_ip = request.client.host
+    except:
+        pass
+    
+    Logger.debug(
+        f"[MIDDLEWARE] Request started",
+        extra={
+            "request_id": request_id,
+            "method": request.method,
+            "path": str(request.url.path),
+            "client_ip": client_ip
+        }
+    )
+    
+    try:
+        response = await call_next(request)
+        
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        
+        Logger.debug(
+            f"[MIDDLEWARE] Request completed",
+            extra={
+                "request_id": request_id,
+                "method": request.method,
+                "path": str(request.url.path),
+                "status_code": response.status_code,
+                "duration_ms": request_duration_ms
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        error_traceback = traceback.format_exc()
+        
+        Logger.error(
+            f"[MIDDLEWARE] Unhandled exception",
+            extra={
+                "request_id": request_id,
+                "method": request.method,
+                "path": str(request.url.path),
+                "client_ip": client_ip,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "duration_ms": request_duration_ms
+            }
+        )
+        
+        Logger.debug(
+            f"[MIDDLEWARE] Exception traceback",
+            extra={
+                "request_id": request_id,
+                "traceback": error_traceback
+            }
+        )
+        
+        # Log to structured logger
+        log_error(e, step="middleware", context={
+            "method": request.method,
+            "path": str(request.url.path),
+            "client_ip": client_ip
+        })
+        
+        # Re-raise to let FastAPI handle it
+        raise
+
+
+# Global exception handler for HTTPException
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTP exceptions with detailed logging."""
+    Logger.error(
+        f"[HTTP_EXCEPTION] {exc.status_code}",
+        extra={
+            "status_code": exc.status_code,
+            "detail": exc.detail,
+            "path": str(request.url.path),
+            "method": request.method
+        }
+    )
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+
+# Global exception handler for unhandled exceptions
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Handle all unhandled exceptions with comprehensive logging."""
+    error_traceback = traceback.format_exc()
+    
+    Logger.error(
+        f"[GLOBAL_EXCEPTION] Unhandled exception",
+        extra={
+            "error_type": type(exc).__name__,
+            "error_message": str(exc),
+            "path": str(request.url.path),
+            "method": request.method
+        }
+    )
+    
+    Logger.debug(
+        f"[GLOBAL_EXCEPTION] Full traceback",
+        extra={"traceback": error_traceback}
+    )
+    
+    # Log to structured logger
+    log_error(exc, step="global_exception_handler", context={
+        "path": str(request.url.path),
+        "method": request.method
+    })
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": {
+                "error": str(exc),
+                "error_type": type(exc).__name__,
+                "message": "An unexpected error occurred. Please try again."
+            }
+        }
+    )
 
 
 # Helper function to get real client IP address when behind a reverse proxy
@@ -455,9 +614,8 @@ class AsyncQueueHandler(logging.Handler):
 
 # Modify the existing logging setup
 def setup_logging(verbose=False):
-    current_time = time.strftime("%Y-%m-%d-%H:%M:%S")
-    log_filename = f"query_log_{current_time}.log"
-    configure_logging(verbose=verbose, log_filename=log_filename)
+    # File logging is handled by structured_logger.py
+    configure_logging(verbose=verbose)
 
     # Add async queue handler for streaming logs to frontend
     logger = logging.getLogger()
@@ -523,53 +681,124 @@ async def generate_query(
     csrf_token: CsrfProtect = Depends(),
     _: bool = Depends(validate_csrf_if_enabled),
 ):
+    """
+    Generate a Cypher query from a natural language question.
+    
+    Includes comprehensive structured logging for all steps.
+    """
+    request_start_time = time.time()
+    
     # Apply rate limiting
     check_rate_limit(request)
 
     setup_logging(generate_query_request.verbose)
+    
+    # Get client IP for logging
+    client_ip = ""
+    try:
+        x_forwarded_for = request.headers.get("x-forwarded-for")
+        if x_forwarded_for:
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        elif hasattr(request, "client") and hasattr(request.client, "host"):
+            client_ip = request.client.host
+    except:
+        client_ip = "unknown"
 
-    # CSRF is now validated by the dependency
+    # Determine provider
+    provider = (
+        (generate_query_request.provider or "").strip().lower()
+        if generate_query_request.provider
+        else get_provider_for_model(generate_query_request.llm_type) or ""
+    )
+    
+    # Determine search type
+    search_type = "db_search"
+    if generate_query_request.embedding is not None or (
+        generate_query_request.vector_index and generate_query_request.vector_category
+    ):
+        search_type = "vector_search"
+    
+    # Create structured query log
+    structured_logger = get_structured_logger()
+    query_log = structured_logger.create_query_log(
+        question=generate_query_request.question,
+        provider=provider,
+        model_name=generate_query_request.llm_type,
+        top_k=generate_query_request.top_k,
+        search_type=search_type,
+        vector_index=generate_query_request.vector_index,
+        embedding_provided=generate_query_request.embedding is not None,
+        verbose=generate_query_request.verbose,
+        client_ip=client_ip
+    )
 
-    Logger.info(f"Generating query for question: '{generate_query_request.question}'")
-    Logger.debug(
-        f"Using LLM: {generate_query_request.llm_type}, top_k: {generate_query_request.top_k}"
+    Logger.info(
+        f"[API] /generate_query/ - Starting request",
+        extra={
+            "request_id": query_log.request_id,
+            "question": generate_query_request.question[:100],
+            "model": generate_query_request.llm_type,
+            "provider": provider,
+            "top_k": generate_query_request.top_k,
+            "search_type": search_type,
+            "client_ip": client_ip
+        }
     )
 
     # Handle "env" API key by using the API key from .env
     api_key = generate_query_request.api_key
     if api_key == "env":
-        provider = (
-            (generate_query_request.provider or "").strip().lower()
-            if generate_query_request.provider
-            else None
-        )
         if not provider:
-            provider = get_provider_for_model(generate_query_request.llm_type)
-        if not provider:
+            Logger.error(
+                "[API] /generate_query/ - Provider required for env API key",
+                extra={"request_id": query_log.request_id}
+            )
+            finalize_query_log(status="failed")
             raise HTTPException(
                 status_code=400,
                 detail="Provider is required when using 'env' api_key. Supply 'provider' or pass an explicit API key.",
             )
         env_var = get_provider_env_var(provider)
         if not env_var:
+            Logger.error(
+                f"[API] /generate_query/ - Unknown provider: {provider}",
+                extra={"request_id": query_log.request_id}
+            )
+            finalize_query_log(status="failed")
             raise HTTPException(
                 status_code=400,
                 detail=f"Unknown provider '{provider}'.",
             )
         api_key = os.getenv(env_var)
         if not api_key:
+            Logger.error(
+                f"[API] /generate_query/ - API key not configured: {env_var}",
+                extra={"request_id": query_log.request_id}
+            )
+            finalize_query_log(status="failed")
             raise HTTPException(
                 status_code=400,
                 detail=f"API key for provider '{provider}' is not configured in environment ({env_var}).",
             )
-        Logger.info(f"Using {provider} API key from .env via {env_var}")
+        Logger.info(
+            f"[API] /generate_query/ - Using env API key",
+            extra={
+                "request_id": query_log.request_id,
+                "provider": provider,
+                "env_var": env_var
+            }
+        )
 
     key = f"{generate_query_request.llm_type}_{api_key}"
 
     # Initialize or reuse RunPipeline instance
     if key not in pipeline_instances:
         Logger.info(
-            f"Creating new pipeline instance for {generate_query_request.llm_type}"
+            f"[API] /generate_query/ - Creating new pipeline instance",
+            extra={
+                "request_id": query_log.request_id,
+                "model": generate_query_request.llm_type
+            }
         )
         pipeline_instances[key] = RunPipeline(
             model_name=generate_query_request.llm_type,
@@ -584,10 +813,17 @@ async def generate_query(
     logger = logging.getLogger()
     logger.addHandler(handler)
 
+    query = ""
+    
     try:
         if generate_query_request.embedding is not None:
-            Logger.info("Processing vector search with embedding")
-            Logger.debug(f"Vector index: {generate_query_request.vector_index}")
+            Logger.info(
+                "[API] /generate_query/ - Processing vector search with embedding",
+                extra={
+                    "request_id": query_log.request_id,
+                    "vector_index": generate_query_request.vector_index
+                }
+            )
 
             generate_query_request.embedding = (
                 generate_query_request.embedding.replace('{"vector_data":', "")
@@ -597,13 +833,20 @@ async def generate_query(
             )
             embedding = [float(x) for x in generate_query_request.embedding.split(",")]
             embedding = np.array(embedding)
-            Logger.debug(f"Embedding shape: {embedding.shape}")
+            
+            Logger.debug(
+                f"[API] /generate_query/ - Embedding parsed",
+                extra={
+                    "request_id": query_log.request_id,
+                    "embedding_shape": embedding.shape,
+                    "embedding_dtype": str(embedding.dtype)
+                }
+            )
 
             vector_index = f"{generate_query_request.vector_index}Embeddings"
             rp.search_type = "vector_search"
             rp.top_k = generate_query_request.top_k
 
-            Logger.info("Generating query with vector embedding")
             query = rp.run_for_query(
                 question=generate_query_request.question,
                 model_name=generate_query_request.llm_type,
@@ -618,27 +861,32 @@ async def generate_query(
             and generate_query_request.vector_category
         ):
             Logger.info(
-                "Processing category-based vector search without specific embedding"
+                "[API] /generate_query/ - Processing category-based vector search",
+                extra={
+                    "request_id": query_log.request_id,
+                    "vector_index": generate_query_request.vector_index,
+                    "vector_category": generate_query_request.vector_category
+                }
             )
-            Logger.debug(f"Vector index: {generate_query_request.vector_index}")
-            Logger.debug(f"Vector category: {generate_query_request.vector_category}")
 
             vector_index = f"{generate_query_request.vector_index}Embeddings"
             rp.search_type = "vector_search"
             rp.top_k = generate_query_request.top_k
 
-            Logger.info("Generating query with category-based vector search")
             query = rp.run_for_query(
                 question=generate_query_request.question,
                 model_name=generate_query_request.llm_type,
                 api_key=api_key,
                 vector_index=vector_index,
-                embedding=None,  # No specific embedding, use category-based search
+                embedding=None,
                 reset_llm_type=True,
             )
 
         else:
-            Logger.info("Processing standard database search")
+            Logger.info(
+                "[API] /generate_query/ - Processing standard database search",
+                extra={"request_id": query_log.request_id}
+            )
             rp.search_type = "db_search"
             rp.top_k = generate_query_request.top_k
 
@@ -649,21 +897,76 @@ async def generate_query(
                 reset_llm_type=True,
             )
 
-        Logger.info("Query generation successful")
-        Logger.debug(f"Generated query: {query}")
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        
+        Logger.info(
+            "[API] /generate_query/ - Query generation successful",
+            extra={
+                "request_id": query_log.request_id,
+                "query_preview": query[:200] if query else "",
+                "query_length": len(query) if query else 0,
+                "duration_ms": request_duration_ms
+            }
+        )
+        
+        # Finalize the structured log
+        finalize_query_log(
+            generated_query=query,
+            final_query=query,
+            status="completed"
+        )
 
     except Exception as e:
-        Logger.error(f"Error generating query: {str(e)}")
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        error_traceback = traceback.format_exc()
+        
+        Logger.error(
+            f"[API] /generate_query/ - Error generating query",
+            extra={
+                "request_id": query_log.request_id,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "duration_ms": request_duration_ms
+            }
+        )
+        Logger.debug(
+            f"[API] /generate_query/ - Error traceback",
+            extra={
+                "request_id": query_log.request_id,
+                "traceback": error_traceback
+            }
+        )
+        
+        # Log error to structured logger
+        log_error(e, step="generate_query", context={
+            "question": generate_query_request.question,
+            "model": generate_query_request.llm_type
+        })
+        
+        finalize_query_log(status="failed")
+        
         logs = log_stream.getvalue()
         logger.removeHandler(handler)
-        raise HTTPException(status_code=500, detail={"error": str(e), "logs": logs})
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "request_id": query_log.request_id,
+                "logs": logs
+            }
+        )
 
     finally:
         logger.removeHandler(handler)
 
     logs = log_stream.getvalue()
 
-    response = JSONResponse({"query": query, "logs": logs})
+    response = JSONResponse({
+        "query": query, 
+        "logs": logs,
+        "request_id": query_log.request_id
+    })
     return response
 
 
@@ -674,52 +977,118 @@ async def run_query(
     csrf_token: CsrfProtect = Depends(),
     _: bool = Depends(validate_csrf_if_enabled),
 ):
+    """
+    Execute a Cypher query and generate a natural language response.
+    
+    Includes comprehensive structured logging for all steps.
+    """
+    request_start_time = time.time()
+    
     # Apply rate limiting
     check_rate_limit(request)
 
     setup_logging(run_query_request.verbose)
+    
+    # Get client IP for logging
+    client_ip = ""
+    try:
+        x_forwarded_for = request.headers.get("x-forwarded-for")
+        if x_forwarded_for:
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        elif hasattr(request, "client") and hasattr(request.client, "host"):
+            client_ip = request.client.host
+    except:
+        client_ip = "unknown"
 
-    # CSRF is now validated by the dependency
+    # Determine provider
+    provider = (
+        (run_query_request.provider or "").strip().lower()
+        if run_query_request.provider
+        else get_provider_for_model(run_query_request.llm_type) or ""
+    )
+    
+    # Create structured query log
+    structured_logger = get_structured_logger()
+    query_log = structured_logger.create_query_log(
+        question=run_query_request.question,
+        provider=provider,
+        model_name=run_query_request.llm_type,
+        top_k=run_query_request.top_k,
+        search_type="query_execution",
+        verbose=run_query_request.verbose,
+        client_ip=client_ip
+    )
+    
+    # Store the query being executed
+    query_log.final_query = run_query_request.query
 
-    Logger.info(f"Running query for question: '{run_query_request.question}'")
-    Logger.debug(f"Query to execute: {run_query_request.query}")
-    Logger.debug(
-        f"Using LLM: {run_query_request.llm_type}, top_k: {run_query_request.top_k}"
+    Logger.info(
+        f"[API] /run_query/ - Starting request",
+        extra={
+            "request_id": query_log.request_id,
+            "question": run_query_request.question[:100],
+            "query_preview": run_query_request.query[:200],
+            "model": run_query_request.llm_type,
+            "provider": provider,
+            "top_k": run_query_request.top_k,
+            "client_ip": client_ip
+        }
     )
 
     # Handle "env" API key by using the API key from .env
     api_key = run_query_request.api_key
     if api_key == "env":
-        provider = (
-            (run_query_request.provider or "").strip().lower()
-            if run_query_request.provider
-            else None
-        )
         if not provider:
-            provider = get_provider_for_model(run_query_request.llm_type)
-        if not provider:
+            Logger.error(
+                "[API] /run_query/ - Provider required for env API key",
+                extra={"request_id": query_log.request_id}
+            )
+            finalize_query_log(status="failed")
             raise HTTPException(
                 status_code=400,
                 detail="Provider is required when using 'env' api_key. Supply 'provider' or pass an explicit API key.",
             )
         env_var = get_provider_env_var(provider)
         if not env_var:
+            Logger.error(
+                f"[API] /run_query/ - Unknown provider: {provider}",
+                extra={"request_id": query_log.request_id}
+            )
+            finalize_query_log(status="failed")
             raise HTTPException(
                 status_code=400,
                 detail=f"Unknown provider '{provider}'.",
             )
         api_key = os.getenv(env_var)
         if not api_key:
+            Logger.error(
+                f"[API] /run_query/ - API key not configured: {env_var}",
+                extra={"request_id": query_log.request_id}
+            )
+            finalize_query_log(status="failed")
             raise HTTPException(
                 status_code=400,
                 detail=f"API key for provider '{provider}' is not configured in environment ({env_var}).",
             )
-        Logger.info(f"Using {provider} API key from .env via {env_var}")
+        Logger.info(
+            f"[API] /run_query/ - Using env API key",
+            extra={
+                "request_id": query_log.request_id,
+                "provider": provider,
+                "env_var": env_var
+            }
+        )
 
     key = f"{run_query_request.llm_type}_{api_key}"
 
     if key not in pipeline_instances:
-        Logger.info(f"Creating new pipeline instance for {run_query_request.llm_type}")
+        Logger.info(
+            f"[API] /run_query/ - Creating new pipeline instance",
+            extra={
+                "request_id": query_log.request_id,
+                "model": run_query_request.llm_type
+            }
+        )
         pipeline_instances[key] = RunPipeline(
             model_name=run_query_request.llm_type,
             verbose=run_query_request.verbose,
@@ -733,9 +1102,19 @@ async def run_query(
     logger = logging.getLogger()
     logger.addHandler(handler)
 
+    nl_response = ""
+    result = []
+    
     try:
-        Logger.info("Executing query against database")
-        response, result = rp.execute_query(
+        Logger.info(
+            "[API] /run_query/ - Executing query against database",
+            extra={
+                "request_id": query_log.request_id,
+                "query_preview": run_query_request.query[:200]
+            }
+        )
+        
+        nl_response, result = rp.execute_query(
             query=run_query_request.query,
             question=run_query_request.question,
             model_name=run_query_request.llm_type,
@@ -743,23 +1122,80 @@ async def run_query(
             reset_llm_type=True,
         )
 
-        Logger.info("Query executed successfully")
-        Logger.debug(
-            f"Result count: {len(result) if isinstance(result, list) else 'N/A'}"
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        result_count = len(result) if isinstance(result, list) else 1
+        
+        Logger.info(
+            "[API] /run_query/ - Query executed successfully",
+            extra={
+                "request_id": query_log.request_id,
+                "result_count": result_count,
+                "response_preview": nl_response[:200] if nl_response else "",
+                "response_length": len(nl_response) if nl_response else 0,
+                "duration_ms": request_duration_ms
+            }
         )
-        Logger.debug(f"Natural language response generated")
+        
+        # Finalize the structured log
+        finalize_query_log(
+            final_query=run_query_request.query,
+            natural_language_response=nl_response,
+            status="completed"
+        )
 
     except Exception as e:
-        Logger.error(f"Error running query: {str(e)}")
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        error_traceback = traceback.format_exc()
+        
+        Logger.error(
+            f"[API] /run_query/ - Error executing query",
+            extra={
+                "request_id": query_log.request_id,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "duration_ms": request_duration_ms
+            }
+        )
+        Logger.debug(
+            f"[API] /run_query/ - Error traceback",
+            extra={
+                "request_id": query_log.request_id,
+                "traceback": error_traceback
+            }
+        )
+        
+        # Log error to structured logger
+        log_error(e, step="run_query", context={
+            "question": run_query_request.question,
+            "query": run_query_request.query[:200],
+            "model": run_query_request.llm_type
+        })
+        
+        finalize_query_log(status="failed")
+        
         logs = log_stream.getvalue()
         logger.removeHandler(handler)
-        raise HTTPException(status_code=500, detail={"error": str(e), "logs": logs})
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "request_id": query_log.request_id,
+                "logs": logs
+            }
+        )
+        
     finally:
         logger.removeHandler(handler)
 
     logs = log_stream.getvalue()
 
-    response = JSONResponse({"response": response, "result": result, "logs": logs})
+    response = JSONResponse({
+        "response": nl_response, 
+        "result": result, 
+        "logs": logs,
+        "request_id": query_log.request_id
+    })
 
     return response
 

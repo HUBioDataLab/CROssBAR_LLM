@@ -27,6 +27,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
@@ -660,8 +661,48 @@ function App() {
             )}
           </Box>
           
+          {/* Privacy Banner */}
+          <Paper 
+            elevation={0}
+            sx={{ 
+              mt: 4,
+              p: 2,
+              backgroundColor: theme => theme.palette.mode === 'dark' 
+                ? 'rgba(100, 181, 246, 0.08)' 
+                : 'rgba(0, 113, 227, 0.04)',
+              borderRadius: '12px',
+              border: theme => `1px solid ${theme.palette.mode === 'dark' 
+                ? 'rgba(100, 181, 246, 0.2)' 
+                : 'rgba(0, 113, 227, 0.1)'}`,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 1.5
+            }}
+          >
+            <SecurityOutlinedIcon 
+              sx={{ 
+                fontSize: 20, 
+                color: theme => theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3',
+                mt: 0.25,
+                flexShrink: 0
+              }} 
+            />
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: 'text.secondary',
+                lineHeight: 1.6,
+                fontFamily: "'Poppins', 'Roboto', sans-serif"
+              }}
+            >
+              We save user queries and outputs, but remove all identifiable data once the session is finished. 
+              Data is never used for model training. Data is stored on the CROssBAR v2 server. 
+              We may analyze data globally to improve the user experience.
+            </Typography>
+          </Paper>
+
           <Box sx={{ 
-            mt: 4,
+            mt: 2,
             pt: 2, 
             borderTop: theme => `1px solid ${theme.palette.divider}`,
             display: 'flex',

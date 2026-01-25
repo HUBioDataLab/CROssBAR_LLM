@@ -1,98 +1,363 @@
-aiohappyeyeballs==2.6.1 ; python_version >= "3.10" and python_version < "3.11"
-aiohttp==3.11.18 ; python_version >= "3.10" and python_version < "3.11"
-aiosignal==1.3.2 ; python_version >= "3.10" and python_version < "3.11"
-annotated-types==0.7.0 ; python_version >= "3.10" and python_version < "3.11"
-anthropic==0.50.0 ; python_version >= "3.10" and python_version < "3.11"
-anyio==4.9.0 ; python_version >= "3.10" and python_version < "3.11"
-async-timeout==4.0.3 ; python_version >= "3.10" and python_version < "3.11"
-attrs==25.3.0 ; python_version >= "3.10" and python_version < "3.11"
-cachetools==5.5.2 ; python_version >= "3.10" and python_version < "3.11"
-certifi==2025.1.31 ; python_version >= "3.10" and python_version < "3.11"
-cffi==1.17.1 ; python_version >= "3.10" and python_version < "3.11" and platform_python_implementation == "PyPy"
-charset-normalizer==3.4.1 ; python_version >= "3.10" and python_version < "3.11"
-cli-exit-tools==1.2.7 ; python_version >= "3.10" and python_version < "3.11"
-click==8.1.8 ; python_version >= "3.10" and python_version < "3.11"
-colorama==0.4.6 ; python_version >= "3.10" and python_version < "3.11" and platform_system == "Windows"
-dataclasses-json==0.6.7 ; python_version >= "3.10" and python_version < "3.11"
-defusedxml==0.7.1 ; python_version >= "3.10" and python_version < "3.11"
-dill==0.4.0 ; python_version >= "3.10" and python_version < "3.11"
-distro==1.9.0 ; python_version >= "3.10" and python_version < "3.11"
-exceptiongroup==1.2.2 ; python_version >= "3.10" and python_version < "3.11"
-fastapi-csrf-protect==0.3.2 ; python_version >= "3.10" and python_version < "3.11"
-fastapi==0.115.12 ; python_version >= "3.10" and python_version < "3.11"
-filetype==1.2.0 ; python_version >= "3.10" and python_version < "3.11"
-frozenlist==1.6.0 ; python_version >= "3.10" and python_version < "3.11"
-google-ai-generativelanguage==0.6.17 ; python_version >= "3.10" and python_version < "3.11"
-google-api-core[grpc]==2.24.2 ; python_version >= "3.10" and python_version < "3.11"
-google-auth==2.39.0 ; python_version >= "3.10" and python_version < "3.11"
-googleapis-common-protos==1.70.0 ; python_version >= "3.10" and python_version < "3.11"
-greenlet==3.2.1 ; python_version < "3.11" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32") and python_version >= "3.10"
-groq==0.23.1 ; python_version >= "3.10" and python_version < "3.11"
-grpcio-status==1.72.0 ; python_version >= "3.10" and python_version < "3.11"
-grpcio==1.72.0 ; python_version >= "3.10" and python_version < "3.11"
-h11==0.16.0 ; python_version >= "3.10" and python_version < "3.11"
-httpcore==1.0.9 ; python_version >= "3.10" and python_version < "3.11"
-httpx-sse==0.4.0 ; python_version >= "3.10" and python_version < "3.11"
-httpx==0.28.1 ; python_version >= "3.10" and python_version < "3.11"
-idna==3.10 ; python_version >= "3.10" and python_version < "3.11"
-itsdangerous==2.2.0 ; python_version >= "3.10" and python_version < "3.11"
-jiter==0.9.0 ; python_version >= "3.10" and python_version < "3.11"
-jsonpatch==1.33 ; python_version >= "3.10" and python_version < "3.11"
-jsonpointer==3.0.0 ; python_version >= "3.10" and python_version < "3.11"
-langchain-anthropic==0.2.4 ; python_version >= "3.10" and python_version < "3.11"
-langchain-community==0.3.22 ; python_version >= "3.10" and python_version < "3.11"
-langchain-core==0.3.56 ; python_version >= "3.10" and python_version < "3.11"
-langchain-google-genai==2.1.3 ; python_version >= "3.10" and python_version < "3.11"
-langchain-groq==0.2.5 ; python_version >= "3.10" and python_version < "3.11"
-langchain-nvidia-ai-endpoints==0.3.9 ; python_version >= "3.10" and python_version < "3.11"
-langchain-openai==0.3.14 ; python_version >= "3.10" and python_version < "3.11"
-langchain-text-splitters==0.3.8 ; python_version >= "3.10" and python_version < "3.11"
-langchain==0.3.24 ; python_version >= "3.10" and python_version < "3.11"
-langsmith==0.3.35 ; python_version >= "3.10" and python_version < "3.11"
-lib-detect-testenv==2.0.8 ; python_version >= "3.10" and python_version < "3.11"
-marshmallow==3.26.1 ; python_version >= "3.10" and python_version < "3.11"
-multidict==6.4.3 ; python_version >= "3.10" and python_version < "3.11"
-multiprocess==0.70.18 ; python_version >= "3.10" and python_version < "3.11"
-mypy-extensions==1.1.0 ; python_version >= "3.10" and python_version < "3.11"
-neo4j==5.28.1 ; python_version >= "3.10" and python_version < "3.11"
-numpy==1.26.4 ; python_version >= "3.10" and python_version < "3.11"
-openai==1.76.0 ; python_version >= "3.10" and python_version < "3.11"
-orjson==3.10.16 ; python_version >= "3.10" and python_version < "3.11" and platform_python_implementation != "PyPy"
-packaging==24.2 ; python_version >= "3.10" and python_version < "3.11"
-pandas==2.2.3 ; python_version >= "3.10" and python_version < "3.11"
-propcache==0.3.1 ; python_version >= "3.10" and python_version < "3.11"
-proto-plus==1.26.1 ; python_version >= "3.10" and python_version < "3.11"
-protobuf==6.30.2 ; python_version >= "3.10" and python_version < "3.11"
-psutil==7.0.0 ; python_version >= "3.10" and python_version < "3.11"
-pyasn1-modules==0.4.2 ; python_version >= "3.10" and python_version < "3.11"
-pyasn1==0.6.1 ; python_version >= "3.10" and python_version < "3.11"
-pycparser==2.22 ; python_version >= "3.10" and python_version < "3.11" and platform_python_implementation == "PyPy"
-pydantic-core==2.33.1 ; python_version >= "3.10" and python_version < "3.11"
-pydantic-settings==2.9.1 ; python_version >= "3.10" and python_version < "3.11"
-pydantic==2.11.3 ; python_version >= "3.10" and python_version < "3.11"
-python-dateutil==2.9.0.post0 ; python_version >= "3.10" and python_version < "3.11"
-python-dotenv==1.1.0 ; python_version >= "3.10" and python_version < "3.11"
-python-multipart==0.0.17 ; python_version >= "3.10" and python_version < "3.11"
-pytz==2025.2 ; python_version >= "3.10" and python_version < "3.11"
-pyyaml==6.0.2 ; python_version >= "3.10" and python_version < "3.11"
-regex==2024.11.6 ; python_version >= "3.10" and python_version < "3.11"
-requests-toolbelt==1.0.0 ; python_version >= "3.10" and python_version < "3.11"
-requests==2.32.3 ; python_version >= "3.10" and python_version < "3.11"
-rsa==4.9.1 ; python_version >= "3.10" and python_version < "3.11"
-six==1.17.0 ; python_version >= "3.10" and python_version < "3.11"
-sniffio==1.3.1 ; python_version >= "3.10" and python_version < "3.11"
-sqlalchemy==2.0.40 ; python_version >= "3.10" and python_version < "3.11"
-sse-starlette==2.3.3 ; python_version >= "3.10" and python_version < "3.11"
-starlette==0.46.2 ; python_version >= "3.10" and python_version < "3.11"
-tenacity==9.1.2 ; python_version >= "3.10" and python_version < "3.11"
-tiktoken==0.9.0 ; python_version >= "3.10" and python_version < "3.11"
-tqdm==4.67.1 ; python_version >= "3.10" and python_version < "3.11"
-typing-extensions==4.13.2 ; python_version >= "3.10" and python_version < "3.11"
-typing-inspect==0.9.0 ; python_version >= "3.10" and python_version < "3.11"
-typing-inspection==0.4.0 ; python_version >= "3.10" and python_version < "3.11"
-tzdata==2025.2 ; python_version >= "3.10" and python_version < "3.11"
-urllib3==2.4.0 ; python_version >= "3.10" and python_version < "3.11"
-wrapt-timeout-decorator==1.5.1 ; python_version >= "3.10" and python_version < "3.11"
-wrapt==1.17.2 ; python_version >= "3.10" and python_version < "3.11"
-yarl==1.20.0 ; python_version >= "3.10" and python_version < "3.11"
-zstandard==0.23.0 ; python_version >= "3.10" and python_version < "3.11"
+# This file was autogenerated by uv via the following command:
+#    uv export --no-hashes --format requirements-txt
+-e .
+aiohappyeyeballs==2.6.1
+    # via aiohttp
+aiohttp==3.13.3
+    # via
+    #   langchain-community
+    #   langchain-nvidia-ai-endpoints
+aiosignal==1.4.0
+    # via aiohttp
+annotated-doc==0.0.4
+    # via fastapi
+annotated-types==0.7.0
+    # via pydantic
+anthropic==0.76.0
+    # via langchain-anthropic
+anyio==4.12.1
+    # via
+    #   anthropic
+    #   google-genai
+    #   groq
+    #   httpx
+    #   openai
+    #   sse-starlette
+    #   starlette
+async-timeout==4.0.3 ; python_full_version < '3.11'
+    # via
+    #   aiohttp
+    #   langchain-classic
+attrs==25.4.0
+    # via aiohttp
+certifi==2026.1.4
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
+charset-normalizer==3.4.4
+    # via requests
+cli-exit-tools==1.2.7
+    # via wrapt-timeout-decorator
+click==8.3.1
+    # via
+    #   cli-exit-tools
+    #   rich-click
+    #   uvicorn
+colorama==0.4.6 ; sys_platform == 'win32'
+    # via
+    #   click
+    #   rich-click
+    #   tqdm
+dataclasses-json==0.6.7
+    # via langchain-community
+dill==0.4.1
+    # via
+    #   multiprocess
+    #   wrapt-timeout-decorator
+distro==1.9.0
+    # via
+    #   anthropic
+    #   google-genai
+    #   groq
+    #   openai
+docstring-parser==0.17.0
+    # via anthropic
+exceptiongroup==1.3.1 ; python_full_version < '3.11'
+    # via anyio
+fastapi==0.128.0
+    # via
+    #   crossbar-llm
+    #   fastapi-csrf-protect
+fastapi-csrf-protect==0.3.2
+    # via crossbar-llm
+filetype==1.2.0
+    # via
+    #   langchain-google-genai
+    #   langchain-nvidia-ai-endpoints
+frozenlist==1.8.0
+    # via
+    #   aiohttp
+    #   aiosignal
+google-auth==2.47.0
+    # via google-genai
+google-genai==1.60.0
+    # via langchain-google-genai
+greenlet==3.3.1 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
+    # via sqlalchemy
+groq==0.37.1
+    # via langchain-groq
+h11==0.16.0
+    # via
+    #   httpcore
+    #   uvicorn
+httpcore==1.0.9
+    # via httpx
+httpx==0.28.1
+    # via
+    #   anthropic
+    #   google-genai
+    #   groq
+    #   langgraph-sdk
+    #   langsmith
+    #   openai
+httpx-sse==0.4.3
+    # via langchain-community
+idna==3.11
+    # via
+    #   anyio
+    #   httpx
+    #   requests
+    #   yarl
+itsdangerous==2.2.0
+    # via fastapi-csrf-protect
+jiter==0.12.0
+    # via
+    #   anthropic
+    #   openai
+jsonpatch==1.33
+    # via langchain-core
+jsonpointer==3.0.0
+    # via jsonpatch
+langchain==1.2.7
+    # via crossbar-llm
+langchain-anthropic==1.3.1
+    # via crossbar-llm
+langchain-classic==1.0.1
+    # via langchain-community
+langchain-community==0.4.1
+    # via crossbar-llm
+langchain-core==1.2.7
+    # via
+    #   langchain
+    #   langchain-anthropic
+    #   langchain-classic
+    #   langchain-community
+    #   langchain-google-genai
+    #   langchain-groq
+    #   langchain-nvidia-ai-endpoints
+    #   langchain-openai
+    #   langchain-text-splitters
+    #   langgraph
+    #   langgraph-checkpoint
+    #   langgraph-prebuilt
+langchain-google-genai==4.2.0
+    # via crossbar-llm
+langchain-groq==1.1.1
+    # via crossbar-llm
+langchain-nvidia-ai-endpoints==1.0.2
+    # via crossbar-llm
+langchain-openai==1.1.7
+    # via crossbar-llm
+langchain-text-splitters==1.1.0
+    # via langchain-classic
+langgraph==1.0.7
+    # via langchain
+langgraph-checkpoint==4.0.0
+    # via
+    #   langgraph
+    #   langgraph-prebuilt
+langgraph-prebuilt==1.0.7
+    # via langgraph
+langgraph-sdk==0.3.3
+    # via langgraph
+langsmith==0.6.4
+    # via
+    #   langchain-classic
+    #   langchain-community
+    #   langchain-core
+lib-detect-testenv==3.0.1
+    # via
+    #   cli-exit-tools
+    #   wrapt-timeout-decorator
+markdown-it-py==4.0.0
+    # via rich
+marshmallow==3.26.2
+    # via dataclasses-json
+mdurl==0.1.2
+    # via markdown-it-py
+multidict==6.7.0
+    # via
+    #   aiohttp
+    #   yarl
+multiprocess==0.70.19
+    # via wrapt-timeout-decorator
+mypy-extensions==1.1.0
+    # via typing-inspect
+neo4j==6.1.0
+    # via crossbar-llm
+numpy==2.2.6 ; python_full_version < '3.11'
+    # via
+    #   crossbar-llm
+    #   langchain-community
+    #   pandas
+numpy==2.4.1 ; python_full_version >= '3.11'
+    # via
+    #   crossbar-llm
+    #   langchain-community
+    #   pandas
+openai==2.15.0
+    # via
+    #   crossbar-llm
+    #   langchain-openai
+orjson==3.11.5
+    # via
+    #   langgraph-sdk
+    #   langsmith
+ormsgpack==1.12.2
+    # via langgraph-checkpoint
+packaging==25.0
+    # via
+    #   langchain-core
+    #   langsmith
+    #   marshmallow
+pandas==2.3.3 ; python_full_version < '3.11'
+    # via crossbar-llm
+pandas==3.0.0 ; python_full_version >= '3.11'
+    # via crossbar-llm
+propcache==0.4.1
+    # via
+    #   aiohttp
+    #   yarl
+psutil==7.2.1
+    # via wrapt-timeout-decorator
+pyasn1==0.6.2
+    # via
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.4.2
+    # via google-auth
+pydantic==2.12.5
+    # via
+    #   anthropic
+    #   crossbar-llm
+    #   fastapi
+    #   fastapi-csrf-protect
+    #   google-genai
+    #   groq
+    #   langchain
+    #   langchain-anthropic
+    #   langchain-classic
+    #   langchain-core
+    #   langchain-google-genai
+    #   langgraph
+    #   langsmith
+    #   openai
+    #   pydantic-settings
+pydantic-core==2.41.5
+    # via pydantic
+pydantic-settings==2.12.0
+    # via langchain-community
+pygments==2.19.2
+    # via rich
+python-dateutil==2.9.0.post0
+    # via pandas
+python-dotenv==1.2.1
+    # via
+    #   crossbar-llm
+    #   pydantic-settings
+python-multipart==0.0.22
+    # via crossbar-llm
+pytz==2025.2
+    # via
+    #   neo4j
+    #   pandas
+pyyaml==6.0.3
+    # via
+    #   langchain-classic
+    #   langchain-community
+    #   langchain-core
+regex==2026.1.15
+    # via tiktoken
+requests==2.32.5
+    # via
+    #   google-auth
+    #   google-genai
+    #   langchain-classic
+    #   langchain-community
+    #   langsmith
+    #   requests-toolbelt
+    #   tiktoken
+requests-toolbelt==1.0.0
+    # via langsmith
+rich==14.3.1
+    # via rich-click
+rich-click==1.9.6
+    # via lib-detect-testenv
+rsa==4.9.1
+    # via google-auth
+six==1.17.0
+    # via python-dateutil
+sniffio==1.3.1
+    # via
+    #   anthropic
+    #   google-genai
+    #   groq
+    #   openai
+sqlalchemy==2.0.46
+    # via
+    #   langchain-classic
+    #   langchain-community
+sse-starlette==3.2.0
+    # via crossbar-llm
+starlette==0.50.0
+    # via
+    #   fastapi
+    #   sse-starlette
+tenacity==9.1.2
+    # via
+    #   google-genai
+    #   langchain-community
+    #   langchain-core
+tiktoken==0.12.0
+    # via langchain-openai
+tqdm==4.67.1
+    # via openai
+typing-extensions==4.15.0
+    # via
+    #   aiosignal
+    #   anthropic
+    #   anyio
+    #   exceptiongroup
+    #   fastapi
+    #   google-genai
+    #   groq
+    #   langchain-core
+    #   multidict
+    #   openai
+    #   pydantic
+    #   pydantic-core
+    #   rich-click
+    #   sqlalchemy
+    #   starlette
+    #   typing-inspect
+    #   typing-inspection
+    #   uvicorn
+typing-inspect==0.9.0
+    # via dataclasses-json
+typing-inspection==0.4.2
+    # via
+    #   pydantic
+    #   pydantic-settings
+tzdata==2025.3 ; python_full_version < '3.11' or sys_platform == 'emscripten' or sys_platform == 'win32'
+    # via pandas
+urllib3==2.6.3
+    # via requests
+uuid-utils==0.14.0
+    # via
+    #   langchain-core
+    #   langsmith
+uvicorn==0.40.0
+    # via crossbar-llm
+websockets==15.0.1
+    # via google-genai
+wrapt==2.0.1
+    # via wrapt-timeout-decorator
+wrapt-timeout-decorator==1.5.1
+    # via crossbar-llm
+xxhash==3.6.0
+    # via langgraph
+yarl==1.22.0
+    # via aiohttp
+zstandard==0.25.0
+    # via langsmith

@@ -1,7 +1,10 @@
+import json
 import logging
 import os
 import sys
+import traceback
 from datetime import datetime
+from time import time
 
 from dotenv import load_dotenv
 from wrapt_timeout_decorator import *
@@ -12,7 +15,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 # Import required modules for Neo4J connection and schema extraction
-from typing import Literal, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -23,7 +26,18 @@ from .qa_templates import (
     CYPHER_OUTPUT_PARSER_PROMPT,
     VECTOR_SEARCH_CYPHER_GENERATION_PROMPT,
 )
-from langchain.chains import LLMChain
+from .utils import Logger, timed_block, detailed_timer
+from .structured_logger import (
+    get_structured_logger,
+    get_current_query_log,
+    LLMCallLog,
+    TokenUsage,
+    timed_step,
+    timed_operation,
+)
+from .llm_callback_handler import create_llm_callback, DetailedLLMCallback
+
+from langchain_core.output_parsers import StrOutputParser
 from langchain_anthropic import ChatAnthropic
 from langchain_community.llms import Ollama, Replicate
 from langchain_google_genai import GoogleGenerativeAI
@@ -35,27 +49,19 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, ConfigDict, validate_call
 
 
-def configure_logging(verbose=False, log_filename="query_log.log"):
+def configure_logging(verbose=False, log_filename=None):
     """
     Configure logging for the application based on verbosity level.
     
+    Note: File logging is handled by structured_logger.py, so we only set up
+    console logging here. The log_filename parameter is ignored (kept for backward compatibility).
+    
     Args:
         verbose (bool): Whether to show detailed debug logs
-        log_filename (str): Name of the log file to write logs to
+        log_filename (str): Deprecated - kept for backward compatibility
     """
-    # Create logs directory if it doesn't exist
-    log_dir = os.path.join(parent_dir, "logs")
-    os.makedirs(log_dir, exist_ok=True)
-    log_path = os.path.join(log_dir, log_filename)
-    
-    # Set up file handler for all logs
-    file_handler = logging.FileHandler(log_path)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    ))
-    
     # Set up handlers based on verbosity
-    handlers = [file_handler]
+    handlers = []
     if verbose:
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(logging.Formatter(
@@ -63,16 +69,17 @@ def configure_logging(verbose=False, log_filename="query_log.log"):
         ))
         handlers.append(console_handler)
     
-    # Configure root logger
+    # Configure root logger (no file handler - structured_logger handles file logging)
     logging.basicConfig(
-        handlers=handlers,
+        handlers=handlers if handlers else None,
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        force=True  # Override any existing configuration
     )
     
     # Log configuration completed
     log_level = "DEBUG" if verbose else "INFO"
-    logging.info(f"Logging initialized with level: {log_level}, output to: {log_path}")
+    logging.info(f"Logging initialized with level: {log_level}")
 
 
 class Config(BaseModel):
@@ -90,7 +97,7 @@ class Config(BaseModel):
     nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", "default")
     openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "default")
     neo4j_usr: str = os.getenv("NEO4J_USERNAME")
-    neo4j_password: str = os.getenv("MY_NEO4J_PASSWORD")
+    neo4j_password: str = os.getenv("NEO4J_PASSWORD")
     neo4j_db_name: str = os.getenv("NEO4J_DATABASE_NAME")
     neo4j_uri: str = os.getenv("NEO4J_URI")
 
@@ -297,6 +304,8 @@ class QueryChain:
     """
     QueryChain class to handle the generation, correction, and parsing of Cypher queries using language models.
     It encapsulates the entire process as a single chain of operations.
+    
+    Enhanced with detailed logging for all LLM interactions.
     """
 
     def __init__(
@@ -324,27 +333,54 @@ class QueryChain:
         schema: dict,
         verbose: bool = False,
         search_type: Literal["vector_search", "db_search"] = "db_search",
+        model_name: str = "",
+        provider: str = "",
     ):
-
-        if search_type == "db_search":
-            self.cypher_chain = LLMChain(
-                llm=cypher_llm, prompt=CYPHER_GENERATION_PROMPT, verbose=verbose
-            )
-        else:
-            self.cypher_chain = LLMChain(
-                llm=cypher_llm,
-                prompt=VECTOR_SEARCH_CYPHER_GENERATION_PROMPT,
-                verbose=verbose,
-            )
-
-        self.qa_chain = LLMChain(
-            llm=qa_llm, prompt=CYPHER_OUTPUT_PARSER_PROMPT, verbose=verbose
+        self.model_name = model_name
+        self.provider = provider
+        
+        Logger.info(
+            f"Initializing QueryChain",
+            extra={
+                "search_type": search_type,
+                "model_name": model_name,
+                "provider": provider,
+                "verbose": verbose
+            }
         )
+
+        # Use LCEL (LangChain Expression Language) pattern for chains
+        if search_type == "db_search":
+            self.cypher_chain = CYPHER_GENERATION_PROMPT | cypher_llm | StrOutputParser()
+            self.prompt_template = CYPHER_GENERATION_PROMPT
+        else:
+            self.cypher_chain = VECTOR_SEARCH_CYPHER_GENERATION_PROMPT | cypher_llm | StrOutputParser()
+            self.prompt_template = VECTOR_SEARCH_CYPHER_GENERATION_PROMPT
+
+        self.qa_chain = CYPHER_OUTPUT_PARSER_PROMPT | qa_llm | StrOutputParser()
+        self.qa_prompt_template = CYPHER_OUTPUT_PARSER_PROMPT
         self.schema = schema
         self.verbose = verbose
         self.search_type = search_type
 
         self.generated_queries = []
+        
+        # Log schema summary
+        schema_summary = {
+            "node_types_count": len(schema.get("nodes", [])),
+            "edge_types_count": len(schema.get("edges", [])),
+            "node_properties_count": len(schema.get("node_properties", [])),
+            "edge_properties_count": len(schema.get("edge_properties", []))
+        }
+        Logger.debug(f"Schema loaded", extra=schema_summary)
+
+    def _get_schema_context_for_logging(self) -> Dict[str, Any]:
+        """Get a summary of schema context for logging."""
+        return {
+            "nodes": self.schema.get("nodes", [])[:5],  # First 5 node types
+            "edges_count": len(self.schema.get("edges", [])),
+            "node_properties_sample": self.schema.get("node_properties", [])[:3]
+        }
 
     @timeout(180)
     @validate_call
@@ -356,78 +392,268 @@ class QueryChain:
     ) -> str:
         """
         Executes the query chain: generates a query, corrects it, and returns the corrected query.
+        
+        Includes detailed logging of:
+        - Prompt variables and template
+        - Raw LLM response
+        - Query cleaning steps
+        - Timing information
         """
-
-        if self.search_type == "db_search":
-            self.generated_query = (
-                self.cypher_chain.run(
-                    node_types=self.schema["nodes"],
-                    node_properties=self.schema["node_properties"],
-                    edge_properties=self.schema["edge_properties"],
-                    edges=self.schema["edges"],
-                    question=question,
-                )
-                .strip()
-                .strip("\n")
-                .replace("cypher", "")
-                .strip("`")
-                .replace("''", "'")
-                .replace('""', '"')
+        structured_logger = get_structured_logger()
+        step = structured_logger.start_step("cypher_generation", {
+            "question": question,
+            "search_type": self.search_type,
+            "vector_index": vector_index,
+            "has_embedding": embedding is not None
+        })
+        
+        llm_start_time = time()
+        raw_response = ""
+        
+        try:
+            # Prepare prompt variables for logging
+            prompt_variables = {
+                "node_types": str(self.schema["nodes"])[:500],
+                "node_properties": str(self.schema["node_properties"])[:500],
+                "edge_properties": str(self.schema["edge_properties"])[:500],
+                "edges": str(self.schema["edges"])[:500],
+                "question": question,
+            }
+            if vector_index:
+                prompt_variables["vector_index"] = vector_index
+            
+            Logger.debug(
+                f"[CYPHER_GEN] Starting query generation",
+                extra={
+                    "question": question,
+                    "search_type": self.search_type,
+                    "model": self.model_name,
+                    "provider": self.provider
+                }
+            )
+            
+            # Create callback handler for this LLM call
+            callback = create_llm_callback(
+                call_type="cypher_generation",
+                model_name=self.model_name,
+                provider=self.provider
             )
 
-        elif self.search_type == "vector_search" and embedding is None:
-            self.generated_query = (
-                self.cypher_chain.run(
-                    node_types=self.schema["nodes"],
-                    node_properties=self.schema["node_properties"],
-                    edge_properties=self.schema["edge_properties"],
-                    edges=self.schema["edges"],
-                    question=question,
-                    vector_index=vector_index,
+            if self.search_type == "db_search":
+                Logger.debug("[CYPHER_GEN] Executing db_search query generation")
+                raw_response = self.cypher_chain.invoke(
+                    {
+                        "node_types": self.schema["nodes"],
+                        "node_properties": self.schema["node_properties"],
+                        "edge_properties": self.schema["edge_properties"],
+                        "edges": self.schema["edges"],
+                        "question": question,
+                    },
+                    config={"callbacks": [callback]}
                 )
-                .strip()
-                .strip("\n")
-                .replace("cypher", "")
-                .strip("`")
-                .replace("''", "'")
-                .replace('""', '"')
-            )
-
-        elif self.search_type == "vector_search" and embedding is not None:
-
-            self.generated_query = (
-                self.cypher_chain.run(
-                    node_types=self.schema["nodes"],
-                    node_properties=self.schema["node_properties"],
-                    edge_properties=self.schema["edge_properties"],
-                    edges=self.schema["edges"],
-                    question=question,
-                    vector_index=vector_index,
+                
+            elif self.search_type == "vector_search" and embedding is None:
+                Logger.debug("[CYPHER_GEN] Executing vector_search query generation (no embedding)")
+                raw_response = self.cypher_chain.invoke(
+                    {
+                        "node_types": self.schema["nodes"],
+                        "node_properties": self.schema["node_properties"],
+                        "edge_properties": self.schema["edge_properties"],
+                        "edges": self.schema["edges"],
+                        "question": question,
+                        "vector_index": vector_index,
+                    },
+                    config={"callbacks": [callback]}
                 )
-                .strip()
-                .strip("\n")
-                .replace("cypher", "")
-                .strip("`")
-                .replace("''", "'")
-                .replace('""', '"')
+
+            elif self.search_type == "vector_search" and embedding is not None:
+                Logger.debug("[CYPHER_GEN] Executing vector_search query generation (with embedding)")
+                raw_response = self.cypher_chain.invoke(
+                    {
+                        "node_types": self.schema["nodes"],
+                        "node_properties": self.schema["node_properties"],
+                        "edge_properties": self.schema["edge_properties"],
+                        "edges": self.schema["edges"],
+                        "question": question,
+                        "vector_index": vector_index,
+                    },
+                    config={"callbacks": [callback]}
+                )
+            
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            # Log raw response
+            Logger.debug(
+                f"[CYPHER_GEN] Raw LLM response received",
+                extra={
+                    "raw_response_length": len(raw_response),
+                    "raw_response_preview": raw_response[:500] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
             )
-
-            self.generated_query = self.generated_query.format(user_input=embedding)
-
-        corrected_query = correct_query(
-            query=self.generated_query, edge_schema=self.schema["edges"]
-        )
-
-        self.generated_queries.append(corrected_query)
-
-        # Logging generated and corrected queries
-        logging.info(f"Generated Query: {self.generated_query}")
-        logging.info(f"Corrected Query: {corrected_query}")
-
-        return corrected_query
+            
+            # Clean the response step by step (with logging)
+            Logger.debug("[CYPHER_GEN] Cleaning raw response")
+            cleaned = raw_response.strip()
+            cleaned = cleaned.strip("\n")
+            cleaned = cleaned.replace("cypher", "")
+            cleaned = cleaned.strip("`")
+            cleaned = cleaned.replace("''", "'")
+            cleaned = cleaned.replace('""', '"')
+            
+            self.generated_query = cleaned
+            
+            # Handle embedding substitution for vector search
+            if self.search_type == "vector_search" and embedding is not None:
+                Logger.debug("[CYPHER_GEN] Substituting embedding into query")
+                self.generated_query = self.generated_query.format(user_input=embedding)
+            
+            Logger.info(
+                f"[CYPHER_GEN] Query generated successfully",
+                extra={
+                    "generated_query": self.generated_query[:500],
+                    "query_length": len(self.generated_query),
+                    "llm_duration_ms": llm_duration_ms
+                }
+            )
+            
+            # Correct the query
+            Logger.debug("[CYPHER_GEN] Starting query correction")
+            correction_start_time = time()
+            
+            corrected_query = correct_query(
+                query=self.generated_query, edge_schema=self.schema["edges"]
+            )
+            
+            correction_duration_ms = (time() - correction_start_time) * 1000
+            
+            self.generated_queries.append(corrected_query)
+            
+            # Detailed logging of correction results
+            query_changed = corrected_query != self.generated_query
+            Logger.info(
+                f"[CYPHER_GEN] Query correction completed",
+                extra={
+                    "original_query": self.generated_query[:300],
+                    "corrected_query": corrected_query[:300] if corrected_query else "EMPTY",
+                    "query_changed": query_changed,
+                    "correction_success": bool(corrected_query),
+                    "correction_duration_ms": correction_duration_ms
+                }
+            )
+            
+            # Log to structured logger
+            structured_logger.end_step(step, "completed")
+            
+            # Update current query log if exists
+            current_log = get_current_query_log()
+            if current_log:
+                current_log.generated_query = self.generated_query
+                current_log.final_query = corrected_query
+            
+            return corrected_query
+            
+        except Exception as e:
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.exception(
+                f"[CYPHER_GEN] Error during query generation",
+                exc=e,
+                context={
+                    "question": question,
+                    "search_type": self.search_type,
+                    "raw_response_preview": raw_response[:200] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "failed", e)
+            raise
+    
+    def run_qa_chain(
+        self,
+        output: Any,
+        input_question: str,
+    ) -> str:
+        """
+        Run the QA chain to generate a natural language response.
+        
+        Includes detailed logging of the QA process.
+        """
+        structured_logger = get_structured_logger()
+        step = structured_logger.start_step("qa_response_generation", {
+            "question": input_question,
+            "output_type": type(output).__name__,
+            "output_length": len(str(output)) if output else 0
+        })
+        
+        qa_start_time = time()
+        
+        try:
+            Logger.debug(
+                f"[QA_CHAIN] Starting QA response generation",
+                extra={
+                    "question": input_question,
+                    "output_preview": str(output)[:300] if output else "",
+                    "model": self.model_name,
+                    "provider": self.provider
+                }
+            )
+            
+            # Create callback handler for QA chain
+            callback = create_llm_callback(
+                call_type="qa_response",
+                model_name=self.model_name,
+                provider=self.provider
+            )
+            
+            raw_response = self.qa_chain.invoke(
+                {
+                    "output": output,
+                    "input_question": input_question,
+                },
+                config={"callbacks": [callback]}
+            )
+            
+            qa_duration_ms = (time() - qa_start_time) * 1000
+            
+            final_response = raw_response.strip("\n")
+            
+            Logger.info(
+                f"[QA_CHAIN] QA response generated successfully",
+                extra={
+                    "response_preview": final_response[:300],
+                    "response_length": len(final_response),
+                    "duration_ms": qa_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "completed")
+            
+            return final_response
+            
+        except Exception as e:
+            qa_duration_ms = (time() - qa_start_time) * 1000
+            
+            Logger.exception(
+                f"[QA_CHAIN] Error during QA response generation",
+                exc=e,
+                context={
+                    "question": input_question,
+                    "duration_ms": qa_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "failed", e)
+            raise
 
 
 class RunPipeline:
+    """
+    Main pipeline for running natural language to Cypher query conversion.
+    
+    Enhanced with comprehensive logging for all pipeline stages.
+    """
 
     def __init__(
         self,
@@ -439,10 +665,26 @@ class RunPipeline:
         reset_schema: bool = False,
         search_type: Literal["vector_search", "db_search"] = "db_search",
     ):
+        Logger.info(
+            "[PIPELINE_INIT] Initializing RunPipeline",
+            extra={
+                "model_name": str(model_name),
+                "verbose": verbose,
+                "top_k": top_k,
+                "search_type": search_type,
+                "reset_schema": reset_schema
+            }
+        )
 
         self.verbose = verbose
         self.top_k = top_k
         self.config: Config = Config()
+        
+        # Store model info for logging
+        self.current_model_name = model_name if isinstance(model_name, str) else str(model_name)
+        self.current_provider = ""
+        
+        Logger.debug("[PIPELINE_INIT] Connecting to Neo4j")
         self.neo4j_connection: Neo4JConnection = Neo4JConnection(
             self.config.neo4j_usr,
             self.config.neo4j_password,
@@ -451,6 +693,8 @@ class RunPipeline:
             reset_schema=reset_schema,
             create_vector_indexes=False if search_type == "db_search" else True,
         )
+        Logger.debug("[PIPELINE_INIT] Neo4j connection established")
+        
         self.search_type = search_type
 
         # define llm type(s)
@@ -458,9 +702,14 @@ class RunPipeline:
 
         # define outputs list
         self.outputs = []
+        
+        Logger.info("[PIPELINE_INIT] Pipeline initialization complete")
 
     def define_llm(self, model_name):
+        """Define LLM based on model name, with detailed logging."""
         from models_config import get_provider_for_model_name
+        
+        Logger.debug(f"[DEFINE_LLM] Defining LLM for model: {model_name}")
     
         provider_model_map = {
             "OpenAI": (OpenAILanguageModel, self.config.openai_api_key),
@@ -476,18 +725,33 @@ class RunPipeline:
             """Helper function to get the appropriate LLM instance for a model name."""
             provider = get_provider_for_model_name(model_name_str)
             if not provider:
+                Logger.error(f"[DEFINE_LLM] Unsupported model: {model_name_str}")
                 raise ValueError(f"Unsupported Language Model Name: {model_name_str}")
             
             if provider not in provider_model_map:
+                Logger.error(f"[DEFINE_LLM] Unsupported provider: {provider}")
                 raise ValueError(f"Unsupported Provider: {provider}")
             
             model_class, api_key = provider_model_map[provider]
             
+            Logger.info(
+                f"[DEFINE_LLM] Creating LLM instance",
+                extra={
+                    "model": model_name_str,
+                    "provider": provider,
+                    "has_api_key": api_key is not None and api_key != "default"
+                }
+            )
+            
+            # Store provider info for logging
+            self.current_provider = provider
+            self.current_model_name = model_name_str
+            
             # Ollama doesn't use an API key
             if provider == "Ollama":
-                return model_class(model_name=model_name_str).llm
+                return model_class(model_name=model_name_str).llm, provider
             else:
-                return model_class(api_key, model_name=model_name_str).llm
+                return model_class(api_key, model_name=model_name_str).llm, provider
 
         if isinstance(model_name, (dict, list)):
 
@@ -498,16 +762,25 @@ class RunPipeline:
                 model_name = dict(zip(["cypher_llm_model", "qa_llm_model"], model_name))
 
             self.llm = {}
+            self.llm_providers = {}
             for model_type, model_name_str in model_name.items():
                 if model_type == "cypher_llm_model":
-                    self.llm["cypher_llm"] = get_llm_for_model(model_name_str)
+                    self.llm["cypher_llm"], provider = get_llm_for_model(model_name_str)
+                    self.llm_providers["cypher_llm"] = provider
                 elif model_type == "qa_llm_model":
-                    self.llm["qa_llm"] = get_llm_for_model(model_name_str)
+                    self.llm["qa_llm"], provider = get_llm_for_model(model_name_str)
+                    self.llm_providers["qa_llm"] = provider
                 else:
                     raise ValueError(f"Unsupported model type: {model_type}")
+            
+            Logger.info(
+                f"[DEFINE_LLM] Multiple LLMs configured",
+                extra={"llm_providers": self.llm_providers}
+            )
 
         else:
-            self.llm = get_llm_for_model(model_name)
+            self.llm, self.current_provider = get_llm_for_model(model_name)
+            self.llm_providers = {"default": self.current_provider}
 
     @validate_call(config=ConfigDict(arbitrary_types_allowed=True))
     def run_for_query(
@@ -521,8 +794,27 @@ class RunPipeline:
         ] = None,
         api_key: str = None,
     ) -> str:
+        """
+        Run the query generation pipeline.
+        
+        Includes comprehensive logging of all steps.
+        """
+        pipeline_start_time = time()
+        
+        Logger.info(
+            "[RUN_FOR_QUERY] Starting query generation pipeline",
+            extra={
+                "question": question,
+                "search_type": self.search_type,
+                "vector_index": vector_index,
+                "has_embedding": embedding is not None,
+                "model_name": model_name,
+                "reset_llm_type": reset_llm_type
+            }
+        )
 
         if api_key:
+            Logger.debug("[RUN_FOR_QUERY] Setting custom API key for all providers")
             self.config.openai_api_key = api_key
             self.config.gemini_api_key = api_key
             self.config.anthropic_api_key = api_key
@@ -530,24 +822,38 @@ class RunPipeline:
             self.config.replicate_api_key = api_key
             self.config.nvidia_api_key = api_key
             self.config.openrouter_api_key = api_key
-
         else:
+            Logger.debug("[RUN_FOR_QUERY] Using default config from environment")
             self.config = Config()
 
         if reset_llm_type:
+            Logger.debug(f"[RUN_FOR_QUERY] Resetting LLM type to: {model_name}")
             self.define_llm(model_name=model_name)
 
-        logging.info(
-            f"Selected Language Model(s): {list(self.llm.values()) if isinstance(self.llm, dict) else self.llm}"
+        # Log selected model(s)
+        if isinstance(self.llm, dict):
+            llm_info = {k: str(v) for k, v in self.llm.items()}
+        else:
+            llm_info = {"llm": str(self.llm)}
+        
+        Logger.info(
+            "[RUN_FOR_QUERY] LLM configuration",
+            extra={
+                "llm_info": llm_info,
+                "provider": self.current_provider,
+                "model": self.current_model_name
+            }
         )
-        logging.info(f"Question: {question}")
 
+        # Create QueryChain with model/provider info for logging
         if isinstance(self.llm, dict):
             query_chain: QueryChain = QueryChain(
                 cypher_llm=self.llm["cypher_llm"],
                 qa_llm=self.llm["qa_llm"],
                 schema=self.neo4j_connection.schema,
                 search_type=self.search_type,
+                model_name=self.current_model_name,
+                provider=self.current_provider,
             )
         else:
             query_chain: QueryChain = QueryChain(
@@ -555,20 +861,52 @@ class RunPipeline:
                 qa_llm=self.llm,
                 schema=self.neo4j_connection.schema,
                 search_type=self.search_type,
+                model_name=self.current_model_name,
+                provider=self.current_provider,
             )
 
-        if self.search_type == "db_search":
-            corrected_query = query_chain.run_cypher_chain(question)
-        else:
-            corrected_query = query_chain.run_cypher_chain(
-                question,
-                vector_index=vector_index,
-                embedding=self.handle_embedding(
+        try:
+            if self.search_type == "db_search":
+                Logger.debug("[RUN_FOR_QUERY] Executing db_search pipeline")
+                corrected_query = query_chain.run_cypher_chain(question)
+            else:
+                Logger.debug("[RUN_FOR_QUERY] Executing vector_search pipeline")
+                processed_embedding = self.handle_embedding(
                     embedding=embedding, vector_index=vector_index
-                ),
+                )
+                corrected_query = query_chain.run_cypher_chain(
+                    question,
+                    vector_index=vector_index,
+                    embedding=processed_embedding,
+                )
+
+            pipeline_duration_ms = (time() - pipeline_start_time) * 1000
+            
+            Logger.info(
+                "[RUN_FOR_QUERY] Query generation pipeline completed",
+                extra={
+                    "question": question,
+                    "corrected_query": corrected_query[:300] if corrected_query else "EMPTY",
+                    "query_success": bool(corrected_query),
+                    "pipeline_duration_ms": pipeline_duration_ms
+                }
             )
 
-        return corrected_query
+            return corrected_query
+            
+        except Exception as e:
+            pipeline_duration_ms = (time() - pipeline_start_time) * 1000
+            
+            Logger.exception(
+                "[RUN_FOR_QUERY] Pipeline failed",
+                exc=e,
+                context={
+                    "question": question,
+                    "search_type": self.search_type,
+                    "duration_ms": pipeline_duration_ms
+                }
+            )
+            raise
 
     def execute_query(
         self,
@@ -578,10 +916,52 @@ class RunPipeline:
         reset_llm_type: bool = False,
         api_key: str = None,
     ) -> str:
+        """
+        Execute a Cypher query and generate a natural language response.
+        
+        Includes comprehensive logging of execution and response generation.
+        """
+        execution_start_time = time()
+        
+        Logger.info(
+            "[EXECUTE_QUERY] Starting query execution",
+            extra={
+                "query": query[:300],
+                "question": question,
+                "top_k": self.top_k,
+                "model_name": model_name
+            }
+        )
 
-        result = self.neo4j_connection.execute_query(query, top_k=self.top_k)
+        # Execute Neo4j query
+        neo4j_start_time = time()
+        try:
+            result = self.neo4j_connection.execute_query(query, top_k=self.top_k)
+            neo4j_duration_ms = (time() - neo4j_start_time) * 1000
+            
+            result_count = len(result) if isinstance(result, list) else 1
+            Logger.info(
+                "[EXECUTE_QUERY] Neo4j query executed",
+                extra={
+                    "result_count": result_count,
+                    "result_preview": str(result)[:500] if result else "No results",
+                    "neo4j_duration_ms": neo4j_duration_ms
+                }
+            )
+        except Exception as e:
+            neo4j_duration_ms = (time() - neo4j_start_time) * 1000
+            Logger.exception(
+                "[EXECUTE_QUERY] Neo4j query failed",
+                exc=e,
+                context={
+                    "query": query,
+                    "duration_ms": neo4j_duration_ms
+                }
+            )
+            raise
 
         if api_key:
+            Logger.debug("[EXECUTE_QUERY] Setting custom API key")
             self.config.openai_api_key = api_key
             self.config.gemini_api_key = api_key
             self.config.anthropic_api_key = api_key
@@ -593,16 +973,18 @@ class RunPipeline:
             self.config = Config()
 
         if reset_llm_type:
+            Logger.debug(f"[EXECUTE_QUERY] Resetting LLM to: {model_name}")
             self.define_llm(model_name=model_name)
 
-        logging.info(f"Query Result: {result}")
-
+        # Create QueryChain for QA response
         if isinstance(self.llm, dict):
             query_chain: QueryChain = QueryChain(
                 cypher_llm=self.llm["cypher_llm"],
                 qa_llm=self.llm["qa_llm"],
                 schema=self.neo4j_connection.schema,
                 search_type=self.search_type,
+                model_name=self.current_model_name,
+                provider=self.current_provider,
             )
         else:
             query_chain: QueryChain = QueryChain(
@@ -610,13 +992,51 @@ class RunPipeline:
                 qa_llm=self.llm,
                 schema=self.neo4j_connection.schema,
                 search_type=self.search_type,
+                model_name=self.current_model_name,
+                provider=self.current_provider,
             )
 
-        final_output = query_chain.qa_chain.run(
-            output=result, input_question=question
-        ).strip("\n")
+        # Generate natural language response
+        qa_start_time = time()
+        try:
+            final_output = query_chain.run_qa_chain(
+                output=result,
+                input_question=question
+            )
+            qa_duration_ms = (time() - qa_start_time) * 1000
+            
+            Logger.info(
+                "[EXECUTE_QUERY] QA response generated",
+                extra={
+                    "response_preview": final_output[:300] if final_output else "",
+                    "response_length": len(final_output) if final_output else 0,
+                    "qa_duration_ms": qa_duration_ms
+                }
+            )
+        except Exception as e:
+            qa_duration_ms = (time() - qa_start_time) * 1000
+            Logger.exception(
+                "[EXECUTE_QUERY] QA response generation failed",
+                exc=e,
+                context={
+                    "question": question,
+                    "result_count": len(result) if isinstance(result, list) else 1,
+                    "duration_ms": qa_duration_ms
+                }
+            )
+            raise
 
-        logging.info(f"{final_output}")
+        total_duration_ms = (time() - execution_start_time) * 1000
+        
+        Logger.info(
+            "[EXECUTE_QUERY] Query execution completed",
+            extra={
+                "total_duration_ms": total_duration_ms,
+                "neo4j_duration_ms": neo4j_duration_ms,
+                "qa_duration_ms": qa_duration_ms,
+                "result_count": len(result) if isinstance(result, list) else 1
+            }
+        )
 
         return final_output, result
 
@@ -631,21 +1051,45 @@ class RunPipeline:
             str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]
         ] = None,
     ) -> str:
+        """
+        Run the full pipeline with error handling - errors don't propagate.
+        
+        Includes comprehensive logging of all steps and error states.
+        """
+        pipeline_start_time = time()
+        
+        Logger.info(
+            "[RUN_WITHOUT_ERRORS] Starting error-tolerant pipeline",
+            extra={
+                "question": question,
+                "search_type": self.search_type,
+                "vector_index": vector_index,
+                "has_embedding": embedding is not None
+            }
+        )
 
         if reset_llm_type:
+            Logger.debug(f"[RUN_WITHOUT_ERRORS] Resetting LLM to: {model_name}")
             self.define_llm(model_name=model_name)
 
-        logging.info(
-            f"Selected Language Model(s): {list(self.llm.values()) if isinstance(self.llm, dict) else self.llm}"
+        Logger.info(
+            "[RUN_WITHOUT_ERRORS] LLM configuration",
+            extra={
+                "llm": str(self.llm) if not isinstance(self.llm, dict) else {k: str(v) for k, v in self.llm.items()},
+                "provider": self.current_provider,
+                "model": self.current_model_name
+            }
         )
-        logging.info(f"Question: {question}")
 
+        # Create QueryChain with model/provider info
         if isinstance(self.llm, dict):
             query_chain: QueryChain = QueryChain(
                 cypher_llm=self.llm["cypher_llm"],
                 qa_llm=self.llm["qa_llm"],
                 schema=self.neo4j_connection.schema,
                 search_type=self.search_type,
+                model_name=self.current_model_name,
+                provider=self.current_provider,
             )
         else:
             query_chain: QueryChain = QueryChain(
@@ -653,40 +1097,100 @@ class RunPipeline:
                 qa_llm=self.llm,
                 schema=self.neo4j_connection.schema,
                 search_type=self.search_type,
+                model_name=self.current_model_name,
+                provider=self.current_provider,
             )
 
-        if self.search_type == "db_search":
-            corrected_query = query_chain.run_cypher_chain(question)
-        else:
-            corrected_query = query_chain.run_cypher_chain(
-                question,
-                vector_index=vector_index,
-                embedding=self.handle_embedding(
-                    embedding=embedding, vector_index=vector_index
-                ),
+        # Generate query
+        try:
+            if self.search_type == "db_search":
+                corrected_query = query_chain.run_cypher_chain(question)
+            else:
+                corrected_query = query_chain.run_cypher_chain(
+                    question,
+                    vector_index=vector_index,
+                    embedding=self.handle_embedding(
+                        embedding=embedding, vector_index=vector_index
+                    ),
+                )
+        except Exception as e:
+            Logger.exception(
+                "[RUN_WITHOUT_ERRORS] Query generation failed",
+                exc=e,
+                context={"question": question}
             )
+            self.outputs.append((question, "", "", "", ""))
+            return None
 
         if not corrected_query:
+            Logger.warning(
+                "[RUN_WITHOUT_ERRORS] Query correction returned empty",
+                extra={
+                    "question": question,
+                    "generated_query": query_chain.generated_query[:200] if hasattr(query_chain, 'generated_query') else ""
+                }
+            )
             self.outputs.append((question, query_chain.generated_query, "", "", ""))
             return None
 
+        # Execute query
         try:
+            neo4j_start_time = time()
             result = self.neo4j_connection.execute_query(
                 corrected_query, top_k=self.top_k
             )
-            logging.info(f"Query Result: {result}")
+            neo4j_duration_ms = (time() - neo4j_start_time) * 1000
+            
+            Logger.info(
+                "[RUN_WITHOUT_ERRORS] Neo4j query executed",
+                extra={
+                    "result_count": len(result) if isinstance(result, list) else 1,
+                    "result_preview": str(result)[:300],
+                    "duration_ms": neo4j_duration_ms
+                }
+            )
         except Exception as e:
-            logging.info(f"An error occurred trying to execute the query: {e}")
+            Logger.exception(
+                "[RUN_WITHOUT_ERRORS] Neo4j query execution failed",
+                exc=e,
+                context={
+                    "query": corrected_query,
+                    "question": question
+                }
+            )
             self.outputs.append(
                 (question, query_chain.generated_query, corrected_query, "", "")
             )
             return None
 
-        final_output = query_chain.qa_chain.run(
-            output=result, input_question=question
-        ).strip("\n")
+        # Generate natural language response
+        try:
+            qa_start_time = time()
+            final_output = query_chain.run_qa_chain(
+                output=result,
+                input_question=question
+            )
+            qa_duration_ms = (time() - qa_start_time) * 1000
+            
+            Logger.info(
+                "[RUN_WITHOUT_ERRORS] QA response generated",
+                extra={
+                    "response_preview": final_output[:200],
+                    "duration_ms": qa_duration_ms
+                }
+            )
+        except Exception as e:
+            Logger.exception(
+                "[RUN_WITHOUT_ERRORS] QA response generation failed",
+                exc=e,
+                context={"question": question}
+            )
+            self.outputs.append(
+                (question, query_chain.generated_query, corrected_query, str(result), "")
+            )
+            return None
 
-        logging.info(f"{final_output}")
+        pipeline_duration_ms = (time() - pipeline_start_time) * 1000
 
         # add outputs of all steps to a list
         self.outputs.append(
@@ -697,6 +1201,15 @@ class RunPipeline:
                 result,
                 final_output,
             )
+        )
+        
+        Logger.info(
+            "[RUN_WITHOUT_ERRORS] Pipeline completed successfully",
+            extra={
+                "question": question,
+                "total_duration_ms": pipeline_duration_ms,
+                "has_response": bool(final_output)
+            }
         )
 
         return final_output
