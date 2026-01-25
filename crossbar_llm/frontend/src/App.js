@@ -57,6 +57,21 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false); // Default to false, will be updated in useEffect
   const [clientIP, setClientIP] = useState('');
+  
+  // Conversation memory state
+  const [sessionId, setSessionId] = useState(() => {
+    // Generate or retrieve session ID from sessionStorage
+    let id = sessionStorage.getItem('conversationSessionId');
+    if (!id) {
+      id = crypto.randomUUID();
+      sessionStorage.setItem('conversationSessionId', id);
+    }
+    return id;
+  });
+  const [conversationHistory, setConversationHistory] = useState([]);
+  // Each item: { question, cypherQuery, response, followUpQuestions, timestamp }
+  const [pendingFollowUp, setPendingFollowUp] = useState(null); // Triggers auto-run
+  
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('theme-mode');
     if (savedMode) {
@@ -221,6 +236,39 @@ function App() {
     setDrawerVisible(!drawerVisible);
   };
 
+  // Add a new turn to conversation history
+  const addConversationTurn = useCallback((turn) => {
+    setConversationHistory(prev => {
+      const newHistory = [...prev, {
+        ...turn,
+        timestamp: new Date().toISOString()
+      }];
+      // Keep only last 10 turns (matching backend)
+      if (newHistory.length > 10) {
+        return newHistory.slice(-10);
+      }
+      return newHistory;
+    });
+  }, []);
+
+  // Start a new conversation (clear history and generate new session ID)
+  const startNewConversation = useCallback(() => {
+    const newSessionId = crypto.randomUUID();
+    sessionStorage.setItem('conversationSessionId', newSessionId);
+    setSessionId(newSessionId);
+    setConversationHistory([]);
+    setQueryResult(null);
+    setExecutionResult(null);
+    setQuestion('');
+    console.log('Started new conversation with session:', newSessionId.substring(0, 8) + '...');
+  }, []);
+
+  // Handle clicking a follow-up question - auto-run it
+  const handleFollowUpClick = useCallback((followUpQuestion) => {
+    setQuestion(followUpQuestion);
+    setPendingFollowUp(followUpQuestion);
+  }, []);
+
   const renderTabContent = () => {
     switch(tabValue) {
       case 'home':
@@ -248,11 +296,19 @@ function App() {
                 setApiKey={setApiKey}
                 question={question}
                 setQuestion={setQuestion}
+                sessionId={sessionId}
+                addConversationTurn={addConversationTurn}
+                startNewConversation={startNewConversation}
+                conversationHistory={conversationHistory}
+                pendingFollowUp={pendingFollowUp}
+                setPendingFollowUp={setPendingFollowUp}
               />
               <ResultsDisplay
                 queryResult={queryResult}
                 executionResult={executionResult}
                 realtimeLogs={realtimeLogs}
+                conversationHistory={conversationHistory}
+                onFollowUpClick={handleFollowUpClick}
               />
               <LatestQueries 
                 queries={latestQueries} 
@@ -278,11 +334,19 @@ function App() {
                 setApiKey={setApiKey}
                 question={question}
                 setQuestion={setQuestion}
+                sessionId={sessionId}
+                addConversationTurn={addConversationTurn}
+                startNewConversation={startNewConversation}
+                conversationHistory={conversationHistory}
+                pendingFollowUp={pendingFollowUp}
+                setPendingFollowUp={setPendingFollowUp}
               />
               <ResultsDisplay
                 queryResult={queryResult}
                 executionResult={executionResult}
                 realtimeLogs={realtimeLogs}
+                conversationHistory={conversationHistory}
+                onFollowUpClick={handleFollowUpClick}
               />
               <LatestQueries 
                 queries={latestQueries} 

@@ -416,6 +416,7 @@ function LatestQueries({ queries, onSelectQuery }) {
                   }}
                 >
                   <ListItemText
+                    disableTypography
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                         <IconButton 

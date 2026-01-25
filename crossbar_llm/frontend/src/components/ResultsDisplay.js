@@ -9,8 +9,6 @@ import {
   Snackbar,
   Alert,
   Paper,
-  Divider,
-  Chip,
   Fade,
   Tooltip,
   Collapse,
@@ -36,8 +34,15 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import LaunchIcon from '@mui/icons-material/Launch';
 import EditIcon from '@mui/icons-material/Edit';
 import NodeVisualization from './NodeVisualization';
+import ConversationHistory from './ConversationHistory';
 
-function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
+function ResultsDisplay({ 
+  queryResult, 
+  executionResult, 
+  realtimeLogs,
+  conversationHistory = [],
+  onFollowUpClick 
+}) {
   const theme = useTheme();
   const syntaxTheme = theme.palette.mode === 'dark' ? dracula : docco;
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -230,6 +235,8 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
                       ? JSON.stringify(executionResult.response, null, 2)
                       : executionResult.response}
                   </Typography>
+                  
+                  {/* Follow-up Questions are now shown in the Conversation History section below */}
                 </Box>
               </Collapse>
             </Paper>
@@ -789,6 +796,16 @@ function ResultsDisplay({ queryResult, executionResult, realtimeLogs }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Conversation History - shown BELOW results, includes all turns */}
+      {conversationHistory && conversationHistory.length > 0 && (
+        <ConversationHistory 
+          history={conversationHistory}
+          onFollowUpClick={onFollowUpClick}
+          showFullHistory={false}
+          showFollowUpsOnlyForLatest={true}
+        />
+      )}
     </Box>
   );
 }

@@ -48,6 +48,7 @@ from tools.structured_logger import (
     log_error,
     QueryLogEntry,
 )
+from tools.conversation_store import get_conversation_store, ConversationTurn
 from models_config import get_all_models
 
 # Load environment variables
@@ -662,6 +663,7 @@ class GenerateQueryRequest(BaseModel):
     embedding: Optional[str] = None
     vector_category: Optional[str] = None
     provider: Optional[str] = None
+    session_id: Optional[str] = None  # For conversation memory
 
 
 class RunQueryRequest(BaseModel):
@@ -672,6 +674,24 @@ class RunQueryRequest(BaseModel):
     api_key: str
     verbose: bool = False
     provider: Optional[str] = None
+    session_id: Optional[str] = None  # For conversation memory
+
+
+class GenerateQueryResponse(BaseModel):
+    """Response model for query generation with conversation support."""
+    query: str
+    session_id: Optional[str] = None
+    conversation_turn_count: int = 0
+
+
+class RunQueryResponse(BaseModel):
+    """Response model for query execution with conversation support."""
+    response: str
+    result: List[Any]
+    query: str
+    follow_up_questions: List[str] = []
+    session_id: Optional[str] = None
+    conversation_turn_count: int = 0
 
 
 @app.post("/generate_query/")
@@ -791,6 +811,38 @@ async def generate_query(
 
     key = f"{generate_query_request.llm_type}_{api_key}"
 
+    # Get conversation context if session_id is provided
+    conversation_context = ""
+    conversation_turn_count = 0
+    if generate_query_request.session_id:
+        try:
+            conversation_store = get_conversation_store()
+            # For cypher generation, use only last 2-3 turns to save tokens (schema takes most space)
+            conversation_context = conversation_store.get_context_string(
+                generate_query_request.session_id,
+                max_turns=3,
+                include_cypher=True  # Include cypher for context in query generation
+            )
+            conversation_turn_count = len(conversation_store.get_history(generate_query_request.session_id))
+            if conversation_context:
+                Logger.info(
+                    f"[API] /generate_query/ - Using conversation context",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "session_id": generate_query_request.session_id[:8] + "...",
+                        "turn_count": conversation_turn_count,
+                        "context_length": len(conversation_context)
+                    }
+                )
+        except Exception as e:
+            Logger.warning(
+                f"[API] /generate_query/ - Failed to get conversation context",
+                extra={
+                    "request_id": query_log.request_id,
+                    "error": str(e)
+                }
+            )
+
     # Initialize or reuse RunPipeline instance
     if key not in pipeline_instances:
         Logger.info(
@@ -854,6 +906,7 @@ async def generate_query(
                 vector_index=vector_index,
                 embedding=embedding,
                 reset_llm_type=True,
+                conversation_context=conversation_context,
             )
 
         elif (
@@ -880,6 +933,7 @@ async def generate_query(
                 vector_index=vector_index,
                 embedding=None,
                 reset_llm_type=True,
+                conversation_context=conversation_context,
             )
 
         else:
@@ -895,6 +949,7 @@ async def generate_query(
                 model_name=generate_query_request.llm_type,
                 api_key=api_key,
                 reset_llm_type=True,
+                conversation_context=conversation_context,
             )
 
         request_duration_ms = (time.time() - request_start_time) * 1000
@@ -965,7 +1020,9 @@ async def generate_query(
     response = JSONResponse({
         "query": query, 
         "logs": logs,
-        "request_id": query_log.request_id
+        "request_id": query_log.request_id,
+        "session_id": generate_query_request.session_id,
+        "conversation_turn_count": conversation_turn_count
     })
     return response
 
@@ -1081,6 +1138,50 @@ async def run_query(
 
     key = f"{run_query_request.llm_type}_{api_key}"
 
+    # Get conversation context if session_id is provided
+    conversation_context = ""
+    conversation_turn_count = 0
+    conversation_store = None
+    if run_query_request.session_id:
+        try:
+            conversation_store = get_conversation_store()
+        except Exception as e:
+            Logger.warning(
+                f"[API] /run_query/ - Failed to initialize conversation store",
+                extra={
+                    "request_id": query_log.request_id,
+                    "error": str(e)
+                }
+            )
+        
+        if conversation_store:
+            try:
+                # For QA response, use more context (full 10 turns)
+                conversation_context = conversation_store.get_context_string(
+                    run_query_request.session_id,
+                    max_turns=10,
+                    include_cypher=False  # No need for cypher in QA response
+                )
+                conversation_turn_count = len(conversation_store.get_history(run_query_request.session_id))
+                if conversation_context:
+                    Logger.info(
+                        f"[API] /run_query/ - Using conversation context",
+                        extra={
+                            "request_id": query_log.request_id,
+                            "session_id": run_query_request.session_id[:8] + "...",
+                            "turn_count": conversation_turn_count,
+                            "context_length": len(conversation_context)
+                        }
+                    )
+            except Exception as e:
+                Logger.warning(
+                    f"[API] /run_query/ - Failed to get conversation context",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "error": str(e)
+                    }
+                )
+
     if key not in pipeline_instances:
         Logger.info(
             f"[API] /run_query/ - Creating new pipeline instance",
@@ -1120,6 +1221,7 @@ async def run_query(
             model_name=run_query_request.llm_type,
             api_key=api_key,
             reset_llm_type=True,
+            conversation_context=conversation_context,
         )
 
         request_duration_ms = (time.time() - request_start_time) * 1000
@@ -1135,6 +1237,78 @@ async def run_query(
                 "duration_ms": request_duration_ms
             }
         )
+        
+        # Store the conversation turn if session_id is provided
+        follow_up_questions = []
+        if run_query_request.session_id and conversation_store and nl_response:
+            try:
+                # Store the turn
+                conversation_store.add_turn(
+                    session_id=run_query_request.session_id,
+                    question=run_query_request.question,
+                    cypher_query=run_query_request.query,
+                    answer=nl_response
+                )
+                conversation_turn_count += 1
+                
+                Logger.info(
+                    f"[API] /run_query/ - Stored conversation turn",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "session_id": run_query_request.session_id[:8] + "...",
+                        "turn_count": conversation_turn_count
+                    }
+                )
+                
+                # Generate follow-up questions
+                try:
+                    # Get the QueryChain to generate follow-ups
+                    from tools.langchain_llm_qa_trial import QueryChain
+                    if isinstance(rp.llm, dict):
+                        query_chain = QueryChain(
+                            cypher_llm=rp.llm["cypher_llm"],
+                            qa_llm=rp.llm["qa_llm"],
+                            schema=rp.neo4j_connection.schema,
+                            model_name=rp.current_model_name,
+                            provider=rp.current_provider,
+                        )
+                    else:
+                        query_chain = QueryChain(
+                            cypher_llm=rp.llm,
+                            qa_llm=rp.llm,
+                            schema=rp.neo4j_connection.schema,
+                            model_name=rp.current_model_name,
+                            provider=rp.current_provider,
+                        )
+                    
+                    follow_up_questions = query_chain.generate_follow_up_questions(
+                        question=run_query_request.question,
+                        answer=nl_response
+                    )
+                    
+                    Logger.info(
+                        f"[API] /run_query/ - Generated follow-up questions",
+                        extra={
+                            "request_id": query_log.request_id,
+                            "follow_up_count": len(follow_up_questions)
+                        }
+                    )
+                except Exception as e:
+                    Logger.warning(
+                        f"[API] /run_query/ - Failed to generate follow-up questions",
+                        extra={
+                            "request_id": query_log.request_id,
+                            "error": str(e)
+                        }
+                    )
+            except Exception as e:
+                Logger.warning(
+                    f"[API] /run_query/ - Failed to store conversation turn",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "error": str(e)
+                    }
+                )
         
         # Finalize the structured log
         finalize_query_log(
@@ -1194,10 +1368,110 @@ async def run_query(
         "response": nl_response, 
         "result": result, 
         "logs": logs,
-        "request_id": query_log.request_id
+        "request_id": query_log.request_id,
+        "session_id": run_query_request.session_id,
+        "conversation_turn_count": conversation_turn_count,
+        "follow_up_questions": follow_up_questions
     })
 
     return response
+
+
+@app.delete("/conversation/{session_id}")
+async def clear_conversation(
+    session_id: str,
+    request: Request,
+):
+    """
+    Clear the conversation history for a session.
+    
+    This allows users to start a fresh conversation.
+    """
+    try:
+        conversation_store = get_conversation_store()
+        cleared = conversation_store.clear_session(session_id)
+        
+        if cleared:
+            Logger.info(
+                f"[API] /conversation/ - Session cleared",
+                extra={"session_id": session_id[:8] + "..."}
+            )
+            return JSONResponse({
+                "success": True,
+                "message": "Conversation cleared successfully"
+            })
+        else:
+            return JSONResponse({
+                "success": True,
+                "message": "No conversation found for this session"
+            })
+    except Exception as e:
+        Logger.error(
+            f"[API] /conversation/ - Error clearing session",
+            extra={"session_id": session_id[:8] + "...", "error": str(e)}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to clear conversation: {str(e)}"
+        )
+
+
+@app.get("/conversation/{session_id}")
+async def get_conversation(
+    session_id: str,
+    request: Request,
+):
+    """
+    Get the conversation history for a session.
+    """
+    try:
+        conversation_store = get_conversation_store()
+        history = conversation_store.get_history(session_id)
+        session_info = conversation_store.get_session_info(session_id)
+        
+        return JSONResponse({
+            "session_id": session_id,
+            "turns": [
+                {
+                    "question": turn.question,
+                    "cypher_query": turn.cypher_query,
+                    "answer": turn.answer,
+                    "timestamp": turn.timestamp.isoformat()
+                }
+                for turn in history
+            ],
+            "turn_count": len(history),
+            "session_info": session_info
+        })
+    except Exception as e:
+        Logger.error(
+            f"[API] /conversation/ - Error getting conversation",
+            extra={"session_id": session_id[:8] + "...", "error": str(e)}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get conversation: {str(e)}"
+        )
+
+
+@app.get("/conversation_stats/")
+async def get_conversation_stats(request: Request):
+    """
+    Get overall statistics about the conversation store.
+    """
+    try:
+        conversation_store = get_conversation_store()
+        stats = conversation_store.get_stats()
+        return JSONResponse(stats)
+    except Exception as e:
+        Logger.error(
+            f"[API] /conversation_stats/ - Error getting stats",
+            extra={"error": str(e)}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get conversation stats: {str(e)}"
+        )
 
 
 @app.post("/upload_vector/")

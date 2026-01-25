@@ -69,7 +69,13 @@ function QueryInput({
   setApiKey,
   question,
   setQuestion,
-  setRealtimeLogs
+  setRealtimeLogs,
+  sessionId,
+  addConversationTurn,
+  startNewConversation,
+  conversationHistory,
+  pendingFollowUp,
+  setPendingFollowUp
 }) {
   const [topK, setTopK] = useState(10);
   const [verbose, setVerbose] = useState(false);
@@ -387,6 +393,19 @@ function QueryInput({
     };
   }, [generatedQuery, runnedQuery]);
 
+  // Auto-run when a follow-up question is clicked
+  useEffect(() => {
+    if (pendingFollowUp && question === pendingFollowUp && !loading) {
+      // Clear the pending follow-up first to prevent re-triggering
+      setPendingFollowUp(null);
+      // Trigger generate and run
+      handleGenerateAndRunRef.current();
+    }
+  }, [pendingFollowUp, question, loading, setPendingFollowUp]);
+
+  // Ref to hold the handleGenerateAndRun function for use in useEffect
+  const handleGenerateAndRunRef = React.useRef(null);
+
   const handleAbort = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -410,10 +429,10 @@ function QueryInput({
       return;
     }
 
-    // Clear any previous errors and results at the start of the operation
+    // Clear any previous errors at the start of the operation
+    // Keep previous results visible while loading new ones
     setError(null);
     setQueryResult(null);
-    setExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -438,6 +457,7 @@ function QueryInput({
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
+        session_id: sessionId,
       }, { signal });
 
       // Process the query result before setting it
@@ -447,9 +467,9 @@ function QueryInput({
       setGeneratedQuery(queryData);
       setEditableQuery(queryData);
 
-      // Set the query result to null to hide it from ResultsDisplay
-      setQueryResult(null);
-      setExecutionResult(null);
+      // Set the query result for display
+      setQueryResult(queryData);
+      // Keep previous execution results visible
       setRunnedQuery(false);
 
       // Collapse settings panel to show results
@@ -509,10 +529,9 @@ function QueryInput({
       return;
     }
 
-    // Clear any previous errors and results at the start of the operation
+    // Clear any previous errors at the start of the operation
+    // Keep previous results visible while loading new ones
     setError(null);
-    setQueryResult(null);
-    setExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -535,15 +554,28 @@ function QueryInput({
         provider,
         api_key: effectiveApiKey,
         verbose,
+        session_id: sessionId,
       }, { signal });
 
       // Now show the query in the results display
       setQueryResult(editableQuery);
       setExecutionResult({
         result: response.data.result,
-        response: response.data.response
+        response: response.data.response,
+        followUpQuestions: response.data.follow_up_questions || []
       });
       setRunnedQuery(true);
+
+      // Add to conversation history
+      if (addConversationTurn && response.data.response) {
+        addConversationTurn({
+          question: question,
+          cypherQuery: editableQuery,
+          response: response.data.response,
+          result: response.data.result,
+          followUpQuestions: response.data.follow_up_questions || []
+        });
+      }
 
       // Collapse settings panel to show results
       if (showSettings) {
@@ -602,10 +634,9 @@ function QueryInput({
       return;
     }
 
-    // Clear any previous errors and results at the start of the operation
+    // Clear any previous errors at the start of the operation
+    // Keep previous results visible while loading new ones
     setError(null);
-    setQueryResult(null);
-    setExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -631,6 +662,7 @@ function QueryInput({
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
+        session_id: sessionId,
       }, { signal });
 
       // Process the query result
@@ -668,15 +700,28 @@ function QueryInput({
         llm_type: llmType,
         api_key: effectiveApiKey,
         verbose,
+        session_id: sessionId,
       }, { signal });
 
       // Now show the query in the results display
       setQueryResult(processedQuery);
       setExecutionResult({
         result: runResponse.data.result,
-        response: runResponse.data.response
+        response: runResponse.data.response,
+        followUpQuestions: runResponse.data.follow_up_questions || []
       });
       setRunnedQuery(true);
+
+      // Add to conversation history
+      if (addConversationTurn && runResponse.data.response) {
+        addConversationTurn({
+          question: question,
+          cypherQuery: processedQuery,
+          response: runResponse.data.response,
+          result: runResponse.data.result,
+          followUpQuestions: runResponse.data.follow_up_questions || []
+        });
+      }
 
       // Collapse settings panel to show results
       if (showSettings) {
@@ -729,6 +774,9 @@ function QueryInput({
       }
     }
   };
+
+  // Assign to ref for use in useEffect
+  handleGenerateAndRunRef.current = handleGenerateAndRun;
 
   const handleSampleQuestionClick = (sampleQuestion) => {
     setQuestion(typeof sampleQuestion === 'string' ? sampleQuestion : sampleQuestion.question);
@@ -1327,6 +1375,28 @@ function QueryInput({
                   )}
                 </Box>
               </Tooltip>
+
+              {/* New Conversation Button */}
+              {conversationHistory && conversationHistory.length > 0 && (
+                <Tooltip title="Start a fresh conversation (clears history)" placement="top">
+                  <Button
+                    variant="text"
+                    onClick={startNewConversation}
+                    disabled={loading}
+                    size="small"
+                    sx={{
+                      ml: 2,
+                      color: 'text.secondary',
+                      '&:hover': {
+                        color: 'primary.main',
+                        backgroundColor: 'action.hover'
+                      }
+                    }}
+                  >
+                    New Conversation
+                  </Button>
+                </Tooltip>
+              )}
             </Box>
           </Box>
 

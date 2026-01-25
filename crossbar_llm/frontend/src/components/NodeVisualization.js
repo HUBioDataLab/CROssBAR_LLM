@@ -1057,6 +1057,7 @@ function NodeVisualization({ executionResult }) {
                         }}
                       >
                         <ListItemText
+                          disableTypography
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>

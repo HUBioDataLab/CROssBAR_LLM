@@ -63,7 +63,13 @@ function VectorSearch({
   setApiKey,
   question,
   setQuestion,
-  setRealtimeLogs
+  setRealtimeLogs,
+  sessionId,
+  addConversationTurn,
+  startNewConversation,
+  conversationHistory,
+  pendingFollowUp,
+  setPendingFollowUp
 }) {
   const [topK, setTopK] = useState(10);
   const [verbose, setVerbose] = useState(false);
@@ -342,6 +348,19 @@ function VectorSearch({
     };
   }, [clearLogs]);
 
+  // Auto-run when a follow-up question is clicked
+  useEffect(() => {
+    if (pendingFollowUp && question === pendingFollowUp && !loading) {
+      // Clear the pending follow-up first to prevent re-triggering
+      setPendingFollowUp(null);
+      // Trigger generate and run
+      handleGenerateAndRunRef.current();
+    }
+  }, [pendingFollowUp, question, loading, setPendingFollowUp]);
+
+  // Ref to hold the handleGenerateAndRun function for use in useEffect
+  const handleGenerateAndRunRef = React.useRef(null);
+
   // Helper function to handle rate limiting errors
   const handleRateLimitError = (error) => {
     if (error.response && error.response.status === 429) {
@@ -417,11 +436,9 @@ function VectorSearch({
       return;
     }
 
-    // Clear any previous errors and results at the start of the operation
+    // Clear any previous errors at the start of the operation
+    // Keep previous results visible while loading new ones
     setError(null);
-    setQueryResult(null);
-    setExecutionResult(null);
-    setLocalExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -459,6 +476,7 @@ function VectorSearch({
         vector_index: embeddingType,
         embedding: embedding,
         vector_category: vectorCategory,
+        session_id: sessionId,
       }, { signal });
 
       // Process the query result before setting it
@@ -470,8 +488,7 @@ function VectorSearch({
 
       // Set the query result for display
       setQueryResult(queryData);
-      setExecutionResult(null);
-      setLocalExecutionResult(null);
+      // Keep previous execution results visible
       setRunnedQuery(false);
 
       if (verbose) {
@@ -528,11 +545,9 @@ function VectorSearch({
       return;
     }
 
-    // Clear any previous errors and results at the start of the operation
+    // Clear any previous errors at the start of the operation
+    // Keep previous results visible while loading new ones
     setError(null);
-    setQueryResult(null);
-    setExecutionResult(null);
-    setLocalExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -559,17 +574,31 @@ function VectorSearch({
         top_k: topK,
         api_key: effectiveApiKey,
         verbose,
+        session_id: sessionId,
       }, { signal });
 
       setExecutionResult({
         result: response.data.result,
-        response: response.data.response
+        response: response.data.response,
+        followUpQuestions: response.data.follow_up_questions || []
       });
       setLocalExecutionResult({
         result: response.data.result,
-        response: response.data.response
+        response: response.data.response,
+        followUpQuestions: response.data.follow_up_questions || []
       });
       setRunnedQuery(true);
+
+      // Add to conversation history
+      if (addConversationTurn && response.data.response) {
+        addConversationTurn({
+          question: question,
+          cypherQuery: generatedQuery,
+          response: response.data.response,
+          result: response.data.result,
+          followUpQuestions: response.data.follow_up_questions || []
+        });
+      }
 
       if (verbose) {
         if (response.data.logs) {
@@ -624,11 +653,9 @@ function VectorSearch({
       return;
     }
 
-    // Clear any previous errors and results at the start of the operation
+    // Clear any previous errors at the start of the operation
+    // Keep previous results visible while loading new ones
     setError(null);
-    setQueryResult(null);
-    setExecutionResult(null);
-    setLocalExecutionResult(null);
 
     // Create a new AbortController
     abortControllerRef.current = new AbortController();
@@ -658,6 +685,7 @@ function VectorSearch({
         api_key: effectiveApiKey,
         top_k: topK,
         verbose,
+        session_id: sessionId,
       };
 
       // Add vector data if available, otherwise just use vector index for category-based search
@@ -749,7 +777,8 @@ function VectorSearch({
         llm_type: llmType,
         top_k: topK,
         api_key: effectiveApiKey,
-        verbose: verbose
+        verbose: verbose,
+        session_id: sessionId,
       };
 
       const runRequestDataWithProvider = { ...runRequestData, provider };
@@ -757,8 +786,20 @@ function VectorSearch({
 
       setExecutionResult({
         result: runResponse.data.result,
-        response: runResponse.data.response
+        response: runResponse.data.response,
+        followUpQuestions: runResponse.data.follow_up_questions || []
       });
+
+      // Add to conversation history
+      if (addConversationTurn && runResponse.data.response) {
+        addConversationTurn({
+          question: question,
+          cypherQuery: queryString,
+          response: runResponse.data.response,
+          result: runResponse.data.result,
+          followUpQuestions: runResponse.data.follow_up_questions || []
+        });
+      }
       setLocalExecutionResult({
         result: runResponse.data.result,
         response: runResponse.data.response
@@ -806,6 +847,9 @@ function VectorSearch({
       }
     }
   };
+
+  // Assign to ref for use in useEffect
+  handleGenerateAndRunRef.current = handleGenerateAndRun;
 
   const handleSampleQuestionClick = async (sampleQuestionObj) => {
     if (!sampleQuestionObj) return;
@@ -1545,6 +1589,28 @@ function VectorSearch({
                   )}
                 </Box>
               </Tooltip>
+
+              {/* New Conversation Button */}
+              {conversationHistory && conversationHistory.length > 0 && (
+                <Tooltip title="Start a fresh conversation (clears history)" placement="top">
+                  <Button
+                    variant="text"
+                    onClick={startNewConversation}
+                    disabled={loading}
+                    size="small"
+                    sx={{
+                      ml: 2,
+                      color: 'text.secondary',
+                      '&:hover': {
+                        color: 'primary.main',
+                        backgroundColor: 'action.hover'
+                      }
+                    }}
+                  >
+                    New Conversation
+                  </Button>
+                </Tooltip>
+              )}
             </Box>
           </Box>
 

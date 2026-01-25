@@ -48,13 +48,13 @@ RETURN path
 MATCH (g:Gene)
 WHERE g.kegg_ids IS NOT NULL AND "51545" IN g.kegg_ids
 RETURN g.id AS entrez_id
-
+{conversation_context}
 The question is:
 {question}
 """
 
 CYPHER_GENERATION_PROMPT = PromptTemplate(
-    input_variables=["node_types", "node_properties", "edge_properties", "edges", "question",], 
+    input_variables=["node_types", "node_properties", "edge_properties", "edges", "question", "conversation_context"], 
     template=CYPHER_GENERATION_TEMPLATE
 )
 
@@ -139,11 +139,12 @@ RETURN similar_protein_domains.id, similar_protein_domains.name, indirect_domain
 
 The question is:
 {question}
+{conversation_context}
 """
 
 
 VECTOR_SEARCH_CYPHER_GENERATION_PROMPT = PromptTemplate(
-    input_variables=["vector_index","node_types", "node_properties", "edge_properties", "edges", "question",], 
+    input_variables=["vector_index","node_types", "node_properties", "edge_properties", "edges", "question", "conversation_context"], 
     template=VECTOR_SEARCH_CYPHER_GENERATION_TEMPLATE
 )
 
@@ -163,15 +164,35 @@ Example:
 Note: Do not include every field of dictionary, return fields matching the question. Priotrize dictionary fields that have name of entity.
 Note: Do not delete curies
 Note: Do not print intermediate steps just give natural language answer
-
+{conversation_context}
 Cypher Output: 
 {output}
 Question: 
 {input_question}"""
 
-CYPHER_OUTPUT_PARSER_PROMPT = PromptTemplate(input_variables=["output", "input_question"], 
+CYPHER_OUTPUT_PARSER_PROMPT = PromptTemplate(input_variables=["output", "input_question", "conversation_context"], 
                                              template=CYPHER_OUTPUT_PARSER_TEMPLATE)
 
+
+# Template for generating follow-up question suggestions
+FOLLOW_UP_QUESTIONS_TEMPLATE = """Based on this question and answer about a biomedical knowledge graph (CROssBARv2):
+
+User Question: {question}
+Assistant Answer: {answer}
+
+Generate exactly 3 natural follow-up questions that the user might want to ask next. These should:
+1. Be related to the entities or concepts mentioned in the answer
+2. Explore deeper relationships or additional properties
+3. Be diverse (not just rephrasing the same question)
+4. Be concise and natural sounding
+
+Return ONLY a JSON array with exactly 3 questions, no other text. Example format:
+["Question 1?", "Question 2?", "Question 3?"]"""
+
+FOLLOW_UP_QUESTIONS_PROMPT = PromptTemplate(
+    input_variables=["question", "answer"],
+    template=FOLLOW_UP_QUESTIONS_TEMPLATE
+)
 
 
 QUESTION_GENERATOR_TEMPLATE = """
