@@ -280,12 +280,6 @@ function ChatLayout({
     scrollToBottom();
   }, [conversationHistory, isLoading]);
 
-  // Auto-collapse example queries after first question
-  useEffect(() => {
-    if (conversationHistory.length > 0 || queryGenerated) {
-      setExpandedSections(prev => ({ ...prev, examples: false }));
-    }
-  }, [conversationHistory.length, queryGenerated]);
 
   // Sync editable query with queryResult
   useEffect(() => {
@@ -509,8 +503,10 @@ function ChatLayout({
       return;
     }
 
-    // Collapse settings panel when submitting a question (like example questions)
-    setExpandedSections(prev => ({ ...prev, settings: false }));
+    // Collapse settings and examples panels when submitting a question
+    flushSync(() => {
+      setExpandedSections(prev => ({ ...prev, settings: false, examples: false }));
+    });
 
     const userQuestion = question.trim();
     setPendingQuestion(userQuestion);
@@ -702,8 +698,10 @@ function ChatLayout({
       return;
     }
 
-    // Collapse settings panel when submitting a question (like example questions)
-    setExpandedSections(prev => ({ ...prev, settings: false }));
+    // Collapse settings and examples panels when submitting a question
+    flushSync(() => {
+      setExpandedSections(prev => ({ ...prev, settings: false, examples: false }));
+    });
 
     const userQuestion = question.trim();
     setQuestion('');
