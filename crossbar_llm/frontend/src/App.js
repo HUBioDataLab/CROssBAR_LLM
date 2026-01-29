@@ -47,8 +47,6 @@ function App() {
   const [executionResult, setExecutionResult] = useState(null);
   const [realtimeLogs, setRealtimeLogs] = useState('');
   const [showAboutModal, setShowAboutModal] = useState(false);
-  const [latestQueries, setLatestQueries] = useState([]);
-  const [selectedQuery, setSelectedQuery] = useState(null);
   const [question, setQuestion] = useState('');
   const [provider, setProvider] = useState('');
   const [llmType, setLlmType] = useState('');
@@ -185,45 +183,6 @@ function App() {
     setShowAboutModal(false);
   };
 
-  const addLatestQuery = (queryDetails) => {
-    const now = new Date(queryDetails.timestamp).getTime();
-    const isDuplicate = latestQueries.some(q => {
-      const queryTime = new Date(q.timestamp).getTime();
-      const timeDiff = now - queryTime;
-      return q.question === queryDetails.question && 
-             q.queryType === queryDetails.queryType &&
-             timeDiff < 2000; // Less than 2 seconds
-    });
-    
-    // If it's a duplicate, don't add it
-    if (isDuplicate) return;
-    
-    if (latestQueries.length >= 10) {
-      setLatestQueries([...latestQueries.slice(1), queryDetails]);
-    } else {
-      setLatestQueries([...latestQueries, queryDetails]);
-    }
-  }
-
-  const handleSelectQuery = (query) => {
-    setSelectedQuery(query);
-    setQuestion(query.question);
-    
-    // If it's a generated query, set the query result
-    if (query.queryType === 'generated') {
-      setQueryResult(query.query);
-      setExecutionResult(null);
-    } 
-    // If it's a run query, set both query result and execution result
-    else if (query.queryType === 'run') {
-      setQueryResult(query.query);
-      setExecutionResult({
-        response: query.response,
-        result: [] // We don't store the result in latestQueries, so use an empty array
-      });
-    }
-  }
-
   const toggleColorMode = () => {
     const newMode = mode === 'light' ? 'dark' : 'light';
     setMode(newMode);
@@ -288,7 +247,6 @@ function App() {
             conversationHistory={conversationHistory}
             addConversationTurn={addConversationTurn}
             startNewConversation={startNewConversation}
-            addLatestQuery={addLatestQuery}
             question={question}
             setQuestion={setQuestion}
             queryResult={queryResult}
@@ -297,8 +255,6 @@ function App() {
             setExecutionResult={setExecutionResult}
             realtimeLogs={realtimeLogs}
             setRealtimeLogs={setRealtimeLogs}
-            latestQueries={latestQueries}
-            handleSelectQuery={handleSelectQuery}
             pendingFollowUp={pendingFollowUp}
             setPendingFollowUp={setPendingFollowUp}
           />

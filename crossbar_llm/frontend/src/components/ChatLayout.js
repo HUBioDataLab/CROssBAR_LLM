@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import {
   Box,
   Paper,
@@ -37,7 +38,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import RestoreIcon from '@mui/icons-material/Restore';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import BubbleChartIcon from '@mui/icons-material/BubbleChart';
-import HistoryIcon from '@mui/icons-material/History';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -59,7 +59,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
-import LatestQueries from './LatestQueries';
 import api, { getAvailableModels } from '../services/api';
 import axios from 'axios';
 import Fuse from 'fuse.js';
@@ -80,7 +79,6 @@ function ChatLayout({
   conversationHistory,
   addConversationTurn,
   startNewConversation,
-  addLatestQuery,
   question,
   setQuestion,
   queryResult,
@@ -89,8 +87,6 @@ function ChatLayout({
   setExecutionResult,
   realtimeLogs,
   setRealtimeLogs,
-  latestQueries,
-  handleSelectQuery,
   pendingFollowUp,
   setPendingFollowUp,
 }) {
@@ -103,6 +99,7 @@ function ChatLayout({
   // Local state
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState('');
+  const [pendingUserQuestion, setPendingUserQuestion] = useState(''); // Question being processed
   const [error, setError] = useState(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState(null);
@@ -157,7 +154,6 @@ function ChatLayout({
     results: false,
     visualization: true,
     logs: false,
-    history: false,
   });
 
   // Semantic search state
@@ -483,6 +479,19 @@ function ChatLayout({
     return vectorCategory && embeddingType;
   }, [semanticSearchEnabled, vectorCategory, embeddingType]);
 
+  // Check if query result has valid data (not a "no result" message)
+  const hasValidResults = useCallback((result) => {
+    if (!result) return false;
+    if (!Array.isArray(result)) return false;
+    if (result.length === 0) return false;
+    // Check if it's a "no result" string wrapped in array
+    if (result.length === 1 && typeof result[0] === 'string' && 
+        result[0].toLowerCase().includes('did not return any result')) {
+      return false;
+    }
+    return true;
+  }, []);
+
   // Generate query only (without running)
   const handleGenerateOnly = async (e) => {
     e?.preventDefault();
@@ -506,6 +515,7 @@ function ChatLayout({
     const userQuestion = question.trim();
     setPendingQuestion(userQuestion);
     setQuestion('');
+    setPendingUserQuestion(userQuestion); // Show user's question immediately
     setError(null);
     setIsLoading(true);
     setCurrentStep('Generating Cypher query...');
@@ -548,14 +558,6 @@ function ChatLayout({
       // Expand the query section to show the generated query
       setExpandedSections(prev => ({ ...prev, query: true }));
 
-      // Add to latest queries as generated
-      addLatestQuery({
-        question: userQuestion,
-        query: cypherQuery,
-        queryType: 'generated',
-        timestamp: new Date().toISOString(),
-      });
-
     } catch (err) {
       if (axios.isCancel(err) || err.name === 'CanceledError' || err.name === 'AbortError') {
         console.log('Request cancelled');
@@ -576,6 +578,7 @@ function ChatLayout({
         }
         setError(errorMessage);
         setPendingQuestion('');
+        setPendingUserQuestion('');
       }
     } finally {
       setIsLoading(false);
@@ -592,7 +595,13 @@ function ChatLayout({
       return;
     }
 
+    // Collapse example queries immediately when running (use flushSync to force immediate update)
+    flushSync(() => {
+      setExpandedSections(prev => ({ ...prev, examples: false }));
+    });
+    
     setError(null);
+    setPendingUserQuestion(pendingQuestion); // Show user's question immediately
     setIsLoading(true);
     setCurrentStep('Executing query...');
 
@@ -635,22 +644,15 @@ function ChatLayout({
         vectorConfig: semanticSearchEnabled ? { vectorCategory, embeddingType } : null,
       });
 
-      // Add to latest queries
-      addLatestQuery({
-        question: pendingQuestion,
-        query: editableQuery,
-        response: runResponse.data.response,
-        queryType: 'run',
-        timestamp: new Date().toISOString(),
-      });
-
       // Reset query editing state
       setQueryGenerated(false);
       setPendingQuestion('');
       setIsEditingQuery(false);
 
-      // Auto-expand visualization if we have results
-      if (runResponse.data.result && runResponse.data.result.length > 0) {
+      // Auto-expand visualization if we have valid results
+      const result = runResponse.data.result;
+      if (result && Array.isArray(result) && result.length > 0 && 
+          !(result.length === 1 && typeof result[0] === 'string' && result[0].toLowerCase().includes('did not return any result'))) {
         setExpandedSections(prev => ({ ...prev, visualization: true }));
       }
 
@@ -673,10 +675,12 @@ function ChatLayout({
           errorMessage = err.message;
         }
         setError(errorMessage);
+        setPendingUserQuestion('');
       }
     } finally {
       setIsLoading(false);
       setCurrentStep('');
+      setPendingUserQuestion('');
       abortControllerRef.current = null;
     }
   };
@@ -703,6 +707,7 @@ function ChatLayout({
 
     const userQuestion = question.trim();
     setQuestion('');
+    setPendingUserQuestion(userQuestion); // Show user's question immediately
     setError(null);
     setIsLoading(true);
     setCurrentStep('Generating Cypher query...');
@@ -777,17 +782,10 @@ function ChatLayout({
         vectorConfig: semanticSearchEnabled ? { vectorCategory, embeddingType } : null,
       });
 
-      // Add to latest queries
-      addLatestQuery({
-        question: userQuestion,
-        query: cypherQuery,
-        response: runResponse.data.response,
-        queryType: 'run',
-        timestamp: new Date().toISOString(),
-      });
-
-      // Auto-expand visualization if we have results
-      if (runResponse.data.result && runResponse.data.result.length > 0) {
+      // Auto-expand visualization if we have valid results
+      const result = runResponse.data.result;
+      if (result && Array.isArray(result) && result.length > 0 && 
+          !(result.length === 1 && typeof result[0] === 'string' && result[0].toLowerCase().includes('did not return any result'))) {
         setExpandedSections(prev => ({ ...prev, visualization: true }));
       }
 
@@ -810,10 +808,12 @@ function ChatLayout({
           errorMessage = err.message;
         }
         setError(errorMessage);
+        setPendingUserQuestion('');
       }
     } finally {
       setIsLoading(false);
       setCurrentStep('');
+      setPendingUserQuestion('');
       abortControllerRef.current = null;
     }
   };
@@ -1218,45 +1218,155 @@ function ChatLayout({
     );
   };
 
-  // Loading indicator in chat
+  // Loading indicator in chat - shows user question and loading response
   const renderLoading = () => (
-    <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-      <Box
-        sx={{
-          width: 36,
-          height: 36,
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-            : 'linear-gradient(135deg, #0071e3 0%, #5e5ce6 100%)',
-          color: 'white',
-          flexShrink: 0,
-        }}
-      >
-        <SmartToyIcon sx={{ fontSize: 20 }} />
-      </Box>
-      <Box sx={{ flex: 1, pt: 0.5 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.secondary' }}>
-          CROssBAR
-        </Typography>
-        <Paper
-          elevation={0}
+    <Box sx={{ mb: 4 }}>
+      {/* User Message */}
+      {pendingUserQuestion && (
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme.palette.primary.main,
+              color: 'white',
+              flexShrink: 0,
+            }}
+          >
+            <PersonIcon sx={{ fontSize: 20 }} />
+          </Box>
+          <Box sx={{ flex: 1, pt: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                You
+              </Typography>
+              {semanticSearchEnabled && (
+                <Chip
+                  size="small"
+                  label={`Vector: ${vectorCategory || 'N/A'}`}
+                  color="secondary"
+                  variant="outlined"
+                  icon={<SearchIcon sx={{ fontSize: '12px !important' }} />}
+                  sx={{ height: '20px', fontSize: '0.65rem' }}
+                />
+              )}
+            </Box>
+            <Typography variant="body1">{pendingUserQuestion}</Typography>
+          </Box>
+        </Box>
+      )}
+
+      {/* Assistant Loading */}
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box
           sx={{
-            p: 2,
-            borderRadius: '16px',
-            backgroundColor: alpha(theme.palette.background.default, 0.6),
-            border: `1px solid ${theme.palette.divider}`,
+            width: 36,
+            height: 36,
+            borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
+            justifyContent: 'center',
+            background: theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              : 'linear-gradient(135deg, #0071e3 0%, #5e5ce6 100%)',
+            color: 'white',
+            flexShrink: 0,
           }}
         >
-          <CircularProgress size={20} />
-          <Typography variant="body2" color="text.secondary">{currentStep}</Typography>
-        </Paper>
+          <SmartToyIcon sx={{ fontSize: 20 }} />
+        </Box>
+        <Box sx={{ flex: 1, pt: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.secondary' }}>
+            CROssBAR
+          </Typography>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.5,
+              borderRadius: '16px',
+              backgroundColor: alpha(theme.palette.background.default, 0.6),
+              border: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            {/* Step Progress Indicator */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: queryResult ? 2 : 0 }}>
+              <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CircularProgress 
+                  size={32} 
+                  thickness={3}
+                  sx={{ 
+                    color: currentStep.includes('Generating') 
+                      ? theme.palette.info.main 
+                      : theme.palette.success.main 
+                  }} 
+                />
+                <Box sx={{ 
+                  position: 'absolute', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}>
+                  {currentStep.includes('Generating') ? (
+                    <CodeIcon sx={{ fontSize: 14, color: theme.palette.info.main }} />
+                  ) : (
+                    <PlayArrowIcon sx={{ fontSize: 14, color: theme.palette.success.main }} />
+                  )}
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {currentStep}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {currentStep.includes('Generating') 
+                    ? 'Translating your question to a database query...'
+                    : 'Running the query and preparing your answer...'}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Show generated query preview when available */}
+            {queryResult && currentStep.includes('Executing') && (
+              <Box sx={{ 
+                mt: 1,
+                p: 1.5, 
+                borderRadius: '8px', 
+                backgroundColor: alpha(theme.palette.info.main, 0.05),
+                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              }}>
+                <Typography variant="caption" sx={{ 
+                  fontWeight: 600, 
+                  color: theme.palette.info.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  mb: 0.5,
+                }}>
+                  <CodeIcon sx={{ fontSize: 12 }} />
+                  Generated Cypher Query
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontFamily: 'monospace', 
+                    fontSize: '0.75rem',
+                    color: 'text.secondary',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    maxHeight: 80,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {queryResult.length > 200 ? queryResult.substring(0, 200) + '...' : queryResult}
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Box>
       </Box>
     </Box>
   );
@@ -2161,7 +2271,7 @@ function ChatLayout({
           )}
 
           {/* Node Visualization Section */}
-          {executionResult?.result && executionResult.result.length > 0 && (
+          {hasValidResults(executionResult?.result) && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
               <SectionHeader 
                 title="Node Information" 
@@ -2178,7 +2288,7 @@ function ChatLayout({
           )}
 
           {/* Raw Results Section */}
-          {executionResult?.result && (
+          {hasValidResults(executionResult?.result) && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
               <SectionHeader 
                 title="Structured Query Results" 
@@ -2208,22 +2318,6 @@ function ChatLayout({
             </Paper>
           )}
 
-          {/* Recent Queries Section */}
-          {latestQueries && latestQueries.length > 0 && (
-            <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
-              <SectionHeader 
-                title="Recent Queries" 
-                icon={<HistoryIcon fontSize="small" />} 
-                section="history"
-                badge={latestQueries.length}
-              />
-              <Collapse in={expandedSections.history}>
-                <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                  <LatestQueries queries={latestQueries} onSelectQuery={handleSelectQuery} />
-                </Box>
-              </Collapse>
-            </Paper>
-          )}
         </Box>
       </Box>
 
