@@ -30,18 +30,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { getTheme } from './theme';
-import QueryInput from './components/QueryInput';
-import ResultsDisplay from './components/ResultsDisplay';
 import About from './components/About';
-import VectorSearch from './components/VectorSearch';
-import LatestQueries from './components/LatestQueries';
 import Home from './components/Home';
 import ChatLayout from './components/ChatLayout';
 import axios, { refreshCsrfToken } from './services/api';
@@ -270,12 +265,6 @@ function App() {
     console.log('Started new conversation with session:', newSessionId.substring(0, 8) + '...');
   }, []);
 
-  // Handle clicking a follow-up question - auto-run it
-  const handleFollowUpClick = useCallback((followUpQuestion) => {
-    setQuestion(followUpQuestion);
-    setPendingFollowUp(followUpQuestion);
-  }, []);
-
   const renderTabContent = () => {
     switch(tabValue) {
       case 'home':
@@ -313,44 +302,6 @@ function App() {
             pendingFollowUp={pendingFollowUp}
             setPendingFollowUp={setPendingFollowUp}
           />
-        );
-      case 'vectorSearch':
-        return (
-          <Fade in={true} timeout={500}>
-            <Box>
-              <VectorSearch
-                setQueryResult={setQueryResult}
-                setExecutionResult={setExecutionResult}
-                setRealtimeLogs={setRealtimeLogs}
-                addLatestQuery={addLatestQuery}
-                provider={provider}
-                setProvider={setProvider}
-                llmType={llmType}
-                setLlmType={setLlmType}
-                apiKey={apiKey}
-                setApiKey={setApiKey}
-                question={question}
-                setQuestion={setQuestion}
-                sessionId={sessionId}
-                addConversationTurn={addConversationTurn}
-                startNewConversation={startNewConversation}
-                conversationHistory={conversationHistory}
-                pendingFollowUp={pendingFollowUp}
-                setPendingFollowUp={setPendingFollowUp}
-              />
-              <ResultsDisplay
-                queryResult={queryResult}
-                executionResult={executionResult}
-                realtimeLogs={realtimeLogs}
-                conversationHistory={conversationHistory}
-                onFollowUpClick={handleFollowUpClick}
-              />
-              <LatestQueries 
-                queries={latestQueries} 
-                onSelectQuery={handleSelectQuery}
-              />
-            </Box>
-          </Fade>
         );
       case 'about':
         return (
@@ -463,46 +414,6 @@ function App() {
                   fontWeight: tabValue === 'query' ? 600 : 400,
                   fontFamily: "'Poppins', 'Roboto', sans-serif",
                   color: tabValue === 'query' 
-                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                    : 'inherit'
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding sx={{ mb: 1 }}>
-            <ListItemButton 
-              onClick={() => handleTabChange(null, 'vectorSearch')}
-              selected={tabValue === 'vectorSearch'}
-              sx={{ 
-                borderRadius: '12px',
-                py: 1.5,
-                '&.Mui-selected': {
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(100, 181, 246, 0.15)' 
-                    : 'rgba(0, 113, 227, 0.08)',
-                  '&:hover': {
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(100, 181, 246, 0.2)' 
-                      : 'rgba(0, 113, 227, 0.12)',
-                  }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ 
-                minWidth: 40,
-                color: tabValue === 'vectorSearch' 
-                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                  : 'inherit'
-              }}>
-                <SearchOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Semantic Search" 
-                primaryTypographyProps={{ 
-                  fontWeight: tabValue === 'vectorSearch' ? 600 : 400,
-                  fontFamily: "'Poppins', 'Roboto', sans-serif",
-                  color: tabValue === 'vectorSearch' 
                     ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
                     : 'inherit'
                 }}

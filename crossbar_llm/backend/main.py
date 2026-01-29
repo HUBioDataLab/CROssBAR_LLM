@@ -675,6 +675,8 @@ class RunQueryRequest(BaseModel):
     verbose: bool = False
     provider: Optional[str] = None
     session_id: Optional[str] = None  # For conversation memory
+    is_semantic_search: bool = False  # Whether semantic/vector search is active
+    vector_category: Optional[str] = None  # Category used for semantic search
 
 
 class GenerateQueryResponse(BaseModel):
@@ -1283,7 +1285,9 @@ async def run_query(
                     
                     follow_up_questions = query_chain.generate_follow_up_questions(
                         question=run_query_request.question,
-                        answer=nl_response
+                        answer=nl_response,
+                        is_semantic_search=run_query_request.is_semantic_search,
+                        vector_category=run_query_request.vector_category
                     )
                     
                     Logger.info(

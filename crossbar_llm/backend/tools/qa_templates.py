@@ -186,7 +186,7 @@ CYPHER_OUTPUT_PARSER_PROMPT = PromptTemplate(input_variables=["output", "input_q
                                              template=CYPHER_OUTPUT_PARSER_TEMPLATE)
 
 
-# Template for generating follow-up question suggestions
+# Template for generating follow-up question suggestions (regular search)
 FOLLOW_UP_QUESTIONS_TEMPLATE = """Based on this question and answer about a biomedical knowledge graph (CROssBARv2):
 
 User Question: {question}
@@ -197,6 +197,9 @@ Generate exactly 3 natural follow-up questions that the user might want to ask n
 2. Explore deeper relationships or additional properties
 3. Be diverse (not just rephrasing the same question)
 4. Be concise and natural sounding
+5. Focus on standard graph traversal queries (NOT similarity/vector/embedding-based questions)
+
+IMPORTANT: Do NOT generate questions about "similar" entities, embeddings, or vector similarity searches.
 
 Return ONLY a JSON array with exactly 3 questions, no other text. Example format:
 ["Question 1?", "Question 2?", "Question 3?"]"""
@@ -204,6 +207,34 @@ Return ONLY a JSON array with exactly 3 questions, no other text. Example format
 FOLLOW_UP_QUESTIONS_PROMPT = PromptTemplate(
     input_variables=["question", "answer"],
     template=FOLLOW_UP_QUESTIONS_TEMPLATE
+)
+
+# Template for generating follow-up question suggestions (semantic/vector search)
+FOLLOW_UP_QUESTIONS_SEMANTIC_TEMPLATE = """Based on this question and answer about a biomedical knowledge graph (CROssBARv2) using semantic/vector search:
+
+User Question: {question}
+Assistant Answer: {answer}
+Vector Category Used: {vector_category}
+
+Generate exactly 3 natural follow-up questions that the user might want to ask next. These should:
+1. Be related to the entities or concepts mentioned in the answer
+2. Leverage semantic similarity search capabilities (e.g., "find similar...", "what entities are most similar to...")
+3. Explore deeper relationships using the same vector category ({vector_category}) or related categories
+4. Be diverse and take advantage of embedding-based similarity search
+5. Be concise and natural sounding
+
+Since semantic search is active, you can suggest questions about:
+- Finding similar entities based on embeddings
+- Exploring relationships of similar entities
+- Comparing entities by their semantic similarity
+- Discovering related entities through vector similarity
+
+Return ONLY a JSON array with exactly 3 questions, no other text. Example format:
+["Question 1?", "Question 2?", "Question 3?"]"""
+
+FOLLOW_UP_QUESTIONS_SEMANTIC_PROMPT = PromptTemplate(
+    input_variables=["question", "answer", "vector_category"],
+    template=FOLLOW_UP_QUESTIONS_SEMANTIC_TEMPLATE
 )
 
 

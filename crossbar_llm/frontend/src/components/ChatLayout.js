@@ -51,6 +51,9 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import TuneIcon from '@mui/icons-material/Tune';
 import KeyIcon from '@mui/icons-material/Key';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SearchIcon from '@mui/icons-material/Search';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CloseIcon from '@mui/icons-material/Close';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -149,6 +152,7 @@ function ChatLayout({
   const [expandedSections, setExpandedSections] = useState({
     examples: true,
     settings: false,
+    vectorConfig: false,
     query: true,
     results: false,
     visualization: true,
@@ -156,13 +160,69 @@ function ChatLayout({
     history: false,
   });
 
-  // Example queries
+  // Semantic search state
+  const [semanticSearchEnabled, setSemanticSearchEnabled] = useState(false);
+  const [vectorCategory, setVectorCategory] = useState('');
+  const [embeddingType, setEmbeddingType] = useState('');
+  const [vectorFile, setVectorFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  // Node label to vector index names mapping
+  const nodeLabelToVectorIndexNames = {
+    "SmallMolecule": "Selformer",
+    "Drug": "Selformer",
+    "Compound": "Selformer",
+    "Protein": ["Prott5", "Esm2"],
+    "GOTerm": "Anc2vec",
+    "CellularComponent": "Anc2vec",
+    "BiologicalProcess": "Anc2vec",
+    "MolecularFunction": "Anc2vec",
+    "Phenotype": "Cada",
+    "Disease": "Doc2vec",
+    "ProteinDomain": "Dom2vec",
+    "EcNumber": "Rxnfp",
+    "Pathway": "Biokeen",
+  };
+
+  // Example queries (regular)
   const exampleQueries = [
     "Which Gene is related to the Disease named psoriasis?",
     "What proteins does the drug named Caffeine target?",
     "Which drugs target proteins associated with Alzheimer disease?",
     "Which pathways are associated with both diabetes mellitus and T-cell non-Hodgkin lymphoma? Return only signaling pathways.",
     "What are the common side effects of drugs targeting the EGFR gene's protein?",
+  ];
+
+  // Vector search example queries
+  const vectorExampleQueries = [
+    {
+      question: "Give me distinct Biological Processes that are similar to 'cell growth' Biological Process and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
+      vectorCategory: "BiologicalProcess",
+      embeddingType: "Anc2vec"
+    },
+    {
+      question: "Find a protein domain that is similar to the domain with ID 'interpro:IPR000719'. Then, find proteins that possess this similar domain.",
+      vectorCategory: "ProteinDomain",
+      embeddingType: "Dom2vec"
+    },
+    {
+      question: "Give me the names of top 10 Proteins that are targeted by Small Molecules similar to the given embedding.",
+      vectorCategory: "SmallMolecule",
+      embeddingType: "Selformer",
+      vectorFilePath: "small_molecule_embedding.npy"
+    },
+    {
+      question: "What are the most similar proteins to the given protein?",
+      vectorCategory: "Protein",
+      embeddingType: "Esm2",
+      vectorFilePath: "protein_embedding.npy"
+    },
+    {
+      question: "Find diseases related to proteins with similar structure to this embedding.",
+      vectorCategory: "Protein",
+      embeddingType: "Esm2",
+      vectorFilePath: "protein_embedding.npy"
+    }
   ];
 
   const neo4jBrowserUrl = 'https://neo4j.crossbarv2.hubiodatalab.com/browser/?preselectAuthMethod=[NO_AUTH]&dbms=bolt://neo4j.crossbarv2.hubiodatalab.com';
@@ -417,6 +477,12 @@ function ChatLayout({
     return true;
   }, [provider, llmType, apiKeysStatus, apiKey]);
 
+  // Check if semantic search settings are valid (only when enabled)
+  const isSemanticSearchValid = useCallback(() => {
+    if (!semanticSearchEnabled) return true;
+    return vectorCategory && embeddingType;
+  }, [semanticSearchEnabled, vectorCategory, embeddingType]);
+
   // Generate query only (without running)
   const handleGenerateOnly = async (e) => {
     e?.preventDefault();
@@ -425,6 +491,12 @@ function ChatLayout({
     if (!isSettingsValid()) {
       setExpandedSections(prev => ({ ...prev, settings: true }));
       setError('Please configure model settings first');
+      return;
+    }
+
+    if (!isSemanticSearchValid()) {
+      setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
+      setError('Please configure vector search settings (category and embedding type)');
       return;
     }
 
@@ -444,7 +516,8 @@ function ChatLayout({
     const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
 
     try {
-      const generateResponse = await api.post('/generate_query/', {
+      // Build request data
+      const requestData = {
         question: userQuestion,
         llm_type: llmType,
         provider,
@@ -452,7 +525,18 @@ function ChatLayout({
         verbose,
         top_k: topK,
         session_id: sessionId,
-      }, { signal });
+      };
+
+      // Add vector search parameters if enabled
+      if (semanticSearchEnabled && vectorCategory && embeddingType) {
+        requestData.vector_index = embeddingType;
+        requestData.vector_category = vectorCategory;
+        if (vectorFile) {
+          requestData.embedding = JSON.stringify(vectorFile);
+        }
+      }
+
+      const generateResponse = await api.post('/generate_query/', requestData, { signal });
 
       const cypherQuery = generateResponse.data.query;
       setQueryResult(cypherQuery);
@@ -527,6 +611,8 @@ function ChatLayout({
         verbose,
         top_k: topK,
         session_id: sessionId,
+        is_semantic_search: semanticSearchEnabled,
+        vector_category: semanticSearchEnabled ? vectorCategory : null,
       }, { signal });
 
       setExecutionResult({
@@ -538,13 +624,15 @@ function ChatLayout({
       // Update queryResult with the edited query
       setQueryResult(editableQuery);
 
-      // Add to conversation history
+      // Add to conversation history with semantic search context
       addConversationTurn({
         question: pendingQuestion,
         cypherQuery: editableQuery,
         response: runResponse.data.response,
         result: runResponse.data.result,
         followUpQuestions: runResponse.data.follow_up_questions || [],
+        isSemanticSearch: semanticSearchEnabled,
+        vectorConfig: semanticSearchEnabled ? { vectorCategory, embeddingType } : null,
       });
 
       // Add to latest queries
@@ -604,6 +692,12 @@ function ChatLayout({
       return;
     }
 
+    if (!isSemanticSearchValid()) {
+      setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
+      setError('Please configure vector search settings (category and embedding type)');
+      return;
+    }
+
     // Collapse settings panel when submitting a question (like example questions)
     setExpandedSections(prev => ({ ...prev, settings: false }));
 
@@ -623,8 +717,8 @@ function ChatLayout({
     const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
 
     try {
-      // Step 1: Generate Cypher query
-      const generateResponse = await api.post('/generate_query/', {
+      // Build request data
+      const requestData = {
         question: userQuestion,
         llm_type: llmType,
         provider,
@@ -632,7 +726,19 @@ function ChatLayout({
         verbose,
         top_k: topK,
         session_id: sessionId,
-      }, { signal });
+      };
+
+      // Add vector search parameters if enabled
+      if (semanticSearchEnabled && vectorCategory && embeddingType) {
+        requestData.vector_index = embeddingType;
+        requestData.vector_category = vectorCategory;
+        if (vectorFile) {
+          requestData.embedding = JSON.stringify(vectorFile);
+        }
+      }
+
+      // Step 1: Generate Cypher query
+      const generateResponse = await api.post('/generate_query/', requestData, { signal });
 
       const cypherQuery = generateResponse.data.query;
       setQueryResult(cypherQuery);
@@ -650,6 +756,8 @@ function ChatLayout({
         verbose,
         top_k: topK,
         session_id: sessionId,
+        is_semantic_search: semanticSearchEnabled,
+        vector_category: semanticSearchEnabled ? vectorCategory : null,
       }, { signal });
 
       setExecutionResult({
@@ -658,13 +766,15 @@ function ChatLayout({
         followUpQuestions: runResponse.data.follow_up_questions || [],
       });
 
-      // Add to conversation history
+      // Add to conversation history with semantic search context
       addConversationTurn({
         question: userQuestion,
         cypherQuery: cypherQuery,
         response: runResponse.data.response,
         result: runResponse.data.result,
         followUpQuestions: runResponse.data.follow_up_questions || [],
+        isSemanticSearch: semanticSearchEnabled,
+        vectorConfig: semanticSearchEnabled ? { vectorCategory, embeddingType } : null,
       });
 
       // Add to latest queries
@@ -724,8 +834,66 @@ function ChatLayout({
   };
 
   const handleExampleClick = (example) => {
-    setQuestion(example);
+    // Handle both regular string examples and vector examples (objects)
+    if (typeof example === 'object' && example.question) {
+      setQuestion(example.question);
+      if (example.vectorCategory) {
+        setSemanticSearchEnabled(true);
+        setVectorCategory(example.vectorCategory);
+        setEmbeddingType(example.embeddingType || '');
+        setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
+        
+        // Load vector file from public folder if specified
+        if (example.vectorFilePath) {
+          loadVectorFileFromPath(example.vectorFilePath);
+        }
+      }
+    } else {
+      setQuestion(example);
+    }
     inputRef.current?.focus();
+  };
+
+  // Load vector file from public folder path
+  const loadVectorFileFromPath = async (filePath) => {
+    try {
+      const response = await fetch(`/${filePath}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      // Convert to array for JSON serialization
+      const vectorData = Array.from(uint8Array);
+      setVectorFile(vectorData);
+    } catch (error) {
+      console.error('Error loading vector file:', error);
+      setError(`Failed to load vector file: ${filePath}`);
+    }
+  };
+
+  // Handle vector file selection
+  const handleVectorFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    setSelectedFile(file);
+    
+    // Upload the file to the server
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('vector_category', vectorCategory);
+      formData.append('embedding_type', embeddingType);
+      
+      const response = await api.post('/upload_vector/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      
+      setVectorFile(response.data);
+      setSelectedFile(null); // Clear selected file indicator since upload succeeded
+    } catch (error) {
+      console.error('Error uploading vector file:', error);
+      setError(`Failed to upload vector file: ${error.message}`);
+      setSelectedFile(null);
+    }
   };
 
   // Welcome screen when no messages
@@ -855,9 +1023,21 @@ function ChatLayout({
             <PersonIcon sx={{ fontSize: 20 }} />
           </Box>
           <Box sx={{ flex: 1, pt: 0.5 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.secondary' }}>
-              You
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                You
+              </Typography>
+              {turn.isSemanticSearch && (
+                <Chip
+                  size="small"
+                  label={`Vector: ${turn.vectorConfig?.vectorCategory || 'N/A'}`}
+                  color="secondary"
+                  variant="outlined"
+                  icon={<SearchIcon sx={{ fontSize: '12px !important' }} />}
+                  sx={{ height: '20px', fontSize: '0.65rem' }}
+                />
+              )}
+            </Box>
             <Typography variant="body1">{turn.question}</Typography>
           </Box>
         </Box>
@@ -992,6 +1172,15 @@ function ChatLayout({
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontWeight: 600 }}>
                   <LightbulbOutlinedIcon sx={{ fontSize: 14 }} />
                   Suggested follow-ups:
+                  {turn.isSemanticSearch && (
+                    <Chip 
+                      label="Vector Search" 
+                      size="small" 
+                      color="secondary" 
+                      variant="outlined"
+                      sx={{ ml: 1, height: '18px', fontSize: '0.65rem' }}
+                    />
+                  )}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {turn.followUpQuestions.map((q, qIdx) => (
@@ -999,15 +1188,24 @@ function ChatLayout({
                       key={qIdx}
                       label={q}
                       size="small"
-                      onClick={() => handleFollowUpClick(q)}
+                      onClick={() => {
+                        // Restore semantic search settings if the turn was from semantic search
+                        if (turn.isSemanticSearch && turn.vectorConfig) {
+                          setSemanticSearchEnabled(true);
+                          setVectorCategory(turn.vectorConfig.vectorCategory || '');
+                          setEmbeddingType(turn.vectorConfig.embeddingType || '');
+                        }
+                        handleFollowUpClick(q);
+                      }}
+                      icon={turn.isSemanticSearch ? <SearchIcon sx={{ fontSize: '14px !important' }} /> : undefined}
                       sx={{
                         cursor: 'pointer',
                         height: 'auto',
                         py: 0.5,
                         '& .MuiChip-label': { whiteSpace: 'normal' },
-                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                        '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.2) },
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                        backgroundColor: alpha(turn.isSemanticSearch ? theme.palette.secondary.main : theme.palette.primary.main, 0.1),
+                        '&:hover': { backgroundColor: alpha(turn.isSemanticSearch ? theme.palette.secondary.main : theme.palette.primary.main, 0.2) },
+                        border: `1px solid ${alpha(turn.isSemanticSearch ? theme.palette.secondary.main : theme.palette.primary.main, 0.3)}`,
                       }}
                     />
                   ))}
@@ -1254,6 +1452,64 @@ function ChatLayout({
             </Paper>
           )}
           
+          {/* Semantic Search Toggle */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Tooltip title="Enable semantic search to find similar entities using vector embeddings">
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={semanticSearchEnabled}
+                      onChange={(e) => {
+                        setSemanticSearchEnabled(e.target.checked);
+                        if (e.target.checked) {
+                          setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
+                        } else {
+                          // Clear vector config when disabled
+                          setVectorCategory('');
+                          setEmbeddingType('');
+                          setVectorFile(null);
+                          setSelectedFile(null);
+                        }
+                      }}
+                      size="small"
+                      color="secondary"
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <SearchIcon fontSize="small" color={semanticSearchEnabled ? 'secondary' : 'action'} />
+                      <Typography variant="body2" color={semanticSearchEnabled ? 'secondary' : 'text.secondary'}>
+                        Semantic Search
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ ml: 0, mr: 0 }}
+                />
+              </Tooltip>
+              {semanticSearchEnabled && vectorCategory && embeddingType && (
+                <Chip
+                  size="small"
+                  label={`${vectorCategory} (${embeddingType})`}
+                  color="secondary"
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem', height: '22px' }}
+                />
+              )}
+            </Box>
+            {semanticSearchEnabled && (
+              <Button
+                size="small"
+                variant="text"
+                startIcon={<TuneIcon fontSize="small" />}
+                onClick={() => setExpandedSections(prev => ({ ...prev, vectorConfig: !prev.vectorConfig }))}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+              >
+                Configure
+              </Button>
+            )}
+          </Box>
+
           {/* Chat Input with Autocomplete */}
           <Box ref={inputContainerRef} sx={{ position: 'relative' }}>
             <Paper
@@ -1266,11 +1522,11 @@ function ChatLayout({
                 gap: 1,
                 p: 1.5,
                 borderRadius: '20px',
-                border: `1px solid ${theme.palette.divider}`,
+                border: `1px solid ${semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.divider}`,
                 backgroundColor: alpha(theme.palette.background.default, 0.6),
                 '&:focus-within': {
-                  borderColor: theme.palette.primary.main,
-                  boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+                  borderColor: semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.primary.main,
+                  boxShadow: `0 0 0 2px ${alpha(semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.primary.main, 0.2)}`,
                 },
               }}
             >
@@ -1437,15 +1693,24 @@ function ChatLayout({
           </Typography>
 
           {/* Example Queries Section */}
-          <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
-            <SectionHeader title="Example Queries" icon={<LightbulbOutlinedIcon fontSize="small" color="warning" />} section="examples" />
+          <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.divider}`, overflow: 'hidden' }}>
+            <SectionHeader 
+              title={semanticSearchEnabled ? "Vector Search Examples" : "Example Queries"} 
+              icon={<LightbulbOutlinedIcon fontSize="small" color={semanticSearchEnabled ? "secondary" : "warning"} />} 
+              section="examples" 
+            />
             <Collapse in={expandedSections.examples}>
               <Box sx={{ p: 2, pt: 0 }}>
+                {semanticSearchEnabled && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                    Click an example to set the question and configure vector settings
+                  </Typography>
+                )}
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {exampleQueries.map((example, idx) => (
+                  {(semanticSearchEnabled ? vectorExampleQueries : exampleQueries).map((example, idx) => (
                     <Chip
                       key={idx}
-                      label={example}
+                      label={semanticSearchEnabled ? example.question : example}
                       onClick={() => handleExampleClick(example)}
                       sx={{
                         cursor: 'pointer',
@@ -1457,9 +1722,9 @@ function ChatLayout({
                           whiteSpace: 'normal',
                           textAlign: 'left',
                         },
-                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                        '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.15) },
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                        backgroundColor: alpha(semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.primary.main, 0.08),
+                        '&:hover': { backgroundColor: alpha(semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.primary.main, 0.15) },
+                        border: `1px solid ${alpha(semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.primary.main, 0.2)}`,
                       }}
                     />
                   ))}
@@ -1647,6 +1912,135 @@ function ChatLayout({
               </Box>
             </Collapse>
           </Paper>
+
+          {/* Vector Search Configuration Section */}
+          {semanticSearchEnabled && (
+            <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.secondary.main}`, overflow: 'hidden' }}>
+              <SectionHeader 
+                title="Vector Search Config" 
+                icon={<SearchIcon fontSize="small" color="secondary" />} 
+                section="vectorConfig" 
+                badge={vectorCategory && embeddingType ? "Ready" : "Configure"}
+              />
+              <Collapse in={expandedSections.vectorConfig}>
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Configure vector search to find semantically similar entities in the knowledge graph.
+                  </Typography>
+                  
+                  {/* Vector Category */}
+                  <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                    <InputLabel>Vector Category</InputLabel>
+                    <Select
+                      value={vectorCategory}
+                      onChange={(e) => {
+                        const category = e.target.value;
+                        setVectorCategory(category);
+                        setVectorFile(null);
+                        setSelectedFile(null);
+                        const options = nodeLabelToVectorIndexNames[category];
+                        if (Array.isArray(options)) {
+                          setEmbeddingType('');
+                        } else if (options) {
+                          setEmbeddingType(options);
+                        } else {
+                          setEmbeddingType('');
+                        }
+                      }}
+                      label="Vector Category"
+                    >
+                      <MenuItem value=""><em>Select a category</em></MenuItem>
+                      {Object.keys(nodeLabelToVectorIndexNames).map((category) => (
+                        <MenuItem key={category} value={category}>{category}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* Embedding Type */}
+                  <FormControl fullWidth size="small" sx={{ mb: 2 }} disabled={!vectorCategory}>
+                    <InputLabel>Embedding Type</InputLabel>
+                    <Select
+                      value={embeddingType}
+                      onChange={(e) => setEmbeddingType(e.target.value)}
+                      label="Embedding Type"
+                    >
+                      <MenuItem value=""><em>Select embedding type</em></MenuItem>
+                      {vectorCategory && (
+                        Array.isArray(nodeLabelToVectorIndexNames[vectorCategory]) 
+                          ? nodeLabelToVectorIndexNames[vectorCategory].map((opt) => (
+                              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                            ))
+                          : nodeLabelToVectorIndexNames[vectorCategory] && (
+                              <MenuItem value={nodeLabelToVectorIndexNames[vectorCategory]}>
+                                {nodeLabelToVectorIndexNames[vectorCategory]}
+                              </MenuItem>
+                            )
+                      )}
+                    </Select>
+                  </FormControl>
+
+                  {/* Ready Status */}
+                  {vectorCategory && embeddingType && !vectorFile && !selectedFile && (
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      p: 1.5, 
+                      mb: 2,
+                      borderRadius: '8px',
+                      backgroundColor: alpha(theme.palette.success.main, 0.08),
+                      border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
+                    }}>
+                      <CheckCircleIcon fontSize="small" color="success" />
+                      <Typography variant="body2" color="success.main">
+                        Ready for vector search with {vectorCategory} ({embeddingType})
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* File Upload Button */}
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    fullWidth
+                    startIcon={<UploadFileIcon />}
+                    disabled={!vectorCategory || !embeddingType}
+                    sx={{
+                      borderRadius: '12px',
+                      height: '44px',
+                      borderColor: theme.palette.secondary.main,
+                      color: theme.palette.secondary.main,
+                      textTransform: 'none',
+                      '&:hover': {
+                        backgroundColor: alpha(theme.palette.secondary.main, 0.04),
+                      }
+                    }}
+                  >
+                    Upload Custom Vector File (.npy) - Optional
+                    <input
+                      type="file"
+                      hidden
+                      onChange={handleVectorFileChange}
+                      accept=".npy,.csv"
+                    />
+                  </Button>
+
+                  {selectedFile && (
+                    <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                      Selected: {selectedFile.name}
+                    </Typography>
+                  )}
+                  
+                  {vectorFile && !selectedFile && (
+                    <Typography variant="body2" sx={{ mt: 1, color: 'success.main', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <CheckCircleIcon fontSize="small" />
+                      Vector file loaded for {vectorCategory} ({embeddingType})
+                    </Typography>
+                  )}
+                </Box>
+              </Collapse>
+            </Paper>
+          )}
 
           {/* Generated Query Section */}
           {(queryResult || editableQuery) && (

@@ -26,6 +26,7 @@ from .qa_templates import (
     CYPHER_OUTPUT_PARSER_PROMPT,
     VECTOR_SEARCH_CYPHER_GENERATION_PROMPT,
     FOLLOW_UP_QUESTIONS_PROMPT,
+    FOLLOW_UP_QUESTIONS_SEMANTIC_PROMPT,
 )
 from .utils import Logger, timed_block, detailed_timer
 from .structured_logger import (
@@ -683,6 +684,8 @@ class QueryChain:
         self,
         question: str,
         answer: str,
+        is_semantic_search: bool = False,
+        vector_category: str = None,
     ) -> list[str]:
         """
         Generate follow-up question suggestions based on the Q&A.
@@ -690,6 +693,8 @@ class QueryChain:
         Args:
             question: The user's original question
             answer: The assistant's response
+            is_semantic_search: Whether semantic/vector search is active
+            vector_category: The vector category used (e.g., "Protein", "Drug")
             
         Returns:
             List of suggested follow-up questions (up to 3)
@@ -699,12 +704,26 @@ class QueryChain:
                 f"[FOLLOW_UP] Generating follow-up questions",
                 extra={
                     "question_preview": question[:100],
-                    "answer_preview": answer[:200]
+                    "answer_preview": answer[:200],
+                    "is_semantic_search": is_semantic_search,
+                    "vector_category": vector_category
                 }
             )
             
-            # Create a lightweight chain for follow-up generation
-            follow_up_chain = FOLLOW_UP_QUESTIONS_PROMPT | self.qa_llm | StrOutputParser()
+            # Choose the appropriate template based on semantic search status
+            if is_semantic_search and vector_category:
+                follow_up_chain = FOLLOW_UP_QUESTIONS_SEMANTIC_PROMPT | self.qa_llm | StrOutputParser()
+                invoke_params = {
+                    "question": question,
+                    "answer": answer,
+                    "vector_category": vector_category,
+                }
+            else:
+                follow_up_chain = FOLLOW_UP_QUESTIONS_PROMPT | self.qa_llm | StrOutputParser()
+                invoke_params = {
+                    "question": question,
+                    "answer": answer,
+                }
             
             callback = create_llm_callback(
                 call_type="follow_up_generation",
@@ -713,10 +732,7 @@ class QueryChain:
             )
             
             raw_response = follow_up_chain.invoke(
-                {
-                    "question": question,
-                    "answer": answer,
-                },
+                invoke_params,
                 config={"callbacks": [callback]}
             )
             
