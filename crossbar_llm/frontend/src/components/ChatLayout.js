@@ -2285,20 +2285,26 @@ function ChatLayout({
             </Paper>
           )}
 
-          {/* Raw Results Section */}
-          {hasValidResults(executionResult?.result) && (
+          {/* Raw Results Section - show when we have an execution result */}
+          {executionResult && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
               <SectionHeader 
                 title="Structured Query Results" 
                 icon={<DataObjectIcon fontSize="small" color="warning" />} 
                 section="results"
-                badge={executionResult.result.length}
+                badge={hasValidResults(executionResult?.result) ? executionResult.result.length : null}
               />
               <Collapse in={expandedSections.results}>
                 <Box sx={{ p: 2, pt: 0, maxHeight: 300, overflow: 'auto' }}>
-                  <SyntaxHighlighter language="json" style={syntaxTheme} customStyle={{ margin: 0, padding: '12px', fontSize: '0.75rem', borderRadius: '12px' }}>
-                    {JSON.stringify(executionResult.result, null, 2)}
-                  </SyntaxHighlighter>
+                  {hasValidResults(executionResult?.result) ? (
+                    <SyntaxHighlighter language="json" style={syntaxTheme} customStyle={{ margin: 0, padding: '12px', fontSize: '0.75rem', borderRadius: '12px' }}>
+                      {JSON.stringify(executionResult.result, null, 2)}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No result returned from CROssBARv2 KG.
+                    </Typography>
+                  )}
                 </Box>
               </Collapse>
             </Paper>

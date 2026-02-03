@@ -573,14 +573,21 @@ function App() {
         </Box>
         
         {/* Disclaimer */}
-        <Typography variant="caption" sx={{ 
-          color: 'text.secondary', 
-          textAlign: 'center',
-          fontStyle: 'italic',
-          lineHeight: 1.5,
-          fontFamily: "'Poppins', 'Roboto', sans-serif"
-        }}>
-          CROssBAR-LLM can make mistakes. If results seem wrong, try rephrasing or switch models.
+        <Typography
+          component="ul"
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+            textAlign: 'left',
+            lineHeight: 1.5,
+            fontFamily: "'Poppins', 'Roboto', sans-serif",
+            pl: 2,
+            m: 0,
+            '& li': { mb: 0.25 }
+          }}
+        >
+          <li>CROssBAR-LLM can make mistakes. If results seem wrong, try rephrasing or switch models.</li>
+          <li>When CROssBAR cannot generate an answer from the provided inputs, the response may rely on the selected LLM&apos;s internal knowledge.</li>
         </Typography>
         
         {/* Version */}

@@ -161,8 +161,7 @@ given question in order to answer it.
 Instructions:
 Output is formatted as list of dictionaries. You will parse them into natural language text based
 on given question. If the cypher output is 'Given cypher query did not return any result', then use
-your internal knowledge to answer questions and add a warning message that says 'Please note that, 
-in this case, the provided information is based on the internal knowledge of the selected LLM, it was not obtained from CROssBARv2 KG'.
+your internal knowledge to answer the question. Do not add any disclaimer or note about the source of the information; the application will display that separately.
 ABSOLUTE SCOPE RULE:
 You are strictly forbidden from answering general knowledge questions even when using internal knowledge. 
 The instruction to "use internal knowledge" applies ONLY to questions within the biomedical domain. 
