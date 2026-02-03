@@ -3,43 +3,19 @@ import {
   ThemeProvider, 
   CssBaseline, 
   Box, 
-  Container, 
-  Typography, 
-  Button, 
-  IconButton,
   Drawer,
-  AppBar,
-  Toolbar,
-  Divider,
-  useMediaQuery,
-  Paper,
   Fade,
-  Avatar,
-  Tooltip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Collapse
+  Paper,
+  Typography,
+  useMediaQuery,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import MenuIcon from '@mui/icons-material/Menu';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
-import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { getTheme } from './theme';
 import About from './components/About';
 import Home from './components/Home';
-import ChatLayout from './components/ChatLayout';
-import axios, { refreshCsrfToken } from './services/api';
+import { ChatLayout } from './components/chat';
+import { AppHeader, AppSidebar } from './components/layout';
+import { refreshCsrfToken } from './services/api';
 
 function App() {
   const [tabValue, setTabValue] = useState('home');
@@ -52,12 +28,11 @@ function App() {
   const [llmType, setLlmType] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerVisible, setDrawerVisible] = useState(false); // Default to false, will be updated in useEffect
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const [clientIP, setClientIP] = useState('');
   
   // Conversation memory state
   const [sessionId, setSessionId] = useState(() => {
-    // Generate or retrieve session ID from sessionStorage
     let id = sessionStorage.getItem('conversationSessionId');
     if (!id) {
       id = crypto.randomUUID();
@@ -66,11 +41,7 @@ function App() {
     return id;
   });
   const [conversationHistory, setConversationHistory] = useState([]);
-  // Each item: { question, cypherQuery, response, followUpQuestions, timestamp }
-  const [pendingFollowUp, setPendingFollowUp] = useState(null); // Triggers auto-run
-  
-  // Autocomplete tip expanded state
-  const [autocompleteTipExpanded, setAutocompleteTipExpanded] = useState(false);
+  const [pendingFollowUp, setPendingFollowUp] = useState(null);
   
   const [mode, setMode] = useState(() => {
     const savedMode = localStorage.getItem('theme-mode');
@@ -100,14 +71,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Initial token fetch
     refreshCsrfToken();
 
-    // Set up periodic token refresh (every 15 minutes)
     const tokenRefreshInterval = setInterval(() => {
       console.log('Refreshing CSRF token periodically');
       refreshCsrfToken();
-    }, 15 * 60 * 1000); // 15 minutes
+    }, 15 * 60 * 1000);
 
     const navigationType = performance.getEntriesByType('navigation')[0].type;
 
@@ -116,17 +85,14 @@ function App() {
       localStorage.setItem('hasVisited', 'true');
     }
     
-    // Always set the tab to home when the app loads
     setTabValue('home');
     
-    // Check if there's a prefilled query from the home page
     const prefillQuery = localStorage.getItem('prefillQuery');
     if (prefillQuery) {
       setQuestion(prefillQuery);
       localStorage.removeItem('prefillQuery');
     }
     
-    // Clean up on unmount
     return () => {
       clearInterval(tokenRefreshInterval);
     };
@@ -135,7 +101,6 @@ function App() {
   // Fetch client IP on app startup
   useEffect(() => {
     const fetchClientIP = async () => {
-      // Check sessionStorage first
       const storedIP = sessionStorage.getItem('client_ip');
       if (storedIP) {
         setClientIP(storedIP);
@@ -165,11 +130,8 @@ function App() {
     setExecutionResult(null);
     setRealtimeLogs('');
     setDrawerOpen(false);
-    
-    // Reset question field when changing tabs
     setQuestion('');
     
-    // Check if there's a prefilled query when switching to the query tab
     if (newValue === 'query') {
       const prefillQuery = localStorage.getItem('prefillQuery');
       if (prefillQuery) {
@@ -189,10 +151,6 @@ function App() {
     localStorage.setItem('theme-mode', newMode);
   };
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
   const toggleDrawerVisibility = () => {
     setDrawerVisible(!drawerVisible);
   };
@@ -204,7 +162,6 @@ function App() {
         ...turn,
         timestamp: new Date().toISOString()
       }];
-      // Keep only last 10 turns (matching backend)
       if (newHistory.length > 10) {
         return newHistory.slice(-10);
       }
@@ -212,7 +169,7 @@ function App() {
     });
   }, []);
 
-  // Start a new conversation (clear history and generate new session ID)
+  // Start a new conversation
   const startNewConversation = useCallback(() => {
     const newSessionId = crypto.randomUUID();
     sessionStorage.setItem('conversationSessionId', newSessionId);
@@ -272,330 +229,6 @@ function App() {
     }
   };
 
-  const drawer = (
-    <Box sx={{ width: 280, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        py: 2,
-        borderBottom: theme => `1px solid ${theme.palette.divider}`
-      }}>
-        <Typography variant="h6" sx={{ 
-          fontWeight: 600, 
-          fontFamily: "'Poppins', 'Roboto', sans-serif",
-          background: mode === 'dark' 
-            ? 'linear-gradient(90deg, #64B5F6 0%, #B39DDB 100%)' 
-            : 'linear-gradient(90deg, #0071e3 0%, #5e5ce6 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '-0.01em'
-        }}>
-          CROssBAR-LLM
-        </Typography>
-      </Box>
-      
-      <Box sx={{ flexGrow: 1, px: 2, pt: 1.5, overflowY: 'auto' }}>
-        <List sx={{ p: 0, mt: 0 }}>
-          <ListItem disablePadding sx={{ mt: 0 }}>
-            <ListItemButton 
-              onClick={() => handleTabChange(null, 'home')}
-              selected={tabValue === 'home'}
-              sx={{ 
-                borderRadius: '12px',
-                py: 1.5,
-                '&.Mui-selected': {
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(100, 181, 246, 0.15)' 
-                    : 'rgba(0, 113, 227, 0.08)',
-                  '&:hover': {
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(100, 181, 246, 0.2)' 
-                      : 'rgba(0, 113, 227, 0.12)',
-                  }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ 
-                minWidth: 40,
-                color: tabValue === 'home' 
-                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                  : 'inherit'
-              }}>
-                <HomeOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Home" 
-                primaryTypographyProps={{ 
-                  fontWeight: tabValue === 'home' ? 600 : 400,
-                  fontFamily: "'Poppins', 'Roboto', sans-serif",
-                  color: tabValue === 'home' 
-                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                    : 'inherit'
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding sx={{ mb: 1 }}>
-            <ListItemButton 
-              onClick={() => handleTabChange(null, 'query')}
-              selected={tabValue === 'query'}
-              sx={{ 
-                borderRadius: '12px',
-                py: 1.5,
-                '&.Mui-selected': {
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(100, 181, 246, 0.15)' 
-                    : 'rgba(0, 113, 227, 0.08)',
-                  '&:hover': {
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(100, 181, 246, 0.2)' 
-                      : 'rgba(0, 113, 227, 0.12)',
-                  }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ 
-                minWidth: 40,
-                color: tabValue === 'query' 
-                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                  : 'inherit'
-              }}>
-                <ChatOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText 
-                primary="CROssBAR Chat" 
-                primaryTypographyProps={{ 
-                  fontWeight: tabValue === 'query' ? 600 : 400,
-                  fontFamily: "'Poppins', 'Roboto', sans-serif",
-                  color: tabValue === 'query' 
-                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                    : 'inherit'
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-          
-          <ListItem disablePadding>
-            <ListItemButton 
-              onClick={() => handleTabChange(null, 'about')}
-              selected={tabValue === 'about'}
-              sx={{ 
-                borderRadius: '12px',
-                py: 1.5,
-                '&.Mui-selected': {
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(100, 181, 246, 0.15)' 
-                    : 'rgba(0, 113, 227, 0.08)',
-                  '&:hover': {
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(100, 181, 246, 0.2)' 
-                      : 'rgba(0, 113, 227, 0.12)',
-                  }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ 
-                minWidth: 40,
-                color: tabValue === 'about' 
-                  ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                  : 'inherit'
-              }}>
-                <InfoOutlinedIcon />
-              </ListItemIcon>
-              <ListItemText 
-                primary="About" 
-                primaryTypographyProps={{ 
-                  fontWeight: tabValue === 'about' ? 600 : 400,
-                  fontFamily: "'Poppins', 'Roboto', sans-serif",
-                  color: tabValue === 'about' 
-                    ? (theme.palette.mode === 'dark' ? '#64B5F6' : '#0071e3') 
-                    : 'inherit'
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Box>
-      
-      {/* Bottom Section with Tips and Info */}
-      <Box sx={{ 
-        p: 2, 
-        borderTop: theme => `1px solid ${theme.palette.divider}`,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-      }}>
-        {/* Autocomplete Tip - Expandable */}
-        <Box sx={{ 
-          borderRadius: '10px',
-          backgroundColor: theme => theme.palette.mode === 'dark' 
-            ? 'rgba(100, 181, 246, 0.08)' 
-            : 'rgba(0, 113, 227, 0.04)',
-          border: theme => `1px solid ${theme.palette.mode === 'dark' 
-            ? 'rgba(100, 181, 246, 0.15)' 
-            : 'rgba(0, 113, 227, 0.1)'}`,
-          overflow: 'hidden',
-        }}>
-          {/* Clickable Header */}
-          <Box 
-            onClick={() => setAutocompleteTipExpanded(!autocompleteTipExpanded)}
-            sx={{ 
-              p: 1.5, 
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              '&:hover': {
-                backgroundColor: mode === 'dark' 
-                  ? 'rgba(100, 181, 246, 0.12)' 
-                  : 'rgba(0, 113, 227, 0.06)',
-              },
-              transition: 'background-color 0.2s ease',
-            }}
-          >
-            <Typography variant="caption" sx={{ 
-              color: 'text.secondary', 
-              lineHeight: 1.5,
-              fontFamily: "'Poppins', 'Roboto', sans-serif",
-              flex: 1,
-            }}>
-              <strong style={{ color: mode === 'dark' ? '#64B5F6' : '#0071e3' }}>
-                {autocompleteTipExpanded ? 'Entity Autocomplete Available' : 'Tip:'}
-              </strong>{' '}
-              {!autocompleteTipExpanded && (
-                <>
-                  Type <code style={{ 
-                    backgroundColor: mode === 'dark' ? 'rgba(100, 181, 246, 0.2)' : 'rgba(0, 113, 227, 0.1)', 
-                    padding: '2px 5px', 
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                  }}>@</code> followed by an entity name for autocomplete suggestions
-                </>
-              )}
-              {autocompleteTipExpanded && (
-                <span style={{ opacity: 0.7 }}>(click to collapse)</span>
-              )}
-            </Typography>
-            {autocompleteTipExpanded ? (
-              <ExpandLessIcon sx={{ fontSize: 18, color: mode === 'dark' ? '#64B5F6' : '#0071e3', ml: 1 }} />
-            ) : (
-              <ExpandMoreIcon sx={{ fontSize: 18, color: mode === 'dark' ? '#64B5F6' : '#0071e3', ml: 1 }} />
-            )}
-          </Box>
-          
-          {/* Expanded Content */}
-          <Collapse in={autocompleteTipExpanded}>
-            <Box sx={{ 
-              px: 1.5, 
-              pb: 1.5, 
-              borderTop: `1px solid ${mode === 'dark' ? 'rgba(100, 181, 246, 0.15)' : 'rgba(0, 113, 227, 0.1)'}`,
-            }}>
-              <Typography variant="caption" sx={{ 
-                color: 'text.secondary', 
-                display: 'block',
-                lineHeight: 1.6,
-                fontFamily: "'Poppins', 'Roboto', sans-serif",
-                mt: 1.5,
-                mb: 1,
-              }}>
-                Type <code style={{ 
-                  backgroundColor: mode === 'dark' ? 'rgba(100, 181, 246, 0.2)' : 'rgba(0, 113, 227, 0.1)', 
-                  padding: '2px 5px', 
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                }}>@</code> followed by at least 3 characters to search for biomedical entities.
-              </Typography>
-              
-              <Typography variant="caption" sx={{ 
-                color: mode === 'dark' ? '#64B5F6' : '#0071e3', 
-                display: 'block',
-                fontWeight: 600,
-                fontFamily: "'Poppins', 'Roboto', sans-serif",
-                mb: 0.75,
-              }}>
-                How to use autocomplete:
-              </Typography>
-              
-              <Box component="ul" sx={{ 
-                m: 0, 
-                pl: 2, 
-                '& li': { 
-                  mb: 0.5,
-                  fontSize: '0.7rem',
-                  color: 'text.secondary',
-                  fontFamily: "'Poppins', 'Roboto', sans-serif",
-                  lineHeight: 1.5,
-                } 
-              }}>
-                <li>Type <strong>@</strong> symbol followed by the entity name you're looking for.</li>
-                <li>After typing at least 3 characters, a dropdown menu will appear with matching entities.</li>
-                <li>Use <strong>arrow keys</strong> to navigate the suggestions, <strong>Enter</strong> or <strong>Tab</strong> to select.</li>
-                <li>You can also <strong>click</strong> on a suggestion to select it.</li>
-                <li>Available entity types include: <em>genes, proteins, diseases, drugs, pathways</em> and more.</li>
-              </Box>
-              
-              <Typography variant="caption" sx={{ 
-                color: 'text.secondary', 
-                display: 'block',
-                fontStyle: 'italic',
-                fontFamily: "'Poppins', 'Roboto', sans-serif",
-                mt: 1,
-                pt: 1,
-                borderTop: `1px dashed ${mode === 'dark' ? 'rgba(100, 181, 246, 0.15)' : 'rgba(0, 113, 227, 0.1)'}`,
-              }}>
-                This feature helps ensure accurate entity names in your queries and improves search results.
-              </Typography>
-            </Box>
-          </Collapse>
-        </Box>
-
-        {/* Privacy Notice */}
-        <Box sx={{ 
-          p: 1.5, 
-          borderRadius: '10px',
-          backgroundColor: theme => theme.palette.mode === 'dark' 
-            ? 'rgba(255, 255, 255, 0.03)' 
-            : 'rgba(0, 0, 0, 0.02)',
-        }}>
-          <Typography variant="caption" sx={{ 
-            color: 'text.secondary', 
-            display: 'block',
-            lineHeight: 1.5,
-            fontSize: '0.65rem',
-            fontFamily: "'Poppins', 'Roboto', sans-serif"
-          }}>
-            We save user queries and outputs, but remove all identifiable data once the session is finished. 
-            Data is never used for model training. Data is stored on the CROssBAR v2 server. 
-            We may analyze data globally to improve the user experience.
-          </Typography>
-        </Box>
-        
-        {/* Disclaimer */}
-        <Typography variant="caption" sx={{ 
-          color: 'text.secondary', 
-          textAlign: 'center',
-          fontStyle: 'italic',
-          lineHeight: 1.5,
-          fontFamily: "'Poppins', 'Roboto', sans-serif"
-        }}>
-          CROssBAR-LLM can make mistakes. If results seem wrong, try rephrasing or switch models.
-        </Typography>
-        
-        {/* Version */}
-        <Typography variant="caption" sx={{ 
-          color: 'text.secondary', 
-          textAlign: 'center',
-          fontFamily: "'Poppins', 'Roboto', sans-serif",
-          mt: 0.5,
-        }}>
-          CROssBAR-LLM v1.0
-        </Typography>
-      </Box>
-    </Box>
-  );
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -606,103 +239,13 @@ function App() {
           ? 'linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%)' 
           : 'linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%)'
       }}>
-        <AppBar 
-          position="fixed" 
-          elevation={0}
-          sx={{ 
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            borderBottom: theme => `1px solid ${theme.palette.divider}`,
-            width: '100%'
-          }}
-        >
-          <Toolbar sx={{ justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                backgroundColor: theme => theme.palette.mode === 'dark' 
-                  ? 'rgba(100, 181, 246, 0.1)' 
-                  : 'rgba(0, 113, 227, 0.05)',
-                borderRadius: '12px',
-                px: 2,
-                py: 0.5,
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(100, 181, 246, 0.15)' 
-                    : 'rgba(0, 113, 227, 0.1)',
-                }
-              }}
-              onClick={() => handleTabChange(null, 'home')}>
-                <Typography variant="h6" noWrap component="div" sx={{ 
-                  fontWeight: 700,
-                  display: { xs: 'none', sm: 'block' },
-                  background: mode === 'dark' 
-                    ? 'linear-gradient(90deg, #64B5F6 0%, #B39DDB 100%)' 
-                    : 'linear-gradient(90deg, #0071e3 0%, #5e5ce6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  letterSpacing: '-0.01em'
-                }}>
-                  CROssBAR-LLM
-                </Typography>
-              </Box>
-            </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title={drawerVisible ? "Hide sidebar" : "Show sidebar"}>
-                <IconButton 
-                  onClick={toggleDrawerVisibility} 
-                  color="inherit"
-                  sx={{ 
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(0, 113, 227, 0.08)',
-                    backdropFilter: 'blur(10px)',
-                    border: theme => `1px solid ${theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.1)' 
-                      : 'rgba(0, 113, 227, 0.15)'}`,
-                    '&:hover': {
-                      backgroundColor: theme => theme.palette.mode === 'dark' 
-                        ? 'rgba(255, 255, 255, 0.1)' 
-                        : 'rgba(0, 113, 227, 0.12)',
-                    },
-                    color: theme => theme.palette.mode === 'dark'
-                      ? 'inherit'
-                      : 'rgba(0, 113, 227, 0.8)'
-                  }}
-                >
-                  {drawerVisible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
-                <IconButton 
-                  onClick={toggleColorMode} 
-                  color="inherit"
-                  sx={{ 
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(0, 113, 227, 0.08)',
-                    backdropFilter: 'blur(10px)',
-                    border: theme => `1px solid ${theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.1)' 
-                      : 'rgba(0, 113, 227, 0.15)'}`,
-                    '&:hover': {
-                      backgroundColor: theme => theme.palette.mode === 'dark' 
-                        ? 'rgba(255, 255, 255, 0.1)' 
-                        : 'rgba(0, 113, 227, 0.12)',
-                    },
-                    color: theme => theme.palette.mode === 'dark'
-                      ? 'inherit'
-                      : 'rgba(0, 113, 227, 0.8)'
-                  }}
-                >
-                  {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Toolbar>
-        </AppBar>
+        <AppHeader
+          mode={mode}
+          onThemeToggle={toggleColorMode}
+          drawerVisible={drawerVisible}
+          onDrawerToggle={toggleDrawerVisibility}
+          onLogoClick={() => handleTabChange(null, 'home')}
+        />
         
         {drawerVisible && (
           <Drawer
@@ -722,11 +265,14 @@ function App() {
               }
             }}
           >
-            {drawer}
+            <AppSidebar
+              mode={mode}
+              tabValue={tabValue}
+              onTabChange={handleTabChange}
+            />
           </Drawer>
         )}
         
-        {/* Conditionally render based on tab - ChatLayout uses full height */}
         {tabValue === 'query' ? (
           <Box
             component="main"
