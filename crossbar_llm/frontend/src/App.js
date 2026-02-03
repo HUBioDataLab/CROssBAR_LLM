@@ -35,6 +35,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AddIcon from '@mui/icons-material/Add';
 import { getTheme } from './theme';
 import About from './components/About';
 import Home from './components/Home';
@@ -337,7 +338,7 @@ function App() {
             </ListItemButton>
           </ListItem>
           
-          <ListItem disablePadding sx={{ mb: 1 }}>
+          <ListItem disablePadding sx={{ mb: 1, flexDirection: 'column', alignItems: 'stretch' }}>
             <ListItemButton 
               onClick={() => handleTabChange(null, 'query')}
               selected={tabValue === 'query'}
@@ -375,6 +376,26 @@ function App() {
                 }}
               />
             </ListItemButton>
+            <Button
+              size="small"
+              startIcon={<AddIcon sx={{ fontSize: '1rem' }} />}
+              onClick={() => {
+                setTabValue('query');
+                startNewConversation();
+                setDrawerOpen(false);
+              }}
+              sx={{
+                mt: 0.5,
+                ml: 5,
+                textTransform: 'none',
+                fontSize: '0.75rem',
+                color: 'text.secondary',
+                justifyContent: 'flex-start',
+                minHeight: 32,
+              }}
+            >
+              New chat
+            </Button>
           </ListItem>
           
           <ListItem disablePadding>
