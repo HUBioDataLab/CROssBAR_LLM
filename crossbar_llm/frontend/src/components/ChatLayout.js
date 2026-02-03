@@ -117,6 +117,9 @@ function ChatLayout({
   const [queryGenerated, setQueryGenerated] = useState(false); // True when query is generated but not run
   const [isEditingQuery, setIsEditingQuery] = useState(false);
   
+  // Historical query viewing state
+  const [viewingHistoryIndex, setViewingHistoryIndex] = useState(null);
+  
   // Autocomplete hint visibility
   const [showAutocompleteHint, setShowAutocompleteHint] = useState(true);
   
@@ -459,6 +462,25 @@ function ChatLayout({
     }
   };
 
+  // Handle viewing historical query details in right panel
+  const handleViewDetails = (turn, index) => {
+    // Update right panel with historical turn data
+    setQueryResult(turn.cypherQuery || '');
+    setExecutionResult(turn.result ? { result: turn.result } : null);
+    setViewingHistoryIndex(index);
+    
+    // Reset editing state
+    setEditableQuery(turn.cypherQuery || '');
+    setOriginalQuery(turn.cypherQuery || '');
+    setQueryGenerated(false);
+    setIsEditingQuery(false);
+    
+    // Open right panel if closed
+    if (!rightPanelOpen) {
+      setRightPanelOpen(true);
+    }
+  };
+
   const handleCancel = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -606,6 +628,7 @@ function ChatLayout({
     });
     
     setError(null);
+    setViewingHistoryIndex(null); // Reset history viewing state
     setPendingUserQuestion(pendingQuestion); // Show user's question immediately
     setIsLoading(true);
     setCurrentStep('Executing query...');
@@ -849,8 +872,9 @@ function ChatLayout({
     setIsLoading(true);
     setCurrentStep('Generating Cypher query...');
     
-    // Reset query editing state and retry state
+    // Reset query editing state, retry state, and history viewing state
     setQueryGenerated(false);
+    setViewingHistoryIndex(null);
     setPendingQuestion('');
     setRetryAttempts([]);
     setCurrentRetry(0);
@@ -1222,6 +1246,35 @@ function ChatLayout({
                   <ContentCopyIcon sx={{ fontSize: 14 }} />
                 </IconButton>
               </Tooltip>
+              {turn.cypherQuery && (
+                <Chip
+                  icon={<CodeIcon sx={{ fontSize: 14 }} />}
+                  label={viewingHistoryIndex === index ? "Viewing" : "Query Details"}
+                  size="small"
+                  onClick={() => handleViewDetails(turn, index)}
+                  variant={viewingHistoryIndex === index ? "filled" : "outlined"}
+                  color={viewingHistoryIndex === index ? "primary" : "default"}
+                  sx={{
+                    height: 22,
+                    fontSize: '0.7rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '& .MuiChip-icon': {
+                      marginLeft: '6px',
+                    },
+                    '&:hover': {
+                      backgroundColor: viewingHistoryIndex === index 
+                        ? theme.palette.primary.main 
+                        : alpha(theme.palette.primary.main, 0.1),
+                      borderColor: theme.palette.primary.main,
+                      color: viewingHistoryIndex === index 
+                        ? 'white' 
+                        : theme.palette.primary.main,
+                    },
+                  }}
+                />
+              )}
             </Box>
 
             <Paper
@@ -2405,6 +2458,26 @@ function ChatLayout({
                 </Box>
               </Collapse>
             </Paper>
+          )}
+
+          {/* Historical Query Viewing Indicator */}
+          {viewingHistoryIndex !== null && (
+            <Alert 
+              severity="info" 
+              sx={{ mb: 2, borderRadius: '12px' }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  onClick={() => setViewingHistoryIndex(null)}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Clear
+                </Button>
+              }
+            >
+              Viewing query from message #{viewingHistoryIndex + 1}
+            </Alert>
           )}
 
           {/* Generated Query Section */}
