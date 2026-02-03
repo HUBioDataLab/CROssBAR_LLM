@@ -31,8 +31,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AddIcon from '@mui/icons-material/Add';
@@ -258,6 +256,8 @@ function App() {
             setRealtimeLogs={setRealtimeLogs}
             pendingFollowUp={pendingFollowUp}
             setPendingFollowUp={setPendingFollowUp}
+            drawerVisible={drawerVisible}
+            onToggleDrawerVisibility={toggleDrawerVisibility}
           />
         );
       case 'about':
@@ -678,31 +678,6 @@ function App() {
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title={drawerVisible ? "Hide sidebar" : "Show sidebar"}>
-                <IconButton 
-                  onClick={toggleDrawerVisibility} 
-                  color="inherit"
-                  sx={{ 
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(0, 113, 227, 0.08)',
-                    backdropFilter: 'blur(10px)',
-                    border: theme => `1px solid ${theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.1)' 
-                      : 'rgba(0, 113, 227, 0.15)'}`,
-                    '&:hover': {
-                      backgroundColor: theme => theme.palette.mode === 'dark' 
-                        ? 'rgba(255, 255, 255, 0.1)' 
-                        : 'rgba(0, 113, 227, 0.12)',
-                    },
-                    color: theme => theme.palette.mode === 'dark'
-                      ? 'inherit'
-                      : 'rgba(0, 113, 227, 0.8)'
-                  }}
-                >
-                  {drawerVisible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                </IconButton>
-              </Tooltip>
               <Tooltip title={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
                 <IconButton 
                   onClick={toggleColorMode} 

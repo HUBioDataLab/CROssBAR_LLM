@@ -89,6 +89,9 @@ function ChatLayout({
   setRealtimeLogs,
   pendingFollowUp,
   setPendingFollowUp,
+  // Left sidebar visibility (only on query tab)
+  drawerVisible,
+  onToggleDrawerVisibility,
 }) {
   const theme = useTheme();
   const syntaxTheme = theme.palette.mode === 'dark' ? dracula : docco;
@@ -1649,6 +1652,32 @@ function ChatLayout({
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {onToggleDrawerVisibility != null && (
+              <Tooltip title={drawerVisible ? "Hide sidebar" : "Show sidebar"}>
+                <IconButton
+                  onClick={onToggleDrawerVisibility}
+                  size="small"
+                  sx={{
+                    backgroundColor: theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : 'rgba(0, 113, 227, 0.08)',
+                    border: `1px solid ${theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.1)'
+                      : 'rgba(0, 113, 227, 0.15)'}`,
+                    '&:hover': {
+                      backgroundColor: theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.1)'
+                        : 'rgba(0, 113, 227, 0.12)',
+                    },
+                    color: theme.palette.mode === 'dark'
+                      ? 'inherit'
+                      : 'rgba(0, 113, 227, 0.8)',
+                  }}
+                >
+                  {drawerVisible ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                </IconButton>
+              </Tooltip>
+            )}
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               CROssBAR Chat
             </Typography>
@@ -1834,7 +1863,11 @@ function ChatLayout({
                 size="small"
                 variant="text"
                 startIcon={<TuneIcon fontSize="small" />}
-                onClick={() => setExpandedSections(prev => ({ ...prev, vectorConfig: !prev.vectorConfig }))}
+                onClick={() => setExpandedSections(prev =>
+                  prev.vectorConfig
+                    ? { ...prev, vectorConfig: false, examples: true }
+                    : { ...prev, vectorConfig: true, examples: false }
+                )}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Configure
@@ -2252,7 +2285,7 @@ function ChatLayout({
                 title="Vector Search Config" 
                 icon={<SearchIcon fontSize="small" color="secondary" />} 
                 section="vectorConfig" 
-                badge={vectorCategory && embeddingType ? "Ready" : "Configure"}
+                badge={vectorCategory && embeddingType ? "Ready" : "Required"}
               />
               <Collapse in={expandedSections.vectorConfig}>
                 <Box sx={{ p: 2, pt: 0 }}>
