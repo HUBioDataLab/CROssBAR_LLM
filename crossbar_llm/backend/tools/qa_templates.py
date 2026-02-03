@@ -156,6 +156,48 @@ VECTOR_SEARCH_CYPHER_GENERATION_PROMPT = PromptTemplate(
     template=VECTOR_SEARCH_CYPHER_GENERATION_TEMPLATE
 )
 
+
+# Template for regenerating Cypher query after execution error
+CYPHER_ERROR_CORRECTION_TEMPLATE = """Task: Fix the Cypher query that produced an error when executed against the Neo4j database.
+
+Original question: {question}
+
+Failed Cypher query:
+{failed_query}
+
+Error message from database:
+{error_message}
+
+Database Schema:
+Nodes: {node_types}
+Node properties: {node_properties}
+Relationships: {edges}
+Relationship properties: {edge_properties}
+{conversation_context}
+
+Instructions:
+- Carefully analyze the error message to understand what went wrong
+- Fix the query to avoid the same error
+- Use only node types, relationship types, and properties that exist in the schema
+- Do not add any directionality to relationships
+- Do not make uppercase, lowercase or camelcase given biological entity names - use them as provided
+- Do not use double quotes symbols in generated Cypher query (i.e., ''x'' or ""x"")
+- Return ONLY the corrected Cypher query with no explanations or apologies
+- Do not include any text except the corrected Cypher query
+
+Common error fixes:
+- CypherSyntaxError: Check for typos, missing brackets, incorrect function usage
+- PropertyError: Verify property names match the schema exactly
+- RelationshipTypeError: Use only relationship types from the schema
+- LabelError: Use only node labels from the schema
+"""
+
+CYPHER_ERROR_CORRECTION_PROMPT = PromptTemplate(
+    input_variables=["question", "failed_query", "error_message", "node_types", "node_properties", "edges", "edge_properties", "conversation_context"],
+    template=CYPHER_ERROR_CORRECTION_TEMPLATE
+)
+
+
 CYPHER_OUTPUT_PARSER_TEMPLATE = """You are a specialized biological data parser. Task:Parse output of Cypher statement to natural language text based on
 given question in order to answer it.
 Instructions:

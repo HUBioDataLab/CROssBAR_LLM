@@ -696,6 +696,30 @@ class RunQueryResponse(BaseModel):
     conversation_turn_count: int = 0
 
 
+class RunQueryWithRetryRequest(BaseModel):
+    """Request model for query execution with automatic retry on error."""
+    query: str
+    question: str
+    llm_type: str
+    top_k: int = 5
+    api_key: str
+    verbose: bool = False
+    provider: Optional[str] = None
+    session_id: Optional[str] = None
+    is_semantic_search: bool = False
+    vector_category: Optional[str] = None
+    max_retries: int = 3  # Maximum number of retry attempts
+
+
+class RetryAttempt(BaseModel):
+    """Model for a single retry attempt."""
+    attempt: int
+    query: str
+    error: Optional[str] = None
+    error_type: Optional[str] = None
+    success: bool = False
+
+
 @app.post("/generate_query/")
 async def generate_query(
     request: Request,
@@ -1379,6 +1403,343 @@ async def run_query(
     })
 
     return response
+
+
+@app.post("/run_query_with_retry/")
+async def run_query_with_retry(
+    request: Request,
+    run_query_request: RunQueryWithRetryRequest,
+    csrf_token: CsrfProtect = Depends(),
+    _: bool = Depends(validate_csrf_if_enabled),
+):
+    """
+    Execute a Cypher query with automatic retry on error.
+    
+    This endpoint uses Server-Sent Events (SSE) to stream progress back to the client.
+    If the query fails, it will regenerate the query using the error message as feedback
+    and retry up to max_retries times.
+    
+    SSE Events:
+    - attempt_started: Query execution attempt starting
+    - attempt_failed: Query attempt failed with error
+    - query_regenerated: New query generated after error
+    - completed: Query executed successfully
+    - failed: All retry attempts exhausted
+    """
+    request_start_time = time.time()
+    
+    # Get client IP
+    client_ip = "unknown"
+    try:
+        x_forwarded_for = request.headers.get("x-forwarded-for")
+        if x_forwarded_for:
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        elif hasattr(request, "client") and hasattr(request.client, "host"):
+            client_ip = request.client.host
+    except:
+        pass
+    
+    Logger.info(
+        "[API] /run_query_with_retry/ - Starting request with retry support",
+        extra={
+            "question": run_query_request.question[:100],
+            "query_preview": run_query_request.query[:200],
+            "max_retries": run_query_request.max_retries,
+            "client_ip": client_ip
+        }
+    )
+    
+    async def event_generator():
+        """Generate SSE events for query execution with retry."""
+        attempts = []
+        current_query = run_query_request.query
+        nl_response = ""
+        result = []
+        follow_up_questions = []
+        conversation_turn_count = 0
+        
+        # Determine provider
+        provider = (
+            (run_query_request.provider or "").strip().lower()
+            if run_query_request.provider
+            else get_provider_for_model(run_query_request.llm_type) or ""
+        )
+        
+        # Handle "env" API key
+        api_key = run_query_request.api_key
+        if api_key == "env":
+            if not provider:
+                yield {
+                    "event": "failed",
+                    "data": json.dumps({
+                        "error": "Provider is required when using 'env' api_key",
+                        "error_type": "ValidationError",
+                        "attempts": attempts
+                    })
+                }
+                return
+            env_var = get_provider_env_var(provider)
+            if env_var:
+                api_key = os.getenv(env_var)
+        
+        # Get or create pipeline instance
+        key = f"{run_query_request.llm_type}_{api_key}"
+        if key not in pipeline_instances:
+            pipeline_instances[key] = RunPipeline(
+                model_name=run_query_request.llm_type,
+                verbose=run_query_request.verbose,
+            )
+        rp = pipeline_instances[key]
+        
+        # Get conversation context
+        conversation_context = ""
+        if run_query_request.session_id:
+            try:
+                conversation_store = get_conversation_store()
+                conversation_context = conversation_store.get_context_string(
+                    run_query_request.session_id,
+                    max_turns=5,
+                    include_cypher=False
+                )
+                conversation_turn_count = len(conversation_store.get_history(run_query_request.session_id))
+            except Exception as e:
+                Logger.warning(
+                    f"[API] /run_query_with_retry/ - Failed to get conversation context",
+                    extra={"error": str(e)}
+                )
+        
+        # Try executing the query with retries
+        max_attempts = run_query_request.max_retries + 1  # Initial attempt + retries
+        
+        for attempt_num in range(1, max_attempts + 1):
+            attempt_info = {
+                "attempt": attempt_num,
+                "query": current_query,
+                "error": None,
+                "error_type": None,
+                "success": False
+            }
+            
+            # Notify client that attempt is starting
+            yield {
+                "event": "attempt_started",
+                "data": json.dumps({
+                    "attempt": attempt_num,
+                    "max_attempts": max_attempts,
+                    "query": current_query
+                })
+            }
+            
+            try:
+                Logger.info(
+                    f"[API] /run_query_with_retry/ - Attempt {attempt_num}/{max_attempts}",
+                    extra={
+                        "query_preview": current_query[:200],
+                        "attempt": attempt_num
+                    }
+                )
+                
+                # Execute the query
+                nl_response, result = rp.execute_query(
+                    query=current_query,
+                    question=run_query_request.question,
+                    model_name=run_query_request.llm_type,
+                    api_key=api_key,
+                    reset_llm_type=True,
+                    conversation_context=conversation_context,
+                )
+                
+                # Success!
+                attempt_info["success"] = True
+                attempts.append(attempt_info)
+                
+                Logger.info(
+                    f"[API] /run_query_with_retry/ - Query succeeded on attempt {attempt_num}",
+                    extra={
+                        "result_count": len(result) if isinstance(result, list) else 1,
+                        "response_preview": nl_response[:200] if nl_response else ""
+                    }
+                )
+                
+                # Store conversation turn if session_id is provided
+                if run_query_request.session_id and conversation_store and nl_response:
+                    try:
+                        conversation_store.add_turn(
+                            session_id=run_query_request.session_id,
+                            question=run_query_request.question,
+                            cypher_query=current_query,
+                            answer=nl_response
+                        )
+                        conversation_turn_count += 1
+                        
+                        # Generate follow-up questions
+                        try:
+                            from tools.langchain_llm_qa_trial import QueryChain
+                            if isinstance(rp.llm, dict):
+                                query_chain = QueryChain(
+                                    cypher_llm=rp.llm["cypher_llm"],
+                                    qa_llm=rp.llm["qa_llm"],
+                                    schema=rp.neo4j_connection.schema,
+                                    model_name=rp.current_model_name,
+                                    provider=rp.current_provider,
+                                )
+                            else:
+                                query_chain = QueryChain(
+                                    cypher_llm=rp.llm,
+                                    qa_llm=rp.llm,
+                                    schema=rp.neo4j_connection.schema,
+                                    model_name=rp.current_model_name,
+                                    provider=rp.current_provider,
+                                )
+                            
+                            follow_up_questions = query_chain.generate_follow_up_questions(
+                                question=run_query_request.question,
+                                answer=nl_response,
+                                is_semantic_search=run_query_request.is_semantic_search,
+                                vector_category=run_query_request.vector_category
+                            )
+                        except Exception as e:
+                            Logger.warning(
+                                f"[API] /run_query_with_retry/ - Failed to generate follow-up questions",
+                                extra={"error": str(e)}
+                            )
+                    except Exception as e:
+                        Logger.warning(
+                            f"[API] /run_query_with_retry/ - Failed to store conversation turn",
+                            extra={"error": str(e)}
+                        )
+                
+                # Send completion event
+                yield {
+                    "event": "completed",
+                    "data": json.dumps({
+                        "response": nl_response,
+                        "result": result,
+                        "query": current_query,
+                        "attempts": attempts,
+                        "total_attempts": len(attempts),
+                        "session_id": run_query_request.session_id,
+                        "conversation_turn_count": conversation_turn_count,
+                        "follow_up_questions": follow_up_questions
+                    })
+                }
+                return
+                
+            except Exception as e:
+                error_message = str(e)
+                error_type = type(e).__name__
+                
+                attempt_info["error"] = error_message
+                attempt_info["error_type"] = error_type
+                attempts.append(attempt_info)
+                
+                Logger.warning(
+                    f"[API] /run_query_with_retry/ - Attempt {attempt_num} failed",
+                    extra={
+                        "error_type": error_type,
+                        "error_message": error_message[:300],
+                        "attempt": attempt_num
+                    }
+                )
+                
+                # Notify client of failure
+                yield {
+                    "event": "attempt_failed",
+                    "data": json.dumps({
+                        "attempt": attempt_num,
+                        "error": error_message,
+                        "error_type": error_type,
+                        "query": current_query
+                    })
+                }
+                
+                # If we have more retries, regenerate the query
+                if attempt_num < max_attempts:
+                    try:
+                        Logger.info(
+                            f"[API] /run_query_with_retry/ - Regenerating query with error feedback",
+                            extra={"attempt": attempt_num}
+                        )
+                        
+                        # Get or create QueryChain for regeneration
+                        from tools.langchain_llm_qa_trial import QueryChain
+                        if isinstance(rp.llm, dict):
+                            query_chain = QueryChain(
+                                cypher_llm=rp.llm["cypher_llm"],
+                                qa_llm=rp.llm["qa_llm"],
+                                schema=rp.neo4j_connection.schema,
+                                model_name=rp.current_model_name,
+                                provider=rp.current_provider,
+                            )
+                        else:
+                            query_chain = QueryChain(
+                                cypher_llm=rp.llm,
+                                qa_llm=rp.llm,
+                                schema=rp.neo4j_connection.schema,
+                                model_name=rp.current_model_name,
+                                provider=rp.current_provider,
+                            )
+                        
+                        # Regenerate query with error feedback
+                        new_query = query_chain.regenerate_query_with_error(
+                            question=run_query_request.question,
+                            failed_query=current_query,
+                            error_message=error_message,
+                            conversation_context=conversation_context,
+                        )
+                        
+                        Logger.info(
+                            f"[API] /run_query_with_retry/ - Query regenerated",
+                            extra={
+                                "new_query_preview": new_query[:200],
+                                "attempt": attempt_num
+                            }
+                        )
+                        
+                        # Notify client of regenerated query
+                        yield {
+                            "event": "query_regenerated",
+                            "data": json.dumps({
+                                "attempt": attempt_num + 1,
+                                "new_query": new_query,
+                                "previous_error": error_message
+                            })
+                        }
+                        
+                        current_query = new_query
+                        
+                    except Exception as regen_error:
+                        Logger.error(
+                            f"[API] /run_query_with_retry/ - Failed to regenerate query",
+                            extra={
+                                "error": str(regen_error),
+                                "attempt": attempt_num
+                            }
+                        )
+                        # Continue with same query for next attempt
+        
+        # All attempts exhausted
+        request_duration_ms = (time.time() - request_start_time) * 1000
+        
+        Logger.error(
+            f"[API] /run_query_with_retry/ - All retry attempts exhausted",
+            extra={
+                "total_attempts": len(attempts),
+                "duration_ms": request_duration_ms
+            }
+        )
+        
+        yield {
+            "event": "failed",
+            "data": json.dumps({
+                "error": "All retry attempts exhausted",
+                "error_type": "MaxRetriesExceeded",
+                "attempts": attempts,
+                "total_attempts": len(attempts)
+            })
+        }
+    
+    return EventSourceResponse(event_generator())
 
 
 @app.delete("/conversation/{session_id}")

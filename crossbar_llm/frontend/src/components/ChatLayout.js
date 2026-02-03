@@ -163,6 +163,12 @@ function ChatLayout({
   const [vectorFile, setVectorFile] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Retry state for query execution
+  const [retryAttempts, setRetryAttempts] = useState([]);
+  const [currentRetry, setCurrentRetry] = useState(0);
+  const [maxRetries] = useState(3);
+  const [isRetrying, setIsRetrying] = useState(false);
+
   // Node label to vector index names mapping
   const nodeLabelToVectorIndexNames = {
     "SmallMolecule": "Selformer",
@@ -681,6 +687,136 @@ function ChatLayout({
     }
   };
 
+  // Run query with SSE retry support
+  const runQueryWithRetry = (cypherQuery, userQuestion, effectiveApiKey) => {
+    return new Promise((resolve, reject) => {
+      // Reset retry state
+      setRetryAttempts([]);
+      setCurrentRetry(0);
+      setIsRetrying(false);
+      
+      // Build the request body for SSE POST
+      const requestBody = {
+        query: cypherQuery,
+        question: userQuestion,
+        llm_type: llmType,
+        provider,
+        api_key: effectiveApiKey,
+        verbose,
+        top_k: topK,
+        session_id: sessionId,
+        is_semantic_search: semanticSearchEnabled,
+        vector_category: semanticSearchEnabled ? vectorCategory : null,
+        max_retries: maxRetries,
+      };
+
+      // Get the base URL from the api service
+      const baseURL = api.defaults.baseURL || '';
+      
+      // Use fetch with POST for SSE (EventSource only supports GET)
+      fetch(`${baseURL}/run_query_with_retry/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
+        body: JSON.stringify(requestBody),
+        credentials: 'include',
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        
+        const processEvents = () => {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              return;
+            }
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep incomplete line in buffer
+            
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                // Skip event type line, we'll get it from data
+                continue;
+              }
+              
+              if (line.startsWith('data:')) {
+                try {
+                  const jsonStr = line.slice(5).trim();
+                  if (!jsonStr) continue;
+                  
+                  const eventData = JSON.parse(jsonStr);
+                  
+                  // Handle different event types based on the data structure
+                  if (eventData.attempt !== undefined && eventData.max_attempts !== undefined && eventData.query !== undefined && !eventData.error) {
+                    // attempt_started
+                    setCurrentRetry(eventData.attempt);
+                    setCurrentStep(`Executing query... (Attempt ${eventData.attempt}/${eventData.max_attempts})`);
+                    if (eventData.attempt > 1) {
+                      setIsRetrying(true);
+                      setQueryResult(eventData.query);
+                      setEditableQuery(eventData.query);
+                    }
+                  } else if (eventData.attempt !== undefined && eventData.error !== undefined && eventData.query !== undefined) {
+                    // attempt_failed
+                    setRetryAttempts(prev => [...prev, {
+                      attempt: eventData.attempt,
+                      query: eventData.query,
+                      error: eventData.error,
+                      errorType: eventData.error_type
+                    }]);
+                    setCurrentStep(`Query failed, regenerating... (Attempt ${eventData.attempt})`);
+                  } else if (eventData.new_query !== undefined && eventData.previous_error !== undefined) {
+                    // query_regenerated
+                    setQueryResult(eventData.new_query);
+                    setEditableQuery(eventData.new_query);
+                    setCurrentStep(`Retrying with corrected query... (Attempt ${eventData.attempt})`);
+                  } else if (eventData.response !== undefined && eventData.result !== undefined) {
+                    // completed
+                    resolve({
+                      response: eventData.response,
+                      result: eventData.result,
+                      query: eventData.query,
+                      follow_up_questions: eventData.follow_up_questions || [],
+                      attempts: eventData.attempts,
+                      total_attempts: eventData.total_attempts,
+                    });
+                    return;
+                  } else if (eventData.error !== undefined && eventData.attempts !== undefined) {
+                    // failed - all retries exhausted
+                    reject({
+                      error: eventData.error,
+                      errorType: eventData.error_type,
+                      attempts: eventData.attempts,
+                    });
+                    return;
+                  }
+                } catch (parseErr) {
+                  console.error('Error parsing SSE data:', parseErr, line);
+                }
+              }
+            }
+            
+            processEvents(); // Continue reading
+          }).catch(err => {
+            reject({ error: err.message });
+          });
+        };
+        
+        processEvents();
+      }).catch(err => {
+        reject({ error: err.message });
+      });
+    });
+  };
+
   // Generate and run query
   const handleSubmit = async (e) => {
     e?.preventDefault();
@@ -710,9 +846,12 @@ function ChatLayout({
     setIsLoading(true);
     setCurrentStep('Generating Cypher query...');
     
-    // Reset query editing state
+    // Reset query editing state and retry state
     setQueryGenerated(false);
     setPendingQuestion('');
+    setRetryAttempts([]);
+    setCurrentRetry(0);
+    setIsRetrying(false);
 
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -749,39 +888,39 @@ function ChatLayout({
       setOriginalQuery(cypherQuery);
       setCurrentStep('Executing query...');
 
-      // Step 2: Run the query
-      const runResponse = await api.post('/run_query/', {
-        query: cypherQuery,
-        question: userQuestion,
-        llm_type: llmType,
-        provider,
-        api_key: effectiveApiKey,
-        verbose,
-        top_k: topK,
-        session_id: sessionId,
-        is_semantic_search: semanticSearchEnabled,
-        vector_category: semanticSearchEnabled ? vectorCategory : null,
-      }, { signal });
+      // Step 2: Run the query with SSE retry support
+      const runResponse = await runQueryWithRetry(cypherQuery, userQuestion, effectiveApiKey);
+      
+      // Use the final query from the response (may be different if retried)
+      const finalQuery = runResponse.query || cypherQuery;
 
       setExecutionResult({
-        result: runResponse.data.result,
-        response: runResponse.data.response,
-        followUpQuestions: runResponse.data.follow_up_questions || [],
+        result: runResponse.result,
+        response: runResponse.response,
+        followUpQuestions: runResponse.follow_up_questions || [],
       });
 
-      // Add to conversation history with semantic search context
+      // Update the query result if it changed during retries
+      if (runResponse.query && runResponse.query !== cypherQuery) {
+        setQueryResult(runResponse.query);
+        setEditableQuery(runResponse.query);
+        setOriginalQuery(runResponse.query);
+      }
+
+      // Add to conversation history with semantic search context and retry info
       addConversationTurn({
         question: userQuestion,
-        cypherQuery: cypherQuery,
-        response: runResponse.data.response,
-        result: runResponse.data.result,
-        followUpQuestions: runResponse.data.follow_up_questions || [],
+        cypherQuery: finalQuery,
+        response: runResponse.response,
+        result: runResponse.result,
+        followUpQuestions: runResponse.follow_up_questions || [],
         isSemanticSearch: semanticSearchEnabled,
         vectorConfig: semanticSearchEnabled ? { vectorCategory, embeddingType } : null,
+        retryAttempts: runResponse.total_attempts > 1 ? runResponse.attempts : null,
       });
 
       // Auto-expand visualization if we have valid results
-      const result = runResponse.data.result;
+      const result = runResponse.result;
       if (result && Array.isArray(result) && result.length > 0 && 
           !(result.length === 1 && typeof result[0] === 'string' && result[0].toLowerCase().includes('did not return any result'))) {
         setExpandedSections(prev => ({ ...prev, visualization: true }));
@@ -793,17 +932,26 @@ function ChatLayout({
       } else {
         console.error('Error:', err);
         let errorMessage = 'An error occurred';
-        const detail = err.response?.data?.detail;
-        if (detail) {
-          if (typeof detail === 'string') {
-            errorMessage = detail;
-          } else if (Array.isArray(detail)) {
-            errorMessage = detail.map(e => e.msg || JSON.stringify(e)).join(', ');
-          } else if (typeof detail === 'object') {
-            errorMessage = detail.msg || detail.error || JSON.stringify(detail);
+        
+        // Handle retry failure with attempts info
+        if (err.attempts) {
+          const lastAttempt = err.attempts[err.attempts.length - 1];
+          errorMessage = `All ${err.attempts.length} attempts failed. Last error: ${lastAttempt?.error || err.error}`;
+        } else {
+          const detail = err.response?.data?.detail;
+          if (detail) {
+            if (typeof detail === 'string') {
+              errorMessage = detail;
+            } else if (Array.isArray(detail)) {
+              errorMessage = detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+            } else if (typeof detail === 'object') {
+              errorMessage = detail.msg || detail.error || JSON.stringify(detail);
+            }
+          } else if (err.error) {
+            errorMessage = err.error;
+          } else if (err.message) {
+            errorMessage = err.message;
           }
-        } else if (err.message) {
-          errorMessage = err.message;
         }
         setError(errorMessage);
         setPendingUserQuestion('');
@@ -812,6 +960,8 @@ function ChatLayout({
       setIsLoading(false);
       setCurrentStep('');
       setPendingUserQuestion('');
+      setIsRetrying(false);
+      setCurrentRetry(0);
       abortControllerRef.current = null;
     }
   };
@@ -1291,15 +1441,17 @@ function ChatLayout({
             }}
           >
             {/* Step Progress Indicator */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: queryResult ? 2 : 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: queryResult || retryAttempts.length > 0 ? 2 : 0 }}>
               <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CircularProgress 
                   size={32} 
                   thickness={3}
                   sx={{ 
-                    color: currentStep.includes('Generating') 
-                      ? theme.palette.info.main 
-                      : theme.palette.success.main 
+                    color: isRetrying
+                      ? theme.palette.warning.main
+                      : currentStep.includes('Generating') 
+                        ? theme.palette.info.main 
+                        : theme.palette.success.main 
                   }} 
                 />
                 <Box sx={{ 
@@ -1310,42 +1462,114 @@ function ChatLayout({
                 }}>
                   {currentStep.includes('Generating') ? (
                     <CodeIcon sx={{ fontSize: 14, color: theme.palette.info.main }} />
+                  ) : isRetrying ? (
+                    <RestoreIcon sx={{ fontSize: 14, color: theme.palette.warning.main }} />
                   ) : (
                     <PlayArrowIcon sx={{ fontSize: 14, color: theme.palette.success.main }} />
                   )}
                 </Box>
               </Box>
-              <Box>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {currentStep}
-                </Typography>
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    {currentStep}
+                  </Typography>
+                  {currentRetry > 1 && (
+                    <Chip
+                      size="small"
+                      label={`Retry ${currentRetry - 1}/${maxRetries}`}
+                      color="warning"
+                      sx={{ height: '20px', fontSize: '0.7rem' }}
+                    />
+                  )}
+                </Box>
                 <Typography variant="caption" color="text.secondary">
                   {currentStep.includes('Generating') 
                     ? 'Translating your question to a database query...'
-                    : 'Running the query and preparing your answer...'}
+                    : isRetrying
+                      ? 'Query failed, regenerating with error feedback...'
+                      : 'Running the query and preparing your answer...'}
                 </Typography>
               </Box>
             </Box>
 
+            {/* Show failed retry attempts */}
+            {retryAttempts.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                {retryAttempts.map((attempt, idx) => (
+                  <Box 
+                    key={idx} 
+                    sx={{ 
+                      mt: 1,
+                      p: 1.5, 
+                      borderRadius: '8px', 
+                      backgroundColor: alpha(theme.palette.error.main, 0.05),
+                      border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ 
+                      fontWeight: 600, 
+                      color: theme.palette.error.main,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      mb: 0.5,
+                    }}>
+                      Attempt {attempt.attempt} failed
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        fontSize: '0.75rem',
+                        color: 'text.secondary',
+                        mb: 1,
+                      }}
+                    >
+                      {attempt.error?.length > 150 ? attempt.error.substring(0, 150) + '...' : attempt.error}
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        fontFamily: 'monospace', 
+                        fontSize: '0.65rem',
+                        color: alpha(theme.palette.text.secondary, 0.7),
+                        display: 'block',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        maxHeight: 40,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {attempt.query?.length > 100 ? attempt.query.substring(0, 100) + '...' : attempt.query}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+
             {/* Show generated query preview when available */}
-            {queryResult && currentStep.includes('Executing') && (
+            {queryResult && (currentStep.includes('Executing') || currentStep.includes('Retrying')) && (
               <Box sx={{ 
                 mt: 1,
                 p: 1.5, 
                 borderRadius: '8px', 
-                backgroundColor: alpha(theme.palette.info.main, 0.05),
-                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                backgroundColor: isRetrying 
+                  ? alpha(theme.palette.warning.main, 0.05)
+                  : alpha(theme.palette.info.main, 0.05),
+                border: `1px solid ${isRetrying 
+                  ? alpha(theme.palette.warning.main, 0.2)
+                  : alpha(theme.palette.info.main, 0.2)}`,
               }}>
                 <Typography variant="caption" sx={{ 
                   fontWeight: 600, 
-                  color: theme.palette.info.main,
+                  color: isRetrying ? theme.palette.warning.main : theme.palette.info.main,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 0.5,
                   mb: 0.5,
                 }}>
                   <CodeIcon sx={{ fontSize: 12 }} />
-                  Generated Cypher Query
+                  {isRetrying ? 'Corrected Cypher Query' : 'Generated Cypher Query'}
                 </Typography>
                 <Typography 
                   variant="body2" 
