@@ -1869,7 +1869,7 @@ function ChatLayout({
           {/* Semantic Search Toggle */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title="Enable semantic search to find similar entities using vector embeddings">
+              <Tooltip title="Use this feature to search the knowledge graph for similar genes/proteins/diseases/pathways/phenotypes/etc. related to your query. For instance, given the query &quot;Find a protein domain similar to interpro:IPR000719, then find proteins that possess this domain,&quot; the system identifies similar domains via vector embeddings and retrieves associated proteins by traversing the knowledge graph.">
                 <FormControlLabel
                   control={
                     <Switch
@@ -1894,7 +1894,7 @@ function ChatLayout({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <SearchIcon fontSize="small" color={semanticSearchEnabled ? 'secondary' : 'action'} />
                       <Typography variant="body2" color={semanticSearchEnabled ? 'secondary' : 'text.secondary'}>
-                        Semantic Search
+                        Enable vector-based similarity search to explore biologically similar entities
                       </Typography>
                     </Box>
                   }
