@@ -144,12 +144,18 @@ def extract_client_ip(request: Request) -> str:
 origins = [
     "http://localhost:3000",  # React dev server
     "http://127.0.0.1:3000",
+    "http://localhost:3001",  # Log dashboard dev server
+    "http://127.0.0.1:3001",
     "http://localhost:8501",
     "http://127.0.0.1:8501",
     f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}",
 ]
 
 app = FastAPI()
+
+# Mount the dashboard API router
+from dashboard_api import router as dashboard_router, setup_dashboard_log_handler
+app.include_router(dashboard_router)
 
 
 # Global exception handler middleware for comprehensive error logging
@@ -2174,6 +2180,7 @@ def get_free_models():
 @app.on_event("startup")
 async def startup_event():
     setup_logging(verbose=False)
+    setup_dashboard_log_handler()
     # Initialize the event loop for threading usage
     asyncio.get_event_loop_policy().get_event_loop()
     Logger.info("API server started with rate limiting enabled")
