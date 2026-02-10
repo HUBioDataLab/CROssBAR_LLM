@@ -109,20 +109,20 @@ function ChatLayout({
   const [topK, setTopK] = useState(10);
   const [verbose, setVerbose] = useState(false);
   const [copySnackbar, setCopySnackbar] = useState(false);
-  
+
   // Query editing state
   const [editableQuery, setEditableQuery] = useState('');
   const [originalQuery, setOriginalQuery] = useState('');
   const [pendingQuestion, setPendingQuestion] = useState(''); // Question waiting for query to be run
   const [queryGenerated, setQueryGenerated] = useState(false); // True when query is generated but not run
   const [isEditingQuery, setIsEditingQuery] = useState(false);
-  
+
   // Historical query viewing state
   const [viewingHistoryIndex, setViewingHistoryIndex] = useState(null);
-  
+
   // Autocomplete hint visibility
   const [showAutocompleteHint, setShowAutocompleteHint] = useState(true);
-  
+
   // Autocomplete state
   const [suggestions, setSuggestions] = useState([]);
   const [displaySuggestions, setDisplaySuggestions] = useState([]);
@@ -132,7 +132,7 @@ function ChatLayout({
   const inputContainerRef = useRef(null);
   const suggestionsRef = useRef(null);
   const debounceTimeoutRef = useRef(null);
-  
+
   // Node type color mapping for autocomplete
   const nodeTypeColors = {
     "Gene": { bg: '#287271', text: '#FFFFFF' },
@@ -144,13 +144,13 @@ function ChatLayout({
     "Phenotype": { bg: '#58d0e8', text: '#FFFFFF' },
     "default": { bg: '#A5ABB6', text: '#FFFFFF' }
   };
-  
+
   // API keys and models state
   const [apiKeysStatus, setApiKeysStatus] = useState({});
   const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
   const [modelChoices, setModelChoices] = useState({});
   const [modelsLoaded, setModelsLoaded] = useState(false);
-  
+
   // Expanded sections in right panel
   const [expandedSections, setExpandedSections] = useState({
     examples: true,
@@ -237,7 +237,7 @@ function ChatLayout({
 
   // Supported/recommended models (highlighted in model selection)
   const supportedModels = [
-    'gpt-5.1', 'gpt-4o', 'o4-mini', 'claude-sonnet-4-5', 'claude-opus-4-1', 
+    'gpt-5.1', 'gpt-4o', 'gpt-5-nano', 'gpt-5-mini', 'claude-sonnet-4-5', 'claude-opus-4-1',
     'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.5-pro', 'gemini-2.5-flash'
   ];
 
@@ -468,13 +468,13 @@ function ChatLayout({
     setQueryResult(turn.cypherQuery || '');
     setExecutionResult(turn.result ? { result: turn.result } : null);
     setViewingHistoryIndex(index);
-    
+
     // Reset editing state
     setEditableQuery(turn.cypherQuery || '');
     setOriginalQuery(turn.cypherQuery || '');
     setQueryGenerated(false);
     setIsEditingQuery(false);
-    
+
     // Open right panel if closed
     if (!rightPanelOpen) {
       setRightPanelOpen(true);
@@ -510,7 +510,7 @@ function ChatLayout({
     if (!Array.isArray(result)) return false;
     if (result.length === 0) return false;
     // Check if it's a "no result" string wrapped in array
-    if (result.length === 1 && typeof result[0] === 'string' && 
+    if (result.length === 1 && typeof result[0] === 'string' &&
         result[0].toLowerCase().includes('did not return any result')) {
       return false;
     }
@@ -581,7 +581,7 @@ function ChatLayout({
       setOriginalQuery(cypherQuery);
       setQueryGenerated(true);
       setIsEditingQuery(false);
-      
+
       // Expand the query section to show the generated query
       setExpandedSections(prev => ({ ...prev, query: true }));
 
@@ -626,7 +626,7 @@ function ChatLayout({
     flushSync(() => {
       setExpandedSections(prev => ({ ...prev, examples: false }));
     });
-    
+
     setError(null);
     setViewingHistoryIndex(null); // Reset history viewing state
     setPendingUserQuestion(pendingQuestion); // Show user's question immediately
@@ -679,7 +679,7 @@ function ChatLayout({
 
       // Auto-expand visualization if we have valid results
       const result = runResponse.data.result;
-      if (result && Array.isArray(result) && result.length > 0 && 
+      if (result && Array.isArray(result) && result.length > 0 &&
           !(result.length === 1 && typeof result[0] === 'string' && result[0].toLowerCase().includes('did not return any result'))) {
         setExpandedSections(prev => ({ ...prev, visualization: true }));
       }
@@ -720,7 +720,7 @@ function ChatLayout({
       setRetryAttempts([]);
       setCurrentRetry(0);
       setIsRetrying(false);
-      
+
       // Build the request body for SSE POST
       const requestBody = {
         query: cypherQuery,
@@ -738,7 +738,7 @@ function ChatLayout({
 
       // Get the base URL from the api service
       const baseURL = api.defaults.baseURL || '';
-      
+
       // Use fetch with POST for SSE (EventSource only supports GET)
       fetch(`${baseURL}/run_query_with_retry/`, {
         method: 'POST',
@@ -752,34 +752,34 @@ function ChatLayout({
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
-        
+
         const processEvents = () => {
           reader.read().then(({ done, value }) => {
             if (done) {
               return;
             }
-            
+
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split('\n');
             buffer = lines.pop() || ''; // Keep incomplete line in buffer
-            
+
             for (const line of lines) {
               if (line.startsWith('event:')) {
                 // Skip event type line, we'll get it from data
                 continue;
               }
-              
+
               if (line.startsWith('data:')) {
                 try {
                   const jsonStr = line.slice(5).trim();
                   if (!jsonStr) continue;
-                  
+
                   const eventData = JSON.parse(jsonStr);
-                  
+
                   // Handle different event types based on the data structure
                   if (eventData.attempt !== undefined && eventData.max_attempts !== undefined && eventData.query !== undefined && !eventData.error) {
                     // attempt_started
@@ -829,13 +829,13 @@ function ChatLayout({
                 }
               }
             }
-            
+
             processEvents(); // Continue reading
           }).catch(err => {
             reject({ error: err.message });
           });
         };
-        
+
         processEvents();
       }).catch(err => {
         reject({ error: err.message });
@@ -871,7 +871,7 @@ function ChatLayout({
     setError(null);
     setIsLoading(true);
     setCurrentStep('Generating Cypher query...');
-    
+
     // Reset query editing state, retry state, and history viewing state
     setQueryGenerated(false);
     setViewingHistoryIndex(null);
@@ -917,7 +917,7 @@ function ChatLayout({
 
       // Step 2: Run the query with SSE retry support
       const runResponse = await runQueryWithRetry(cypherQuery, userQuestion, effectiveApiKey);
-      
+
       // Use the final query from the response (may be different if retried)
       const finalQuery = runResponse.query || cypherQuery;
 
@@ -948,7 +948,7 @@ function ChatLayout({
 
       // Auto-expand visualization if we have valid results
       const result = runResponse.result;
-      if (result && Array.isArray(result) && result.length > 0 && 
+      if (result && Array.isArray(result) && result.length > 0 &&
           !(result.length === 1 && typeof result[0] === 'string' && result[0].toLowerCase().includes('did not return any result'))) {
         setExpandedSections(prev => ({ ...prev, visualization: true }));
       }
@@ -959,7 +959,7 @@ function ChatLayout({
       } else {
         console.error('Error:', err);
         let errorMessage = 'An error occurred';
-        
+
         // Handle retry failure with attempts info
         if (err.attempts) {
           const lastAttempt = err.attempts[err.attempts.length - 1];
@@ -1017,7 +1017,7 @@ function ChatLayout({
         setVectorCategory(example.vectorCategory);
         setEmbeddingType(example.embeddingType || '');
         setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
-        
+
         // Load vector file from public folder if specified
         if (example.vectorFilePath) {
           loadVectorFileFromPath(example.vectorFilePath);
@@ -1048,20 +1048,20 @@ function ChatLayout({
   const handleVectorFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     setSelectedFile(file);
-    
+
     // Upload the file to the server
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('vector_category', vectorCategory);
       formData.append('embedding_type', embeddingType);
-      
+
       const response = await api.post('/upload_vector/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
+
       setVectorFile(response.data);
       setSelectedFile(null); // Clear selected file indicator since upload succeeded
     } catch (error) {
@@ -1109,13 +1109,13 @@ function ChatLayout({
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 550 }}>
         Ask questions about the biomedical knowledge graph. I'll generate Cypher queries and provide natural language answers.
       </Typography>
-      
+
       {/* Features Grid */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, 
-        gap: 2, 
-        width: '100%', 
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+        gap: 2,
+        width: '100%',
         maxWidth: 700,
         mt: 2,
       }}>
@@ -1264,12 +1264,12 @@ function ChatLayout({
                       marginLeft: '6px',
                     },
                     '&:hover': {
-                      backgroundColor: viewingHistoryIndex === index 
-                        ? theme.palette.primary.main 
+                      backgroundColor: viewingHistoryIndex === index
+                        ? theme.palette.primary.main
                         : alpha(theme.palette.primary.main, 0.1),
                       borderColor: theme.palette.primary.main,
-                      color: viewingHistoryIndex === index 
-                        ? 'white' 
+                      color: viewingHistoryIndex === index
+                        ? 'white'
                         : theme.palette.primary.main,
                     },
                   }}
@@ -1288,21 +1288,21 @@ function ChatLayout({
             >
               <Box
                 sx={{
-                  '& p': { 
-                    margin: 0, 
+                  '& p': {
+                    margin: 0,
                     marginBottom: 1.5,
                     lineHeight: 1.7,
                     '&:last-child': { marginBottom: 0 }
                   },
                   '& strong': { fontWeight: 600 },
                   '& em': { fontStyle: 'italic' },
-                  '& ul, & ol': { 
-                    margin: 0, 
+                  '& ul, & ol': {
+                    margin: 0,
                     marginBottom: 1.5,
                     paddingLeft: 2.5,
                     '&:last-child': { marginBottom: 0 }
                   },
-                  '& li': { 
+                  '& li': {
                     marginBottom: 0.5,
                     lineHeight: 1.6,
                   },
@@ -1377,10 +1377,10 @@ function ChatLayout({
                   <LightbulbOutlinedIcon sx={{ fontSize: 14 }} />
                   Suggested follow-ups:
                   {turn.isSemanticSearch && (
-                    <Chip 
-                      label="Vector Search" 
-                      size="small" 
-                      color="secondary" 
+                    <Chip
+                      label="Vector Search"
+                      size="small"
+                      color="secondary"
                       variant="outlined"
                       sx={{ ml: 1, height: '18px', fontSize: '0.65rem' }}
                     />
@@ -1499,22 +1499,22 @@ function ChatLayout({
             {/* Step Progress Indicator */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: queryResult || retryAttempts.length > 0 ? 2 : 0 }}>
               <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CircularProgress 
-                  size={32} 
+                <CircularProgress
+                  size={32}
                   thickness={3}
-                  sx={{ 
+                  sx={{
                     color: isRetrying
                       ? theme.palette.warning.main
-                      : currentStep.includes('Generating') 
-                        ? theme.palette.info.main 
-                        : theme.palette.success.main 
-                  }} 
+                      : currentStep.includes('Generating')
+                        ? theme.palette.info.main
+                        : theme.palette.success.main
+                  }}
                 />
-                <Box sx={{ 
-                  position: 'absolute', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center' 
+                <Box sx={{
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   {currentStep.includes('Generating') ? (
                     <CodeIcon sx={{ fontSize: 14, color: theme.palette.info.main }} />
@@ -1540,7 +1540,7 @@ function ChatLayout({
                   )}
                 </Box>
                 <Typography variant="caption" color="text.secondary">
-                  {currentStep.includes('Generating') 
+                  {currentStep.includes('Generating')
                     ? 'Translating your question to a database query...'
                     : isRetrying
                       ? 'Query failed, regenerating with error feedback...'
@@ -1553,18 +1553,18 @@ function ChatLayout({
             {retryAttempts.length > 0 && (
               <Box sx={{ mb: 2 }}>
                 {retryAttempts.map((attempt, idx) => (
-                  <Box 
-                    key={idx} 
-                    sx={{ 
+                  <Box
+                    key={idx}
+                    sx={{
                       mt: 1,
-                      p: 1.5, 
-                      borderRadius: '8px', 
+                      p: 1.5,
+                      borderRadius: '8px',
                       backgroundColor: alpha(theme.palette.error.main, 0.05),
                       border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
                     }}
                   >
-                    <Typography variant="caption" sx={{ 
-                      fontWeight: 600, 
+                    <Typography variant="caption" sx={{
+                      fontWeight: 600,
                       color: theme.palette.error.main,
                       display: 'flex',
                       alignItems: 'center',
@@ -1573,9 +1573,9 @@ function ChatLayout({
                     }}>
                       Attempt {attempt.attempt} failed
                     </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
+                    <Typography
+                      variant="body2"
+                      sx={{
                         fontSize: '0.75rem',
                         color: 'text.secondary',
                         mb: 1,
@@ -1583,10 +1583,10 @@ function ChatLayout({
                     >
                       {attempt.error?.length > 150 ? attempt.error.substring(0, 150) + '...' : attempt.error}
                     </Typography>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        fontFamily: 'monospace', 
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontFamily: 'monospace',
                         fontSize: '0.65rem',
                         color: alpha(theme.palette.text.secondary, 0.7),
                         display: 'block',
@@ -1605,19 +1605,19 @@ function ChatLayout({
 
             {/* Show generated query preview when available */}
             {queryResult && (currentStep.includes('Executing') || currentStep.includes('Retrying')) && (
-              <Box sx={{ 
+              <Box sx={{
                 mt: 1,
-                p: 1.5, 
-                borderRadius: '8px', 
-                backgroundColor: isRetrying 
+                p: 1.5,
+                borderRadius: '8px',
+                backgroundColor: isRetrying
                   ? alpha(theme.palette.warning.main, 0.05)
                   : alpha(theme.palette.info.main, 0.05),
-                border: `1px solid ${isRetrying 
+                border: `1px solid ${isRetrying
                   ? alpha(theme.palette.warning.main, 0.2)
                   : alpha(theme.palette.info.main, 0.2)}`,
               }}>
-                <Typography variant="caption" sx={{ 
-                  fontWeight: 600, 
+                <Typography variant="caption" sx={{
+                  fontWeight: 600,
                   color: isRetrying ? theme.palette.warning.main : theme.palette.info.main,
                   display: 'flex',
                   alignItems: 'center',
@@ -1627,10 +1627,10 @@ function ChatLayout({
                   <CodeIcon sx={{ fontSize: 12 }} />
                   {isRetrying ? 'Corrected Cypher Query' : 'Generated Cypher Query'}
                 </Typography>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    fontFamily: 'monospace', 
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: 'monospace',
                     fontSize: '0.75rem',
                     color: 'text.secondary',
                     whiteSpace: 'pre-wrap',
@@ -1673,11 +1673,11 @@ function ChatLayout({
   );
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      height: 'calc(100vh - 64px)', 
-      overflow: 'hidden', 
-      mt: '64px', 
+    <Box sx={{
+      display: 'flex',
+      height: 'calc(100vh - 64px)',
+      overflow: 'hidden',
+      mt: '64px',
       width: '100%',
     }}>
       {/* Main Chat Panel */}
@@ -1865,7 +1865,7 @@ function ChatLayout({
               </Box>
             </Paper>
           )}
-          
+
           {/* Semantic Search Toggle */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -2083,10 +2083,10 @@ function ChatLayout({
               </Paper>
             )}
           </Box>
-          
+
           <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', textAlign: 'center' }}>
-            <CodeIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} /> Generate only • 
-            <SendIcon sx={{ fontSize: 12, verticalAlign: 'middle', mx: 0.5 }} /> Generate & Run • 
+            <CodeIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} /> Generate only •
+            <SendIcon sx={{ fontSize: 12, verticalAlign: 'middle', mx: 0.5 }} /> Generate & Run •
             Type @ for autocomplete
           </Typography>
         </Box>
@@ -2112,10 +2112,10 @@ function ChatLayout({
 
           {/* Example Queries Section */}
           <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${semanticSearchEnabled ? theme.palette.secondary.main : theme.palette.divider}`, overflow: 'hidden' }}>
-            <SectionHeader 
-              title={semanticSearchEnabled ? "Vector Search Examples" : "Example Queries"} 
-              icon={<LightbulbOutlinedIcon fontSize="small" color={semanticSearchEnabled ? "secondary" : "warning"} />} 
-              section="examples" 
+            <SectionHeader
+              title={semanticSearchEnabled ? "Vector Search Examples" : "Example Queries"}
+              icon={<LightbulbOutlinedIcon fontSize="small" color={semanticSearchEnabled ? "secondary" : "warning"} />}
+              section="examples"
             />
             <Collapse in={expandedSections.examples}>
               <Box sx={{ p: 2, pt: 0 }}>
@@ -2136,7 +2136,7 @@ function ChatLayout({
                         height: 'auto',
                         py: 1,
                         px: 0.5,
-                        '& .MuiChip-label': { 
+                        '& .MuiChip-label': {
                           whiteSpace: 'normal',
                           textAlign: 'left',
                         },
@@ -2153,18 +2153,18 @@ function ChatLayout({
 
           {/* Settings Section */}
           <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
-            <SectionHeader 
-              title="Model Settings" 
-              icon={<TuneIcon fontSize="small" color="primary" />} 
-              section="settings" 
+            <SectionHeader
+              title="Model Settings"
+              icon={<TuneIcon fontSize="small" color="primary" />}
+              section="settings"
               badge={!isSettingsValid() ? "Required" : null}
             />
             <Collapse in={expandedSections.settings}>
               <Box sx={{ p: 2, pt: 0 }}>
                 <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                   <InputLabel>Provider</InputLabel>
-                  <Select 
-                    value={provider} 
+                  <Select
+                    value={provider}
                     onChange={(e) => {
                       const selectedProvider = e.target.value;
                       setProvider(selectedProvider);
@@ -2176,7 +2176,7 @@ function ChatLayout({
                       } else {
                         setLlmType('');
                       }
-                    }} 
+                    }}
                     label="Provider"
                   >
                     <MenuItem value=""><em>Select a provider</em></MenuItem>
@@ -2198,8 +2198,8 @@ function ChatLayout({
                       }
                       const isSupported = supportedModels.includes(m);
                       return (
-                        <MenuItem 
-                          key={m} 
+                        <MenuItem
+                          key={m}
                           value={m}
                           sx={isSupported ? {
                             backgroundColor: alpha(theme.palette.success.main, 0.08),
@@ -2216,9 +2216,9 @@ function ChatLayout({
                           } : {}}
                         >
                           {isSupported && (
-                            <Box component="span" sx={{ 
-                              color: theme.palette.success.main, 
-                              mr: 1, 
+                            <Box component="span" sx={{
+                              color: theme.palette.success.main,
+                              mr: 1,
                               fontSize: '0.75rem',
                               fontWeight: 700,
                             }}>★</Box>
@@ -2229,7 +2229,7 @@ function ChatLayout({
                     })}
                   </Select>
                 </FormControl>
-                
+
                 {/* API Key Section */}
                 {apiKeysLoaded && apiKeysStatus[provider] ? (
                   <Paper
@@ -2288,7 +2288,7 @@ function ChatLayout({
                     }}
                   />
                 )}
-                
+
                 <TextField
                   fullWidth
                   size="small"
@@ -2300,7 +2300,7 @@ function ChatLayout({
                   helperText="Number of results to return (1-100)"
                   sx={{ mb: 2 }}
                 />
-                
+
                 {/* Debug Mode */}
                 <Box
                   onClick={() => setVerbose(!verbose)}
@@ -2334,10 +2334,10 @@ function ChatLayout({
           {/* Vector Search Configuration Section */}
           {semanticSearchEnabled && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.secondary.main}`, overflow: 'hidden' }}>
-              <SectionHeader 
-                title="Vector Search Config" 
-                icon={<SearchIcon fontSize="small" color="secondary" />} 
-                section="vectorConfig" 
+              <SectionHeader
+                title="Vector Search Config"
+                icon={<SearchIcon fontSize="small" color="secondary" />}
+                section="vectorConfig"
                 badge={vectorCategory && embeddingType ? "Ready" : "Required"}
               />
               <Collapse in={expandedSections.vectorConfig}>
@@ -2345,7 +2345,7 @@ function ChatLayout({
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Configure vector search to find semantically similar entities in the knowledge graph.
                   </Typography>
-                  
+
                   {/* Vector Category */}
                   <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                     <InputLabel>Vector Category</InputLabel>
@@ -2384,7 +2384,7 @@ function ChatLayout({
                     >
                       <MenuItem value=""><em>Select embedding type</em></MenuItem>
                       {vectorCategory && (
-                        Array.isArray(nodeLabelToVectorIndexNames[vectorCategory]) 
+                        Array.isArray(nodeLabelToVectorIndexNames[vectorCategory])
                           ? nodeLabelToVectorIndexNames[vectorCategory].map((opt) => (
                               <MenuItem key={opt} value={opt}>{opt}</MenuItem>
                             ))
@@ -2399,11 +2399,11 @@ function ChatLayout({
 
                   {/* Ready Status */}
                   {vectorCategory && embeddingType && !vectorFile && !selectedFile && (
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 1, 
-                      p: 1.5, 
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      p: 1.5,
                       mb: 2,
                       borderRadius: '8px',
                       backgroundColor: alpha(theme.palette.success.main, 0.08),
@@ -2448,7 +2448,7 @@ function ChatLayout({
                       Selected: {selectedFile.name}
                     </Typography>
                   )}
-                  
+
                   {vectorFile && !selectedFile && (
                     <Typography variant="body2" sx={{ mt: 1, color: 'success.main', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <CheckCircleIcon fontSize="small" />
@@ -2462,13 +2462,13 @@ function ChatLayout({
 
           {/* Historical Query Viewing Indicator */}
           {viewingHistoryIndex !== null && (
-            <Alert 
-              severity="info" 
+            <Alert
+              severity="info"
               sx={{ mb: 2, borderRadius: '12px' }}
               action={
-                <Button 
-                  color="inherit" 
-                  size="small" 
+                <Button
+                  color="inherit"
+                  size="small"
                   onClick={() => setViewingHistoryIndex(null)}
                   sx={{ textTransform: 'none' }}
                 >
@@ -2483,10 +2483,10 @@ function ChatLayout({
           {/* Generated Query Section */}
           {(queryResult || editableQuery) && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${queryGenerated ? theme.palette.info.main : theme.palette.divider}`, overflow: 'hidden' }}>
-              <SectionHeader 
-                title={queryGenerated ? "Generated Query (Editable)" : "Generated Query"} 
-                icon={<CodeIcon fontSize="small" color="info" />} 
-                section="query" 
+              <SectionHeader
+                title={queryGenerated ? "Generated Query (Editable)" : "Generated Query"}
+                icon={<CodeIcon fontSize="small" color="info" />}
+                section="query"
                 badge={queryGenerated ? "Pending" : null}
               />
               <Collapse in={expandedSections.query}>
@@ -2601,9 +2601,9 @@ function ChatLayout({
           {/* Node Visualization Section */}
           {hasValidResults(executionResult?.result) && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
-              <SectionHeader 
-                title="Node Information" 
-                icon={<BubbleChartIcon fontSize="small" color="success" />} 
+              <SectionHeader
+                title="Node Information"
+                icon={<BubbleChartIcon fontSize="small" color="success" />}
                 section="visualization"
                 badge={executionResult.result.length}
               />
@@ -2618,9 +2618,9 @@ function ChatLayout({
           {/* Raw Results Section - show when we have an execution result */}
           {executionResult && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
-              <SectionHeader 
-                title="Structured Query Results" 
-                icon={<DataObjectIcon fontSize="small" color="warning" />} 
+              <SectionHeader
+                title="Structured Query Results"
+                icon={<DataObjectIcon fontSize="small" color="warning" />}
                 section="results"
                 badge={hasValidResults(executionResult?.result) ? executionResult.result.length : null}
               />
