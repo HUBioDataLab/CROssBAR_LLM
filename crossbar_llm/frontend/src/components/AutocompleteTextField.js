@@ -362,8 +362,8 @@ function AutocompleteTextField({
   const handleSuggestionClick = (suggestion) => {
     // Replace underscores with spaces when using the suggestion in the text field
     const displayTerm = suggestion.term.replaceAll('_', ' ');
-    // Format as "Term (Type)"
-    const displaySuggestion = `${displayTerm} (${suggestion.type})`;
+    // Format as "Term <Type>"
+    const displaySuggestion = `${displayTerm} <${suggestion.type}>`;
     const textBeforeCursor = value.slice(0, cursorPosition);
     const textAfterCursor = value.slice(cursorPosition);
     const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
