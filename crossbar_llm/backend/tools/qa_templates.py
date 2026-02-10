@@ -22,7 +22,8 @@ Do not make up node types, edge types or their properties that do not exist in t
 Do not make uppercase, lowercase or camelcase given biological entity names in question. Use it as is.
 Note: SmallMolecule is parent label for Drug and Compounds. If question is asking for both nodes use SmallMolecule.
 Note: Do not use double quotes symbols in generated Cypher query (i.e., ''x'' or ""x"")
-Note: If the question includes an OrganismTaxon organism name (including strain/parentheses/synonyms/special characters), you MUST preserve it exactly as written by the user and 
+ORGANISM NAME FIDELITY RULE (applies only to OrganismTaxon nodes):
+If the question includes an OrganismTaxon organism name (including strain/parentheses/synonyms/special characters), you MUST preserve it exactly as written by the user and 
 use it verbatim in the query (no normalization, no case changes, no escaping/simplifying, no character substitutions), e.g., "Saccharomyces cerevisiae (strain ATCC 204508 / S288c) (Baker^s yeast)" and "Gallus gallus (Chicken)" must be used exactly as written.
 
 ABSOLUTE SCOPE RULE:
