@@ -194,11 +194,11 @@ function ChatLayout({
 
   // Example queries (regular)
   const exampleQueries = [
-    "Which Gene is related to the Disease named psoriasis?",
-    "What proteins does the drug named Caffeine target?",
-    "Which drugs target proteins associated with Alzheimer disease?",
-    "Which pathways are associated with both diabetes mellitus and T-cell non-Hodgkin lymphoma? Return only signaling pathways.",
-    "What are the common side effects of drugs targeting the EGFR gene's protein?",
+    "Which Gene is related to the Disease named psoriasis (Disease) ?",
+    "For proteins associated with amyotrophic lateral sclerosis (Disease), which orthologous proteins in Mus musculus (Mouse) (Organism Taxon) or Danio rerio (Zebrafish) (Brachydanio rerio) (Organism Taxon) have experimentally validated functional annotations, and which conserved biological processes do they support?",
+    "Which drugs target proteins associated with Alzheimer disease (Disease) ?",
+    "Which pathways are associated with both diabetes mellitus (Disease) and T-cell non-Hodgkin lymphoma (Disease) ? Return only signaling pathways.",
+    "What are the common side effects of drugs targeting the protein of EGFR (Gene) ?",
   ];
 
   // Vector search example queries
