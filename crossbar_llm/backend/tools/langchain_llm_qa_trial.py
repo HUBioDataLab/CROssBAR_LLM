@@ -28,6 +28,7 @@ from .qa_templates import (
     FOLLOW_UP_QUESTIONS_PROMPT,
     FOLLOW_UP_QUESTIONS_SEMANTIC_PROMPT,
     CYPHER_ERROR_CORRECTION_PROMPT,
+    CYPHER_EMPTY_RESULT_REGEN_PROMPT,
 )
 from .utils import Logger, timed_block, detailed_timer
 from .structured_logger import (
@@ -721,7 +722,132 @@ class QueryChain:
             
             structured_logger.end_step(step, "failed", e)
             raise
-    
+
+    @timeout(180)
+    def regenerate_query_on_empty(
+        self,
+        question: str,
+        failed_query: str,
+        conversation_context: str = "",
+    ) -> str:
+        """
+        Regenerate a Cypher query when the previous query returned no results.
+        
+        This method is used when a generated query executes successfully but returns
+        an empty result set. It passes the failed query to the LLM so it can try
+        a more general or alternative approach.
+        
+        Args:
+            question: The user's original question
+            failed_query: The Cypher query that returned no results
+            conversation_context: Optional context from previous conversation turns
+            
+        Returns:
+            A new Cypher query that may return results
+        """
+        structured_logger = get_structured_logger()
+        step = structured_logger.start_step("cypher_empty_result_regen", {
+            "question": question,
+            "failed_query": failed_query[:300],
+            "has_conversation_context": bool(conversation_context)
+        })
+        
+        llm_start_time = time()
+        raw_response = ""
+        
+        try:
+            Logger.info(
+                "[CYPHER_EMPTY_REGEN] Starting query regeneration after empty result",
+                extra={
+                    "question": question,
+                    "failed_query": failed_query[:300],
+                    "model": self.model_name,
+                    "provider": self.provider
+                }
+            )
+            
+            # Create the empty result regeneration chain using the stored cypher LLM
+            empty_regen_chain = CYPHER_EMPTY_RESULT_REGEN_PROMPT | self.cypher_llm | StrOutputParser()
+            
+            # Format conversation context
+            cypher_context = ""
+            if conversation_context:
+                cypher_context = f"\nPrevious conversation context:\n{conversation_context}\n"
+            
+            # Create callback handler for this LLM call
+            callback = create_llm_callback(
+                call_type="cypher_empty_result_regen",
+                model_name=self.model_name,
+                provider=self.provider
+            )
+            
+            raw_response = empty_regen_chain.invoke(
+                {
+                    "question": question,
+                    "failed_query": failed_query,
+                    "node_types": self.schema["nodes"],
+                    "node_properties": self.schema["node_properties"],
+                    "edges": self.schema["edges"],
+                    "edge_properties": self.schema["edge_properties"],
+                    "conversation_context": cypher_context,
+                },
+                config={"callbacks": [callback]}
+            )
+            
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.debug(
+                "[CYPHER_EMPTY_REGEN] Raw LLM response received",
+                extra={
+                    "raw_response_length": len(raw_response),
+                    "raw_response_preview": raw_response[:500] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            # Clean the response
+            cleaned = raw_response.strip()
+            cleaned = cleaned.strip("\n")
+            cleaned = cleaned.replace("cypher", "")
+            cleaned = cleaned.strip("`")
+            cleaned = cleaned.replace("''", "'")
+            cleaned = cleaned.replace('""', '"')
+            
+            # Correct the query
+            corrected_query = correct_query(
+                query=cleaned, edge_schema=self.schema["edges"]
+            )
+            
+            Logger.info(
+                "[CYPHER_EMPTY_REGEN] Query regenerated successfully",
+                extra={
+                    "corrected_query": corrected_query[:500],
+                    "query_length": len(corrected_query),
+                    "llm_duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "completed")
+            
+            return corrected_query
+            
+        except Exception as e:
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.exception(
+                "[CYPHER_EMPTY_REGEN] Error during query regeneration",
+                exc=e,
+                context={
+                    "question": question,
+                    "failed_query": failed_query[:200],
+                    "raw_response_preview": raw_response[:200] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "failed", e)
+            raise
+
     def run_qa_chain(
         self,
         output: Any,

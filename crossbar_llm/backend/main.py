@@ -1413,18 +1413,22 @@ async def run_query_with_retry(
     _: bool = Depends(validate_csrf_if_enabled),
 ):
     """
-    Execute a Cypher query with automatic retry on error.
+    Execute a Cypher query with automatic retry on error or empty result.
     
     This endpoint uses Server-Sent Events (SSE) to stream progress back to the client.
-    If the query fails, it will regenerate the query using the error message as feedback
-    and retry up to max_retries times.
+    If the query fails with an error, it retries up to max_retries (default 3) times.
+    If the query returns empty results, it retries up to 2 times with a different query.
+    If all retries are exhausted, the LLM falls back to its internal knowledge to
+    answer the user's question instead of returning an error.
     
     SSE Events:
     - attempt_started: Query execution attempt starting
     - attempt_failed: Query attempt failed with error
-    - query_regenerated: New query generated after error
-    - completed: Query executed successfully
-    - failed: All retry attempts exhausted
+    - attempt_empty: Query returned empty results
+    - query_regenerated: New query generated after error or empty result
+    - fallback_started: Falling back to LLM internal knowledge
+    - completed: Query executed successfully (or fallback response generated)
+    - failed: All retry attempts and fallback exhausted (rare edge case)
     """
     request_start_time = time.time()
     
@@ -1450,13 +1454,25 @@ async def run_query_with_retry(
     )
     
     async def event_generator():
-        """Generate SSE events for query execution with retry."""
+        """Generate SSE events for query execution with retry.
+        
+        Retry logic:
+        - On query execution error: retry up to max_retries (default 3) times
+          with error-corrected query regeneration.
+        - On empty result: retry up to 2 times with empty-result-aware query
+          regeneration.
+        - If all retries are exhausted (for either error or empty), fall back
+          to the LLM's internal knowledge instead of returning an error.
+        """
+        EMPTY_RESULT_STRING = "Given cypher query did not return any result"
+        
         attempts = []
         current_query = run_query_request.query
         nl_response = ""
         result = []
         follow_up_questions = []
         conversation_turn_count = 0
+        conversation_store = None
         
         # Determine provider
         provider = (
@@ -1508,15 +1524,50 @@ async def run_query_with_retry(
                     extra={"error": str(e)}
                 )
         
-        # Try executing the query with retries
-        max_attempts = run_query_request.max_retries + 1  # Initial attempt + retries
+        # Create QueryChain once for reuse across retries
+        from tools.langchain_llm_qa_trial import QueryChain
+        if isinstance(rp.llm, dict):
+            query_chain = QueryChain(
+                cypher_llm=rp.llm["cypher_llm"],
+                qa_llm=rp.llm["qa_llm"],
+                schema=rp.neo4j_connection.schema,
+                model_name=rp.current_model_name,
+                provider=rp.current_provider,
+            )
+        else:
+            query_chain = QueryChain(
+                cypher_llm=rp.llm,
+                qa_llm=rp.llm,
+                schema=rp.neo4j_connection.schema,
+                model_name=rp.current_model_name,
+                provider=rp.current_provider,
+            )
         
-        for attempt_num in range(1, max_attempts + 1):
+        # Retry limits: errors get max_retries (default 3), empty results get 2
+        max_error_retries = run_query_request.max_retries  # Default 3
+        max_empty_retries = 2
+        error_retries_used = 0
+        empty_retries_used = 0
+        attempt_num = 0
+        should_fallback = False
+        last_failure_type = None  # "error" or "empty"
+        
+        Logger.info(
+            "[API] /run_query_with_retry/ - Starting retry loop",
+            extra={
+                "max_error_retries": max_error_retries,
+                "max_empty_retries": max_empty_retries
+            }
+        )
+        
+        while True:
+            attempt_num += 1
             attempt_info = {
                 "attempt": attempt_num,
                 "query": current_query,
                 "error": None,
                 "error_type": None,
+                "empty_result": False,
                 "success": False
             }
             
@@ -1525,17 +1576,20 @@ async def run_query_with_retry(
                 "event": "attempt_started",
                 "data": json.dumps({
                     "attempt": attempt_num,
-                    "max_attempts": max_attempts,
-                    "query": current_query
+                    "query": current_query,
+                    "error_retries_used": error_retries_used,
+                    "empty_retries_used": empty_retries_used
                 })
             }
             
             try:
                 Logger.info(
-                    f"[API] /run_query_with_retry/ - Attempt {attempt_num}/{max_attempts}",
+                    f"[API] /run_query_with_retry/ - Attempt {attempt_num}",
                     extra={
                         "query_preview": current_query[:200],
-                        "attempt": attempt_num
+                        "attempt": attempt_num,
+                        "error_retries_used": error_retries_used,
+                        "empty_retries_used": empty_retries_used
                     }
                 )
                 
@@ -1549,7 +1603,80 @@ async def run_query_with_retry(
                     conversation_context=conversation_context,
                 )
                 
-                # Success!
+                # Check if the query returned empty results
+                is_empty = (isinstance(result, str) and result == EMPTY_RESULT_STRING)
+                
+                if is_empty:
+                    empty_retries_used += 1
+                    attempt_info["empty_result"] = True
+                    attempts.append(attempt_info)
+                    
+                    Logger.warning(
+                        f"[API] /run_query_with_retry/ - Attempt {attempt_num} returned empty results",
+                        extra={
+                            "empty_retries_used": empty_retries_used,
+                            "max_empty_retries": max_empty_retries
+                        }
+                    )
+                    
+                    # Notify client of empty result
+                    yield {
+                        "event": "attempt_empty",
+                        "data": json.dumps({
+                            "attempt": attempt_num,
+                            "query": current_query,
+                            "empty_retries_used": empty_retries_used,
+                            "max_empty_retries": max_empty_retries
+                        })
+                    }
+                    
+                    if empty_retries_used <= max_empty_retries:
+                        # Can still retry for empty result
+                        try:
+                            Logger.info(
+                                "[API] /run_query_with_retry/ - Regenerating query after empty result",
+                                extra={"empty_retries_used": empty_retries_used}
+                            )
+                            
+                            new_query = query_chain.regenerate_query_on_empty(
+                                question=run_query_request.question,
+                                failed_query=current_query,
+                                conversation_context=conversation_context,
+                            )
+                            
+                            Logger.info(
+                                "[API] /run_query_with_retry/ - Query regenerated after empty result",
+                                extra={"new_query_preview": new_query[:200]}
+                            )
+                            
+                            yield {
+                                "event": "query_regenerated",
+                                "data": json.dumps({
+                                    "attempt": attempt_num + 1,
+                                    "new_query": new_query,
+                                    "reason": "empty_result"
+                                })
+                            }
+                            
+                            current_query = new_query
+                            
+                        except Exception as regen_error:
+                            Logger.error(
+                                "[API] /run_query_with_retry/ - Failed to regenerate query after empty result",
+                                extra={"error": str(regen_error)}
+                            )
+                            # Continue with same query for next attempt
+                        
+                        continue
+                    else:
+                        # Max empty retries reached - fall back to internal knowledge
+                        # nl_response already contains the LLM's internal knowledge answer
+                        # because execute_query passed the empty result through the QA chain
+                        should_fallback = True
+                        last_failure_type = "empty"
+                        break
+                
+                # Query succeeded with actual data
                 attempt_info["success"] = True
                 attempts.append(attempt_info)
                 
@@ -1574,24 +1701,6 @@ async def run_query_with_retry(
                         
                         # Generate follow-up questions
                         try:
-                            from tools.langchain_llm_qa_trial import QueryChain
-                            if isinstance(rp.llm, dict):
-                                query_chain = QueryChain(
-                                    cypher_llm=rp.llm["cypher_llm"],
-                                    qa_llm=rp.llm["qa_llm"],
-                                    schema=rp.neo4j_connection.schema,
-                                    model_name=rp.current_model_name,
-                                    provider=rp.current_provider,
-                                )
-                            else:
-                                query_chain = QueryChain(
-                                    cypher_llm=rp.llm,
-                                    qa_llm=rp.llm,
-                                    schema=rp.neo4j_connection.schema,
-                                    model_name=rp.current_model_name,
-                                    provider=rp.current_provider,
-                                )
-                            
                             follow_up_questions = query_chain.generate_follow_up_questions(
                                 question=run_query_request.question,
                                 answer=nl_response,
@@ -1628,17 +1737,19 @@ async def run_query_with_retry(
             except Exception as e:
                 error_message = str(e)
                 error_type = type(e).__name__
+                error_retries_used += 1
                 
                 attempt_info["error"] = error_message
                 attempt_info["error_type"] = error_type
                 attempts.append(attempt_info)
                 
                 Logger.warning(
-                    f"[API] /run_query_with_retry/ - Attempt {attempt_num} failed",
+                    f"[API] /run_query_with_retry/ - Attempt {attempt_num} failed with error",
                     extra={
                         "error_type": error_type,
                         "error_message": error_message[:300],
-                        "attempt": attempt_num
+                        "error_retries_used": error_retries_used,
+                        "max_error_retries": max_error_retries
                     }
                 )
                 
@@ -1649,38 +1760,20 @@ async def run_query_with_retry(
                         "attempt": attempt_num,
                         "error": error_message,
                         "error_type": error_type,
-                        "query": current_query
+                        "query": current_query,
+                        "error_retries_used": error_retries_used,
+                        "max_error_retries": max_error_retries
                     })
                 }
                 
-                # If we have more retries, regenerate the query
-                if attempt_num < max_attempts:
+                if error_retries_used <= max_error_retries:
+                    # Can still retry for error
                     try:
                         Logger.info(
-                            f"[API] /run_query_with_retry/ - Regenerating query with error feedback",
-                            extra={"attempt": attempt_num}
+                            "[API] /run_query_with_retry/ - Regenerating query with error feedback",
+                            extra={"error_retries_used": error_retries_used}
                         )
                         
-                        # Get or create QueryChain for regeneration
-                        from tools.langchain_llm_qa_trial import QueryChain
-                        if isinstance(rp.llm, dict):
-                            query_chain = QueryChain(
-                                cypher_llm=rp.llm["cypher_llm"],
-                                qa_llm=rp.llm["qa_llm"],
-                                schema=rp.neo4j_connection.schema,
-                                model_name=rp.current_model_name,
-                                provider=rp.current_provider,
-                            )
-                        else:
-                            query_chain = QueryChain(
-                                cypher_llm=rp.llm,
-                                qa_llm=rp.llm,
-                                schema=rp.neo4j_connection.schema,
-                                model_name=rp.current_model_name,
-                                provider=rp.current_provider,
-                            )
-                        
-                        # Regenerate query with error feedback
                         new_query = query_chain.regenerate_query_with_error(
                             question=run_query_request.question,
                             failed_query=current_query,
@@ -1689,19 +1782,16 @@ async def run_query_with_retry(
                         )
                         
                         Logger.info(
-                            f"[API] /run_query_with_retry/ - Query regenerated",
-                            extra={
-                                "new_query_preview": new_query[:200],
-                                "attempt": attempt_num
-                            }
+                            "[API] /run_query_with_retry/ - Query regenerated after error",
+                            extra={"new_query_preview": new_query[:200]}
                         )
                         
-                        # Notify client of regenerated query
                         yield {
                             "event": "query_regenerated",
                             "data": json.dumps({
                                 "attempt": attempt_num + 1,
                                 "new_query": new_query,
+                                "reason": "error",
                                 "previous_error": error_message
                             })
                         }
@@ -1710,34 +1800,134 @@ async def run_query_with_retry(
                         
                     except Exception as regen_error:
                         Logger.error(
-                            f"[API] /run_query_with_retry/ - Failed to regenerate query",
-                            extra={
-                                "error": str(regen_error),
-                                "attempt": attempt_num
-                            }
+                            "[API] /run_query_with_retry/ - Failed to regenerate query after error",
+                            extra={"error": str(regen_error)}
                         )
                         # Continue with same query for next attempt
+                    
+                    continue
+                else:
+                    # Max error retries reached - fall back to internal knowledge
+                    should_fallback = True
+                    last_failure_type = "error"
+                    break
         
-        # All attempts exhausted
-        request_duration_ms = (time.time() - request_start_time) * 1000
-        
-        Logger.error(
-            f"[API] /run_query_with_retry/ - All retry attempts exhausted",
-            extra={
-                "total_attempts": len(attempts),
-                "duration_ms": request_duration_ms
+        # All retries exhausted - fall back to LLM internal knowledge
+        if should_fallback:
+            request_duration_ms = (time.time() - request_start_time) * 1000
+            
+            Logger.info(
+                f"[API] /run_query_with_retry/ - Falling back to LLM internal knowledge",
+                extra={
+                    "last_failure_type": last_failure_type,
+                    "error_retries_used": error_retries_used,
+                    "empty_retries_used": empty_retries_used,
+                    "total_attempts": len(attempts),
+                    "duration_ms": request_duration_ms
+                }
+            )
+            
+            yield {
+                "event": "fallback_started",
+                "data": json.dumps({
+                    "reason": last_failure_type,
+                    "total_attempts": len(attempts)
+                })
             }
-        )
-        
-        yield {
-            "event": "failed",
-            "data": json.dumps({
-                "error": "All retry attempts exhausted",
-                "error_type": "MaxRetriesExceeded",
-                "attempts": attempts,
-                "total_attempts": len(attempts)
-            })
-        }
+            
+            fallback_response = ""
+            
+            if last_failure_type == "empty":
+                # nl_response already contains the LLM's internal knowledge answer
+                # from the last execute_query call (QA chain saw the empty result)
+                fallback_response = nl_response
+            else:
+                # Error case - need to explicitly get internal knowledge via QA chain
+                try:
+                    fallback_response = query_chain.run_qa_chain(
+                        output=EMPTY_RESULT_STRING,
+                        input_question=run_query_request.question,
+                        conversation_context=conversation_context,
+                    )
+                except Exception as fallback_error:
+                    Logger.error(
+                        "[API] /run_query_with_retry/ - Failed to generate fallback response",
+                        extra={"error": str(fallback_error)}
+                    )
+                    fallback_response = ""
+            
+            if fallback_response:
+                Logger.info(
+                    "[API] /run_query_with_retry/ - Fallback response generated successfully",
+                    extra={
+                        "response_preview": fallback_response[:200],
+                        "last_failure_type": last_failure_type
+                    }
+                )
+                
+                # Store conversation turn for fallback response
+                if run_query_request.session_id and conversation_store and fallback_response:
+                    try:
+                        conversation_store.add_turn(
+                            session_id=run_query_request.session_id,
+                            question=run_query_request.question,
+                            cypher_query=current_query,
+                            answer=fallback_response
+                        )
+                        conversation_turn_count += 1
+                    except Exception as e:
+                        Logger.warning(
+                            "[API] /run_query_with_retry/ - Failed to store fallback conversation turn",
+                            extra={"error": str(e)}
+                        )
+                
+                # Generate follow-up questions for fallback response
+                try:
+                    follow_up_questions = query_chain.generate_follow_up_questions(
+                        question=run_query_request.question,
+                        answer=fallback_response,
+                        is_semantic_search=run_query_request.is_semantic_search,
+                        vector_category=run_query_request.vector_category
+                    )
+                except Exception as e:
+                    Logger.warning(
+                        "[API] /run_query_with_retry/ - Failed to generate follow-up questions for fallback",
+                        extra={"error": str(e)}
+                    )
+                
+                yield {
+                    "event": "completed",
+                    "data": json.dumps({
+                        "response": fallback_response,
+                        "result": [],
+                        "query": current_query,
+                        "attempts": attempts,
+                        "total_attempts": len(attempts),
+                        "session_id": run_query_request.session_id,
+                        "conversation_turn_count": conversation_turn_count,
+                        "follow_up_questions": follow_up_questions,
+                        "used_internal_knowledge": True
+                    })
+                }
+            else:
+                # Last resort: could not even generate a fallback response
+                Logger.error(
+                    "[API] /run_query_with_retry/ - Failed to generate any response",
+                    extra={
+                        "total_attempts": len(attempts),
+                        "duration_ms": request_duration_ms
+                    }
+                )
+                
+                yield {
+                    "event": "failed",
+                    "data": json.dumps({
+                        "error": "All retry attempts exhausted and fallback failed",
+                        "error_type": "MaxRetriesExceeded",
+                        "attempts": attempts,
+                        "total_attempts": len(attempts)
+                    })
+                }
     
     return EventSourceResponse(event_generator())
 

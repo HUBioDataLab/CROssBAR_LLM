@@ -217,6 +217,43 @@ CYPHER_ERROR_CORRECTION_PROMPT = PromptTemplate(
 )
 
 
+# Template for regenerating Cypher query after empty result
+CYPHER_EMPTY_RESULT_REGEN_TEMPLATE = """Task: The previous Cypher query returned no results from the Neo4j database.
+Try to generate a new, potentially more general Cypher query that might find relevant information for the user's question.
+
+Original question: {question}
+
+Previous Cypher query (returned no results):
+{failed_query}
+
+Database Schema:
+Nodes: {node_types}
+Node properties: {node_properties}
+Relationships: {edges}
+Relationship properties: {edge_properties}
+{conversation_context}
+
+Instructions:
+- Analyze why the previous query might have returned no results (e.g., too many constraints, specific property values that might not exist).
+- Try another approach:
+    - Use more general labels if applicable.
+    - Remove some non-essential WHERE constraints.
+    - Check if relationship directionality or labels are correct according to the schema.
+    - Use 'CONTAINS' instead of exact match for string properties if appropriate.
+- Use only node types, relationship types, and properties that exist in the schema.
+- Do not add any directionality to relationships.
+- Do not make uppercase, lowercase or camelcase given biological entity names - use them as provided.
+- Do not use double quotes symbols in generated Cypher query (i.e., ''x'' or ""x"").
+- Return ONLY the new Cypher query with no explanations or apologies.
+- Do not include any text except the new Cypher query.
+"""
+
+CYPHER_EMPTY_RESULT_REGEN_PROMPT = PromptTemplate(
+    input_variables=["question", "failed_query", "node_types", "node_properties", "edges", "edge_properties", "conversation_context"],
+    template=CYPHER_EMPTY_RESULT_REGEN_TEMPLATE
+)
+
+
 CYPHER_OUTPUT_PARSER_TEMPLATE = """You are a specialized biological data parser. Task:Parse output of Cypher statement to natural language text based on
 given question in order to answer it.
 Instructions:
