@@ -465,7 +465,7 @@ function App() {
                     padding: '2px 5px',
                     borderRadius: '4px',
                     fontSize: '0.75rem',
-                  }}>@</code> followed by an entity name for autocomplete suggestions
+                  }}>@</code> followed by an entity name enables autocomplete suggestions, ensuring accurate entity names and improved search results.
                 </>
               )}
               {autocompleteTipExpanded && (
@@ -529,18 +529,6 @@ function App() {
                 <li>You can also <strong>click</strong> on a suggestion to select it.</li>
                 <li>Available entity types include: <em>genes, proteins, diseases, drugs, pathways</em> and more.</li>
               </Box>
-
-              <Typography variant="caption" sx={{
-                color: 'text.secondary',
-                display: 'block',
-                fontStyle: 'italic',
-                fontFamily: "'Poppins', 'Roboto', sans-serif",
-                mt: 1,
-                pt: 1,
-                borderTop: `1px dashed ${mode === 'dark' ? 'rgba(100, 181, 246, 0.15)' : 'rgba(0, 113, 227, 0.1)'}`,
-              }}>
-                This feature helps ensure accurate entity names in your queries and improves search results.
-              </Typography>
             </Box>
           </Collapse>
         </Box>
