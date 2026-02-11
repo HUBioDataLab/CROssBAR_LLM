@@ -67,11 +67,10 @@ MATCH path=(dis:Disease)-[:Gene_is_related_to_disease]-(:Gene)-[:Gene_regulates_
 WHERE reg.gene_symbol IS NOT NULL AND reg.gene_symbol = "ALX4"
 RETURN path
 
-# Give me all shortest paths between proteins "uniprot:Q9UM00" AND "uniprot:Q9NRD1".
-MATCH path = allShortestPaths(
-  (:Protein {id:'uniprot:Q9UM00'})-[*]-(:Protein {id:'uniprot:Q9NRD1'})
-)
-RETURN path
+# Find all shortest paths between the protein "uniprot:Q9UM00" and the protein whose sequence ends with "VQIF". Return only their names.
+MATCH path = allShortestPaths((p1:Protein)-[*]-(p2:Protein))
+WHERE p1.id = "uniprot:Q9UM00" AND p2.sequence ENDS WITH "VQIF"
+RETURN [n in nodes(path) | n.primary_protein_name] AS protein_names
 
 # Convert 51545 kegg id to entrez id (in other words, ncbi gene id).
 MATCH (g:Gene)
