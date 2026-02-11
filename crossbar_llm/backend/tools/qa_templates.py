@@ -22,6 +22,8 @@ Do not make up node types, edge types or their properties that do not exist in t
 Do not make uppercase, lowercase or camelcase given biological entity names in question. Use it as is.
 Note: SmallMolecule is parent label for Drug and Compounds. If question is asking for both nodes use SmallMolecule.
 Note: Do not use double quotes symbols in generated Cypher query (i.e., ''x'' or ""x"")
+Note: Whenever the query returns nodes (entities), you MUST always include their `id` property in the RETURN clause, even if the question does not explicitly request it.
+
 
 ENTITY NAME PARSING RULE: 
 If the question contains an entity followed by a node type in angle brackets, such as X <Disease> or Y <Protein>, treat the type hint as schema guidance only. 
