@@ -393,7 +393,7 @@ function ChatLayout({
   // Handle suggestion selection
   const handleSuggestionClick = useCallback((suggestion) => {
     const displayTerm = suggestion.term.replaceAll('_', ' ');
-    const displaySuggestion = `${displayTerm} <<${suggestion.type}>>`;
+    const displaySuggestion = `${displayTerm} <${suggestion.type}>`;
     const textBeforeCursor = question.slice(0, cursorPosition);
     const textAfterCursor = question.slice(cursorPosition);
     const lastAtSymbol = textBeforeCursor.lastIndexOf('@');
