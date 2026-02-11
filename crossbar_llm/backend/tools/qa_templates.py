@@ -67,6 +67,12 @@ MATCH path=(dis:Disease)-[:Gene_is_related_to_disease]-(:Gene)-[:Gene_regulates_
 WHERE reg.gene_symbol IS NOT NULL AND reg.gene_symbol = "ALX4"
 RETURN path
 
+# Give me all shortest paths between proteins "uniprot:Q9UM00" AND "uniprot:Q9NRD1".
+MATCH path = allShortestPaths(
+  (:Protein {id:'uniprot:Q9UM00'})-[*]-(:Protein {id:'uniprot:Q9NRD1'})
+)
+RETURN path
+
 # Convert 51545 kegg id to entrez id (in other words, ncbi gene id).
 MATCH (g:Gene)
 WHERE g.kegg_ids IS NOT NULL AND "51545" IN g.kegg_ids
