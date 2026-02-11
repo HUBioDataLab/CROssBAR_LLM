@@ -1033,11 +1033,40 @@ function ChatLayout({
   const loadVectorFileFromPath = async (filePath) => {
     try {
       const response = await fetch(`/${filePath}`);
+      if (!response.ok) {
+        throw new Error(`File not found: ${filePath} (HTTP ${response.status})`);
+      }
       const arrayBuffer = await response.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      // Convert to array for JSON serialization
-      const vectorData = Array.from(uint8Array);
-      setVectorFile(vectorData);
+
+      if (filePath.endsWith('.npy')) {
+        const view = new DataView(arrayBuffer);
+        const version = view.getUint8(6);
+        let headerLen, dataStart;
+        if (version >= 2) {
+          headerLen = view.getUint32(8, true);
+          dataStart = 12 + headerLen;
+        } else {
+          headerLen = view.getUint16(8, true);
+          dataStart = 10 + headerLen;
+        }
+
+        const headerBytes = new Uint8Array(arrayBuffer, version >= 2 ? 12 : 10, headerLen);
+        const headerStr = new TextDecoder().decode(headerBytes);
+
+        let vectorData;
+        if (headerStr.includes('<f8') || headerStr.includes('float64')) {
+          vectorData = Array.from(new Float64Array(arrayBuffer, dataStart));
+        } else if (headerStr.includes('<f4') || headerStr.includes('float32')) {
+          vectorData = Array.from(new Float32Array(arrayBuffer, dataStart));
+        } else {
+          vectorData = Array.from(new Float64Array(arrayBuffer, dataStart));
+        }
+        setVectorFile(vectorData);
+      } else {
+        const text = await new Response(arrayBuffer).text();
+        const vectorData = text.trim().split(/[\n,]/).map(Number);
+        setVectorFile(vectorData);
+      }
     } catch (error) {
       console.error('Error loading vector file:', error);
       setError(`Failed to load vector file: ${filePath}`);
@@ -1059,10 +1088,12 @@ function ChatLayout({
       formData.append('embedding_type', embeddingType);
 
       const response = await api.post('/upload_vector/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': undefined },
       });
 
-      setVectorFile(response.data);
+      // Extract the vector_data array from the response
+      const vectorData = response.data?.vector_data || response.data;
+      setVectorFile(vectorData);
       setSelectedFile(null); // Clear selected file indicator since upload succeeded
     } catch (error) {
       console.error('Error uploading vector file:', error);

@@ -1643,7 +1643,7 @@ class RunPipeline:
             if np.isinf(embedding).any():
                 raise ValueError("Infinite value found in provided embedding")
 
-            if embedding.dtype != np.float_:
+            if embedding.dtype != np.float64:
                 raise ValueError("Input embedding must be a float array")
 
             if len(embedding.shape) > 1:
