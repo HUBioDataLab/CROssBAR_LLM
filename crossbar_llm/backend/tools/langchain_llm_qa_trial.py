@@ -44,7 +44,7 @@ from .llm_callback_handler import create_llm_callback, DetailedLLMCallback
 from langchain_core.output_parsers import StrOutputParser
 from langchain_anthropic import ChatAnthropic
 from langchain_community.llms import Ollama, Replicate
-from langchain_google_genai import GoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
@@ -196,8 +196,8 @@ class GoogleGenerativeLanguageModel:
     ):
         self.model_name = model_name or "gemini-1.5-pro-latest"
         self.temperature = temperature or 0
-        self.llm = GoogleGenerativeAI(
-            api_key=api_key,
+        self.llm = ChatGoogleGenerativeAI(
+            google_api_key=api_key,
             model=self.model_name,
             temperature=self.temperature,
             request_timeout=600,
