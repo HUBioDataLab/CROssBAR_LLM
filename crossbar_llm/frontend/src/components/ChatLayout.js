@@ -204,12 +204,12 @@ function ChatLayout({
   // Vector search example queries
   const vectorExampleQueries = [
     {
-      question: "Give me distinct Biological Processes that are similar to 'cell growth' Biological Process and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
+      question: "Give me distinct Biological Processes that are similar to cell growth <Biological Process> and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
       vectorCategory: "BiologicalProcess",
       embeddingType: "Anc2vec"
     },
     {
-      question: "Find a protein domain that is similar to the domain with ID 'interpro:IPR000719'. Then, find proteins that possess this similar domain.",
+      question: "Find a protein domain that is similar to Protein kinase domain <Domain>. Then, find proteins that possess this similar domain.",
       vectorCategory: "ProteinDomain",
       embeddingType: "Dom2vec"
     },
@@ -1029,10 +1029,12 @@ function ChatLayout({
     inputRef.current?.focus();
   };
 
-  // Load vector file from public folder path
+  // Load vector file from public folder path (use base path so it works when app is deployed under e.g. /llm)
   const loadVectorFileFromPath = async (filePath) => {
     try {
-      const response = await fetch(`/${filePath}`);
+      const base = (process.env.PUBLIC_URL || process.env.REACT_APP_CROSSBAR_LLM_ROOT_PATH || '').replace(/\/$/, '');
+      const url = base ? `${base}/${filePath}` : `/${filePath}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`File not found: ${filePath} (HTTP ${response.status})`);
       }
