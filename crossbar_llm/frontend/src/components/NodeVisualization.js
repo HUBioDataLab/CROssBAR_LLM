@@ -1057,6 +1057,7 @@ function NodeVisualization({ executionResult }) {
                         }}
                       >
                         <ListItemText
+                          disableTypography
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -1147,35 +1148,41 @@ function NodeVisualization({ executionResult }) {
                             </Box>
                           }
                         />
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                           {entity.id && (
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              component={Link}
-                              href={generateExternalLink(entity.id)}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              startIcon={<OpenInNewIcon />}
-                              sx={{
-                                mr: 1,
-                                fontSize: '0.75rem',
-                                textTransform: 'none',
-                                borderRadius: '8px',
-                                minWidth: 'auto',
-                                px: 1.5,
-                                py: 0.5
-                              }}
-                            >
-                              View in External Database
-                            </Button>
+                            <Tooltip title="View in External Database">
+                              <IconButton
+                                size="small"
+                                component={Link}
+                                href={generateExternalLink(entity.id)}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                sx={{
+                                  mr: 0.5,
+                                  color: 'primary.main',
+                                  border: theme => `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                                  borderRadius: '6px',
+                                  p: 0.5,
+                                  '&:hover': {
+                                    backgroundColor: theme => alpha(theme.palette.primary.main, 0.08),
+                                    borderColor: 'primary.main',
+                                  }
+                                }}
+                              >
+                                <OpenInNewIcon sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            </Tooltip>
                           )}
                           <IconButton
                             size="small"
-                            sx={{ transform: expandedEntities[entity.id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+                            sx={{ 
+                              transform: expandedEntities[entity.id] ? 'rotate(180deg)' : 'rotate(0deg)', 
+                              transition: 'transform 0.3s',
+                              p: 0.5,
+                            }}
                           >
-                            <ExpandMoreIcon fontSize="small" />
+                            <ExpandMoreIcon sx={{ fontSize: 18 }} />
                           </IconButton>
                         </Box>
                       </ListItemButton>

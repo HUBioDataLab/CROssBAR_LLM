@@ -25,6 +25,10 @@ from .qa_templates import (
     CYPHER_GENERATION_PROMPT,
     CYPHER_OUTPUT_PARSER_PROMPT,
     VECTOR_SEARCH_CYPHER_GENERATION_PROMPT,
+    FOLLOW_UP_QUESTIONS_PROMPT,
+    FOLLOW_UP_QUESTIONS_SEMANTIC_PROMPT,
+    CYPHER_ERROR_CORRECTION_PROMPT,
+    CYPHER_EMPTY_RESULT_REGEN_PROMPT,
 )
 from .utils import Logger, timed_block, detailed_timer
 from .structured_logger import (
@@ -40,7 +44,7 @@ from .llm_callback_handler import create_llm_callback, DetailedLLMCallback
 from langchain_core.output_parsers import StrOutputParser
 from langchain_anthropic import ChatAnthropic
 from langchain_community.llms import Ollama, Replicate
-from langchain_google_genai import GoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
@@ -90,7 +94,7 @@ class Config(BaseModel):
 
     load_dotenv()
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "default")
-    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "default")
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY") or "default"
     anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "default")
     groq_api_key: str = os.getenv("GROQ_API_KEY", "default")
     replicate_api_key: str = os.getenv("REPLICATE_API_KEY", "default")
@@ -192,7 +196,7 @@ class GoogleGenerativeLanguageModel:
     ):
         self.model_name = model_name or "gemini-1.5-pro-latest"
         self.temperature = temperature or 0
-        self.llm = GoogleGenerativeAI(
+        self.llm = ChatGoogleGenerativeAI(
             api_key=api_key,
             model=self.model_name,
             temperature=self.temperature,
@@ -359,6 +363,8 @@ class QueryChain:
 
         self.qa_chain = CYPHER_OUTPUT_PARSER_PROMPT | qa_llm | StrOutputParser()
         self.qa_prompt_template = CYPHER_OUTPUT_PARSER_PROMPT
+        self.cypher_llm = cypher_llm  # Store the LLM for error correction
+        self.qa_llm = qa_llm  # Store the LLM for follow-up generation
         self.schema = schema
         self.verbose = verbose
         self.search_type = search_type
@@ -389,6 +395,7 @@ class QueryChain:
         question: str,
         vector_index: str = None,
         embedding: Union[list[float], None] = None,
+        conversation_context: str = "",
     ) -> str:
         """
         Executes the query chain: generates a query, corrects it, and returns the corrected query.
@@ -398,13 +405,20 @@ class QueryChain:
         - Raw LLM response
         - Query cleaning steps
         - Timing information
+        
+        Args:
+            question: The user's natural language question
+            vector_index: Optional vector index for similarity search
+            embedding: Optional embedding for vector search
+            conversation_context: Optional context from previous conversation turns
         """
         structured_logger = get_structured_logger()
         step = structured_logger.start_step("cypher_generation", {
             "question": question,
             "search_type": self.search_type,
             "vector_index": vector_index,
-            "has_embedding": embedding is not None
+            "has_embedding": embedding is not None,
+            "has_conversation_context": bool(conversation_context)
         })
         
         llm_start_time = time()
@@ -439,6 +453,11 @@ class QueryChain:
                 provider=self.provider
             )
 
+            # Format conversation context for cypher generation (only include last 2-3 for token efficiency)
+            cypher_context = ""
+            if conversation_context:
+                cypher_context = f"\nPrevious conversation context (use for understanding follow-up questions):\n{conversation_context}\n"
+
             if self.search_type == "db_search":
                 Logger.debug("[CYPHER_GEN] Executing db_search query generation")
                 raw_response = self.cypher_chain.invoke(
@@ -448,6 +467,7 @@ class QueryChain:
                         "edge_properties": self.schema["edge_properties"],
                         "edges": self.schema["edges"],
                         "question": question,
+                        "conversation_context": cypher_context,
                     },
                     config={"callbacks": [callback]}
                 )
@@ -462,6 +482,7 @@ class QueryChain:
                         "edges": self.schema["edges"],
                         "question": question,
                         "vector_index": vector_index,
+                        "conversation_context": cypher_context,
                     },
                     config={"callbacks": [callback]}
                 )
@@ -476,6 +497,7 @@ class QueryChain:
                         "edges": self.schema["edges"],
                         "question": question,
                         "vector_index": vector_index,
+                        "conversation_context": cypher_context,
                     },
                     config={"callbacks": [callback]}
                 )
@@ -569,22 +591,285 @@ class QueryChain:
             
             structured_logger.end_step(step, "failed", e)
             raise
-    
+
+    @timeout(180)
+    def regenerate_query_with_error(
+        self,
+        question: str,
+        failed_query: str,
+        error_message: str,
+        conversation_context: str = "",
+    ) -> str:
+        """
+        Regenerate a Cypher query using error feedback from a failed execution.
+        
+        This method is used when a generated query fails during execution.
+        It passes the error message to the LLM so it can learn from the mistake
+        and generate a corrected query.
+        
+        Args:
+            question: The user's original question
+            failed_query: The Cypher query that failed
+            error_message: The error message from the failed execution
+            conversation_context: Optional context from previous conversation turns
+            
+        Returns:
+            A corrected Cypher query
+        """
+        structured_logger = get_structured_logger()
+        step = structured_logger.start_step("cypher_error_correction", {
+            "question": question,
+            "failed_query": failed_query[:300],
+            "error_message": error_message[:500],
+            "has_conversation_context": bool(conversation_context)
+        })
+        
+        llm_start_time = time()
+        raw_response = ""
+        
+        try:
+            Logger.info(
+                "[CYPHER_ERROR_CORRECTION] Starting query regeneration with error feedback",
+                extra={
+                    "question": question,
+                    "failed_query": failed_query[:300],
+                    "error_message": error_message[:300],
+                    "model": self.model_name,
+                    "provider": self.provider
+                }
+            )
+            
+            # Create the error correction chain using the stored cypher LLM
+            error_correction_chain = CYPHER_ERROR_CORRECTION_PROMPT | self.cypher_llm | StrOutputParser()
+            
+            # Format conversation context
+            cypher_context = ""
+            if conversation_context:
+                cypher_context = f"\nPrevious conversation context:\n{conversation_context}\n"
+            
+            # Create callback handler for this LLM call
+            callback = create_llm_callback(
+                call_type="cypher_error_correction",
+                model_name=self.model_name,
+                provider=self.provider
+            )
+            
+            raw_response = error_correction_chain.invoke(
+                {
+                    "question": question,
+                    "failed_query": failed_query,
+                    "error_message": error_message,
+                    "node_types": self.schema["nodes"],
+                    "node_properties": self.schema["node_properties"],
+                    "edges": self.schema["edges"],
+                    "edge_properties": self.schema["edge_properties"],
+                    "conversation_context": cypher_context,
+                },
+                config={"callbacks": [callback]}
+            )
+            
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.debug(
+                "[CYPHER_ERROR_CORRECTION] Raw LLM response received",
+                extra={
+                    "raw_response_length": len(raw_response),
+                    "raw_response_preview": raw_response[:500] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            # Clean the response
+            cleaned = raw_response.strip()
+            cleaned = cleaned.strip("\n")
+            cleaned = cleaned.replace("cypher", "")
+            cleaned = cleaned.strip("`")
+            cleaned = cleaned.replace("''", "'")
+            cleaned = cleaned.replace('""', '"')
+            
+            # Correct the query
+            corrected_query = correct_query(
+                query=cleaned, edge_schema=self.schema["edges"]
+            )
+            
+            Logger.info(
+                "[CYPHER_ERROR_CORRECTION] Query regenerated successfully",
+                extra={
+                    "corrected_query": corrected_query[:500],
+                    "query_length": len(corrected_query),
+                    "llm_duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "completed")
+            
+            return corrected_query
+            
+        except Exception as e:
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.exception(
+                "[CYPHER_ERROR_CORRECTION] Error during query regeneration",
+                exc=e,
+                context={
+                    "question": question,
+                    "failed_query": failed_query[:200],
+                    "error_message": error_message[:200],
+                    "raw_response_preview": raw_response[:200] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "failed", e)
+            raise
+
+    @timeout(180)
+    def regenerate_query_on_empty(
+        self,
+        question: str,
+        failed_query: str,
+        conversation_context: str = "",
+    ) -> str:
+        """
+        Regenerate a Cypher query when the previous query returned no results.
+        
+        This method is used when a generated query executes successfully but returns
+        an empty result set. It passes the failed query to the LLM so it can try
+        a more general or alternative approach.
+        
+        Args:
+            question: The user's original question
+            failed_query: The Cypher query that returned no results
+            conversation_context: Optional context from previous conversation turns
+            
+        Returns:
+            A new Cypher query that may return results
+        """
+        structured_logger = get_structured_logger()
+        step = structured_logger.start_step("cypher_empty_result_regen", {
+            "question": question,
+            "failed_query": failed_query[:300],
+            "has_conversation_context": bool(conversation_context)
+        })
+        
+        llm_start_time = time()
+        raw_response = ""
+        
+        try:
+            Logger.info(
+                "[CYPHER_EMPTY_REGEN] Starting query regeneration after empty result",
+                extra={
+                    "question": question,
+                    "failed_query": failed_query[:300],
+                    "model": self.model_name,
+                    "provider": self.provider
+                }
+            )
+            
+            # Create the empty result regeneration chain using the stored cypher LLM
+            empty_regen_chain = CYPHER_EMPTY_RESULT_REGEN_PROMPT | self.cypher_llm | StrOutputParser()
+            
+            # Format conversation context
+            cypher_context = ""
+            if conversation_context:
+                cypher_context = f"\nPrevious conversation context:\n{conversation_context}\n"
+            
+            # Create callback handler for this LLM call
+            callback = create_llm_callback(
+                call_type="cypher_empty_result_regen",
+                model_name=self.model_name,
+                provider=self.provider
+            )
+            
+            raw_response = empty_regen_chain.invoke(
+                {
+                    "question": question,
+                    "failed_query": failed_query,
+                    "node_types": self.schema["nodes"],
+                    "node_properties": self.schema["node_properties"],
+                    "edges": self.schema["edges"],
+                    "edge_properties": self.schema["edge_properties"],
+                    "conversation_context": cypher_context,
+                },
+                config={"callbacks": [callback]}
+            )
+            
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.debug(
+                "[CYPHER_EMPTY_REGEN] Raw LLM response received",
+                extra={
+                    "raw_response_length": len(raw_response),
+                    "raw_response_preview": raw_response[:500] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            # Clean the response
+            cleaned = raw_response.strip()
+            cleaned = cleaned.strip("\n")
+            cleaned = cleaned.replace("cypher", "")
+            cleaned = cleaned.strip("`")
+            cleaned = cleaned.replace("''", "'")
+            cleaned = cleaned.replace('""', '"')
+            
+            # Correct the query
+            corrected_query = correct_query(
+                query=cleaned, edge_schema=self.schema["edges"]
+            )
+            
+            Logger.info(
+                "[CYPHER_EMPTY_REGEN] Query regenerated successfully",
+                extra={
+                    "corrected_query": corrected_query[:500],
+                    "query_length": len(corrected_query),
+                    "llm_duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "completed")
+            
+            return corrected_query
+            
+        except Exception as e:
+            llm_duration_ms = (time() - llm_start_time) * 1000
+            
+            Logger.exception(
+                "[CYPHER_EMPTY_REGEN] Error during query regeneration",
+                exc=e,
+                context={
+                    "question": question,
+                    "failed_query": failed_query[:200],
+                    "raw_response_preview": raw_response[:200] if raw_response else "",
+                    "duration_ms": llm_duration_ms
+                }
+            )
+            
+            structured_logger.end_step(step, "failed", e)
+            raise
+
     def run_qa_chain(
         self,
         output: Any,
         input_question: str,
+        conversation_context: str = "",
     ) -> str:
         """
         Run the QA chain to generate a natural language response.
         
         Includes detailed logging of the QA process.
+        
+        Args:
+            output: The Cypher query output to parse
+            input_question: The user's original question
+            conversation_context: Optional context from previous conversation turns
         """
         structured_logger = get_structured_logger()
         step = structured_logger.start_step("qa_response_generation", {
             "question": input_question,
             "output_type": type(output).__name__,
-            "output_length": len(str(output)) if output else 0
+            "output_length": len(str(output)) if output else 0,
+            "has_conversation_context": bool(conversation_context)
         })
         
         qa_start_time = time()
@@ -596,9 +881,15 @@ class QueryChain:
                     "question": input_question,
                     "output_preview": str(output)[:300] if output else "",
                     "model": self.model_name,
-                    "provider": self.provider
+                    "provider": self.provider,
+                    "has_conversation_context": bool(conversation_context)
                 }
             )
+            
+            # Format conversation context for QA response
+            qa_context = ""
+            if conversation_context:
+                qa_context = f"\nPrevious conversation for context:\n{conversation_context}\n"
             
             # Create callback handler for QA chain
             callback = create_llm_callback(
@@ -611,6 +902,7 @@ class QueryChain:
                 {
                     "output": output,
                     "input_question": input_question,
+                    "conversation_context": qa_context,
                 },
                 config={"callbacks": [callback]}
             )
@@ -646,6 +938,91 @@ class QueryChain:
             
             structured_logger.end_step(step, "failed", e)
             raise
+
+    def generate_follow_up_questions(
+        self,
+        question: str,
+        answer: str,
+        is_semantic_search: bool = False,
+        vector_category: str = None,
+    ) -> list[str]:
+        """
+        Generate follow-up question suggestions based on the Q&A.
+        
+        Args:
+            question: The user's original question
+            answer: The assistant's response
+            is_semantic_search: Whether semantic/vector search is active
+            vector_category: The vector category used (e.g., "Protein", "Drug")
+            
+        Returns:
+            List of suggested follow-up questions (up to 3)
+        """
+        try:
+            Logger.debug(
+                f"[FOLLOW_UP] Generating follow-up questions",
+                extra={
+                    "question_preview": question[:100],
+                    "answer_preview": answer[:200],
+                    "is_semantic_search": is_semantic_search,
+                    "vector_category": vector_category
+                }
+            )
+            
+            # Choose the appropriate template based on semantic search status
+            if is_semantic_search and vector_category:
+                follow_up_chain = FOLLOW_UP_QUESTIONS_SEMANTIC_PROMPT | self.qa_llm | StrOutputParser()
+                invoke_params = {
+                    "question": question,
+                    "answer": answer,
+                    "vector_category": vector_category,
+                }
+            else:
+                follow_up_chain = FOLLOW_UP_QUESTIONS_PROMPT | self.qa_llm | StrOutputParser()
+                invoke_params = {
+                    "question": question,
+                    "answer": answer,
+                }
+            
+            callback = create_llm_callback(
+                call_type="follow_up_generation",
+                model_name=self.model_name,
+                provider=self.provider
+            )
+            
+            raw_response = follow_up_chain.invoke(
+                invoke_params,
+                config={"callbacks": [callback]}
+            )
+            
+            # Parse the JSON array from response
+            import json
+            try:
+                # Try to extract JSON array from response
+                response_text = raw_response.strip()
+                # Find the JSON array in the response
+                start_idx = response_text.find('[')
+                end_idx = response_text.rfind(']') + 1
+                if start_idx != -1 and end_idx > start_idx:
+                    json_str = response_text[start_idx:end_idx]
+                    follow_ups = json.loads(json_str)
+                    if isinstance(follow_ups, list):
+                        # Return up to 3 questions
+                        return [str(q).strip() for q in follow_ups[:3] if q]
+            except json.JSONDecodeError:
+                Logger.warning(
+                    "[FOLLOW_UP] Failed to parse follow-up questions as JSON",
+                    extra={"raw_response": raw_response[:300]}
+                )
+            
+            return []
+            
+        except Exception as e:
+            Logger.warning(
+                f"[FOLLOW_UP] Error generating follow-up questions",
+                extra={"error": str(e)}
+            )
+            return []
 
 
 class RunPipeline:
@@ -793,11 +1170,21 @@ class RunPipeline:
             str, list[str], dict[Literal["cypher_llm_model", "qa_llm_model"], str]
         ] = None,
         api_key: str = None,
+        conversation_context: str = "",
     ) -> str:
         """
         Run the query generation pipeline.
         
         Includes comprehensive logging of all steps.
+        
+        Args:
+            question: The user's natural language question
+            vector_index: Optional vector index for similarity search
+            embedding: Optional embedding for vector search
+            reset_llm_type: Whether to reset the LLM type
+            model_name: Model name(s) to use
+            api_key: API key for the LLM provider
+            conversation_context: Optional context from previous conversation turns
         """
         pipeline_start_time = time()
         
@@ -809,7 +1196,8 @@ class RunPipeline:
                 "vector_index": vector_index,
                 "has_embedding": embedding is not None,
                 "model_name": model_name,
-                "reset_llm_type": reset_llm_type
+                "reset_llm_type": reset_llm_type,
+                "has_conversation_context": bool(conversation_context)
             }
         )
 
@@ -868,7 +1256,10 @@ class RunPipeline:
         try:
             if self.search_type == "db_search":
                 Logger.debug("[RUN_FOR_QUERY] Executing db_search pipeline")
-                corrected_query = query_chain.run_cypher_chain(question)
+                corrected_query = query_chain.run_cypher_chain(
+                    question,
+                    conversation_context=conversation_context
+                )
             else:
                 Logger.debug("[RUN_FOR_QUERY] Executing vector_search pipeline")
                 processed_embedding = self.handle_embedding(
@@ -878,6 +1269,7 @@ class RunPipeline:
                     question,
                     vector_index=vector_index,
                     embedding=processed_embedding,
+                    conversation_context=conversation_context,
                 )
 
             pipeline_duration_ms = (time() - pipeline_start_time) * 1000
@@ -915,11 +1307,20 @@ class RunPipeline:
         model_name: str,
         reset_llm_type: bool = False,
         api_key: str = None,
+        conversation_context: str = "",
     ) -> str:
         """
         Execute a Cypher query and generate a natural language response.
         
         Includes comprehensive logging of execution and response generation.
+        
+        Args:
+            query: The Cypher query to execute
+            question: The user's original question
+            model_name: Model name to use
+            reset_llm_type: Whether to reset the LLM type
+            api_key: API key for the LLM provider
+            conversation_context: Optional context from previous conversation turns
         """
         execution_start_time = time()
         
@@ -929,7 +1330,8 @@ class RunPipeline:
                 "query": query[:300],
                 "question": question,
                 "top_k": self.top_k,
-                "model_name": model_name
+                "model_name": model_name,
+                "has_conversation_context": bool(conversation_context)
             }
         )
 
@@ -1001,7 +1403,8 @@ class RunPipeline:
         try:
             final_output = query_chain.run_qa_chain(
                 output=result,
-                input_question=question
+                input_question=question,
+                conversation_context=conversation_context
             )
             qa_duration_ms = (time() - qa_start_time) * 1000
             
@@ -1240,7 +1643,7 @@ class RunPipeline:
             if np.isinf(embedding).any():
                 raise ValueError("Infinite value found in provided embedding")
 
-            if embedding.dtype != np.float_:
+            if embedding.dtype != np.float64:
                 raise ValueError("Input embedding must be a float array")
 
             if len(embedding.shape) > 1:

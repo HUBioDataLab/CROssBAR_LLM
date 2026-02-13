@@ -1,8 +1,11 @@
 import asyncio
+import hashlib
+import hmac
 import json
 import logging
 import os
 import queue
+import secrets
 import threading
 import time
 import traceback
@@ -21,6 +24,7 @@ from config import (
     get_provider_env_var,
     get_provider_for_model,
     get_setting,
+    is_env_model_allowed,
 )
 from config import get_api_keys_status as get_api_keys_status_from_config
 from dotenv import load_dotenv
@@ -48,10 +52,85 @@ from tools.structured_logger import (
     log_error,
     QueryLogEntry,
 )
+from tools.conversation_store import get_conversation_store, ConversationTurn
 from models_config import get_all_models
+
+
+def get_free_models_for_environment() -> List[str]:
+    """
+    Return model names that can be used with server-managed (`api_key='env'`) keys.
+    Development: all models.
+    Production: only explicitly allowed free models with configured provider keys.
+    """
+    all_models = get_all_models()
+    if IS_DEVELOPMENT:
+        return [model for provider_models in all_models.values() for model in provider_models]
+
+    free_models: List[str] = []
+    for model_list in all_models.values():
+        for model_name in model_list:
+            if not is_env_model_allowed(model_name):
+                continue
+            provider_id = get_provider_for_model(model_name)
+            env_var = get_provider_env_var(provider_id or "")
+            if env_var and os.getenv(env_var):
+                free_models.append(model_name)
+    return free_models
 
 # Load environment variables
 load_dotenv()
+
+_IP_HASH_SECRET: bytes = os.getenv("IP_HASH_SECRET", "").encode("utf-8") or secrets.token_bytes(32)
+
+
+def anonymize_ip(raw_ip: str) -> str:
+    """
+    Return a GDPR-compliant anonymized client identifier derived from a raw IP.
+
+    Uses HMAC-SHA256 keyed with a server secret so the mapping is:
+      • deterministic  – same IP ➜ same ID  (rate-limiting works)
+      • irreversible   – cannot recover the IP from the ID
+      • collision-safe – 16 hex chars = 64 bits of entropy
+
+    The returned string has the form ``anon_<16-hex-chars>`` so it is
+    immediately recognisable as an anonymized value in logs.
+    """
+    if not raw_ip or raw_ip in ("unknown", ""):
+        return "anon_unknown"
+    digest = hmac.new(_IP_HASH_SECRET, raw_ip.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"anon_{digest[:16]}"
+
+
+def extract_client_ip(request: Request) -> str:
+    """
+    Extract the real client IP from a request and return its **anonymized**
+    form.  Checks common proxy headers in priority order.
+
+    This is the single source of truth for client identification — every
+    place that needs a client identifier should call this function instead
+    of re-implementing header inspection.
+    """
+    raw_ip: str | None = None
+
+    # 1. X-Forwarded-For (standard reverse-proxy header, first entry = client)
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        raw_ip = xff.split(",")[0].strip()
+    # 2. X-Real-IP (nginx convention)
+    elif request.headers.get("x-real-ip"):
+        raw_ip = request.headers.get("x-real-ip")
+    # 3. X-Client-IP (custom header)
+    elif request.headers.get("x-client-ip"):
+        raw_ip = request.headers.get("x-client-ip")
+    # 4. Direct connection (usually the proxy itself)
+    elif hasattr(request, "client") and request.client and hasattr(request.client, "host"):
+        raw_ip = request.client.host
+    # 5. Fallback
+    else:
+        raw_ip = "127.0.0.1"
+
+    return anonymize_ip(raw_ip)
+
 
 origins = [
     "http://localhost:3000",  # React dev server
@@ -69,7 +148,7 @@ app = FastAPI()
 async def log_requests_and_errors(request: Request, call_next):
     """
     Middleware to log all requests and catch unhandled exceptions.
-    
+
     Provides comprehensive error logging with:
     - Full request details
     - Complete stack traces
@@ -78,33 +157,25 @@ async def log_requests_and_errors(request: Request, call_next):
     """
     request_id = str(time.time())  # Simple request ID for middleware-level logging
     request_start_time = time.time()
-    
-    # Get client IP
-    client_ip = "unknown"
-    try:
-        x_forwarded_for = request.headers.get("x-forwarded-for")
-        if x_forwarded_for:
-            client_ip = x_forwarded_for.split(",")[0].strip()
-        elif hasattr(request, "client") and hasattr(request.client, "host"):
-            client_ip = request.client.host
-    except:
-        pass
-    
+
+    # Get anonymized client identifier
+    client_id = extract_client_ip(request)
+
     Logger.debug(
         f"[MIDDLEWARE] Request started",
         extra={
             "request_id": request_id,
             "method": request.method,
             "path": str(request.url.path),
-            "client_ip": client_ip
+            "client_id": client_id
         }
     )
-    
+
     try:
         response = await call_next(request)
-        
+
         request_duration_ms = (time.time() - request_start_time) * 1000
-        
+
         Logger.debug(
             f"[MIDDLEWARE] Request completed",
             extra={
@@ -115,26 +186,26 @@ async def log_requests_and_errors(request: Request, call_next):
                 "duration_ms": request_duration_ms
             }
         )
-        
+
         return response
-        
+
     except Exception as e:
         request_duration_ms = (time.time() - request_start_time) * 1000
         error_traceback = traceback.format_exc()
-        
+
         Logger.error(
             f"[MIDDLEWARE] Unhandled exception",
             extra={
                 "request_id": request_id,
                 "method": request.method,
                 "path": str(request.url.path),
-                "client_ip": client_ip,
+                "client_id": client_id,
                 "error_type": type(e).__name__,
                 "error_message": str(e),
                 "duration_ms": request_duration_ms
             }
         )
-        
+
         Logger.debug(
             f"[MIDDLEWARE] Exception traceback",
             extra={
@@ -142,14 +213,14 @@ async def log_requests_and_errors(request: Request, call_next):
                 "traceback": error_traceback
             }
         )
-        
+
         # Log to structured logger
         log_error(e, step="middleware", context={
             "method": request.method,
             "path": str(request.url.path),
-            "client_ip": client_ip
+            "client_id": client_id
         })
-        
+
         # Re-raise to let FastAPI handle it
         raise
 
@@ -167,7 +238,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "method": request.method
         }
     )
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail}
@@ -179,7 +250,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 async def global_exception_handler(request: Request, exc: Exception):
     """Handle all unhandled exceptions with comprehensive logging."""
     error_traceback = traceback.format_exc()
-    
+
     Logger.error(
         f"[GLOBAL_EXCEPTION] Unhandled exception",
         extra={
@@ -189,18 +260,18 @@ async def global_exception_handler(request: Request, exc: Exception):
             "method": request.method
         }
     )
-    
+
     Logger.debug(
         f"[GLOBAL_EXCEPTION] Full traceback",
         extra={"traceback": error_traceback}
     )
-    
+
     # Log to structured logger
     log_error(exc, step="global_exception_handler", context={
         "path": str(request.url.path),
         "method": request.method
     })
-    
+
     return JSONResponse(
         status_code=500,
         content={
@@ -213,72 +284,16 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Helper function to get real client IP address when behind a reverse proxy
+# Helper function to get anonymized client identifier when behind a reverse proxy.
+# Returns a GDPR-compliant hashed identifier — never a raw IP address.
 def get_client_ip(request: Request, x_forwarded_for: Optional[str] = Header(None)):
-    # Print debug information
-    Logger.debug(f"x_forwarded_for type: {type(x_forwarded_for)}")
-    Logger.debug(f"x_forwarded_for value: {x_forwarded_for}")
+    """Return an anonymized client identifier derived from the real IP.
 
-    # First try X-Forwarded-For header which is standard for proxies
-    if x_forwarded_for and isinstance(x_forwarded_for, str):
-        # Ensure x_forwarded_for is treated as a string
-        x_forwarded_for_str = str(x_forwarded_for)
-        # X-Forwarded-For can contain multiple IPs - the first one is the client
-        client_ip = x_forwarded_for_str.split(",")[0].strip()
-        Logger.debug(f"Using X-Forwarded-For IP: {client_ip}")
-        return client_ip
-
-    # Try getting X-Forwarded-For from the request headers directly
-    x_forwarded_for_header = request.headers.get("x-forwarded-for")
-    if x_forwarded_for_header:
-        client_ip = x_forwarded_for_header.split(",")[0].strip()
-        Logger.debug(f"Using X-Forwarded-For from request headers: {client_ip}")
-        return client_ip
-
-    # Try X-Real-IP header (used by some proxies)
-    x_real_ip = request.headers.get("x-real-ip")
-    if x_real_ip:
-        Logger.debug(f"Using X-Real-IP: {x_real_ip}")
-        return x_real_ip
-
-    # Try custom header (if client is sending it)
-    client_ip_header = request.headers.get("x-client-ip")
-    if client_ip_header:
-        Logger.debug(f"Using X-Client-IP header: {client_ip_header}")
-        return client_ip_header
-
-    # Try to get from request body if provided
-    try:
-        body = request.scope.get("_body")
-        if body:
-            body_json = json.loads(body.decode("utf-8"))
-            if "client_ip" in body_json:
-                Logger.debug(
-                    f"Using client_ip from request body: {body_json['client_ip']}"
-                )
-                return body_json["client_ip"]
-    except:
-        pass
-
-    # Try to get from form data for multipart/form-data requests
-    try:
-        if request.headers.get("content-type", "").startswith("multipart/form-data"):
-            form_data = request._form
-            if form_data and "client_ip" in form_data:
-                client_ip = form_data.get("client_ip")
-                Logger.debug(f"Using client_ip from form data: {client_ip}")
-                return client_ip
-    except:
-        pass
-
-    # Fall back to the direct client IP (the proxy server most likely)
-    if hasattr(request, "client") and hasattr(request.client, "host"):
-        Logger.debug(f"Falling back to direct client IP: {request.client.host}")
-        return request.client.host
-
-    # Ultimate fallback
-    Logger.warning("Could not determine client IP, using default")
-    return "127.0.0.1"
+    Kept as a FastAPI dependency (``Depends(get_client_ip)``) for backward
+    compatibility.  Internally delegates to :func:`extract_client_ip` which
+    hashes the IP via HMAC-SHA256.
+    """
+    return extract_client_ip(request)
 
 
 # Rate limiting implementation
@@ -286,7 +301,7 @@ class RateLimiter:
     def __init__(self):
         self.request_records: Dict[
             str, List[datetime]
-        ] = {}  # IP -> list of request timestamps
+        ] = {}  # anonymized client ID -> list of request timestamps
         # Get rate limits from configuration
         self.minute_limit = get_setting("rate_limits", {}).get("minute", 6)
         self.hour_limit = get_setting("rate_limits", {}).get("hour", 20)
@@ -309,36 +324,36 @@ class RateLimiter:
                 f"Rate limiting is enabled with limits: {minute_display}/min, {hour_display}/hr, {day_display}/day"
             )
 
-    def is_rate_limited(self, ip: str) -> tuple[bool, str, int]:
+    def is_rate_limited(self, client_id: str) -> tuple[bool, str, int]:
         # If rate limiting is disabled, immediately return not limited
         if not self.enabled:
             return False, "", 0
 
         current_time = datetime.now()
 
-        # Ensure ip is a string
-        ip_str = str(ip)
-        Logger.debug(f"Checking rate limit for IP: {ip_str}")
+        # Ensure client_id is a string
+        id_str = str(client_id)
+        Logger.debug(f"Checking rate limit for client: {id_str}")
 
-        # If IP not in records, add it
-        if ip_str not in self.request_records:
-            self.request_records[ip_str] = [current_time]
+        # If client not in records, add it
+        if id_str not in self.request_records:
+            self.request_records[id_str] = [current_time]
             return False, "", 0
 
         # Add current timestamp to tracking
-        self.request_records[ip_str].append(current_time)
+        self.request_records[id_str].append(current_time)
 
         # Check minute limit - skip check if limit is effectively unlimited
         if self.minute_limit < 1000000:  # Threshold for "unlimited"
             minute_ago = current_time - timedelta(minutes=1)
             minute_requests = [
-                ts for ts in self.request_records[ip_str] if ts > minute_ago
+                ts for ts in self.request_records[id_str] if ts > minute_ago
             ]
             if len(minute_requests) > self.minute_limit:
                 # Keep only requests from the last day for storage efficiency
-                self.request_records[ip_str] = [
+                self.request_records[id_str] = [
                     ts
-                    for ts in self.request_records[ip_str]
+                    for ts in self.request_records[id_str]
                     if ts > (current_time - timedelta(days=1))
                 ]
                 return True, "minute", 60
@@ -346,12 +361,12 @@ class RateLimiter:
         # Check hour limit - skip check if limit is effectively unlimited
         if self.hour_limit < 1000000:  # Threshold for "unlimited"
             hour_ago = current_time - timedelta(hours=1)
-            hour_requests = [ts for ts in self.request_records[ip_str] if ts > hour_ago]
+            hour_requests = [ts for ts in self.request_records[id_str] if ts > hour_ago]
             if len(hour_requests) > self.hour_limit:
                 # Keep only requests from the last day for storage efficiency
-                self.request_records[ip_str] = [
+                self.request_records[id_str] = [
                     ts
-                    for ts in self.request_records[ip_str]
+                    for ts in self.request_records[id_str]
                     if ts > (current_time - timedelta(days=1))
                 ]
                 return True, "hour", 3600
@@ -359,12 +374,12 @@ class RateLimiter:
         # Check day limit - skip check if limit is effectively unlimited
         if self.day_limit < 1000000:  # Threshold for "unlimited"
             day_ago = current_time - timedelta(days=1)
-            day_requests = [ts for ts in self.request_records[ip_str] if ts > day_ago]
+            day_requests = [ts for ts in self.request_records[id_str] if ts > day_ago]
             if len(day_requests) > self.day_limit:
                 # Keep last 30 days of requests
-                self.request_records[ip_str] = [
+                self.request_records[id_str] = [
                     ts
-                    for ts in self.request_records[ip_str]
+                    for ts in self.request_records[id_str]
                     if ts > (current_time - timedelta(days=30))
                 ]
                 return True, "day", 86400
@@ -463,45 +478,15 @@ def check_rate_limit(request: Request):
     if not get_setting("rate_limiting_enabled", True):
         return
 
-    # Get actual client IP from headers or fallback to direct client IP (without Header dependency)
-    # Try getting X-Forwarded-For from the request headers directly
-    client_ip = None
+    # Get anonymized client identifier (GDPR-compliant)
+    client_id = extract_client_ip(request)
+    Logger.debug(f"Client ID for rate limiting: {client_id}")
 
-    # Try to get from headers
-    x_forwarded_for = request.headers.get("x-forwarded-for")
-    if x_forwarded_for:
-        client_ip = x_forwarded_for.split(",")[0].strip()
-        Logger.debug(f"Using X-Forwarded-For from request headers: {client_ip}")
-
-    # Try X-Real-IP header
-    elif request.headers.get("x-real-ip"):
-        client_ip = request.headers.get("x-real-ip")
-        Logger.debug(f"Using X-Real-IP: {client_ip}")
-
-    # Try custom header
-    elif request.headers.get("x-client-ip"):
-        client_ip = request.headers.get("x-client-ip")
-        Logger.debug(f"Using X-Client-IP header: {client_ip}")
-
-    # Fall back to direct client IP
-    elif hasattr(request, "client") and hasattr(request.client, "host"):
-        client_ip = request.client.host
-        Logger.debug(f"Using direct client IP: {client_ip}")
-
-    # Default
-    else:
-        client_ip = "127.0.0.1"
-        Logger.warning("Could not determine client IP, using default")
-
-    # Ensure client_ip is a string
-    client_ip_str = str(client_ip)
-    Logger.debug(f"Client IP for rate limiting: {client_ip_str}")
-
-    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_ip_str)
+    is_limited, limit_type, retry_seconds = rate_limiter.is_rate_limited(client_id)
 
     if is_limited:
         Logger.warning(
-            f"Rate limit exceeded for IP: {client_ip_str} ({limit_type} limit)"
+            f"Rate limit exceeded for client: {client_id} ({limit_type} limit)"
         )
 
         # Get current limits from rate limiter
@@ -662,6 +647,7 @@ class GenerateQueryRequest(BaseModel):
     embedding: Optional[str] = None
     vector_category: Optional[str] = None
     provider: Optional[str] = None
+    session_id: Optional[str] = None  # For conversation memory
 
 
 class RunQueryRequest(BaseModel):
@@ -672,6 +658,50 @@ class RunQueryRequest(BaseModel):
     api_key: str
     verbose: bool = False
     provider: Optional[str] = None
+    session_id: Optional[str] = None  # For conversation memory
+    is_semantic_search: bool = False  # Whether semantic/vector search is active
+    vector_category: Optional[str] = None  # Category used for semantic search
+
+
+class GenerateQueryResponse(BaseModel):
+    """Response model for query generation with conversation support."""
+    query: str
+    session_id: Optional[str] = None
+    conversation_turn_count: int = 0
+
+
+class RunQueryResponse(BaseModel):
+    """Response model for query execution with conversation support."""
+    response: str
+    result: List[Any]
+    query: str
+    follow_up_questions: List[str] = []
+    session_id: Optional[str] = None
+    conversation_turn_count: int = 0
+
+
+class RunQueryWithRetryRequest(BaseModel):
+    """Request model for query execution with automatic retry on error."""
+    query: str
+    question: str
+    llm_type: str
+    top_k: int = 5
+    api_key: str
+    verbose: bool = False
+    provider: Optional[str] = None
+    session_id: Optional[str] = None
+    is_semantic_search: bool = False
+    vector_category: Optional[str] = None
+    max_retries: int = 3  # Maximum number of retry attempts
+
+
+class RetryAttempt(BaseModel):
+    """Model for a single retry attempt."""
+    attempt: int
+    query: str
+    error: Optional[str] = None
+    error_type: Optional[str] = None
+    success: bool = False
 
 
 @app.post("/generate_query/")
@@ -683,26 +713,18 @@ async def generate_query(
 ):
     """
     Generate a Cypher query from a natural language question.
-    
+
     Includes comprehensive structured logging for all steps.
     """
     request_start_time = time.time()
-    
+
     # Apply rate limiting
     check_rate_limit(request)
 
     setup_logging(generate_query_request.verbose)
-    
-    # Get client IP for logging
-    client_ip = ""
-    try:
-        x_forwarded_for = request.headers.get("x-forwarded-for")
-        if x_forwarded_for:
-            client_ip = x_forwarded_for.split(",")[0].strip()
-        elif hasattr(request, "client") and hasattr(request.client, "host"):
-            client_ip = request.client.host
-    except:
-        client_ip = "unknown"
+
+    # Get anonymized client identifier (GDPR-compliant)
+    client_id = extract_client_ip(request)
 
     # Determine provider
     provider = (
@@ -710,14 +732,14 @@ async def generate_query(
         if generate_query_request.provider
         else get_provider_for_model(generate_query_request.llm_type) or ""
     )
-    
+
     # Determine search type
     search_type = "db_search"
     if generate_query_request.embedding is not None or (
         generate_query_request.vector_index and generate_query_request.vector_category
     ):
         search_type = "vector_search"
-    
+
     # Create structured query log
     structured_logger = get_structured_logger()
     query_log = structured_logger.create_query_log(
@@ -729,7 +751,7 @@ async def generate_query(
         vector_index=generate_query_request.vector_index,
         embedding_provided=generate_query_request.embedding is not None,
         verbose=generate_query_request.verbose,
-        client_ip=client_ip
+        client_id=client_id
     )
 
     Logger.info(
@@ -741,13 +763,30 @@ async def generate_query(
             "provider": provider,
             "top_k": generate_query_request.top_k,
             "search_type": search_type,
-            "client_ip": client_ip
+            "client_id": client_id
         }
     )
 
     # Handle "env" API key by using the API key from .env
     api_key = generate_query_request.api_key
     if api_key == "env":
+        if not is_env_model_allowed(generate_query_request.llm_type):
+            Logger.warning(
+                "[API] /generate_query/ - Model not allowed for env API key",
+                extra={
+                    "request_id": query_log.request_id,
+                    "model": generate_query_request.llm_type,
+                    "environment": "production" if IS_PRODUCTION else "development",
+                },
+            )
+            finalize_query_log(status="failed")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"Model '{generate_query_request.llm_type}' is not available "
+                    "with server-managed API keys in this environment."
+                ),
+            )
         if not provider:
             Logger.error(
                 "[API] /generate_query/ - Provider required for env API key",
@@ -791,6 +830,38 @@ async def generate_query(
 
     key = f"{generate_query_request.llm_type}_{api_key}"
 
+    # Get conversation context if session_id is provided
+    conversation_context = ""
+    conversation_turn_count = 0
+    if generate_query_request.session_id:
+        try:
+            conversation_store = get_conversation_store()
+            # For cypher generation, use only last 2-3 turns to save tokens (schema takes most space)
+            conversation_context = conversation_store.get_context_string(
+                generate_query_request.session_id,
+                max_turns=3,
+                include_cypher=True  # Include cypher for context in query generation
+            )
+            conversation_turn_count = len(conversation_store.get_history(generate_query_request.session_id))
+            if conversation_context:
+                Logger.info(
+                    f"[API] /generate_query/ - Using conversation context",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "session_id": generate_query_request.session_id[:8] + "...",
+                        "turn_count": conversation_turn_count,
+                        "context_length": len(conversation_context)
+                    }
+                )
+        except Exception as e:
+            Logger.warning(
+                f"[API] /generate_query/ - Failed to get conversation context",
+                extra={
+                    "request_id": query_log.request_id,
+                    "error": str(e)
+                }
+            )
+
     # Initialize or reuse RunPipeline instance
     if key not in pipeline_instances:
         Logger.info(
@@ -814,7 +885,7 @@ async def generate_query(
     logger.addHandler(handler)
 
     query = ""
-    
+
     try:
         if generate_query_request.embedding is not None:
             Logger.info(
@@ -833,7 +904,7 @@ async def generate_query(
             )
             embedding = [float(x) for x in generate_query_request.embedding.split(",")]
             embedding = np.array(embedding)
-            
+
             Logger.debug(
                 f"[API] /generate_query/ - Embedding parsed",
                 extra={
@@ -854,6 +925,7 @@ async def generate_query(
                 vector_index=vector_index,
                 embedding=embedding,
                 reset_llm_type=True,
+                conversation_context=conversation_context,
             )
 
         elif (
@@ -880,6 +952,7 @@ async def generate_query(
                 vector_index=vector_index,
                 embedding=None,
                 reset_llm_type=True,
+                conversation_context=conversation_context,
             )
 
         else:
@@ -895,10 +968,11 @@ async def generate_query(
                 model_name=generate_query_request.llm_type,
                 api_key=api_key,
                 reset_llm_type=True,
+                conversation_context=conversation_context,
             )
 
         request_duration_ms = (time.time() - request_start_time) * 1000
-        
+
         Logger.info(
             "[API] /generate_query/ - Query generation successful",
             extra={
@@ -908,7 +982,7 @@ async def generate_query(
                 "duration_ms": request_duration_ms
             }
         )
-        
+
         # Finalize the structured log
         finalize_query_log(
             generated_query=query,
@@ -919,7 +993,7 @@ async def generate_query(
     except Exception as e:
         request_duration_ms = (time.time() - request_start_time) * 1000
         error_traceback = traceback.format_exc()
-        
+
         Logger.error(
             f"[API] /generate_query/ - Error generating query",
             extra={
@@ -936,19 +1010,19 @@ async def generate_query(
                 "traceback": error_traceback
             }
         )
-        
+
         # Log error to structured logger
         log_error(e, step="generate_query", context={
             "question": generate_query_request.question,
             "model": generate_query_request.llm_type
         })
-        
+
         finalize_query_log(status="failed")
-        
+
         logs = log_stream.getvalue()
         logger.removeHandler(handler)
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail={
                 "error": str(e),
                 "error_type": type(e).__name__,
@@ -963,9 +1037,11 @@ async def generate_query(
     logs = log_stream.getvalue()
 
     response = JSONResponse({
-        "query": query, 
+        "query": query,
         "logs": logs,
-        "request_id": query_log.request_id
+        "request_id": query_log.request_id,
+        "session_id": generate_query_request.session_id,
+        "conversation_turn_count": conversation_turn_count
     })
     return response
 
@@ -979,26 +1055,18 @@ async def run_query(
 ):
     """
     Execute a Cypher query and generate a natural language response.
-    
+
     Includes comprehensive structured logging for all steps.
     """
     request_start_time = time.time()
-    
+
     # Apply rate limiting
     check_rate_limit(request)
 
     setup_logging(run_query_request.verbose)
-    
-    # Get client IP for logging
-    client_ip = ""
-    try:
-        x_forwarded_for = request.headers.get("x-forwarded-for")
-        if x_forwarded_for:
-            client_ip = x_forwarded_for.split(",")[0].strip()
-        elif hasattr(request, "client") and hasattr(request.client, "host"):
-            client_ip = request.client.host
-    except:
-        client_ip = "unknown"
+
+    # Get anonymized client identifier (GDPR-compliant)
+    client_id = extract_client_ip(request)
 
     # Determine provider
     provider = (
@@ -1006,7 +1074,7 @@ async def run_query(
         if run_query_request.provider
         else get_provider_for_model(run_query_request.llm_type) or ""
     )
-    
+
     # Create structured query log
     structured_logger = get_structured_logger()
     query_log = structured_logger.create_query_log(
@@ -1016,9 +1084,9 @@ async def run_query(
         top_k=run_query_request.top_k,
         search_type="query_execution",
         verbose=run_query_request.verbose,
-        client_ip=client_ip
+        client_id=client_id
     )
-    
+
     # Store the query being executed
     query_log.final_query = run_query_request.query
 
@@ -1031,13 +1099,30 @@ async def run_query(
             "model": run_query_request.llm_type,
             "provider": provider,
             "top_k": run_query_request.top_k,
-            "client_ip": client_ip
+            "client_id": client_id
         }
     )
 
     # Handle "env" API key by using the API key from .env
     api_key = run_query_request.api_key
     if api_key == "env":
+        if not is_env_model_allowed(run_query_request.llm_type):
+            Logger.warning(
+                "[API] /run_query/ - Model not allowed for env API key",
+                extra={
+                    "request_id": query_log.request_id,
+                    "model": run_query_request.llm_type,
+                    "environment": "production" if IS_PRODUCTION else "development",
+                },
+            )
+            finalize_query_log(status="failed")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"Model '{run_query_request.llm_type}' is not available "
+                    "with server-managed API keys in this environment."
+                ),
+            )
         if not provider:
             Logger.error(
                 "[API] /run_query/ - Provider required for env API key",
@@ -1081,6 +1166,50 @@ async def run_query(
 
     key = f"{run_query_request.llm_type}_{api_key}"
 
+    # Get conversation context if session_id is provided
+    conversation_context = ""
+    conversation_turn_count = 0
+    conversation_store = None
+    if run_query_request.session_id:
+        try:
+            conversation_store = get_conversation_store()
+        except Exception as e:
+            Logger.warning(
+                f"[API] /run_query/ - Failed to initialize conversation store",
+                extra={
+                    "request_id": query_log.request_id,
+                    "error": str(e)
+                }
+            )
+
+        if conversation_store:
+            try:
+                # For QA response, use more context (full 10 turns)
+                conversation_context = conversation_store.get_context_string(
+                    run_query_request.session_id,
+                    max_turns=10,
+                    include_cypher=False  # No need for cypher in QA response
+                )
+                conversation_turn_count = len(conversation_store.get_history(run_query_request.session_id))
+                if conversation_context:
+                    Logger.info(
+                        f"[API] /run_query/ - Using conversation context",
+                        extra={
+                            "request_id": query_log.request_id,
+                            "session_id": run_query_request.session_id[:8] + "...",
+                            "turn_count": conversation_turn_count,
+                            "context_length": len(conversation_context)
+                        }
+                    )
+            except Exception as e:
+                Logger.warning(
+                    f"[API] /run_query/ - Failed to get conversation context",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "error": str(e)
+                    }
+                )
+
     if key not in pipeline_instances:
         Logger.info(
             f"[API] /run_query/ - Creating new pipeline instance",
@@ -1104,7 +1233,7 @@ async def run_query(
 
     nl_response = ""
     result = []
-    
+
     try:
         Logger.info(
             "[API] /run_query/ - Executing query against database",
@@ -1113,18 +1242,19 @@ async def run_query(
                 "query_preview": run_query_request.query[:200]
             }
         )
-        
+
         nl_response, result = rp.execute_query(
             query=run_query_request.query,
             question=run_query_request.question,
             model_name=run_query_request.llm_type,
             api_key=api_key,
             reset_llm_type=True,
+            conversation_context=conversation_context,
         )
 
         request_duration_ms = (time.time() - request_start_time) * 1000
         result_count = len(result) if isinstance(result, list) else 1
-        
+
         Logger.info(
             "[API] /run_query/ - Query executed successfully",
             extra={
@@ -1135,7 +1265,81 @@ async def run_query(
                 "duration_ms": request_duration_ms
             }
         )
-        
+
+        # Store the conversation turn if session_id is provided
+        follow_up_questions = []
+        if run_query_request.session_id and conversation_store and nl_response:
+            try:
+                # Store the turn
+                conversation_store.add_turn(
+                    session_id=run_query_request.session_id,
+                    question=run_query_request.question,
+                    cypher_query=run_query_request.query,
+                    answer=nl_response
+                )
+                conversation_turn_count += 1
+
+                Logger.info(
+                    f"[API] /run_query/ - Stored conversation turn",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "session_id": run_query_request.session_id[:8] + "...",
+                        "turn_count": conversation_turn_count
+                    }
+                )
+
+                # Generate follow-up questions
+                try:
+                    # Get the QueryChain to generate follow-ups
+                    from tools.langchain_llm_qa_trial import QueryChain
+                    if isinstance(rp.llm, dict):
+                        query_chain = QueryChain(
+                            cypher_llm=rp.llm["cypher_llm"],
+                            qa_llm=rp.llm["qa_llm"],
+                            schema=rp.neo4j_connection.schema,
+                            model_name=rp.current_model_name,
+                            provider=rp.current_provider,
+                        )
+                    else:
+                        query_chain = QueryChain(
+                            cypher_llm=rp.llm,
+                            qa_llm=rp.llm,
+                            schema=rp.neo4j_connection.schema,
+                            model_name=rp.current_model_name,
+                            provider=rp.current_provider,
+                        )
+
+                    follow_up_questions = query_chain.generate_follow_up_questions(
+                        question=run_query_request.question,
+                        answer=nl_response,
+                        is_semantic_search=run_query_request.is_semantic_search,
+                        vector_category=run_query_request.vector_category
+                    )
+
+                    Logger.info(
+                        f"[API] /run_query/ - Generated follow-up questions",
+                        extra={
+                            "request_id": query_log.request_id,
+                            "follow_up_count": len(follow_up_questions)
+                        }
+                    )
+                except Exception as e:
+                    Logger.warning(
+                        f"[API] /run_query/ - Failed to generate follow-up questions",
+                        extra={
+                            "request_id": query_log.request_id,
+                            "error": str(e)
+                        }
+                    )
+            except Exception as e:
+                Logger.warning(
+                    f"[API] /run_query/ - Failed to store conversation turn",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "error": str(e)
+                    }
+                )
+
         # Finalize the structured log
         finalize_query_log(
             final_query=run_query_request.query,
@@ -1146,7 +1350,7 @@ async def run_query(
     except Exception as e:
         request_duration_ms = (time.time() - request_start_time) * 1000
         error_traceback = traceback.format_exc()
-        
+
         Logger.error(
             f"[API] /run_query/ - Error executing query",
             extra={
@@ -1163,20 +1367,20 @@ async def run_query(
                 "traceback": error_traceback
             }
         )
-        
+
         # Log error to structured logger
         log_error(e, step="run_query", context={
             "question": run_query_request.question,
             "query": run_query_request.query[:200],
             "model": run_query_request.llm_type
         })
-        
+
         finalize_query_log(status="failed")
-        
+
         logs = log_stream.getvalue()
         logger.removeHandler(handler)
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail={
                 "error": str(e),
                 "error_type": type(e).__name__,
@@ -1184,20 +1388,652 @@ async def run_query(
                 "logs": logs
             }
         )
-        
+
     finally:
         logger.removeHandler(handler)
 
     logs = log_stream.getvalue()
 
     response = JSONResponse({
-        "response": nl_response, 
-        "result": result, 
+        "response": nl_response,
+        "result": result,
         "logs": logs,
-        "request_id": query_log.request_id
+        "request_id": query_log.request_id,
+        "session_id": run_query_request.session_id,
+        "conversation_turn_count": conversation_turn_count,
+        "follow_up_questions": follow_up_questions
     })
 
     return response
+
+
+@app.post("/run_query_with_retry/")
+async def run_query_with_retry(
+    request: Request,
+    run_query_request: RunQueryWithRetryRequest,
+    csrf_token: CsrfProtect = Depends(),
+    _: bool = Depends(validate_csrf_if_enabled),
+):
+    """
+    Execute a Cypher query with automatic retry on error or empty result.
+
+    This endpoint uses Server-Sent Events (SSE) to stream progress back to the client.
+    If the query fails with an error, it retries up to max_retries (default 3) times.
+    If the query returns empty results, it retries up to 2 times with a different query.
+    If all retries are exhausted, the LLM falls back to its internal knowledge to
+    answer the user's question instead of returning an error.
+
+    SSE Events:
+    - attempt_started: Query execution attempt starting
+    - attempt_failed: Query attempt failed with error
+    - attempt_empty: Query returned empty results
+    - query_regenerated: New query generated after error or empty result
+    - fallback_started: Falling back to LLM internal knowledge
+    - completed: Query executed successfully (or fallback response generated)
+    - failed: All retry attempts and fallback exhausted (rare edge case)
+    """
+    request_start_time = time.time()
+
+    # Get anonymized client identifier (GDPR-compliant)
+    client_id = extract_client_ip(request)
+
+    Logger.info(
+        "[API] /run_query_with_retry/ - Starting request with retry support",
+        extra={
+            "question": run_query_request.question[:100],
+            "query_preview": run_query_request.query[:200],
+            "max_retries": run_query_request.max_retries,
+            "client_id": client_id
+        }
+    )
+
+    async def event_generator():
+        """Generate SSE events for query execution with retry.
+
+        Retry logic:
+        - On query execution error: retry up to max_retries (default 3) times
+          with error-corrected query regeneration.
+        - On empty result: retry up to 2 times with empty-result-aware query
+          regeneration.
+        - If all retries are exhausted (for either error or empty), fall back
+          to the LLM's internal knowledge instead of returning an error.
+        """
+        EMPTY_RESULT_STRING = "Given cypher query did not return any result"
+
+        attempts = []
+        current_query = run_query_request.query
+        nl_response = ""
+        result = []
+        follow_up_questions = []
+        conversation_turn_count = 0
+        conversation_store = None
+
+        # Determine provider
+        provider = (
+            (run_query_request.provider or "").strip().lower()
+            if run_query_request.provider
+            else get_provider_for_model(run_query_request.llm_type) or ""
+        )
+
+        # Handle "env" API key
+        api_key = run_query_request.api_key
+        if api_key == "env":
+            if not is_env_model_allowed(run_query_request.llm_type):
+                yield {
+                    "event": "failed",
+                    "data": json.dumps({
+                        "error": (
+                            f"Model '{run_query_request.llm_type}' is not available "
+                            "with server-managed API keys in this environment."
+                        ),
+                        "error_type": "ModelNotAllowed",
+                        "attempts": attempts
+                    })
+                }
+                return
+            if not provider:
+                yield {
+                    "event": "failed",
+                    "data": json.dumps({
+                        "error": "Provider is required when using 'env' api_key",
+                        "error_type": "ValidationError",
+                        "attempts": attempts
+                    })
+                }
+                return
+            env_var = get_provider_env_var(provider)
+            if env_var:
+                api_key = os.getenv(env_var)
+
+        # Get or create pipeline instance
+        key = f"{run_query_request.llm_type}_{api_key}"
+        if key not in pipeline_instances:
+            pipeline_instances[key] = RunPipeline(
+                model_name=run_query_request.llm_type,
+                verbose=run_query_request.verbose,
+            )
+        rp = pipeline_instances[key]
+
+        # Get conversation context
+        conversation_context = ""
+        if run_query_request.session_id:
+            try:
+                conversation_store = get_conversation_store()
+                conversation_context = conversation_store.get_context_string(
+                    run_query_request.session_id,
+                    max_turns=5,
+                    include_cypher=False
+                )
+                conversation_turn_count = len(conversation_store.get_history(run_query_request.session_id))
+            except Exception as e:
+                Logger.warning(
+                    f"[API] /run_query_with_retry/ - Failed to get conversation context",
+                    extra={"error": str(e)}
+                )
+
+        # Create QueryChain once for reuse across retries
+        from tools.langchain_llm_qa_trial import QueryChain
+        if isinstance(rp.llm, dict):
+            query_chain = QueryChain(
+                cypher_llm=rp.llm["cypher_llm"],
+                qa_llm=rp.llm["qa_llm"],
+                schema=rp.neo4j_connection.schema,
+                model_name=rp.current_model_name,
+                provider=rp.current_provider,
+            )
+        else:
+            query_chain = QueryChain(
+                cypher_llm=rp.llm,
+                qa_llm=rp.llm,
+                schema=rp.neo4j_connection.schema,
+                model_name=rp.current_model_name,
+                provider=rp.current_provider,
+            )
+
+        # Retry limits: errors get max_retries (default 3), empty results get 2
+        max_error_retries = run_query_request.max_retries  # Default 3
+        max_empty_retries = 2
+        error_retries_used = 0
+        empty_retries_used = 0
+        attempt_num = 0
+        should_fallback = False
+        last_failure_type = None  # "error" or "empty"
+
+        Logger.info(
+            "[API] /run_query_with_retry/ - Starting retry loop",
+            extra={
+                "max_error_retries": max_error_retries,
+                "max_empty_retries": max_empty_retries
+            }
+        )
+
+        while True:
+            attempt_num += 1
+            attempt_info = {
+                "attempt": attempt_num,
+                "query": current_query,
+                "error": None,
+                "error_type": None,
+                "empty_result": False,
+                "success": False
+            }
+
+            # Notify client that attempt is starting
+            yield {
+                "event": "attempt_started",
+                "data": json.dumps({
+                    "attempt": attempt_num,
+                    "query": current_query,
+                    "error_retries_used": error_retries_used,
+                    "empty_retries_used": empty_retries_used
+                })
+            }
+
+            try:
+                Logger.info(
+                    f"[API] /run_query_with_retry/ - Attempt {attempt_num}",
+                    extra={
+                        "query_preview": current_query[:200],
+                        "attempt": attempt_num,
+                        "error_retries_used": error_retries_used,
+                        "empty_retries_used": empty_retries_used
+                    }
+                )
+
+                # Execute the query
+                nl_response, result = rp.execute_query(
+                    query=current_query,
+                    question=run_query_request.question,
+                    model_name=run_query_request.llm_type,
+                    api_key=api_key,
+                    reset_llm_type=True,
+                    conversation_context=conversation_context,
+                )
+
+                # Check if the query returned empty results
+                is_empty = (isinstance(result, str) and result == EMPTY_RESULT_STRING)
+
+                if is_empty:
+                    empty_retries_used += 1
+                    attempt_info["empty_result"] = True
+                    attempts.append(attempt_info)
+
+                    Logger.warning(
+                        f"[API] /run_query_with_retry/ - Attempt {attempt_num} returned empty results",
+                        extra={
+                            "empty_retries_used": empty_retries_used,
+                            "max_empty_retries": max_empty_retries
+                        }
+                    )
+
+                    # Notify client of empty result
+                    yield {
+                        "event": "attempt_empty",
+                        "data": json.dumps({
+                            "attempt": attempt_num,
+                            "query": current_query,
+                            "empty_retries_used": empty_retries_used,
+                            "max_empty_retries": max_empty_retries
+                        })
+                    }
+
+                    if empty_retries_used <= max_empty_retries:
+                        # Can still retry for empty result
+                        try:
+                            Logger.info(
+                                "[API] /run_query_with_retry/ - Regenerating query after empty result",
+                                extra={"empty_retries_used": empty_retries_used}
+                            )
+
+                            new_query = query_chain.regenerate_query_on_empty(
+                                question=run_query_request.question,
+                                failed_query=current_query,
+                                conversation_context=conversation_context,
+                            )
+
+                            Logger.info(
+                                "[API] /run_query_with_retry/ - Query regenerated after empty result",
+                                extra={"new_query_preview": new_query[:200]}
+                            )
+
+                            yield {
+                                "event": "query_regenerated",
+                                "data": json.dumps({
+                                    "attempt": attempt_num + 1,
+                                    "new_query": new_query,
+                                    "reason": "empty_result"
+                                })
+                            }
+
+                            current_query = new_query
+
+                        except Exception as regen_error:
+                            Logger.error(
+                                "[API] /run_query_with_retry/ - Failed to regenerate query after empty result",
+                                extra={"error": str(regen_error)}
+                            )
+                            # Continue with same query for next attempt
+
+                        continue
+                    else:
+                        # Max empty retries reached - fall back to internal knowledge
+                        # nl_response already contains the LLM's internal knowledge answer
+                        # because execute_query passed the empty result through the QA chain
+                        should_fallback = True
+                        last_failure_type = "empty"
+                        break
+
+                # Query succeeded with actual data
+                attempt_info["success"] = True
+                attempts.append(attempt_info)
+
+                Logger.info(
+                    f"[API] /run_query_with_retry/ - Query succeeded on attempt {attempt_num}",
+                    extra={
+                        "result_count": len(result) if isinstance(result, list) else 1,
+                        "response_preview": nl_response[:200] if nl_response else ""
+                    }
+                )
+
+                # Store conversation turn if session_id is provided
+                if run_query_request.session_id and conversation_store and nl_response:
+                    try:
+                        conversation_store.add_turn(
+                            session_id=run_query_request.session_id,
+                            question=run_query_request.question,
+                            cypher_query=current_query,
+                            answer=nl_response
+                        )
+                        conversation_turn_count += 1
+
+                        # Generate follow-up questions
+                        try:
+                            follow_up_questions = query_chain.generate_follow_up_questions(
+                                question=run_query_request.question,
+                                answer=nl_response,
+                                is_semantic_search=run_query_request.is_semantic_search,
+                                vector_category=run_query_request.vector_category
+                            )
+                        except Exception as e:
+                            Logger.warning(
+                                f"[API] /run_query_with_retry/ - Failed to generate follow-up questions",
+                                extra={"error": str(e)}
+                            )
+                    except Exception as e:
+                        Logger.warning(
+                            f"[API] /run_query_with_retry/ - Failed to store conversation turn",
+                            extra={"error": str(e)}
+                        )
+
+                # Send completion event
+                yield {
+                    "event": "completed",
+                    "data": json.dumps({
+                        "response": nl_response,
+                        "result": result,
+                        "query": current_query,
+                        "attempts": attempts,
+                        "total_attempts": len(attempts),
+                        "session_id": run_query_request.session_id,
+                        "conversation_turn_count": conversation_turn_count,
+                        "follow_up_questions": follow_up_questions
+                    })
+                }
+                return
+
+            except Exception as e:
+                error_message = str(e)
+                error_type = type(e).__name__
+                error_retries_used += 1
+
+                attempt_info["error"] = error_message
+                attempt_info["error_type"] = error_type
+                attempts.append(attempt_info)
+
+                Logger.warning(
+                    f"[API] /run_query_with_retry/ - Attempt {attempt_num} failed with error",
+                    extra={
+                        "error_type": error_type,
+                        "error_message": error_message[:300],
+                        "error_retries_used": error_retries_used,
+                        "max_error_retries": max_error_retries
+                    }
+                )
+
+                # Notify client of failure
+                yield {
+                    "event": "attempt_failed",
+                    "data": json.dumps({
+                        "attempt": attempt_num,
+                        "error": error_message,
+                        "error_type": error_type,
+                        "query": current_query,
+                        "error_retries_used": error_retries_used,
+                        "max_error_retries": max_error_retries
+                    })
+                }
+
+                if error_retries_used <= max_error_retries:
+                    # Can still retry for error
+                    try:
+                        Logger.info(
+                            "[API] /run_query_with_retry/ - Regenerating query with error feedback",
+                            extra={"error_retries_used": error_retries_used}
+                        )
+
+                        new_query = query_chain.regenerate_query_with_error(
+                            question=run_query_request.question,
+                            failed_query=current_query,
+                            error_message=error_message,
+                            conversation_context=conversation_context,
+                        )
+
+                        Logger.info(
+                            "[API] /run_query_with_retry/ - Query regenerated after error",
+                            extra={"new_query_preview": new_query[:200]}
+                        )
+
+                        yield {
+                            "event": "query_regenerated",
+                            "data": json.dumps({
+                                "attempt": attempt_num + 1,
+                                "new_query": new_query,
+                                "reason": "error",
+                                "previous_error": error_message
+                            })
+                        }
+
+                        current_query = new_query
+
+                    except Exception as regen_error:
+                        Logger.error(
+                            "[API] /run_query_with_retry/ - Failed to regenerate query after error",
+                            extra={"error": str(regen_error)}
+                        )
+                        # Continue with same query for next attempt
+
+                    continue
+                else:
+                    # Max error retries reached - fall back to internal knowledge
+                    should_fallback = True
+                    last_failure_type = "error"
+                    break
+
+        # All retries exhausted - fall back to LLM internal knowledge
+        if should_fallback:
+            request_duration_ms = (time.time() - request_start_time) * 1000
+
+            Logger.info(
+                f"[API] /run_query_with_retry/ - Falling back to LLM internal knowledge",
+                extra={
+                    "last_failure_type": last_failure_type,
+                    "error_retries_used": error_retries_used,
+                    "empty_retries_used": empty_retries_used,
+                    "total_attempts": len(attempts),
+                    "duration_ms": request_duration_ms
+                }
+            )
+
+            yield {
+                "event": "fallback_started",
+                "data": json.dumps({
+                    "reason": last_failure_type,
+                    "total_attempts": len(attempts)
+                })
+            }
+
+            fallback_response = ""
+
+            if last_failure_type == "empty":
+                # nl_response already contains the LLM's internal knowledge answer
+                # from the last execute_query call (QA chain saw the empty result)
+                fallback_response = nl_response
+            else:
+                # Error case - need to explicitly get internal knowledge via QA chain
+                try:
+                    fallback_response = query_chain.run_qa_chain(
+                        output=EMPTY_RESULT_STRING,
+                        input_question=run_query_request.question,
+                        conversation_context=conversation_context,
+                    )
+                except Exception as fallback_error:
+                    Logger.error(
+                        "[API] /run_query_with_retry/ - Failed to generate fallback response",
+                        extra={"error": str(fallback_error)}
+                    )
+                    fallback_response = ""
+
+            if fallback_response:
+                Logger.info(
+                    "[API] /run_query_with_retry/ - Fallback response generated successfully",
+                    extra={
+                        "response_preview": fallback_response[:200],
+                        "last_failure_type": last_failure_type
+                    }
+                )
+
+                # Store conversation turn for fallback response
+                if run_query_request.session_id and conversation_store and fallback_response:
+                    try:
+                        conversation_store.add_turn(
+                            session_id=run_query_request.session_id,
+                            question=run_query_request.question,
+                            cypher_query=current_query,
+                            answer=fallback_response
+                        )
+                        conversation_turn_count += 1
+                    except Exception as e:
+                        Logger.warning(
+                            "[API] /run_query_with_retry/ - Failed to store fallback conversation turn",
+                            extra={"error": str(e)}
+                        )
+
+                # Generate follow-up questions for fallback response
+                try:
+                    follow_up_questions = query_chain.generate_follow_up_questions(
+                        question=run_query_request.question,
+                        answer=fallback_response,
+                        is_semantic_search=run_query_request.is_semantic_search,
+                        vector_category=run_query_request.vector_category
+                    )
+                except Exception as e:
+                    Logger.warning(
+                        "[API] /run_query_with_retry/ - Failed to generate follow-up questions for fallback",
+                        extra={"error": str(e)}
+                    )
+
+                yield {
+                    "event": "completed",
+                    "data": json.dumps({
+                        "response": fallback_response,
+                        "result": [],
+                        "query": current_query,
+                        "attempts": attempts,
+                        "total_attempts": len(attempts),
+                        "session_id": run_query_request.session_id,
+                        "conversation_turn_count": conversation_turn_count,
+                        "follow_up_questions": follow_up_questions,
+                        "used_internal_knowledge": True
+                    })
+                }
+            else:
+                # Last resort: could not even generate a fallback response
+                Logger.error(
+                    "[API] /run_query_with_retry/ - Failed to generate any response",
+                    extra={
+                        "total_attempts": len(attempts),
+                        "duration_ms": request_duration_ms
+                    }
+                )
+
+                yield {
+                    "event": "failed",
+                    "data": json.dumps({
+                        "error": "All retry attempts exhausted and fallback failed",
+                        "error_type": "MaxRetriesExceeded",
+                        "attempts": attempts,
+                        "total_attempts": len(attempts)
+                    })
+                }
+
+    return EventSourceResponse(event_generator())
+
+
+@app.delete("/conversation/{session_id}")
+async def clear_conversation(
+    session_id: str,
+    request: Request,
+):
+    """
+    Clear the conversation history for a session.
+
+    This allows users to start a fresh conversation.
+    """
+    try:
+        conversation_store = get_conversation_store()
+        cleared = conversation_store.clear_session(session_id)
+
+        if cleared:
+            Logger.info(
+                f"[API] /conversation/ - Session cleared",
+                extra={"session_id": session_id[:8] + "..."}
+            )
+            return JSONResponse({
+                "success": True,
+                "message": "Conversation cleared successfully"
+            })
+        else:
+            return JSONResponse({
+                "success": True,
+                "message": "No conversation found for this session"
+            })
+    except Exception as e:
+        Logger.error(
+            f"[API] /conversation/ - Error clearing session",
+            extra={"session_id": session_id[:8] + "...", "error": str(e)}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to clear conversation: {str(e)}"
+        )
+
+
+@app.get("/conversation/{session_id}")
+async def get_conversation(
+    session_id: str,
+    request: Request,
+):
+    """
+    Get the conversation history for a session.
+    """
+    try:
+        conversation_store = get_conversation_store()
+        history = conversation_store.get_history(session_id)
+        session_info = conversation_store.get_session_info(session_id)
+
+        return JSONResponse({
+            "session_id": session_id,
+            "turns": [
+                {
+                    "question": turn.question,
+                    "cypher_query": turn.cypher_query,
+                    "answer": turn.answer,
+                    "timestamp": turn.timestamp.isoformat()
+                }
+                for turn in history
+            ],
+            "turn_count": len(history),
+            "session_info": session_info
+        })
+    except Exception as e:
+        Logger.error(
+            f"[API] /conversation/ - Error getting conversation",
+            extra={"session_id": session_id[:8] + "...", "error": str(e)}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get conversation: {str(e)}"
+        )
+
+
+@app.get("/conversation_stats/")
+async def get_conversation_stats(request: Request):
+    """
+    Get overall statistics about the conversation store.
+    """
+    try:
+        conversation_store = get_conversation_store()
+        stats = conversation_store.get_stats()
+        return JSONResponse(stats)
+    except Exception as e:
+        Logger.error(
+            f"[API] /conversation_stats/ - Error getting stats",
+            extra={"error": str(e)}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get conversation stats: {str(e)}"
+        )
 
 
 @app.post("/upload_vector/")
@@ -1206,7 +2042,6 @@ async def upload_vector(
     csrf_token: CsrfProtect = Depends(),
     vector_category: str = Form(...),
     embedding_type: Optional[str] = Form(None),
-    client_ip: Optional[str] = Form(None),
     file: UploadFile = File(...),
     _: bool = Depends(validate_csrf_if_enabled),
 ):
@@ -1311,6 +2146,17 @@ def get_available_models():
     models = get_all_models()
     Logger.debug(f"Returning models configuration with {len(models)} providers")
     return models
+
+
+@app.get("/free_models/")
+def get_free_models():
+    """
+    Get models that are available without user API key (server-managed env keys).
+    """
+    Logger.info("Free models requested")
+    free_models = get_free_models_for_environment()
+    Logger.debug(f"Returning {len(free_models)} free models")
+    return {"models": free_models}
 
 
 # Initialize logging on startup

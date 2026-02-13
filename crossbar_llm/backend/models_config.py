@@ -19,6 +19,8 @@ MODELS_CONFIG = {
         "claude-opus-4-1",
     ],
     "Google": [
+        "gemini-3-pro-preview",
+        "gemini-3-flash-preview",
         "gemini-2.5-pro",
         "gemini-2.5-flash",
     ],
@@ -66,10 +68,10 @@ def get_all_models():
 def get_models_by_provider(provider: str):
     """
     Get models for a specific provider.
-    
+
     Args:
         provider: The provider name (case-insensitive)
-    
+
     Returns:
         List of model names for the provider, or empty list if not found
     """
@@ -82,7 +84,7 @@ def get_models_by_provider(provider: str):
 def get_all_model_names():
     """
     Get a flat list of all model names across all providers.
-    
+
     Returns:
         List of all model names
     """
@@ -95,10 +97,10 @@ def get_all_model_names():
 def get_provider_for_model_name(model_name: str):
     """
     Find which provider a model belongs to.
-    
+
     Args:
         model_name: The model name to search for
-    
+
     Returns:
         Provider name if found, None otherwise
     """

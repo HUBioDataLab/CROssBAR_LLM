@@ -51,6 +51,11 @@ PROVIDER_DISPLAY_NAME = {
     "openrouter": "OpenRouter",
 }
 
+PRODUCTION_FREE_ENV_MODELS = {
+    "gpt-5-mini",
+    "gemini-3-flash-preview",
+}
+
 
 def get_setting(key, default=None):
     """Get a setting from the configuration."""
@@ -73,13 +78,13 @@ def get_provider_for_model(model_name: str) -> str | None:
     """
     if not model_name:
         return None
-    
+
     from models_config import get_provider_for_model_name
-    
+
     display_name = get_provider_for_model_name(model_name)
     if not display_name:
         return None
-    
+
     display_to_provider = {
         "OpenAI": "openai",
         "Anthropic": "anthropic",
@@ -89,7 +94,7 @@ def get_provider_for_model(model_name: str) -> str | None:
         "OpenRouter": "openrouter",
         "Ollama": "ollama",
     }
-    
+
     return display_to_provider.get(display_name)
 
 
@@ -102,3 +107,12 @@ def get_api_keys_status() -> dict:
             value != "" and value != "default"
         )
     return status
+
+
+def is_env_model_allowed(model_name: str) -> bool:
+    """Return whether a model is allowed with api_key='env' in this environment."""
+    if not model_name:
+        return False
+    if IS_DEVELOPMENT:
+        return True
+    return model_name in PRODUCTION_FREE_ENV_MODELS
