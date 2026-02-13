@@ -94,7 +94,7 @@ class Config(BaseModel):
 
     load_dotenv()
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "default")
-    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "default")
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY") or "default"
     anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "default")
     groq_api_key: str = os.getenv("GROQ_API_KEY", "default")
     replicate_api_key: str = os.getenv("REPLICATE_API_KEY", "default")
