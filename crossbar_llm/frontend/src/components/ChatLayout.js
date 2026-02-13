@@ -220,7 +220,7 @@ function ChatLayout({
       vectorFilePath: "small_molecule_embedding.npy"
     },
     {
-      question: "What are the most similar proteins to the given protein?",
+      question: "What are the most similar proteins to the given protein embedding?",
       vectorCategory: "Protein",
       embeddingType: "Esm2",
       vectorFilePath: "protein_embedding.npy"
