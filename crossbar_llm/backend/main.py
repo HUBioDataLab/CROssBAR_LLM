@@ -24,6 +24,7 @@ from config import (
     get_provider_env_var,
     get_provider_for_model,
     get_setting,
+    is_env_model_allowed,
 )
 from config import get_api_keys_status as get_api_keys_status_from_config
 from dotenv import load_dotenv
@@ -53,6 +54,28 @@ from tools.structured_logger import (
 )
 from tools.conversation_store import get_conversation_store, ConversationTurn
 from models_config import get_all_models
+
+
+def get_free_models_for_environment() -> List[str]:
+    """
+    Return model names that can be used with server-managed (`api_key='env'`) keys.
+    Development: all models.
+    Production: only explicitly allowed free models with configured provider keys.
+    """
+    all_models = get_all_models()
+    if IS_DEVELOPMENT:
+        return [model for provider_models in all_models.values() for model in provider_models]
+
+    free_models: List[str] = []
+    for model_list in all_models.values():
+        for model_name in model_list:
+            if not is_env_model_allowed(model_name):
+                continue
+            provider_id = get_provider_for_model(model_name)
+            env_var = get_provider_env_var(provider_id or "")
+            if env_var and os.getenv(env_var):
+                free_models.append(model_name)
+    return free_models
 
 # Load environment variables
 load_dotenv()
@@ -747,6 +770,23 @@ async def generate_query(
     # Handle "env" API key by using the API key from .env
     api_key = generate_query_request.api_key
     if api_key == "env":
+        if not is_env_model_allowed(generate_query_request.llm_type):
+            Logger.warning(
+                "[API] /generate_query/ - Model not allowed for env API key",
+                extra={
+                    "request_id": query_log.request_id,
+                    "model": generate_query_request.llm_type,
+                    "environment": "production" if IS_PRODUCTION else "development",
+                },
+            )
+            finalize_query_log(status="failed")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"Model '{generate_query_request.llm_type}' is not available "
+                    "with server-managed API keys in this environment."
+                ),
+            )
         if not provider:
             Logger.error(
                 "[API] /generate_query/ - Provider required for env API key",
@@ -1066,6 +1106,23 @@ async def run_query(
     # Handle "env" API key by using the API key from .env
     api_key = run_query_request.api_key
     if api_key == "env":
+        if not is_env_model_allowed(run_query_request.llm_type):
+            Logger.warning(
+                "[API] /run_query/ - Model not allowed for env API key",
+                extra={
+                    "request_id": query_log.request_id,
+                    "model": run_query_request.llm_type,
+                    "environment": "production" if IS_PRODUCTION else "development",
+                },
+            )
+            finalize_query_log(status="failed")
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"Model '{run_query_request.llm_type}' is not available "
+                    "with server-managed API keys in this environment."
+                ),
+            )
         if not provider:
             Logger.error(
                 "[API] /run_query/ - Provider required for env API key",
@@ -1421,6 +1478,19 @@ async def run_query_with_retry(
         # Handle "env" API key
         api_key = run_query_request.api_key
         if api_key == "env":
+            if not is_env_model_allowed(run_query_request.llm_type):
+                yield {
+                    "event": "failed",
+                    "data": json.dumps({
+                        "error": (
+                            f"Model '{run_query_request.llm_type}' is not available "
+                            "with server-managed API keys in this environment."
+                        ),
+                        "error_type": "ModelNotAllowed",
+                        "attempts": attempts
+                    })
+                }
+                return
             if not provider:
                 yield {
                     "event": "failed",
@@ -2076,6 +2146,17 @@ def get_available_models():
     models = get_all_models()
     Logger.debug(f"Returning models configuration with {len(models)} providers")
     return models
+
+
+@app.get("/free_models/")
+def get_free_models():
+    """
+    Get models that are available without user API key (server-managed env keys).
+    """
+    Logger.info("Free models requested")
+    free_models = get_free_models_for_environment()
+    Logger.debug(f"Returning {len(free_models)} free models")
+    return {"models": free_models}
 
 
 # Initialize logging on startup

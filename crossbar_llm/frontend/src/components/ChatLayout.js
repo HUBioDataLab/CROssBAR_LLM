@@ -59,7 +59,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
-import api, { getAvailableModels } from '../services/api';
+import api, { getAvailableModels, getFreeModels } from '../services/api';
 import axios from 'axios';
 import Fuse from 'fuse.js';
 import { loadSuggestions } from '../utils/loadSuggestions';
@@ -149,6 +149,7 @@ function ChatLayout({
   const [apiKeysStatus, setApiKeysStatus] = useState({});
   const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
   const [modelChoices, setModelChoices] = useState({});
+  const [freeModels, setFreeModels] = useState([]);
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   // Expanded sections in right panel
@@ -247,10 +248,13 @@ function ChatLayout({
       try {
         const models = await getAvailableModels();
         setModelChoices(models);
+        const freeModelNames = await getFreeModels();
+        setFreeModels(freeModelNames);
         setModelsLoaded(true);
       } catch (error) {
-        console.error('Error fetching available models:', error);
+        console.error('Error fetching available/free models:', error);
         setModelChoices({});
+        setFreeModels([]);
         setModelsLoaded(true);
       }
     };
@@ -265,9 +269,6 @@ function ChatLayout({
         if (response.data) {
           setApiKeysStatus(response.data);
           setApiKeysLoaded(true);
-          if (provider && response.data[provider]) {
-            setApiKey('env');
-          }
         }
       } catch (error) {
         console.error('Error fetching API keys status:', error);
@@ -276,16 +277,17 @@ function ChatLayout({
     fetchApiKeysStatus();
   }, [provider, setApiKey]);
 
-  // When provider changes, update API key
+  // When provider/model changes, default to server key only for free models
   useEffect(() => {
     if (apiKeysLoaded && provider) {
-      if (apiKeysStatus[provider]) {
+      const selectedModelIsFree = !!llmType && freeModels.includes(llmType);
+      if (apiKeysStatus[provider] && selectedModelIsFree) {
         setApiKey('env');
-      } else {
+      } else if (apiKey === 'env') {
         setApiKey('');
       }
     }
-  }, [provider, apiKeysStatus, apiKeysLoaded, setApiKey]);
+  }, [provider, llmType, freeModels, apiKeysStatus, apiKeysLoaded, apiKey, setApiKey]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
@@ -494,9 +496,11 @@ function ChatLayout({
   const isSettingsValid = useCallback(() => {
     if (!provider) return false;
     if (!llmType) return false;
-    if (!apiKeysStatus[provider] && !apiKey) return false;
+    const selectedModelIsFree = freeModels.includes(llmType);
+    const canUseServerKeyForSelection = apiKeysStatus[provider] && selectedModelIsFree;
+    if (!canUseServerKeyForSelection && !apiKey) return false;
     return true;
-  }, [provider, llmType, apiKeysStatus, apiKey]);
+  }, [provider, llmType, apiKeysStatus, freeModels, apiKey]);
 
   // Check if semantic search settings are valid (only when enabled)
   const isSemanticSearchValid = useCallback(() => {
@@ -550,7 +554,9 @@ function ChatLayout({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+    const selectedModelIsFree = freeModels.includes(llmType);
+    const canUseServerKeyForSelection = apiKeysStatus[provider] && selectedModelIsFree;
+    const effectiveApiKey = (canUseServerKeyForSelection && (apiKey === 'env' || !apiKey)) ? 'env' : apiKey;
 
     try {
       // Build request data
@@ -636,7 +642,9 @@ function ChatLayout({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+    const selectedModelIsFree = freeModels.includes(llmType);
+    const canUseServerKeyForSelection = apiKeysStatus[provider] && selectedModelIsFree;
+    const effectiveApiKey = (canUseServerKeyForSelection && (apiKey === 'env' || !apiKey)) ? 'env' : apiKey;
 
     try {
       const runResponse = await api.post('/run_query/', {
@@ -883,7 +891,9 @@ function ChatLayout({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    const effectiveApiKey = (apiKeysStatus[provider] && apiKey === 'env') ? 'env' : apiKey;
+    const selectedModelIsFree = freeModels.includes(llmType);
+    const canUseServerKeyForSelection = apiKeysStatus[provider] && selectedModelIsFree;
+    const effectiveApiKey = (canUseServerKeyForSelection && (apiKey === 'env' || !apiKey)) ? 'env' : apiKey;
 
     try {
       // Build request data
@@ -2230,6 +2240,7 @@ function ChatLayout({
                         return <MenuItem key={`label-${idx}`} disabled sx={{ opacity: 0.7, fontWeight: 'bold', fontSize: '0.85rem' }}>{m.label}</MenuItem>;
                       }
                       const isSupported = supportedModels.includes(m);
+                      const isFreeModel = freeModels.includes(m);
                       return (
                         <MenuItem
                           key={m}
@@ -2256,7 +2267,7 @@ function ChatLayout({
                               fontWeight: 700,
                             }}>★</Box>
                           )}
-                          {m}
+                          {m}{isFreeModel ? ' (Free)' : ''}
                         </MenuItem>
                       );
                     })}
@@ -2264,7 +2275,7 @@ function ChatLayout({
                 </FormControl>
 
                 {/* API Key Section */}
-                {apiKeysLoaded && apiKeysStatus[provider] ? (
+                {apiKeysLoaded && apiKeysStatus[provider] && freeModels.includes(llmType) ? (
                   <Paper
                     variant="outlined"
                     sx={{

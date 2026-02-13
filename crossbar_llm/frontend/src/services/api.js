@@ -134,6 +134,16 @@ export const getAvailableModels = async () => {
   }
 };
 
+export const getFreeModels = async () => {
+  try {
+    const response = await instance.get('/free_models/');
+    return response.data?.models || [];
+  } catch (error) {
+    console.error('Error fetching free models:', error);
+    throw error;
+  }
+};
+
 // Export the refreshCsrfToken function for explicit usage
 export { refreshCsrfToken };
 
