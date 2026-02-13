@@ -194,7 +194,7 @@ function ChatLayout({
 
   // Example queries (regular)
   const exampleQueries = [
-    "Which Gene is related to the Disease named psoriasis <Disease> ?",
+    "Which Gene is related to psoriasis <Disease> ?",
     "For proteins associated with amyotrophic lateral sclerosis <Disease>, which orthologous proteins in Mus musculus (Mouse) <Organism Taxon> have experimentally validated functional annotations, and which conserved biological processes do they support?",
     "Which drugs target proteins associated with Alzheimer disease <Disease> ?",
     "Which pathways are associated with both diabetes mellitus <Disease> and T-cell non-Hodgkin lymphoma <Disease> ? Return only signaling pathways.",
