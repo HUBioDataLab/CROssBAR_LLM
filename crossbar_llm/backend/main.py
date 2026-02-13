@@ -63,18 +63,27 @@ def get_free_models_for_environment() -> List[str]:
     Production: only explicitly allowed free models with configured provider keys.
     """
     all_models = get_all_models()
+    all_model_names = [model for provider_models in all_models.values() for model in provider_models]
+
+    # A model can only be "free" if its provider key is actually configured.
+    configured_models: List[str] = []
+    for model_name in all_model_names:
+        provider_id = get_provider_for_model(model_name)
+        env_var = get_provider_env_var(provider_id or "")
+        if not env_var:
+            continue
+        env_value = os.getenv(env_var, "")
+        if env_value and env_value != "default":
+            configured_models.append(model_name)
+
     if IS_DEVELOPMENT:
-        return [model for provider_models in all_models.values() for model in provider_models]
+        # In development, expose all configured-provider models as free.
+        return configured_models
 
     free_models: List[str] = []
-    for model_list in all_models.values():
-        for model_name in model_list:
-            if not is_env_model_allowed(model_name):
-                continue
-            provider_id = get_provider_for_model(model_name)
-            env_var = get_provider_env_var(provider_id or "")
-            if env_var and os.getenv(env_var):
-                free_models.append(model_name)
+    for model_name in configured_models:
+        if is_env_model_allowed(model_name):
+            free_models.append(model_name)
     return free_models
 
 # Load environment variables

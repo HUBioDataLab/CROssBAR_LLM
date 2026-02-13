@@ -2240,7 +2240,7 @@ function ChatLayout({
                         return <MenuItem key={`label-${idx}`} disabled sx={{ opacity: 0.7, fontWeight: 'bold', fontSize: '0.85rem' }}>{m.label}</MenuItem>;
                       }
                       const isSupported = supportedModels.includes(m);
-                      const isFreeModel = freeModels.includes(m);
+                      const isFreeModel = freeModels.includes(m) && !!apiKeysStatus[provider];
                       return (
                         <MenuItem
                           key={m}
