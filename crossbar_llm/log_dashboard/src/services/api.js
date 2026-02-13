@@ -57,10 +57,4 @@ export const getLogDetail = (requestId) =>
 export const getFilters = () =>
   api.get('/api/filters').then((r) => r.data);
 
-// Live stream URL (uses query-param auth for EventSource)
-export const getStreamUrl = () => {
-  const token = localStorage.getItem('dashboard_token');
-  return `${API_BASE}/dashboard/api/stream?token=${token}`;
-};
-
 export default api;

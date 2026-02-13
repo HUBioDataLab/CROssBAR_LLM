@@ -1,16 +1,13 @@
 """
 Dashboard API for CROssBAR LLM Log Visualization.
 
-Provides endpoints for authentication, log querying, statistics,
-and real-time log streaming for the standalone log dashboard.
+Provides endpoints for authentication, log querying, and statistics
+for the standalone log dashboard.
 """
 
-import asyncio
 import json
 import logging
 import os
-import queue
-import threading
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
@@ -18,10 +15,9 @@ from typing import Any, Dict, List, Optional
 import jwt
 import bcrypt
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
-from sse_starlette.sse import EventSourceResponse
 
 load_dotenv()
 
@@ -90,6 +86,102 @@ async def get_current_user(
 # Log file reader
 # ---------------------------------------------------------------------------
 
+# Maximum time gap (seconds) between a db_search and its paired
+# query_execution to be considered the same user action.
+_PAIR_MAX_GAP_SECONDS = 120
+
+
+def _merge_pair(gen_entry: dict, exec_entry: dict) -> dict:
+    """Merge a db_search entry with its paired query_execution entry
+    into a single combined log entry that represents the full pipeline."""
+
+    merged = {**gen_entry}  # start with generation entry as base
+
+    merged["search_type"] = "generate_and_execute"
+    merged["linked_request_id"] = exec_entry.get("request_id", "")
+
+    # Combine steps from both entries into one pipeline
+    gen_steps = list(gen_entry.get("steps", []))
+    exec_steps = list(exec_entry.get("steps", []))
+
+    # Add query correction as a synthetic step if present
+    qc = gen_entry.get("query_correction")
+    if qc:
+        qc_step = {
+            "step_name": "query_correction",
+            "step_number": len(gen_steps) + 1,
+            "duration_ms": qc.get("duration_ms", 0),
+            "status": "completed" if qc.get("success") else "failed",
+            "details": {
+                "schemas_checked": qc.get("schemas_checked", 0),
+                "corrections_count": len(qc.get("corrections", [])),
+                "success": qc.get("success"),
+            },
+        }
+        gen_steps.append(qc_step)
+
+    # Add Neo4j execution as a synthetic step if present
+    neo = exec_entry.get("neo4j_execution")
+    if neo:
+        neo_step = {
+            "step_name": "neo4j_execution",
+            "step_number": len(gen_steps) + 1,
+            "duration_ms": neo.get("execution_time_ms", 0),
+            "status": "failed" if neo.get("error") else "completed",
+            "details": {
+                "result_count": neo.get("result_count", 0),
+                "connection_status": neo.get("connection_status", ""),
+            },
+        }
+        gen_steps.append(neo_step)
+
+    # Re-number all exec steps following gen steps
+    offset = len(gen_steps)
+    for s in exec_steps:
+        s = {**s, "step_number": offset + s.get("step_number", 1)}
+        gen_steps.append(s)
+
+    merged["steps"] = gen_steps
+
+    # Combine LLM calls
+    merged["llm_calls"] = list(gen_entry.get("llm_calls", [])) + list(
+        exec_entry.get("llm_calls", [])
+    )
+
+    # Take execution-phase fields from the exec entry
+    merged["neo4j_execution"] = exec_entry.get("neo4j_execution")
+    merged["natural_language_response"] = exec_entry.get(
+        "natural_language_response", ""
+    )
+
+    # Combined duration = generation + execution
+    gen_dur = gen_entry.get("total_duration_ms", 0) or 0
+    exec_dur = exec_entry.get("total_duration_ms", 0) or 0
+    merged["total_duration_ms"] = gen_dur + exec_dur
+
+    # Use the earliest start / latest end
+    merged["start_time"] = gen_entry.get("start_time", "")
+    merged["end_time"] = exec_entry.get("end_time", "") or gen_entry.get(
+        "end_time", ""
+    )
+
+    # Worst status wins
+    if exec_entry.get("status") == "failed" or gen_entry.get("status") == "failed":
+        merged["status"] = "failed"
+    else:
+        merged["status"] = exec_entry.get("status", gen_entry.get("status", ""))
+
+    # Carry over error from whichever entry has one
+    if exec_entry.get("error"):
+        merged["error"] = exec_entry["error"]
+        merged["error_type"] = exec_entry.get("error_type")
+        merged["error_traceback"] = exec_entry.get("error_traceback")
+        merged["error_step"] = exec_entry.get("error_step")
+    elif gen_entry.get("error"):
+        pass  # already in merged from gen_entry copy
+
+    return merged
+
 
 class LogFileReader:
     """Reads and queries structured log files (JSONL + JSON)."""
@@ -97,7 +189,8 @@ class LogFileReader:
     def __init__(self) -> None:
         self._cache: Dict[str, List[dict]] = {}
         self._cache_time: Dict[str, float] = {}
-        self._cache_ttl = 30  # seconds
+        self._merged_cache: Optional[List[dict]] = None
+        self._merged_cache_key: Optional[str] = None
 
     # -- helpers ----------------------------------------------------------
 
@@ -138,12 +231,88 @@ class LogFileReader:
         self._cache_time[path] = mtime
         return entries
 
-    def _all_entries(self) -> List[dict]:
-        """Return all log entries across all files."""
+    def _raw_entries(self) -> List[dict]:
+        """Return all raw (un-merged) log entries across all files."""
         all_entries: List[dict] = []
         for path in self._find_jsonl_files():
             all_entries.extend(self._read_jsonl(path))
         return all_entries
+
+    def _cache_key(self) -> str:
+        """Simple cache-busting key based on file mtimes."""
+        parts = []
+        for path in self._find_jsonl_files():
+            try:
+                parts.append(f"{path}:{os.path.getmtime(path)}")
+            except OSError:
+                pass
+        return "|".join(parts)
+
+    def _all_entries(self) -> List[dict]:
+        """Return merged log entries (db_search + query_execution pairs
+        combined into single entries)."""
+        key = self._cache_key()
+        if self._merged_cache is not None and self._merged_cache_key == key:
+            return self._merged_cache
+
+        raw = self._raw_entries()
+        merged = self._pair_and_merge(raw)
+        self._merged_cache = merged
+        self._merged_cache_key = key
+        return merged
+
+    def _pair_and_merge(self, raw: List[dict]) -> List[dict]:
+        """Walk through entries in order and pair consecutive
+        db_search / query_execution entries that belong together."""
+
+        # Index: for each db_search, try to find a matching query_execution
+        # that immediately follows (same question, same client, same final_query).
+        consumed: set = set()  # indices of entries consumed by pairing
+        result: List[dict] = []
+
+        for i, entry in enumerate(raw):
+            if i in consumed:
+                continue
+
+            if entry.get("search_type") == "db_search" and i + 1 < len(raw):
+                candidate = raw[i + 1]
+                if self._is_pair(entry, candidate):
+                    merged = _merge_pair(entry, candidate)
+                    result.append(merged)
+                    consumed.add(i)
+                    consumed.add(i + 1)
+                    continue
+
+            result.append(entry)
+
+        return result
+
+    @staticmethod
+    def _is_pair(gen: dict, exec_: dict) -> bool:
+        """Check whether gen (db_search) and exec_ (query_execution) form a pair."""
+        if exec_.get("search_type") != "query_execution":
+            return False
+        if gen.get("question", "").strip() != exec_.get("question", "").strip():
+            return False
+        # Same client
+        gen_client = gen.get("client_ip") or gen.get("client_id", "")
+        exec_client = exec_.get("client_ip") or exec_.get("client_id", "")
+        if gen_client != exec_client:
+            return False
+        # Same final_query
+        gen_fq = (gen.get("final_query") or "").strip()
+        exec_fq = (exec_.get("final_query") or "").strip()
+        if gen_fq and exec_fq and gen_fq != exec_fq:
+            return False
+        # Time gap within threshold
+        try:
+            t1 = datetime.fromisoformat(gen.get("timestamp", ""))
+            t2 = datetime.fromisoformat(exec_.get("timestamp", ""))
+            if abs((t2 - t1).total_seconds()) > _PAIR_MAX_GAP_SECONDS:
+                return False
+        except (ValueError, TypeError):
+            pass
+        return True
 
     # -- public API -------------------------------------------------------
 
@@ -159,6 +328,7 @@ class LogFileReader:
         date_to: Optional[str] = None,
         sort_by: str = "timestamp",
         sort_order: str = "desc",
+        search_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         entries = self._all_entries()
 
@@ -173,6 +343,8 @@ class LogFileReader:
                 for e in entries
                 if (e.get("provider") or "").lower() == provider.lower()
             ]
+        if search_type:
+            entries = [e for e in entries if e.get("search_type") == search_type]
         if search:
             q = search.lower()
             entries = [
@@ -188,7 +360,6 @@ class LogFileReader:
                 e for e in entries if (e.get("timestamp") or "") >= date_from
             ]
         if date_to:
-            # Include the entire day
             date_to_end = date_to + "T23:59:59" if len(date_to) == 10 else date_to
             entries = [
                 e for e in entries if (e.get("timestamp") or "") <= date_to_end
@@ -213,8 +384,15 @@ class LogFileReader:
         }
 
     def get_log_detail(self, request_id: str) -> Optional[dict]:
-        """Get a single log entry by request_id."""
-        # Try detailed log file first
+        """Get a single (merged) log entry by request_id."""
+        # Search merged entries first (matches both original and linked IDs)
+        for entry in self._all_entries():
+            if entry.get("request_id") == request_id:
+                return entry
+            if entry.get("linked_request_id") == request_id:
+                return entry
+
+        # Try detailed log file
         for directory in [DETAILED_LOGS_DIR, LOGS_DIR]:
             path = os.path.join(directory, f"{request_id}.json")
             if os.path.isfile(path):
@@ -224,21 +402,23 @@ class LogFileReader:
                 except Exception:
                     pass
 
-        # Fallback: search JSONL files
-        for entry in self._all_entries():
-            if entry.get("request_id") == request_id:
-                return entry
         return None
 
     def get_stats(self, days: int = 30) -> Dict[str, Any]:
-        """Compute aggregate statistics."""
+        """Compute aggregate statistics over merged entries."""
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
-        entries = [e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff]
+        entries = [
+            e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff
+        ]
 
         total = len(entries)
         completed = sum(1 for e in entries if e.get("status") == "completed")
         failed = sum(1 for e in entries if e.get("status") == "failed")
-        durations = [e.get("total_duration_ms", 0) for e in entries if e.get("total_duration_ms")]
+        durations = [
+            e.get("total_duration_ms", 0)
+            for e in entries
+            if e.get("total_duration_ms")
+        ]
         avg_duration = sum(durations) / len(durations) if durations else 0
 
         total_tokens = 0
@@ -263,10 +443,20 @@ class LogFileReader:
         """Return time-bucketed counts for charts."""
         cutoff = datetime.now() - timedelta(days=days)
         cutoff_iso = cutoff.isoformat()
-        entries = [e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff_iso]
+        entries = [
+            e
+            for e in self._all_entries()
+            if (e.get("timestamp") or "") >= cutoff_iso
+        ]
 
         buckets: Dict[str, Dict[str, int]] = defaultdict(
-            lambda: {"total": 0, "completed": 0, "failed": 0, "tokens": 0, "duration_sum": 0}
+            lambda: {
+                "total": 0,
+                "completed": 0,
+                "failed": 0,
+                "tokens": 0,
+                "duration_sum": 0,
+            }
         )
 
         for e in entries:
@@ -276,9 +466,7 @@ class LogFileReader:
             except (ValueError, TypeError):
                 continue
 
-            if granularity == "hour":
-                key = dt.strftime("%Y-%m-%dT%H:00:00")
-            elif granularity == "day":
+            if granularity == "day":
                 key = dt.strftime("%Y-%m-%d")
             else:
                 key = dt.strftime("%Y-%m-%dT%H:00:00")
@@ -303,7 +491,9 @@ class LogFileReader:
                     "completed": b["completed"],
                     "failed": b["failed"],
                     "tokens": b["tokens"],
-                    "avg_duration_ms": round(b["duration_sum"] / b["total"], 1) if b["total"] else 0,
+                    "avg_duration_ms": round(b["duration_sum"] / b["total"], 1)
+                    if b["total"]
+                    else 0,
                 }
             )
         return result
@@ -311,10 +501,18 @@ class LogFileReader:
     def get_filters(self) -> Dict[str, List[str]]:
         """Return unique filter values."""
         entries = self._all_entries()
-        models = sorted({e.get("model_name", "") for e in entries if e.get("model_name")})
-        providers = sorted({e.get("provider", "") for e in entries if e.get("provider")})
-        statuses = sorted({e.get("status", "") for e in entries if e.get("status")})
-        search_types = sorted({e.get("search_type", "") for e in entries if e.get("search_type")})
+        models = sorted(
+            {e.get("model_name", "") for e in entries if e.get("model_name")}
+        )
+        providers = sorted(
+            {e.get("provider", "") for e in entries if e.get("provider")}
+        )
+        statuses = sorted(
+            {e.get("status", "") for e in entries if e.get("status")}
+        )
+        search_types = sorted(
+            {e.get("search_type", "") for e in entries if e.get("search_type")}
+        )
         return {
             "models": models,
             "providers": providers,
@@ -325,12 +523,17 @@ class LogFileReader:
     def get_model_distribution(self, days: int = 30) -> List[Dict[str, Any]]:
         """Return model usage distribution."""
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
-        entries = [e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff]
+        entries = [
+            e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff
+        ]
         counts: Dict[str, int] = defaultdict(int)
         for e in entries:
             model = e.get("model_name", "unknown")
             counts[model] += 1
-        return [{"model": m, "count": c} for m, c in sorted(counts.items(), key=lambda x: -x[1])]
+        return [
+            {"model": m, "count": c}
+            for m, c in sorted(counts.items(), key=lambda x: -x[1])
+        ]
 
     def get_recent_errors(self, limit: int = 5) -> List[dict]:
         """Return the most recent failed entries."""
@@ -351,60 +554,6 @@ def get_reader() -> LogFileReader:
 
 
 # ---------------------------------------------------------------------------
-# Dashboard log stream queue (separate from the main app's queue)
-# ---------------------------------------------------------------------------
-
-dashboard_log_queue: asyncio.Queue = asyncio.Queue()
-
-
-class DashboardLogHandler(logging.Handler):
-    """Captures log records and feeds them to the dashboard SSE stream."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._sync_queue: queue.Queue = queue.Queue()
-        self._running = True
-        self._thread = threading.Thread(target=self._worker, daemon=True)
-        self._thread.start()
-
-    def emit(self, record: logging.LogRecord) -> None:
-        if not self._running:
-            return
-        entry = self.format(record)
-        self._sync_queue.put(entry)
-
-    def _worker(self) -> None:
-        while self._running:
-            try:
-                entry = self._sync_queue.get(timeout=0.5)
-                try:
-                    loop = asyncio.get_event_loop()
-                    if loop.is_running():
-                        loop.call_soon_threadsafe(dashboard_log_queue.put_nowait, entry)
-                except RuntimeError:
-                    pass
-                self._sync_queue.task_done()
-            except queue.Empty:
-                continue
-
-    def close(self) -> None:
-        self._running = False
-        if self._thread.is_alive():
-            self._thread.join(timeout=1.0)
-        super().close()
-
-
-def setup_dashboard_log_handler() -> None:
-    """Attach the dashboard log handler to the root logger."""
-    root = logging.getLogger()
-    already = any(isinstance(h, DashboardLogHandler) for h in root.handlers)
-    if not already:
-        handler = DashboardLogHandler()
-        handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-        root.addHandler(handler)
-
-
-# ---------------------------------------------------------------------------
 # Router
 # ---------------------------------------------------------------------------
 
@@ -413,10 +562,13 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 # -- Auth -----------------------------------------------------------------
 
+
 @router.post("/auth/login", response_model=LoginResponse)
 async def login(body: LoginRequest):
     if not DASHBOARD_PASSWORD_HASH:
-        raise HTTPException(status_code=500, detail="Dashboard password not configured")
+        raise HTTPException(
+            status_code=500, detail="Dashboard password not configured"
+        )
 
     password_bytes = body.password.encode("utf-8")
     hash_bytes = DASHBOARD_PASSWORD_HASH.encode("utf-8")
@@ -434,6 +586,7 @@ async def verify_token(user: dict = Depends(get_current_user)):
 
 
 # -- Stats ----------------------------------------------------------------
+
 
 @router.get("/api/stats")
 async def get_stats(
@@ -458,6 +611,7 @@ async def get_timeline(
 
 # -- Logs -----------------------------------------------------------------
 
+
 @router.get("/api/logs")
 async def get_logs(
     page: int = Query(1, ge=1),
@@ -466,6 +620,7 @@ async def get_logs(
     model: Optional[str] = None,
     provider: Optional[str] = None,
     search: Optional[str] = None,
+    search_type: Optional[str] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     sort_by: str = Query("timestamp"),
@@ -479,6 +634,7 @@ async def get_logs(
         model=model,
         provider=provider,
         search=search,
+        search_type=search_type,
         date_from=date_from,
         date_to=date_to,
         sort_by=sort_by,
@@ -487,7 +643,9 @@ async def get_logs(
 
 
 @router.get("/api/logs/{request_id}")
-async def get_log_detail(request_id: str, user: dict = Depends(get_current_user)):
+async def get_log_detail(
+    request_id: str, user: dict = Depends(get_current_user)
+):
     entry = get_reader().get_log_detail(request_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Log entry not found")
@@ -496,32 +654,7 @@ async def get_log_detail(request_id: str, user: dict = Depends(get_current_user)
 
 # -- Filters --------------------------------------------------------------
 
+
 @router.get("/api/filters")
 async def get_filters(user: dict = Depends(get_current_user)):
     return get_reader().get_filters()
-
-
-# -- Live stream ----------------------------------------------------------
-
-@router.get("/api/stream")
-async def dashboard_stream(request: Request):
-    """SSE endpoint for real-time log streaming.
-
-    Accepts JWT via query param ``token`` so that EventSource (which cannot
-    set headers) can authenticate.
-    """
-    token = request.query_params.get("token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Missing token query parameter")
-    verify_jwt(token)
-
-    async def event_generator():
-        while True:
-            try:
-                entry = await asyncio.wait_for(dashboard_log_queue.get(), timeout=30)
-                yield {"event": "log", "data": json.dumps({"log": entry})}
-            except asyncio.TimeoutError:
-                # Send keepalive comment to prevent connection timeout
-                yield {"event": "ping", "data": ""}
-
-    return EventSourceResponse(event_generator())
