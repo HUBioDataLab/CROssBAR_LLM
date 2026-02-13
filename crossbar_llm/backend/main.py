@@ -1441,6 +1441,8 @@ async def run_query_with_retry(
     - completed: Query executed successfully (or fallback response generated)
     - failed: All retry attempts and fallback exhausted (rare edge case)
     """
+    check_rate_limit(request)
+
     request_start_time = time.time()
 
     # Get anonymized client identifier (GDPR-compliant)
