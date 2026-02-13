@@ -28,6 +28,7 @@ import {
   Error as ErrorIcon,
   HourglassEmpty as PendingIcon,
   Schedule as DurationIcon,
+  Link as LinkIcon,
 } from '@mui/icons-material';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -45,6 +46,13 @@ function formatDuration(ms) {
 function formatTokens(n) {
   if (n == null) return '-';
   return n.toLocaleString();
+}
+
+function searchTypeLabel(t) {
+  if (t === 'generate_and_execute') return 'Generate & Execute';
+  if (t === 'db_search') return 'Generate Only';
+  if (t === 'query_execution') return 'Execute Only';
+  return t || '-';
 }
 
 function StatusChip({ status }) {
@@ -151,10 +159,21 @@ function OverviewTab({ log }) {
         <InfoRow label="Question" value={log.question} />
         <InfoRow label="Model" value={log.model_name} />
         <InfoRow label="Provider" value={log.provider} />
+        <InfoRow label="Type" value={searchTypeLabel(log.search_type)} />
         <InfoRow label="Top K" value={log.top_k} />
-        <InfoRow label="Search Type" value={log.search_type} />
         <InfoRow label="Vector Index" value={log.vector_index} />
         <InfoRow label="Client" value={log.client_ip || log.client_id} mono />
+        {log.linked_request_id && (
+          <InfoRow
+            label="Linked Request"
+            value={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <LinkIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+                <span>{log.linked_request_id}</span>
+              </Box>
+            }
+          />
+        )}
         <Divider sx={{ my: 2 }} />
         <Typography variant="h5" sx={{ mb: 2 }}>Timing</Typography>
         <InfoRow label="Start" value={log.start_time} mono />
@@ -174,6 +193,17 @@ function StepsTab({ steps }) {
       </Typography>
     );
   }
+
+  // Color code steps by type
+  const stepColor = (name) => {
+    if (name === 'cypher_generation') return 'primary';
+    if (name === 'query_correction') return 'info';
+    if (name === 'neo4j_execution') return 'warning';
+    if (name === 'qa_response_generation') return 'secondary';
+    if (name === 'follow_up_generation') return 'default';
+    return 'default';
+  };
+
   return (
     <Card>
       <CardContent>
@@ -189,9 +219,13 @@ function StepsTab({ steps }) {
                 }
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0 }}>
-                    {step.step_name}
-                  </Typography>
+                  <Chip
+                    label={step.step_name}
+                    size="small"
+                    color={stepColor(step.step_name)}
+                    variant="outlined"
+                    sx={{ fontWeight: 600, fontFamily: '"JetBrains Mono", monospace', fontSize: '0.75rem' }}
+                  />
                   <StatusChip status={step.status} />
                 </Box>
               </StepLabel>
@@ -236,7 +270,7 @@ function LLMCallsTab({ calls }) {
         return (
           <Card key={i}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                 <Chip label={call.call_type || 'unknown'} size="small" color="primary" variant="outlined" />
                 <Chip label={call.model_name || '-'} size="small" variant="outlined" />
                 <Chip label={call.provider || '-'} size="small" variant="outlined" />
@@ -283,7 +317,7 @@ function LLMCallsTab({ calls }) {
                   <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
                     Response
                   </Typography>
-                  <CodeBlock code={call.raw_response} language="cypher" />
+                  <CodeBlock code={call.raw_response} language={call.call_type === 'cypher_generation' ? 'cypher' : 'markdown'} />
                 </Box>
               )}
 
@@ -528,6 +562,25 @@ export default function LogDetail() {
 
   if (!log) return null;
 
+  // Build tab list dynamically
+  const tabs = [
+    { label: 'Overview', key: 'overview' },
+    { label: `Steps (${log.steps?.length || 0})`, key: 'steps' },
+    { label: `LLM Calls (${log.llm_calls?.length || 0})`, key: 'llm' },
+  ];
+  if (log.generated_query || log.query_correction || log.final_query) {
+    tabs.push({ label: 'Query', key: 'query' });
+  }
+  if (log.neo4j_execution) {
+    tabs.push({ label: 'Neo4j', key: 'neo4j' });
+  }
+  if (log.natural_language_response) {
+    tabs.push({ label: 'Response', key: 'response' });
+  }
+  if (log.error) {
+    tabs.push({ label: 'Errors', key: 'errors' });
+  }
+
   return (
     <Box>
       {/* Header */}
@@ -549,6 +602,12 @@ export default function LogDetail() {
             </Typography>
             <CopyButton text={requestId} />
             <StatusChip status={log.status} />
+            <Chip
+              label={searchTypeLabel(log.search_type)}
+              size="small"
+              color={log.search_type === 'generate_and_execute' ? 'primary' : 'default'}
+              variant="outlined"
+            />
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0 }}>
             {log.timestamp
@@ -584,23 +643,26 @@ export default function LogDetail() {
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label="Overview" />
-          <Tab label={`Steps (${log.steps?.length || 0})`} />
-          <Tab label={`LLM Calls (${log.llm_calls?.length || 0})`} />
-          <Tab label="Query" />
-          <Tab label="Neo4j" />
-          <Tab label="Response" />
-          {log.error && <Tab label="Errors" sx={{ color: 'error.main' }} />}
+          {tabs.map((t) => (
+            <Tab
+              key={t.key}
+              label={t.label}
+              sx={t.key === 'errors' ? { color: 'error.main' } : undefined}
+            />
+          ))}
         </Tabs>
       </Box>
 
-      <TabPanel value={tab} index={0}><OverviewTab log={log} /></TabPanel>
-      <TabPanel value={tab} index={1}><StepsTab steps={log.steps} /></TabPanel>
-      <TabPanel value={tab} index={2}><LLMCallsTab calls={log.llm_calls} /></TabPanel>
-      <TabPanel value={tab} index={3}><QueryTab log={log} /></TabPanel>
-      <TabPanel value={tab} index={4}><Neo4jTab execution={log.neo4j_execution} /></TabPanel>
-      <TabPanel value={tab} index={5}><ResponseTab log={log} /></TabPanel>
-      {log.error && <TabPanel value={tab} index={6}><ErrorsTab log={log} /></TabPanel>}
+      {tabs.map((t, i) => {
+        if (t.key === 'overview') return <TabPanel key={t.key} value={tab} index={i}><OverviewTab log={log} /></TabPanel>;
+        if (t.key === 'steps') return <TabPanel key={t.key} value={tab} index={i}><StepsTab steps={log.steps} /></TabPanel>;
+        if (t.key === 'llm') return <TabPanel key={t.key} value={tab} index={i}><LLMCallsTab calls={log.llm_calls} /></TabPanel>;
+        if (t.key === 'query') return <TabPanel key={t.key} value={tab} index={i}><QueryTab log={log} /></TabPanel>;
+        if (t.key === 'neo4j') return <TabPanel key={t.key} value={tab} index={i}><Neo4jTab execution={log.neo4j_execution} /></TabPanel>;
+        if (t.key === 'response') return <TabPanel key={t.key} value={tab} index={i}><ResponseTab log={log} /></TabPanel>;
+        if (t.key === 'errors') return <TabPanel key={t.key} value={tab} index={i}><ErrorsTab log={log} /></TabPanel>;
+        return null;
+      })}
     </Box>
   );
 }

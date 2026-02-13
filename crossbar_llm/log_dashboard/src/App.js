@@ -8,7 +8,7 @@ import Login from './pages/Login';
 import Overview from './pages/Overview';
 import LogsExplorer from './pages/LogsExplorer';
 import LogDetail from './pages/LogDetail';
-import LiveLogs from './pages/LiveLogs';
+
 
 // ---------- Auth Context ----------
 
@@ -112,7 +112,6 @@ export default function App() {
                 <Route index element={<Overview />} />
                 <Route path="logs" element={<LogsExplorer />} />
                 <Route path="logs/:requestId" element={<LogDetail />} />
-                <Route path="live" element={<LiveLogs />} />
               </Route>
             </Routes>
           </BrowserRouter>

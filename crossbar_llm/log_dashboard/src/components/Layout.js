@@ -21,7 +21,6 @@ import {
 import {
   Dashboard as DashboardIcon,
   FormatListBulleted as LogsIcon,
-  FiberManualRecord as LiveIcon,
   Logout as LogoutIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
@@ -38,14 +37,12 @@ const DRAWER_COLLAPSED = 68;
 const NAV_ITEMS = [
   { label: 'Overview', path: '/', icon: <DashboardIcon /> },
   { label: 'Logs Explorer', path: '/logs', icon: <LogsIcon /> },
-  { label: 'Live Logs', path: '/live', icon: <LiveIcon /> },
 ];
 
 function getPageTitle(pathname) {
   if (pathname === '/') return 'Overview';
   if (pathname === '/logs') return 'Logs Explorer';
   if (pathname.startsWith('/logs/')) return 'Log Detail';
-  if (pathname === '/live') return 'Live Logs';
   return 'Dashboard';
 }
 
@@ -56,8 +53,6 @@ function getBreadcrumbs(pathname) {
   } else if (pathname.startsWith('/logs/')) {
     crumbs.push({ label: 'Logs Explorer', path: '/logs' });
     crumbs.push({ label: 'Detail', path: pathname });
-  } else if (pathname === '/live') {
-    crumbs.push({ label: 'Live Logs', path: '/live' });
   }
   return crumbs;
 }

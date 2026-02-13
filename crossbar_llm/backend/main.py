@@ -154,7 +154,7 @@ origins = [
 app = FastAPI()
 
 # Mount the dashboard API router
-from dashboard_api import router as dashboard_router, setup_dashboard_log_handler
+from dashboard_api import router as dashboard_router
 app.include_router(dashboard_router)
 
 
@@ -2180,7 +2180,6 @@ def get_free_models():
 @app.on_event("startup")
 async def startup_event():
     setup_logging(verbose=False)
-    setup_dashboard_log_handler()
     # Initialize the event loop for threading usage
     asyncio.get_event_loop_policy().get_event_loop()
     Logger.info("API server started with rate limiting enabled")

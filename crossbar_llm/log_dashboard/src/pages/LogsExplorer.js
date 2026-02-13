@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Button,
-  Card,
+Card,
   CardContent,
   Chip,
   FormControl,
@@ -48,6 +47,26 @@ function StatusChip({ status }) {
   );
 }
 
+// ---------- Type chip ----------
+
+function TypeChip({ searchType }) {
+  const config = {
+    generate_and_execute: { label: 'Generate & Execute', color: 'primary' },
+    db_search: { label: 'Generate Only', color: 'default' },
+    query_execution: { label: 'Execute Only', color: 'secondary' },
+  };
+  const c = config[searchType] || { label: searchType || '-', color: 'default' };
+  return (
+    <Chip
+      label={c.label}
+      size="small"
+      color={c.color}
+      variant="outlined"
+      sx={{ fontWeight: 500, fontSize: '0.7rem' }}
+    />
+  );
+}
+
 // ---------- Helpers ----------
 
 function formatDuration(ms) {
@@ -73,13 +92,14 @@ export default function LogsExplorer() {
   const [filters, setFilters] = useState(null);
 
   // Pagination & filters state
-  const [page, setPage] = useState(0); // MUI DataGrid uses 0-based
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [status, setStatus] = useState('');
   const [model, setModel] = useState('');
   const [provider, setProvider] = useState('');
+  const [searchType, setSearchType] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [sortModel, setSortModel] = useState([{ field: 'timestamp', sort: 'desc' }]);
@@ -95,12 +115,13 @@ export default function LogsExplorer() {
     try {
       const sort = sortModel[0] || { field: 'timestamp', sort: 'desc' };
       const data = await getLogs({
-        page: page + 1, // API is 1-based
+        page: page + 1,
         limit: pageSize,
         search: search || undefined,
         status: status || undefined,
         model: model || undefined,
         provider: provider || undefined,
+        search_type: searchType || undefined,
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
         sort_by: sort.field,
@@ -113,7 +134,7 @@ export default function LogsExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, status, model, provider, dateFrom, dateTo, sortModel]);
+  }, [page, pageSize, search, status, model, provider, searchType, dateFrom, dateTo, sortModel]);
 
   useEffect(() => {
     fetchData();
@@ -134,12 +155,13 @@ export default function LogsExplorer() {
     setStatus('');
     setModel('');
     setProvider('');
+    setSearchType('');
     setDateFrom('');
     setDateTo('');
     setPage(0);
   };
 
-  const hasActiveFilters = search || status || model || provider || dateFrom || dateTo;
+  const hasActiveFilters = search || status || model || provider || searchType || dateFrom || dateTo;
 
   // CSV export
   const handleExport = () => {
@@ -150,8 +172,8 @@ export default function LogsExplorer() {
       'Model',
       'Provider',
       'Status',
+      'Type',
       'Duration (ms)',
-      'Search Type',
     ];
     const csvRows = rows.map((r) =>
       [
@@ -161,8 +183,8 @@ export default function LogsExplorer() {
         r.model_name,
         r.provider,
         r.status,
-        r.total_duration_ms,
         r.search_type,
+        r.total_duration_ms,
       ].join(',')
     );
     const csv = [headers.join(','), ...csvRows].join('\n');
@@ -209,20 +231,21 @@ export default function LogsExplorer() {
     {
       field: 'model_name',
       headerName: 'Model',
-      width: 140,
+      width: 130,
       renderCell: ({ value }) => (
         <Chip label={value || '-'} size="small" variant="outlined" />
       ),
     },
     {
-      field: 'provider',
-      headerName: 'Provider',
-      width: 110,
+      field: 'search_type',
+      headerName: 'Type',
+      width: 160,
+      renderCell: ({ value }) => <TypeChip searchType={value} />,
     },
     {
       field: 'status',
       headerName: 'Status',
-      width: 120,
+      width: 110,
       renderCell: ({ value }) => <StatusChip status={value} />,
     },
     {
@@ -234,11 +257,6 @@ export default function LogsExplorer() {
           {formatDuration(value)}
         </Typography>
       ),
-    },
-    {
-      field: 'search_type',
-      headerName: 'Type',
-      width: 120,
     },
     {
       field: 'actions',
@@ -258,6 +276,14 @@ export default function LogsExplorer() {
       ),
     },
   ];
+
+  // Type label helper for the filter dropdown
+  const typeLabel = (t) => {
+    if (t === 'generate_and_execute') return 'Generate & Execute';
+    if (t === 'db_search') return 'Generate Only';
+    if (t === 'query_execution') return 'Execute Only';
+    return t;
+  };
 
   return (
     <Box>
@@ -288,6 +314,21 @@ export default function LogsExplorer() {
               sx={{ minWidth: 260, flex: 1 }}
             />
 
+            {/* Type */}
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel>Type</InputLabel>
+              <Select
+                value={searchType}
+                label="Type"
+                onChange={(e) => { setSearchType(e.target.value); setPage(0); }}
+              >
+                <MenuItem value="">All</MenuItem>
+                {(filters?.search_types || []).map((t) => (
+                  <MenuItem key={t} value={t}>{typeLabel(t)}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             {/* Status */}
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Status</InputLabel>
@@ -314,21 +355,6 @@ export default function LogsExplorer() {
                 <MenuItem value="">All</MenuItem>
                 {(filters?.models || []).map((m) => (
                   <MenuItem key={m} value={m}>{m}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Provider */}
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Provider</InputLabel>
-              <Select
-                value={provider}
-                label="Provider"
-                onChange={(e) => { setProvider(e.target.value); setPage(0); }}
-              >
-                <MenuItem value="">All</MenuItem>
-                {(filters?.providers || []).map((p) => (
-                  <MenuItem key={p} value={p}>{p}</MenuItem>
                 ))}
               </Select>
             </FormControl>
