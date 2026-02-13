@@ -197,7 +197,7 @@ class GoogleGenerativeLanguageModel:
         self.model_name = model_name or "gemini-1.5-pro-latest"
         self.temperature = temperature or 0
         self.llm = ChatGoogleGenerativeAI(
-            google_api_key=api_key,
+            api_key=api_key,
             model=self.model_name,
             temperature=self.temperature,
             request_timeout=600,
