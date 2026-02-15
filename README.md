@@ -173,7 +173,7 @@ When the backend is running, you can access:
 
 The application supports both development and production environments with different security settings:
 
-- **Development mode** (default): Disables CSRF protection and rate limiting for easier local development
+- **Development mode** (default): Disables CSRF protection for easier local development (rate limiting on unless CROSSBAR_RATE_LIMIT=false)
 - **Production mode**: Enables full security features
 
 For details on configuring the environment, see [ENVIRONMENT.md](ENVIRONMENT.md).

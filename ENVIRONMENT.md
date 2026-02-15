@@ -5,7 +5,7 @@ CROssBAR LLM backend can be configured to run in different environments with dis
 ## Environment Types
 
 The application supports two environment types:
-- **Development**: Optimized for local development with security features relaxed and no rate limiting
+- **Development**: Optimized for local development with CSRF disabled (rate limiting enabled unless CROSSBAR_RATE_LIMIT=false)
 - **Production**: Full security features enabled with CSRF protection and rate limiting
 
 ## Configuration
@@ -24,12 +24,20 @@ You can set this in your `.env` file or directly in your environment.
 | Feature | Development | Production |
 |---------|-------------|------------|
 | CSRF Protection | Disabled | Enabled |
-| Rate Limiting | Disabled | Enabled |
+| Rate Limiting | See CROSSBAR_RATE_LIMIT below | See CROSSBAR_RATE_LIMIT below |
 | Debug Logging | Verbose | Minimal |
 
-### Rate Limits (Production Only)
+### Rate Limiting (CROSSBAR_RATE_LIMIT)
 
-Rate limiting in production mode follows these defaults:
+Rate limiting is **enabled by default**. Set `CROSSBAR_RATE_LIMIT=false` or `0` to disable:
+
+```
+CROSSBAR_RATE_LIMIT=false   # Disable rate limiting
+```
+
+### Rate Limits (When Enabled)
+
+When rate limiting is enabled, these defaults apply:
 - 6 requests per minute
 - 20 requests per hour
 - 50 requests per day

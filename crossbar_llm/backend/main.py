@@ -319,7 +319,7 @@ class RateLimiter:
 
         # Log with readable rate limit values
         if not self.enabled:
-            Logger.info("Rate limiting is disabled (development mode)")
+            Logger.info("Rate limiting is disabled")
         else:
             # Consider very high limits as effectively unlimited for display purposes
             minute_display = (

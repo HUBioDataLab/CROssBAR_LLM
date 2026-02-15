@@ -15,18 +15,22 @@ ENV = os.getenv("CROSSBAR_ENV", "development").lower()
 IS_PRODUCTION = ENV == "production"
 IS_DEVELOPMENT = not IS_PRODUCTION
 
+# Rate limit: enforced by default. Set CROSSBAR_RATE_LIMIT=false or 0 to disable.
+_rate_limit_env = os.getenv("CROSSBAR_RATE_LIMIT", "").lower()
+RATE_LIMITING_ENABLED = _rate_limit_env not in ("false", "0")
+
 # Environment-specific settings
 SETTINGS = {
     "csrf_enabled": IS_PRODUCTION,
-    "rate_limiting_enabled": IS_PRODUCTION,
+    "rate_limiting_enabled": RATE_LIMITING_ENABLED,
     "debug_logging": IS_DEVELOPMENT,
     # Rate limiting settings
     "rate_limits": {
-        # Use a very large number in development mode instead of infinity
-        # to avoid JSON serialization issues
-        "minute": 6 if IS_PRODUCTION else 10000000,  # Requests per minute
-        "hour": 20 if IS_PRODUCTION else 10000000,  # Requests per hour
-        "day": 50 if IS_PRODUCTION else 10000000,  # Requests per day
+        # Use production limits when rate limiting is enabled; otherwise use
+        # very large numbers (instead of infinity) to avoid JSON serialization issues
+        "minute": 6 if RATE_LIMITING_ENABLED else 10000000,  # Requests per minute
+        "hour": 20 if RATE_LIMITING_ENABLED else 10000000,  # Requests per hour
+        "day": 50 if RATE_LIMITING_ENABLED else 10000000,  # Requests per day
     },
 }
 
