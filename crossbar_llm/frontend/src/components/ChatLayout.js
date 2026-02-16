@@ -238,8 +238,8 @@ function ChatLayout({
 
   // Supported/recommended models (highlighted in model selection)
   const supportedModels = [
-    'gpt-5.1', 'gpt-4o', 'gpt-5-nano', 'gpt-5-mini', 'claude-sonnet-4-5', 'claude-opus-4-1',
-    'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-2.5-pro', 'gemini-2.5-flash'
+    'gpt-5.1', 'gpt-5-mini', 'claude-sonnet-4-5', 'claude-opus-4-1',
+    'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-3-pro-preview', 'gemini-3-flash-preview'
   ];
 
   // Fetch available models on mount
@@ -2318,6 +2318,48 @@ function ChatLayout({
                     })}
                   </Select>
                 </FormControl>
+
+                {/* Model Selection & Usage Disclaimer */}
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    backgroundColor: alpha(theme.palette.info.main, 0.03),
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                    borderRadius: '8px'
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: 'info.main' }}>
+                    Model Selection & Usage Disclaimer
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Free-Tier Access:
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        You can use crossbar-llm for free with <strong>gpt5-mini</strong> and <strong>gemini-3-flash-preview</strong>. To access premium or alternative models, please provide your own API key.
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Privacy & Key Security:
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Your API key is never stored on our servers. It is kept in volatile memory for the duration of your session and is permanently deleted immediately upon session termination or browser close.
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Token Consumption Advisory:
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        This tool utilizes complex multi-query reasoning. A single query averages <strong>9,500 total tokens</strong> (9k input / 500 output). A standard 8-query session averages <strong>75,000 total tokens</strong>. Please monitor your billing limits accordingly.
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Paper>
 
                 {/* API Key Section */}
                 {apiKeysLoaded && apiKeysStatus[provider] && freeModels.includes(llmType) ? (
