@@ -2355,7 +2355,7 @@ function ChatLayout({
                         Token Consumption Advisory:
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        This tool utilizes complex multi-query reasoning. A single query averages <strong>9,500 total tokens</strong> (9k input / 500 output). A standard 8-query session averages <strong>75,000 total tokens</strong>. Please monitor your billing limits accordingly.
+                        This tool utilizes complex multi-query reasoning. A single query averages <strong>17,000 total tokens</strong> (16.5k input / 500 output). Please monitor your billing limits accordingly.
                       </Typography>
                     </Box>
                   </Box>
