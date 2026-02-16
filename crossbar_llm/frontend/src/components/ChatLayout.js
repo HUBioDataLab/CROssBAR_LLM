@@ -59,7 +59,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
-import api, { getAvailableModels, getFreeModels } from '../services/api';
+import api, { getAvailableModels, getFreeModels, refreshCsrfToken } from '../services/api';
 import axios from 'axios';
 import Fuse from 'fuse.js';
 import { loadSuggestions } from '../utils/loadSuggestions';
@@ -747,19 +747,64 @@ function ChatLayout({
       // Get the base URL from the api service
       const baseURL = api.defaults.baseURL || '';
 
+      // Get CSRF token from axios instance headers
+      const csrfToken = api.defaults.headers['X-CSRF-Token'];
+
       // Use fetch with POST for SSE (EventSource only supports GET)
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      };
+      
+      // Add CSRF token if available
+      if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+      }
+
       fetch(`${baseURL}/run_query_with_retry/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-        },
+        headers: headers,
         body: JSON.stringify(requestBody),
         credentials: 'include',
-      }).then(response => {
+      }).then(async response => {
+        // Handle CSRF token errors
+        if (!response.ok && (response.status === 400 || response.status === 403 || response.status === 500)) {
+          const errorText = await response.text();
+          if (errorText.includes('CSRF') || errorText.includes('csrf') || errorText.includes('InvalidHeaderError')) {
+            // CSRF token issue - refresh and retry once
+            console.warn('CSRF token invalid, refreshing and retrying...');
+            try {
+              await refreshCsrfToken();
+              const newCsrfToken = api.defaults.headers['X-CSRF-Token'];
+              if (newCsrfToken) {
+                headers['X-CSRF-Token'] = newCsrfToken;
+              }
+              // Retry the request with new token
+              const retryResponse = await fetch(`${baseURL}/run_query_with_retry/`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody),
+                credentials: 'include',
+              });
+              if (!retryResponse.ok) {
+                throw new Error(`HTTP error after CSRF refresh! status: ${retryResponse.status}`);
+              }
+              return retryResponse; // Return the successful retry response
+            } catch (refreshError) {
+              console.error('Failed to refresh CSRF token:', refreshError);
+              throw new Error(`CSRF token refresh failed: ${refreshError.message}`);
+            }
+          } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        }
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        return response;
+      }).then(response => {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
