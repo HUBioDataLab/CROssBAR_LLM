@@ -2,6 +2,7 @@
   "name": "crossbar-log-dashboard",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/dashboard",
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
@@ -20,7 +21,7 @@
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
-    "build": "react-scripts build",
+    "build": "PUBLIC_URL=/dashboard react-scripts build",
     "test": "react-scripts test"
   },
   "eslintConfig": {

@@ -1,7 +1,24 @@
 import axios from 'axios';
 
-const API_BASE =
-  process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Determine the API base URL based on environment
+const getApiBaseUrl = () => {
+  // If explicitly set, use it
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // In development, use localhost
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:8000';
+  }
+  
+  // In production, derive from the current location
+  // Remove /dashboard from the path if present
+  const basePath = window.location.pathname.split('/dashboard')[0] || '';
+  return `${window.location.origin}${basePath}/api`;
+};
+
+const API_BASE = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: `${API_BASE}/dashboard`,

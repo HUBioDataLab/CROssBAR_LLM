@@ -98,7 +98,7 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <BrowserRouter>
+          <BrowserRouter basename="/dashboard">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route

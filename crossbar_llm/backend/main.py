@@ -149,6 +149,7 @@ origins = [
     "http://localhost:8501",
     "http://127.0.0.1:8501",
     f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}",
+    f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}/dashboard",
 ]
 
 app = FastAPI()
