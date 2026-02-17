@@ -1,8 +1,7 @@
 """
 Dashboard API for CROssBAR LLM Log Visualization.
 
-Provides endpoints for authentication, log querying, and statistics
-for the standalone log dashboard.
+Provides endpoints for log querying and statistics for the standalone log dashboard.
 """
 
 import json
@@ -12,23 +11,14 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-import jwt
-import bcrypt
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Query
 
 load_dotenv()
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-
-DASHBOARD_PASSWORD_HASH = os.getenv("DASHBOARD_PASSWORD_HASH", "")
-DASHBOARD_JWT_SECRET = os.getenv("DASHBOARD_JWT_SECRET", "change-me-in-production")
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRY_HOURS = 24
 
 # Log directories – handle both flat and structured subdirectory layouts
 _backend_dir = os.path.dirname(os.path.realpath(__file__))
@@ -37,50 +27,6 @@ STRUCTURED_LOGS_DIR = os.path.join(LOGS_DIR, "structured_logs")
 DETAILED_LOGS_DIR = os.path.join(LOGS_DIR, "detailed_logs")
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Pydantic models
-# ---------------------------------------------------------------------------
-
-
-class LoginRequest(BaseModel):
-    password: str
-
-
-class LoginResponse(BaseModel):
-    token: str
-
-
-# ---------------------------------------------------------------------------
-# JWT helpers
-# ---------------------------------------------------------------------------
-
-security = HTTPBearer()
-
-
-def create_jwt(data: dict) -> str:
-    payload = {
-        **data,
-        "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRY_HOURS),
-        "iat": datetime.utcnow(),
-    }
-    return jwt.encode(payload, DASHBOARD_JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-
-def verify_jwt(token: str) -> dict:
-    try:
-        return jwt.decode(token, DASHBOARD_JWT_SECRET, algorithms=[JWT_ALGORITHM])
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> dict:
-    return verify_jwt(credentials.credentials)
-
 
 # ---------------------------------------------------------------------------
 # Log file reader
@@ -570,39 +516,11 @@ def get_reader() -> LogFileReader:
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
-# -- Auth -----------------------------------------------------------------
-
-
-@router.post("/auth/login", response_model=LoginResponse)
-async def login(body: LoginRequest):
-    if not DASHBOARD_PASSWORD_HASH:
-        raise HTTPException(
-            status_code=500, detail="Dashboard password not configured"
-        )
-
-    password_bytes = body.password.encode("utf-8")
-    hash_bytes = DASHBOARD_PASSWORD_HASH.encode("utf-8")
-
-    if not bcrypt.checkpw(password_bytes, hash_bytes):
-        raise HTTPException(status_code=401, detail="Invalid password")
-
-    token = create_jwt({"sub": "dashboard_user"})
-    return LoginResponse(token=token)
-
-
-@router.get("/auth/verify")
-async def verify_token(user: dict = Depends(get_current_user)):
-    return {"valid": True}
-
-
 # -- Stats ----------------------------------------------------------------
 
 
 @router.get("/api/stats")
-async def get_stats(
-    days: int = Query(30, ge=1, le=365),
-    user: dict = Depends(get_current_user),
-):
+async def get_stats(days: int = Query(30, ge=1, le=365)):
     reader = get_reader()
     stats = reader.get_stats(days)
     stats["model_distribution"] = reader.get_model_distribution(days)
@@ -614,7 +532,6 @@ async def get_stats(
 async def get_timeline(
     days: int = Query(7, ge=1, le=365),
     granularity: str = Query("hour", regex="^(hour|day)$"),
-    user: dict = Depends(get_current_user),
 ):
     return get_reader().get_timeline(days, granularity)
 
@@ -635,7 +552,6 @@ async def get_logs(
     date_to: Optional[str] = None,
     sort_by: str = Query("timestamp"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
-    user: dict = Depends(get_current_user),
 ):
     return get_reader().get_logs(
         page=page,
@@ -653,9 +569,7 @@ async def get_logs(
 
 
 @router.get("/api/logs/{request_id}")
-async def get_log_detail(
-    request_id: str, user: dict = Depends(get_current_user)
-):
+async def get_log_detail(request_id: str):
     entry = get_reader().get_log_detail(request_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Log entry not found")
@@ -666,5 +580,5 @@ async def get_log_detail(
 
 
 @router.get("/api/filters")
-async def get_filters(user: dict = Depends(get_current_user)):
+async def get_filters():
     return get_reader().get_filters()

@@ -21,7 +21,6 @@ import {
 import {
   Dashboard as DashboardIcon,
   FormatListBulleted as LogsIcon,
-  Logout as LogoutIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   ChevronLeft as CollapseIcon,
@@ -29,7 +28,7 @@ import {
   Menu as MenuIcon,
   BarChart as BrandIcon,
 } from '@mui/icons-material';
-import { useAuth, useColorMode } from '../App';
+import { useColorMode } from '../App';
 
 const DRAWER_WIDTH = 240;
 const DRAWER_COLLAPSED = 68;
@@ -62,7 +61,6 @@ export default function Layout() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
   const { mode, toggleColorMode } = useColorMode();
 
   const [collapsed, setCollapsed] = useState(false);
@@ -199,31 +197,6 @@ export default function Layout() {
               <ListItemText
                 primary={mode === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 primaryTypographyProps={{ fontSize: '0.8125rem', color: 'text.secondary' }}
-              />
-            )}
-          </ListItemButton>
-        </Tooltip>
-
-        <Tooltip title="Sign out" placement="right" arrow>
-          <ListItemButton
-            onClick={logout}
-            sx={{
-              borderRadius: '8px',
-              mx: collapsed ? 0.5 : 0,
-              px: collapsed ? 1.5 : 2,
-              minHeight: 44,
-              justifyContent: collapsed ? 'center' : 'flex-start',
-            }}
-          >
-            <ListItemIcon
-              sx={{ minWidth: collapsed ? 0 : 36, justifyContent: 'center', color: 'error.main' }}
-            >
-              <LogoutIcon />
-            </ListItemIcon>
-            {!collapsed && (
-              <ListItemText
-                primary="Sign Out"
-                primaryTypographyProps={{ fontSize: '0.8125rem', color: 'error.main' }}
               />
             )}
           </ListItemButton>

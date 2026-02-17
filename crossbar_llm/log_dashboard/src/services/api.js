@@ -25,37 +25,6 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach JWT to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('dashboard_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// On 401, redirect to login
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('dashboard_token');
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(err);
-  }
-);
-
-// Auth
-export const login = (password) =>
-  api.post('/auth/login', { password }).then((r) => r.data);
-
-export const verifyToken = () =>
-  api.get('/auth/verify').then((r) => r.data);
-
 // Stats
 export const getStats = (days = 30) =>
   api.get('/api/stats', { params: { days } }).then((r) => r.data);
