@@ -388,7 +388,7 @@ class QueryChain:
             "node_properties_sample": self.schema.get("node_properties", [])[:3]
         }
 
-    @timeout(180)
+    @timeout(300)
     @validate_call
     def run_cypher_chain(
         self,
