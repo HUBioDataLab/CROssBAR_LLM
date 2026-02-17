@@ -54,6 +54,7 @@ function TypeChip({ searchType }) {
     generate_and_execute: { label: 'Generate & Execute', color: 'primary' },
     db_search: { label: 'Generate Only', color: 'default' },
     query_execution: { label: 'Execute Only', color: 'secondary' },
+    query_execution_with_retry: { label: 'Execute Only', color: 'secondary' },
   };
   const c = config[searchType] || { label: searchType || '-', color: 'default' };
   return (

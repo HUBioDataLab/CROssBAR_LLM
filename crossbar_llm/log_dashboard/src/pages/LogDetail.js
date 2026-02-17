@@ -52,6 +52,7 @@ function searchTypeLabel(t) {
   if (t === 'generate_and_execute') return 'Generate & Execute';
   if (t === 'db_search') return 'Generate Only';
   if (t === 'query_execution') return 'Execute Only';
+  if (t === 'query_execution_with_retry') return 'Execute Only';
   return t || '-';
 }
 

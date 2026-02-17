@@ -290,8 +290,18 @@ class LogFileReader:
     @staticmethod
     def _is_pair(gen: dict, exec_: dict) -> bool:
         """Check whether gen (db_search) and exec_ (query_execution) form a pair."""
-        if exec_.get("search_type") != "query_execution":
+        # Accept both query_execution and query_execution_with_retry
+        exec_type = exec_.get("search_type", "")
+        if exec_type not in ["query_execution", "query_execution_with_retry"]:
             return False
+        
+        # Strong pairing signal: same request_id
+        gen_req_id = gen.get("request_id", "")
+        exec_req_id = exec_.get("request_id", "")
+        if gen_req_id and exec_req_id and gen_req_id == exec_req_id:
+            return True
+        
+        # Fallback to legacy pairing logic
         if gen.get("question", "").strip() != exec_.get("question", "").strip():
             return False
         # Same client

@@ -334,6 +334,14 @@ class Neo4jGraphHelper:
         Returns:
             List of result dictionaries, or error message string
         """
+        # Start a step for neo4j execution
+        structured_logger = get_structured_logger()
+        step = structured_logger.start_step("neo4j_query_execution", {
+            "query": query[:500],  # Log first 500 chars
+            "query_length": len(query),
+            "top_k": top_k
+        })
+        
         execution_log = Neo4jExecutionLog()
         execution_start_time = time()
         
@@ -408,6 +416,7 @@ class Neo4jGraphHelper:
                     )
                     
                     log_neo4j_execution(execution_log)
+                    structured_logger.end_step(step, "completed")
                     return "Given cypher query did not return any result"
 
                 # Process results
@@ -446,6 +455,7 @@ class Neo4jGraphHelper:
                 )
                 
                 log_neo4j_execution(execution_log)
+                structured_logger.end_step(step, "completed")
                 return results
                 
         except neo4j.exceptions.CypherSyntaxError as e:
@@ -466,6 +476,7 @@ class Neo4jGraphHelper:
             )
             
             log_neo4j_execution(execution_log)
+            structured_logger.end_step(step, "failed", e)
             raise
             
         except neo4j.exceptions.ClientError as e:
@@ -486,6 +497,7 @@ class Neo4jGraphHelper:
             )
             
             log_neo4j_execution(execution_log)
+            structured_logger.end_step(step, "failed", e)
             raise
             
         except neo4j.exceptions.DatabaseError as e:
@@ -506,6 +518,7 @@ class Neo4jGraphHelper:
             )
             
             log_neo4j_execution(execution_log)
+            structured_logger.end_step(step, "failed", e)
             raise
             
         except Exception as e:
@@ -526,6 +539,7 @@ class Neo4jGraphHelper:
             )
             
             log_neo4j_execution(execution_log)
+            structured_logger.end_step(step, "failed", e)
             raise
 
     def remove_embedding_attribute(self, data: Dict) -> Dict:
