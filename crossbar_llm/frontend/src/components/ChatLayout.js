@@ -287,7 +287,7 @@ function ChatLayout({
         setApiKey('');
       }
     }
-  }, [provider, llmType, freeModels, apiKeysStatus, apiKeysLoaded, apiKey, setApiKey]);
+  }, [provider, llmType, freeModels, apiKeysStatus, apiKeysLoaded]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
