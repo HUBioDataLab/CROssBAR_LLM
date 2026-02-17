@@ -722,7 +722,7 @@ function ChatLayout({
   };
 
   // Run query with SSE retry support
-  const runQueryWithRetry = (cypherQuery, userQuestion, effectiveApiKey) => {
+  const runQueryWithRetry = (cypherQuery, userQuestion, effectiveApiKey, requestId = null) => {
     return new Promise((resolve, reject) => {
       // Reset retry state
       setRetryAttempts([]);
@@ -743,6 +743,11 @@ function ChatLayout({
         vector_category: semanticSearchEnabled ? vectorCategory : null,
         max_retries: maxRetries,
       };
+      
+      // Add request_id if provided (for continuing an existing log from generate_query)
+      if (requestId) {
+        requestBody.request_id = requestId;
+      }
 
       // Get the base URL from the api service
       const baseURL = api.defaults.baseURL || '';
@@ -965,13 +970,14 @@ function ChatLayout({
       const generateResponse = await api.post('/generate_query/', requestData, { signal });
 
       const cypherQuery = generateResponse.data.query;
+      const requestId = generateResponse.data.request_id; // Capture request_id for log continuation
       setQueryResult(cypherQuery);
       setEditableQuery(cypherQuery);
       setOriginalQuery(cypherQuery);
       setCurrentStep('Executing query...');
 
       // Step 2: Run the query with SSE retry support
-      const runResponse = await runQueryWithRetry(cypherQuery, userQuestion, effectiveApiKey);
+      const runResponse = await runQueryWithRetry(cypherQuery, userQuestion, effectiveApiKey, requestId);
 
       // Use the final query from the response (may be different if retried)
       const finalQuery = runResponse.query || cypherQuery;

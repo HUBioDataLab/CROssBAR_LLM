@@ -144,12 +144,19 @@ def extract_client_ip(request: Request) -> str:
 origins = [
     "http://localhost:3000",  # React dev server
     "http://127.0.0.1:3000",
+    "http://localhost:3001",  # Log dashboard dev server
+    "http://127.0.0.1:3001",
     "http://localhost:8501",
     "http://127.0.0.1:8501",
     f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}",
+    f"https://crossbarv2.hubiodatalab.com{os.getenv('REACT_APP_CROSSBAR_LLM_ROOT_PATH')}/dashboard",
 ]
 
 app = FastAPI()
+
+# Mount the dashboard API router
+from dashboard_api import router as dashboard_router
+app.include_router(dashboard_router)
 
 
 # Global exception handler middleware for comprehensive error logging
@@ -670,6 +677,7 @@ class RunQueryRequest(BaseModel):
     session_id: Optional[str] = None  # For conversation memory
     is_semantic_search: bool = False  # Whether semantic/vector search is active
     vector_category: Optional[str] = None  # Category used for semantic search
+    request_id: Optional[str] = None  # For continuing an existing log from generate_query
 
 
 class GenerateQueryResponse(BaseModel):
@@ -702,6 +710,7 @@ class RunQueryWithRetryRequest(BaseModel):
     is_semantic_search: bool = False
     vector_category: Optional[str] = None
     max_retries: int = 3  # Maximum number of retry attempts
+    request_id: Optional[str] = None  # For continuing an existing log from generate_query
 
 
 class RetryAttempt(BaseModel):
@@ -1084,17 +1093,53 @@ async def run_query(
         else get_provider_for_model(run_query_request.llm_type) or ""
     )
 
-    # Create structured query log
+    # Create or continue structured query log
     structured_logger = get_structured_logger()
-    query_log = structured_logger.create_query_log(
-        question=run_query_request.question,
-        provider=provider,
-        model_name=run_query_request.llm_type,
-        top_k=run_query_request.top_k,
-        search_type="query_execution",
-        verbose=run_query_request.verbose,
-        client_id=client_id
-    )
+    
+    # If request_id is provided, try to continue existing log; otherwise create new one
+    if run_query_request.request_id:
+        # Try to get existing log
+        existing_log = structured_logger.get_current_log()
+        if existing_log and existing_log.request_id == run_query_request.request_id:
+            query_log = existing_log
+            Logger.info(
+                f"[API] /run_query/ - Continuing existing log",
+                extra={
+                    "request_id": query_log.request_id,
+                    "existing_steps": len(query_log.steps)
+                }
+            )
+        else:
+            # Log not found in current context, create with provided request_id
+            query_log = structured_logger.create_query_log(
+                question=run_query_request.question,
+                provider=provider,
+                model_name=run_query_request.llm_type,
+                top_k=run_query_request.top_k,
+                search_type="query_execution",
+                verbose=run_query_request.verbose,
+                client_id=client_id,
+                request_id=run_query_request.request_id
+            )
+            Logger.info(
+                f"[API] /run_query/ - Created log with provided request_id",
+                extra={"request_id": query_log.request_id}
+            )
+    else:
+        # No request_id provided, create new log
+        query_log = structured_logger.create_query_log(
+            question=run_query_request.question,
+            provider=provider,
+            model_name=run_query_request.llm_type,
+            top_k=run_query_request.top_k,
+            search_type="query_execution",
+            verbose=run_query_request.verbose,
+            client_id=client_id
+        )
+        Logger.info(
+            f"[API] /run_query/ - Created new log",
+            extra={"request_id": query_log.request_id}
+        )
 
     # Store the query being executed
     query_log.final_query = run_query_request.query
@@ -1469,6 +1514,68 @@ async def run_query_with_retry(
         - If all retries are exhausted (for either error or empty), fall back
           to the LLM's internal knowledge instead of returning an error.
         """
+        # Initialize or continue structured logging
+        structured_logger = get_structured_logger()
+        
+        # If request_id is provided, try to continue existing log; otherwise create new one
+        if run_query_request.request_id:
+            # Try to get existing log
+            existing_log = structured_logger.get_current_log()
+            if existing_log and existing_log.request_id == run_query_request.request_id:
+                query_log = existing_log
+                Logger.info(
+                    f"[API] /run_query_with_retry/ - Continuing existing log",
+                    extra={
+                        "request_id": query_log.request_id,
+                        "existing_steps": len(query_log.steps)
+                    }
+                )
+            else:
+                # Determine provider
+                provider = (
+                    (run_query_request.provider or "").strip().lower()
+                    if run_query_request.provider
+                    else get_provider_for_model(run_query_request.llm_type) or ""
+                )
+                
+                # Log not found in current context, create with provided request_id
+                query_log = structured_logger.create_query_log(
+                    question=run_query_request.question,
+                    provider=provider,
+                    model_name=run_query_request.llm_type,
+                    top_k=run_query_request.top_k,
+                    search_type="query_execution_with_retry",
+                    verbose=run_query_request.verbose,
+                    client_id=client_id,
+                    request_id=run_query_request.request_id
+                )
+                Logger.info(
+                    f"[API] /run_query_with_retry/ - Created log with provided request_id",
+                    extra={"request_id": query_log.request_id}
+                )
+        else:
+            # Determine provider
+            provider = (
+                (run_query_request.provider or "").strip().lower()
+                if run_query_request.provider
+                else get_provider_for_model(run_query_request.llm_type) or ""
+            )
+            
+            # No request_id provided, create new log
+            query_log = structured_logger.create_query_log(
+                question=run_query_request.question,
+                provider=provider,
+                model_name=run_query_request.llm_type,
+                top_k=run_query_request.top_k,
+                search_type="query_execution_with_retry",
+                verbose=run_query_request.verbose,
+                client_id=client_id
+            )
+            Logger.info(
+                f"[API] /run_query_with_retry/ - Created new log",
+                extra={"request_id": query_log.request_id}
+            )
+        
         EMPTY_RESULT_STRING = "Given cypher query did not return any result"
 
         attempts = []
@@ -1479,12 +1586,8 @@ async def run_query_with_retry(
         conversation_turn_count = 0
         conversation_store = None
 
-        # Determine provider
-        provider = (
-            (run_query_request.provider or "").strip().lower()
-            if run_query_request.provider
-            else get_provider_for_model(run_query_request.llm_type) or ""
-        )
+        # Get provider from query_log (already determined in structured logging initialization)
+        provider = query_log.provider
 
         # Handle "env" API key
         api_key = run_query_request.api_key
@@ -1736,6 +1839,13 @@ async def run_query_with_retry(
                             extra={"error": str(e)}
                         )
 
+                # Finalize the structured log
+                finalize_query_log(
+                    final_query=current_query,
+                    natural_language_response=nl_response,
+                    status="completed"
+                )
+
                 # Send completion event
                 yield {
                     "event": "completed",
@@ -1913,6 +2023,13 @@ async def run_query_with_retry(
                         extra={"error": str(e)}
                     )
 
+                # Finalize the structured log for fallback success
+                finalize_query_log(
+                    final_query=current_query,
+                    natural_language_response=fallback_response,
+                    status="completed"
+                )
+
                 yield {
                     "event": "completed",
                     "data": json.dumps({
@@ -1936,6 +2053,9 @@ async def run_query_with_retry(
                         "duration_ms": request_duration_ms
                     }
                 )
+
+                # Finalize the structured log for failure
+                finalize_query_log(status="failed")
 
                 yield {
                     "event": "failed",
