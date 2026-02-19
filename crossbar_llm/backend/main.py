@@ -21,6 +21,7 @@ import pandas as pd
 from config import (
     IS_DEVELOPMENT,
     IS_PRODUCTION,
+    get_default_model_for_env,
     get_provider_env_var,
     get_provider_for_model,
     get_setting,
@@ -2283,11 +2284,19 @@ def get_available_models():
 def get_free_models():
     """
     Get models that are available without user API key (server-managed env keys).
+    Also returns default_model and default_provider for environment-based auto-selection:
+    - Development: gpt-5.1
+    - Production: gpt-5-mini
     """
     Logger.info("Free models requested")
     free_models = get_free_models_for_environment()
-    Logger.debug(f"Returning {len(free_models)} free models")
-    return {"models": free_models}
+    default_model, default_provider = get_default_model_for_env()
+    Logger.debug(f"Returning {len(free_models)} free models, default={default_model}")
+    return {
+        "models": free_models,
+        "default_model": default_model,
+        "default_provider": default_provider,
+    }
 
 
 # Initialize logging on startup

@@ -144,7 +144,7 @@ export const getAvailableModels = async () => {
 export const getFreeModels = async () => {
   try {
     const response = await instance.get('/free_models/');
-    return response.data?.models || [];
+    return response.data;
   } catch (error) {
     console.error('Error fetching free models:', error);
     throw error;

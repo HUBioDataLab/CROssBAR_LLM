@@ -248,9 +248,19 @@ function ChatLayout({
       try {
         const models = await getAvailableModels();
         setModelChoices(models);
-        const freeModelNames = await getFreeModels();
+        const freeData = await getFreeModels();
+        const freeModelNames = freeData?.models || [];
         setFreeModels(freeModelNames);
         setModelsLoaded(true);
+        const { default_model, default_provider } = freeData || {};
+        if (default_model && default_provider && !provider && !llmType) {
+          const providerModels = models?.[default_provider];
+          const modelAvailable = Array.isArray(providerModels) && providerModels.includes(default_model);
+          if (modelAvailable) {
+            setProvider(default_provider);
+            setLlmType(default_model);
+          }
+        }
       } catch (error) {
         console.error('Error fetching available/free models:', error);
         setModelChoices({});

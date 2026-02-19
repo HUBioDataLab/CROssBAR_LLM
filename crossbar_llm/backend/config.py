@@ -60,6 +60,16 @@ PRODUCTION_FREE_ENV_MODELS = {
     "gemini-3-flash-preview",
 }
 
+DEFAULT_MODEL_DEVELOPMENT = "gpt-5.1"
+DEFAULT_MODEL_PRODUCTION = "gpt-5-mini"
+DEFAULT_PROVIDER = "OpenAI"
+
+
+def get_default_model_for_env() -> tuple[str, str]:
+    """Return (model_name, provider) for the current environment."""
+    model = DEFAULT_MODEL_DEVELOPMENT if IS_DEVELOPMENT else DEFAULT_MODEL_PRODUCTION
+    return (model, DEFAULT_PROVIDER)
+
 
 def get_setting(key, default=None):
     """Get a setting from the configuration."""
