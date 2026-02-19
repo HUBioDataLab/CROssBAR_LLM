@@ -305,13 +305,13 @@ function ChatLayout({
   }, [conversationHistory, isLoading]);
 
 
-  // Sync editable query with queryResult
+  // Sync editable query with queryResult 
   useEffect(() => {
-    if (queryResult && !queryGenerated) {
+    if (queryResult && !queryGenerated && !isEditingQuery) {
       setEditableQuery(queryResult);
       setOriginalQuery(queryResult);
     }
-  }, [queryResult, queryGenerated]);
+  }, [queryResult, queryGenerated, isEditingQuery]);
 
   // Ref to hold handleSubmit for use in useEffect
   const handleSubmitRef = useRef(null);
@@ -1708,7 +1708,7 @@ function ChatLayout({
             )}
 
             {/* Show generated query preview when available */}
-            {queryResult && (currentStep.includes('Executing') || currentStep.includes('Retrying')) && (
+            {(editableQuery || queryResult) && (currentStep.includes('Executing') || currentStep.includes('Retrying')) && (
               <Box sx={{
                 mt: 1,
                 p: 1.5,
@@ -1743,7 +1743,7 @@ function ChatLayout({
                     overflow: 'hidden',
                   }}
                 >
-                  {queryResult.length > 200 ? queryResult.substring(0, 200) + '...' : queryResult}
+                  {(() => { const q = editableQuery || queryResult; return q.length > 200 ? q.substring(0, 200) + '...' : q; })()}
                 </Typography>
               </Box>
             )}
@@ -1910,7 +1910,7 @@ function ChatLayout({
           }}
         >
           {/* Pending Query Banner */}
-          {queryGenerated && pendingQuestion && (
+          {queryGenerated && pendingQuestion && !isLoading && (
             <Paper
               elevation={0}
               sx={{
@@ -2629,16 +2629,16 @@ function ChatLayout({
 
           {/* Generated Query Section */}
           {(queryResult || editableQuery) && (
-            <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${queryGenerated ? theme.palette.info.main : theme.palette.divider}`, overflow: 'hidden' }}>
+            <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${queryGenerated && !isLoading ? theme.palette.info.main : theme.palette.divider}`, overflow: 'hidden' }}>
               <SectionHeader
-                title={queryGenerated ? "Generated Query (Editable)" : "Generated Query"}
+                title={(isEditingQuery || queryGenerated) && !isLoading ? "Generated Query (Editable)" : "Generated Query"}
                 icon={<CodeIcon fontSize="small" color="info" />}
                 section="query"
-                badge={queryGenerated ? "Pending" : null}
+                badge={queryGenerated && !isLoading ? "Pending" : null}
               />
               <Collapse in={expandedSections.query}>
                 <Box sx={{ p: 2, pt: 0 }}>
-                  {isEditingQuery || queryGenerated ? (
+                  {(isEditingQuery || queryGenerated) && !isLoading ? (
                     // Editable mode
                     <>
                       <TextField
@@ -2660,7 +2660,7 @@ function ChatLayout({
                         }}
                       />
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {queryGenerated && (
+                        {(queryGenerated || isEditingQuery) && (
                           <Button
                             size="small"
                             variant="contained"
@@ -2714,10 +2714,30 @@ function ChatLayout({
                     <>
                       <Box sx={{ borderRadius: '12px', overflow: 'hidden' }}>
                         <SyntaxHighlighter language="cypher" style={syntaxTheme} customStyle={{ margin: 0, padding: '12px', fontSize: '0.8rem', borderRadius: '12px' }}>
-                          {queryResult}
+                          {(isLoading && editableQuery) ? editableQuery : queryResult}
                         </SyntaxHighlighter>
                       </Box>
+                      {!isLoading && (
                       <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button
+                          size="small"
+                          startIcon={<EditIcon />}
+                          variant="outlined"
+                          onClick={() => {
+                            const relevantTurn = viewingHistoryIndex !== null
+                              ? conversationHistory[viewingHistoryIndex]
+                              : conversationHistory[conversationHistory.length - 1];
+                            if (relevantTurn?.question) {
+                              setPendingQuestion(relevantTurn.question);
+                            }
+                            setEditableQuery(queryResult);
+                            setOriginalQuery(queryResult);
+                            setIsEditingQuery(true);
+                          }}
+                          sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                        >
+                          Edit
+                        </Button>
                         <Button
                           size="small"
                           startIcon={<ContentCopyIcon />}
@@ -2738,6 +2758,7 @@ function ChatLayout({
                           Neo4j Browser
                         </Button>
                       </Box>
+                      )}
                     </>
                   )}
                 </Box>
