@@ -269,7 +269,7 @@ export default function LogsExplorer() {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/logs/${row.request_id}`);
+            navigate(`/dashboard/logs/${row.request_id}`);
           }}
         >
           <OpenIcon fontSize="small" />
@@ -429,7 +429,7 @@ export default function LogsExplorer() {
             setSortModel(m);
             setPage(0);
           }}
-          onRowClick={(params) => navigate(`/logs/${params.row.request_id}`)}
+          onRowClick={(params) => navigate(`/dashboard/logs/${params.row.request_id}`)}
           disableRowSelectionOnClick
           autoHeight
           sx={{

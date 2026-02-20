@@ -554,7 +554,7 @@ export default function LogDetail() {
     return (
       <Box sx={{ py: 4 }}>
         <Alert severity="error" sx={{ borderRadius: '8px', mb: 2 }}>{error}</Alert>
-        <Button startIcon={<BackIcon />} onClick={() => navigate('/logs')}>
+        <Button startIcon={<BackIcon />} onClick={() => navigate('/dashboard/logs')}>
           Back to Logs
         </Button>
       </Box>
@@ -586,7 +586,7 @@ export default function LogDetail() {
     <Box>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <IconButton onClick={() => navigate('/logs')} size="small">
+        <IconButton onClick={() => navigate('/dashboard/logs')} size="small">
           <BackIcon />
         </IconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>

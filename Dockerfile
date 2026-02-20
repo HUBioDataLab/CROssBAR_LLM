@@ -30,22 +30,13 @@ RUN rm -f requirements.txt
 COPY crossbar_llm crossbar_llm
 WORKDIR crossbar_llm
 
-# Install & build main frontend
+# Install & build frontend (includes log dashboard as a sub-route at /dashboard)
 WORKDIR frontend
 RUN /root/.local/share/pnpm/pnpm install
 RUN PUBLIC_URL=$PUBLIC_URL /root/.local/share/pnpm/pnpm build
 RUN cp -rf build /public
 WORKDIR ..
 RUN rm -rf frontend
-
-# Install & build log dashboard
-WORKDIR log_dashboard
-RUN /root/.local/share/pnpm/pnpm install
-RUN PUBLIC_URL=$PUBLIC_URL/dashboard /root/.local/share/pnpm/pnpm build
-RUN mkdir -p /public/dashboard
-RUN cp -rf build/* /public/dashboard/
-WORKDIR ..
-RUN rm -rf log_dashboard
 
 WORKDIR ..
 COPY startup.sh .

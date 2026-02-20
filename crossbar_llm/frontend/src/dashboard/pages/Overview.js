@@ -424,7 +424,7 @@ export default function Overview() {
                   {stats.recent_errors.map((err) => (
                     <Box
                       key={err.request_id}
-                      onClick={() => navigate(`/logs/${err.request_id}`)}
+                      onClick={() => navigate(`/dashboard/logs/${err.request_id}`)}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
