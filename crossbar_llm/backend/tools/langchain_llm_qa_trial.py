@@ -1272,6 +1272,16 @@ class RunPipeline:
                     conversation_context=conversation_context,
                 )
 
+            if not corrected_query and hasattr(query_chain, 'generated_query') and query_chain.generated_query:
+                Logger.warning(
+                    "[RUN_FOR_QUERY] Schema correction returned empty query, falling back to raw generated query",
+                    extra={
+                        "raw_generated_query": query_chain.generated_query[:300],
+                        "question": question,
+                    }
+                )
+                corrected_query = query_chain.generated_query
+
             pipeline_duration_ms = (time() - pipeline_start_time) * 1000
             
             Logger.info(

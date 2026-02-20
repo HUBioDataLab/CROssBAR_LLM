@@ -560,6 +560,14 @@ function ChatLayout({
     setError(null);
     setIsLoading(true);
     setCurrentStep('Generating Cypher query...');
+    setRetryAttempts([]);
+    setCurrentRetry(0);
+    setIsRetrying(false);
+    setQueryResult('');
+    setEditableQuery('');
+    setOriginalQuery('');
+    setQueryGenerated(false);
+    setViewingHistoryIndex(null);
 
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -947,6 +955,9 @@ function ChatLayout({
     setRetryAttempts([]);
     setCurrentRetry(0);
     setIsRetrying(false);
+    setQueryResult('');
+    setEditableQuery('');
+    setOriginalQuery('');
 
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
