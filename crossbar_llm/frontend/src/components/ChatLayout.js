@@ -197,6 +197,7 @@ function ChatLayout({
   const exampleQueries = [
     "Which Gene is related to psoriasis <Disease> ?",
     "For proteins associated with amyotrophic lateral sclerosis <Disease>, which orthologous proteins in Mus musculus (Mouse) <Organism Taxon> have experimentally validated functional annotations, and which conserved biological processes do they support?",
+    "What nodes are on the shortest path that connect MDM2 <Gene> with the drug Sorafenib <Drug> ?",
     "Which drugs target proteins associated with Alzheimer disease <Disease> ?",
     "Which pathways are associated with both diabetes mellitus <Disease> and T-cell non-Hodgkin lymphoma <Disease> ? Return only signaling pathways.",
     "What are the common side effects of drugs targeting the protein of EGFR <Gene> ?",
