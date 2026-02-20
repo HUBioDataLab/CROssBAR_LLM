@@ -4,6 +4,7 @@ Dashboard API for CROssBAR LLM Log Visualization.
 Provides endpoints for log querying and statistics for the standalone log dashboard.
 """
 
+import asyncio
 import json
 import logging
 import os
@@ -522,9 +523,9 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 @router.get("/api/stats")
 async def get_stats(days: int = Query(30, ge=1, le=365)):
     reader = get_reader()
-    stats = reader.get_stats(days)
-    stats["model_distribution"] = reader.get_model_distribution(days)
-    stats["recent_errors"] = reader.get_recent_errors()
+    stats = await asyncio.to_thread(reader.get_stats, days)
+    stats["model_distribution"] = await asyncio.to_thread(reader.get_model_distribution, days)
+    stats["recent_errors"] = await asyncio.to_thread(reader.get_recent_errors)
     return stats
 
 
@@ -533,7 +534,7 @@ async def get_timeline(
     days: int = Query(7, ge=1, le=365),
     granularity: str = Query("hour", regex="^(hour|day)$"),
 ):
-    return get_reader().get_timeline(days, granularity)
+    return await asyncio.to_thread(get_reader().get_timeline, days, granularity)
 
 
 # -- Logs -----------------------------------------------------------------
@@ -553,7 +554,8 @@ async def get_logs(
     sort_by: str = Query("timestamp"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
 ):
-    return get_reader().get_logs(
+    return await asyncio.to_thread(
+        get_reader().get_logs,
         page=page,
         limit=limit,
         status=status,
@@ -570,7 +572,7 @@ async def get_logs(
 
 @router.get("/api/logs/{request_id}")
 async def get_log_detail(request_id: str):
-    entry = get_reader().get_log_detail(request_id)
+    entry = await asyncio.to_thread(get_reader().get_log_detail, request_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Log entry not found")
     return entry
@@ -581,4 +583,4 @@ async def get_log_detail(request_id: str):
 
 @router.get("/api/filters")
 async def get_filters():
-    return get_reader().get_filters()
+    return await asyncio.to_thread(get_reader().get_filters)

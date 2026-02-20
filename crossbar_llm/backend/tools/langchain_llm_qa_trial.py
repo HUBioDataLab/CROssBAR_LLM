@@ -388,7 +388,6 @@ class QueryChain:
             "node_properties_sample": self.schema.get("node_properties", [])[:3]
         }
 
-    @timeout(300)
     @validate_call
     def run_cypher_chain(
         self,
@@ -592,7 +591,6 @@ class QueryChain:
             structured_logger.end_step(step, "failed", e)
             raise
 
-    @timeout(180)
     def regenerate_query_with_error(
         self,
         question: str,
@@ -723,7 +721,6 @@ class QueryChain:
             structured_logger.end_step(step, "failed", e)
             raise
 
-    @timeout(180)
     def regenerate_query_on_empty(
         self,
         question: str,
