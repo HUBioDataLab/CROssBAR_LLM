@@ -38,14 +38,14 @@ RUN cp -rf build /public
 WORKDIR ..
 RUN rm -rf frontend
 
-# Install & build log dashboard
-WORKDIR log_dashboard
-RUN /root/.local/share/pnpm/pnpm install
-RUN PUBLIC_URL=$PUBLIC_URL/dashboard /root/.local/share/pnpm/pnpm build
-RUN mkdir -p /public/dashboard
-RUN cp -rf build/* /public/dashboard/
-WORKDIR ..
-RUN rm -rf log_dashboard
+# # Install & build log dashboard
+# WORKDIR log_dashboard
+# RUN /root/.local/share/pnpm/pnpm install
+# RUN PUBLIC_URL=$PUBLIC_URL/dashboard /root/.local/share/pnpm/pnpm build
+# RUN mkdir -p /public/dashboard
+# RUN cp -rf build/* /public/dashboard/
+# WORKDIR ..
+# RUN rm -rf log_dashboard
 
 WORKDIR ..
 COPY startup.sh .
