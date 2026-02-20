@@ -28,6 +28,9 @@ import {
   List,
   ListItem,
   ListItemText,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import StopIcon from '@mui/icons-material/Stop';
@@ -56,6 +59,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CloseIcon from '@mui/icons-material/Close';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
@@ -119,6 +123,20 @@ function ChatLayout({
 
   // Historical query viewing state
   const [viewingHistoryIndex, setViewingHistoryIndex] = useState(null);
+
+  // Tutorial video modal — auto-open on first visit
+  const [tutorialOpen, setTutorialOpen] = useState(() => {
+    try {
+      return !localStorage.getItem('crossbar_tutorial_seen');
+    } catch {
+      return true;
+    }
+  });
+
+  const handleCloseTutorial = () => {
+    setTutorialOpen(false);
+    try { localStorage.setItem('crossbar_tutorial_seen', '1'); } catch {}
+  };
 
   // Autocomplete hint visibility
   const [showAutocompleteHint, setShowAutocompleteHint] = useState(true);
@@ -1287,6 +1305,124 @@ function ChatLayout({
           </Typography>
         </Paper>
       </Box>
+
+      {/* Tutorial Video Section */}
+      <Box sx={{ width: '100%', maxWidth: 700, mt: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <PlayCircleOutlineIcon sx={{ fontSize: 18 }} />
+            How to use CROssBAR-LLM
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<PlayCircleOutlineIcon />}
+            onClick={() => setTutorialOpen(true)}
+            sx={{
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontSize: '0.75rem',
+              py: 0.4,
+            }}
+          >
+            Open in full view
+          </Button>
+        </Box>
+        <Box
+          sx={{
+            borderRadius: '12px',
+            overflow: 'hidden',
+            border: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+            boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.08)}`,
+            backgroundColor: '#000',
+            aspectRatio: '16/9',
+            maxHeight: 340,
+          }}
+        >
+          <iframe
+            title="CROssBAR-LLM tutorial"
+            src="https://www.youtube.com/embed/RtR1x_Lfx-Q"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* First-visit Tutorial Modal */}
+      <Dialog
+        open={tutorialOpen}
+        onClose={handleCloseTutorial}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            overflow: 'hidden',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            pb: 1,
+            pt: 2,
+            px: 3,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PlayCircleOutlineIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Welcome to CROssBAR-LLM
+            </Typography>
+          </Box>
+          <IconButton onClick={handleCloseTutorial} size="small" edge="end">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ px: 3, pb: 1.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Watch this short tutorial to get started with the biomedical knowledge graph chat interface.
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              backgroundColor: '#000',
+              lineHeight: 0,
+              aspectRatio: '16/9',
+              maxHeight: '60vh',
+            }}
+          >
+            <iframe
+              title="CROssBAR-LLM tutorial (full view)"
+              src="https://www.youtube.com/embed/RtR1x_Lfx-Q?autoplay=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+              }}
+            />
+          </Box>
+          <Box sx={{ px: 3, py: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              variant="contained"
+              onClick={handleCloseTutorial}
+              sx={{ borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
+            >
+              Get started
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 
