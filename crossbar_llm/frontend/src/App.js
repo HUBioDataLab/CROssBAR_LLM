@@ -399,7 +399,7 @@ function App() {
                 <InfoOutlinedIcon />
               </ListItemIcon>
               <ListItemText
-                primary="About"
+                primary="How to use"
                 primaryTypographyProps={{
                   fontWeight: tabValue === 'about' ? 600 : 400,
                   fontFamily: "'Poppins', 'Roboto', sans-serif",
