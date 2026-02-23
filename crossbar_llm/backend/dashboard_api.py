@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 load_dotenv()
 
@@ -514,7 +514,25 @@ def get_reader() -> LogFileReader:
 # Router
 # ---------------------------------------------------------------------------
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+# Traefik's stripprefix middleware sets X-Forwarded-Prefix to the stripped
+# prefix. Requests through the unprotected /api router get
+# X-Forwarded-Prefix: <PUBLIC_URL>/api, while requests through the
+# OAuth-protected /dashboard/api router get X-Forwarded-Prefix: <PUBLIC_URL>.
+# In development (no Traefik) the header is absent, so we allow those through.
+_PUBLIC_URL = os.getenv("REACT_APP_CROSSBAR_LLM_ROOT_PATH", "/llm")
+
+
+def _require_dashboard_access(request: Request) -> None:
+    forwarded_prefix = request.headers.get("X-Forwarded-Prefix")
+    if forwarded_prefix is not None and forwarded_prefix != _PUBLIC_URL:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+
+router = APIRouter(
+    prefix="/dashboard",
+    tags=["dashboard"],
+    dependencies=[Depends(_require_dashboard_access)],
+)
 
 
 # -- Stats ----------------------------------------------------------------
