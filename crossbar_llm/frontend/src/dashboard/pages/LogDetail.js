@@ -34,6 +34,9 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { getLogDetail } from '../services/api';
 import { format, parseISO } from 'date-fns';
+import { tz } from '@date-fns/tz';
+
+const DASHBOARD_TZ = tz('Europe/Istanbul');
 
 // ---------- Helpers ----------
 
@@ -612,7 +615,7 @@ export default function LogDetail() {
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0 }}>
             {log.timestamp
-              ? format(parseISO(log.timestamp), 'MMMM d, yyyy HH:mm:ss')
+              ? format(parseISO(log.timestamp), 'MMMM d, yyyy HH:mm:ss', { in: DASHBOARD_TZ })
               : ''}
             {' · '}
             {formatDuration(log.total_duration_ms)}

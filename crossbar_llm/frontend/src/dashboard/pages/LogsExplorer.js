@@ -26,6 +26,9 @@ import {
 } from '@mui/icons-material';
 import { getLogs, getFilters } from '../services/api';
 import { format, parseISO } from 'date-fns';
+import { tz } from '@date-fns/tz';
+
+const DASHBOARD_TZ = tz('Europe/Istanbul');
 
 // ---------- Status chip ----------
 
@@ -193,7 +196,7 @@ export default function LogsExplorer() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `logs_export_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.csv`;
+    a.download = `logs_export_${format(new Date(), 'yyyy-MM-dd_HH-mm', { in: DASHBOARD_TZ })}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -208,7 +211,7 @@ export default function LogsExplorer() {
         try {
           return (
             <Typography variant="body2" sx={{ mb: 0 }}>
-              {format(parseISO(value), 'MMM d, HH:mm:ss')}
+              {format(parseISO(value), 'MMM d, HH:mm:ss', { in: DASHBOARD_TZ })}
             </Typography>
           );
         } catch {
