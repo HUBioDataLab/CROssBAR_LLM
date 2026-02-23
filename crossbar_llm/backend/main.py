@@ -47,6 +47,7 @@ from sse_starlette.sse import EventSourceResponse
 from tools.langchain_llm_qa_trial import RunPipeline, configure_logging
 from tools.utils import Logger
 from tools.structured_logger import (
+    StructuredLogger,
     get_structured_logger,
     create_query_log,
     finalize_query_log,
@@ -55,6 +56,19 @@ from tools.structured_logger import (
 )
 from tools.conversation_store import get_conversation_store, ConversationTurn
 from models_config import get_all_models
+
+
+def _run_with_log_context(query_log: QueryLogEntry, func, *args, **kwargs):
+    """Run a synchronous blocking function in a thread pool while propagating
+    the StructuredLogger thread-local context into the worker thread.
+
+    Usage: await asyncio.to_thread(_run_with_log_context, query_log, func, **kwargs)
+    """
+    StructuredLogger.set_current_log(query_log)
+    try:
+        return func(*args, **kwargs)
+    finally:
+        StructuredLogger.clear_current_log()
 
 
 def get_free_models_for_environment() -> List[str]:
@@ -937,14 +951,20 @@ async def generate_query(
             rp.search_type = "vector_search"
             rp.top_k = generate_query_request.top_k
 
-            query = rp.run_for_query(
-                question=generate_query_request.question,
-                model_name=generate_query_request.llm_type,
-                api_key=api_key,
-                vector_index=vector_index,
-                embedding=embedding,
-                reset_llm_type=True,
-                conversation_context=conversation_context,
+            query = await asyncio.wait_for(
+                asyncio.to_thread(
+                    _run_with_log_context,
+                    query_log,
+                    rp.run_for_query,
+                    question=generate_query_request.question,
+                    model_name=generate_query_request.llm_type,
+                    api_key=api_key,
+                    vector_index=vector_index,
+                    embedding=embedding,
+                    reset_llm_type=True,
+                    conversation_context=conversation_context,
+                ),
+                timeout=320,
             )
 
         elif (
@@ -964,14 +984,20 @@ async def generate_query(
             rp.search_type = "vector_search"
             rp.top_k = generate_query_request.top_k
 
-            query = rp.run_for_query(
-                question=generate_query_request.question,
-                model_name=generate_query_request.llm_type,
-                api_key=api_key,
-                vector_index=vector_index,
-                embedding=None,
-                reset_llm_type=True,
-                conversation_context=conversation_context,
+            query = await asyncio.wait_for(
+                asyncio.to_thread(
+                    _run_with_log_context,
+                    query_log,
+                    rp.run_for_query,
+                    question=generate_query_request.question,
+                    model_name=generate_query_request.llm_type,
+                    api_key=api_key,
+                    vector_index=vector_index,
+                    embedding=None,
+                    reset_llm_type=True,
+                    conversation_context=conversation_context,
+                ),
+                timeout=320,
             )
 
         else:
@@ -982,12 +1008,18 @@ async def generate_query(
             rp.search_type = "db_search"
             rp.top_k = generate_query_request.top_k
 
-            query = rp.run_for_query(
-                question=generate_query_request.question,
-                model_name=generate_query_request.llm_type,
-                api_key=api_key,
-                reset_llm_type=True,
-                conversation_context=conversation_context,
+            query = await asyncio.wait_for(
+                asyncio.to_thread(
+                    _run_with_log_context,
+                    query_log,
+                    rp.run_for_query,
+                    question=generate_query_request.question,
+                    model_name=generate_query_request.llm_type,
+                    api_key=api_key,
+                    reset_llm_type=True,
+                    conversation_context=conversation_context,
+                ),
+                timeout=320,
             )
 
         request_duration_ms = (time.time() - request_start_time) * 1000
@@ -1298,7 +1330,10 @@ async def run_query(
             }
         )
 
-        nl_response, result = rp.execute_query(
+        nl_response, result = await asyncio.to_thread(
+            _run_with_log_context,
+            query_log,
+            rp.execute_query,
             query=run_query_request.query,
             question=run_query_request.question,
             model_name=run_query_request.llm_type,
@@ -1364,11 +1399,14 @@ async def run_query(
                             provider=rp.current_provider,
                         )
 
-                    follow_up_questions = query_chain.generate_follow_up_questions(
+                    follow_up_questions = await asyncio.to_thread(
+                        _run_with_log_context,
+                        query_log,
+                        query_chain.generate_follow_up_questions,
                         question=run_query_request.question,
                         answer=nl_response,
                         is_semantic_search=run_query_request.is_semantic_search,
-                        vector_category=run_query_request.vector_category
+                        vector_category=run_query_request.vector_category,
                     )
 
                     Logger.info(
@@ -1716,7 +1754,10 @@ async def run_query_with_retry(
                 )
 
                 # Execute the query
-                nl_response, result = rp.execute_query(
+                nl_response, result = await asyncio.to_thread(
+                    _run_with_log_context,
+                    query_log,
+                    rp.execute_query,
                     query=current_query,
                     question=run_query_request.question,
                     model_name=run_query_request.llm_type,
@@ -1760,10 +1801,16 @@ async def run_query_with_retry(
                                 extra={"empty_retries_used": empty_retries_used}
                             )
 
-                            new_query = query_chain.regenerate_query_on_empty(
-                                question=run_query_request.question,
-                                failed_query=current_query,
-                                conversation_context=conversation_context,
+                            new_query = await asyncio.wait_for(
+                                asyncio.to_thread(
+                                    _run_with_log_context,
+                                    query_log,
+                                    query_chain.regenerate_query_on_empty,
+                                    question=run_query_request.question,
+                                    failed_query=current_query,
+                                    conversation_context=conversation_context,
+                                ),
+                                timeout=190,
                             )
 
                             Logger.info(
@@ -1823,11 +1870,14 @@ async def run_query_with_retry(
 
                         # Generate follow-up questions
                         try:
-                            follow_up_questions = query_chain.generate_follow_up_questions(
+                            follow_up_questions = await asyncio.to_thread(
+                                _run_with_log_context,
+                                query_log,
+                                query_chain.generate_follow_up_questions,
                                 question=run_query_request.question,
                                 answer=nl_response,
                                 is_semantic_search=run_query_request.is_semantic_search,
-                                vector_category=run_query_request.vector_category
+                                vector_category=run_query_request.vector_category,
                             )
                         except Exception as e:
                             Logger.warning(
@@ -1903,11 +1953,17 @@ async def run_query_with_retry(
                             extra={"error_retries_used": error_retries_used}
                         )
 
-                        new_query = query_chain.regenerate_query_with_error(
-                            question=run_query_request.question,
-                            failed_query=current_query,
-                            error_message=error_message,
-                            conversation_context=conversation_context,
+                        new_query = await asyncio.wait_for(
+                            asyncio.to_thread(
+                                _run_with_log_context,
+                                query_log,
+                                query_chain.regenerate_query_with_error,
+                                question=run_query_request.question,
+                                failed_query=current_query,
+                                error_message=error_message,
+                                conversation_context=conversation_context,
+                            ),
+                            timeout=190,
                         )
 
                         Logger.info(
@@ -1973,7 +2029,10 @@ async def run_query_with_retry(
             else:
                 # Error case - need to explicitly get internal knowledge via QA chain
                 try:
-                    fallback_response = query_chain.run_qa_chain(
+                    fallback_response = await asyncio.to_thread(
+                        _run_with_log_context,
+                        query_log,
+                        query_chain.run_qa_chain,
                         output=EMPTY_RESULT_STRING,
                         input_question=run_query_request.question,
                         conversation_context=conversation_context,
@@ -2012,11 +2071,14 @@ async def run_query_with_retry(
 
                 # Generate follow-up questions for fallback response
                 try:
-                    follow_up_questions = query_chain.generate_follow_up_questions(
+                    follow_up_questions = await asyncio.to_thread(
+                        _run_with_log_context,
+                        query_log,
+                        query_chain.generate_follow_up_questions,
                         question=run_query_request.question,
                         answer=fallback_response,
                         is_semantic_search=run_query_request.is_semantic_search,
-                        vector_category=run_query_request.vector_category
+                        vector_category=run_query_request.vector_category,
                     )
                 except Exception as e:
                     Logger.warning(

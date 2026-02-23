@@ -28,29 +28,29 @@ import {
   Menu as MenuIcon,
   BarChart as BrandIcon,
 } from '@mui/icons-material';
-import { useColorMode } from '../App';
+import { useColorMode } from '../DashboardApp';
 
 const DRAWER_WIDTH = 240;
 const DRAWER_COLLAPSED = 68;
 
 const NAV_ITEMS = [
-  { label: 'Overview', path: '/', icon: <DashboardIcon /> },
-  { label: 'Logs Explorer', path: '/logs', icon: <LogsIcon /> },
+  { label: 'Overview', path: '/dashboard', icon: <DashboardIcon /> },
+  { label: 'Logs Explorer', path: '/dashboard/logs', icon: <LogsIcon /> },
 ];
 
 function getPageTitle(pathname) {
-  if (pathname === '/') return 'Overview';
-  if (pathname === '/logs') return 'Logs Explorer';
-  if (pathname.startsWith('/logs/')) return 'Log Detail';
+  if (pathname === '/dashboard' || pathname === '/dashboard/') return 'Overview';
+  if (pathname === '/dashboard/logs') return 'Logs Explorer';
+  if (pathname.startsWith('/dashboard/logs/')) return 'Log Detail';
   return 'Dashboard';
 }
 
 function getBreadcrumbs(pathname) {
-  const crumbs = [{ label: 'Dashboard', path: '/' }];
-  if (pathname === '/logs') {
-    crumbs.push({ label: 'Logs Explorer', path: '/logs' });
-  } else if (pathname.startsWith('/logs/')) {
-    crumbs.push({ label: 'Logs Explorer', path: '/logs' });
+  const crumbs = [{ label: 'Dashboard', path: '/dashboard' }];
+  if (pathname === '/dashboard/logs') {
+    crumbs.push({ label: 'Logs Explorer', path: '/dashboard/logs' });
+  } else if (pathname.startsWith('/dashboard/logs/')) {
+    crumbs.push({ label: 'Logs Explorer', path: '/dashboard/logs' });
     crumbs.push({ label: 'Detail', path: pathname });
   }
   return crumbs;
@@ -71,7 +71,9 @@ export default function Layout() {
   const breadcrumbs = getBreadcrumbs(location.pathname);
 
   const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/dashboard' || path === '/dashboard/') {
+      return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+    }
     return location.pathname.startsWith(path);
   };
 

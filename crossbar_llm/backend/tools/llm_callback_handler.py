@@ -7,7 +7,7 @@ token usage, timing, and intermediate outputs (like chain-of-thought).
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from time import time
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
@@ -91,7 +91,7 @@ class DetailedLLMCallback(BaseCallbackHandler):
     ) -> None:
         """Called when LLM starts running."""
         self.call_start_time = time()
-        self.call_start_datetime = datetime.now().isoformat()
+        self.call_start_datetime = datetime.now(timezone.utc).isoformat()
         self.prompts = prompts.copy()
         self.responses = []
         self.thinking_content = []
@@ -128,7 +128,7 @@ class DetailedLLMCallback(BaseCallbackHandler):
     ) -> None:
         """Called when chat model starts running."""
         self.call_start_time = time()
-        self.call_start_datetime = datetime.now().isoformat()
+        self.call_start_datetime = datetime.now(timezone.utc).isoformat()
         self.responses = []
         self.thinking_content = []
         self.streaming_chunks = []
@@ -195,7 +195,7 @@ class DetailedLLMCallback(BaseCallbackHandler):
     ) -> None:
         """Called when LLM ends running."""
         end_time = time()
-        end_datetime = datetime.now().isoformat()
+        end_datetime = datetime.now(timezone.utc).isoformat()
         duration_ms = (end_time - self.call_start_time) * 1000 if self.call_start_time else 0
         
         # Extract responses
@@ -279,7 +279,7 @@ class DetailedLLMCallback(BaseCallbackHandler):
     ) -> None:
         """Called when LLM errors."""
         end_time = time()
-        end_datetime = datetime.now().isoformat()
+        end_datetime = datetime.now(timezone.utc).isoformat()
         duration_ms = (end_time - self.call_start_time) * 1000 if self.call_start_time else 0
         
         import traceback

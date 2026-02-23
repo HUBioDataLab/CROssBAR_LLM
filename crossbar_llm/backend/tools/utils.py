@@ -12,7 +12,7 @@ import json
 import logging
 import traceback
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from timeit import default_timer as timer
 from typing import Any, Callable, Dict, Optional, TypeVar, Union
 
@@ -36,7 +36,7 @@ def timer_func(func: F) -> F:
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         func_name = func.__name__
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
         t1 = timer()
         
         # Log start with limited args info
@@ -93,7 +93,7 @@ def detailed_timer(
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             func_name = func.__name__
-            start_time = datetime.now()
+            start_time = datetime.now(timezone.utc)
             t1 = timer()
             
             log_data = {
@@ -120,7 +120,7 @@ def detailed_timer(
                 log_data["duration_s"] = round(execution_time, 6)
                 log_data["duration_ms"] = round(execution_time * 1000, 2)
                 log_data["status"] = "success"
-                log_data["end_time"] = datetime.now().isoformat()
+                log_data["end_time"] = datetime.now(timezone.utc).isoformat()
                 
                 if log_result:
                     log_data["result"] = _safe_repr(result)
@@ -139,7 +139,7 @@ def detailed_timer(
                 log_data["error_type"] = type(e).__name__
                 log_data["error_message"] = str(e)
                 log_data["traceback"] = traceback.format_exc()
-                log_data["end_time"] = datetime.now().isoformat()
+                log_data["end_time"] = datetime.now(timezone.utc).isoformat()
                 
                 logging.error(f"[DETAILED_TIMER_ERROR] {json.dumps(log_data, default=str)}")
                 raise
@@ -191,7 +191,7 @@ def timed_block(block_name: str, log_level: int = logging.INFO):
         with timed_block("database_query"):
             # do work
     """
-    start_time = datetime.now()
+    start_time = datetime.now(timezone.utc)
     t1 = timer()
     
     logging.debug(f"[BLOCK_START] {block_name} | start_time={start_time.isoformat()}")
@@ -323,7 +323,7 @@ class Logger:
         """
         log_data = {
             "message": message,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         
         if exc:
@@ -353,7 +353,7 @@ class Logger:
         """
         log_entry = {
             "event": event,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **data
         }
         logging.log(level, f"[JSON_LOG] {json.dumps(log_entry, default=str)}", **kwargs)
@@ -392,7 +392,7 @@ class Logger:
             "step_name": step_name,
             "step_number": step_number,
             "status": status,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **details
         }
         
@@ -422,7 +422,7 @@ class Logger:
             "action": action,
             "model": model,
             "provider": provider,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **details
         }
         logging.info(f"[LLM] {json.dumps(log_data, default=str)}")
@@ -438,7 +438,7 @@ class Logger:
         """
         log_data = {
             "event": event,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **details
         }
         logging.info(f"[QUERY] {json.dumps(log_data, default=str)}")

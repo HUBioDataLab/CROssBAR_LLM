@@ -4,15 +4,16 @@ Dashboard API for CROssBAR LLM Log Visualization.
 Provides endpoints for log querying and statistics for the standalone log dashboard.
 """
 
+import asyncio
 import json
 import logging
 import os
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 load_dotenv()
 
@@ -362,7 +363,7 @@ class LogFileReader:
 
     def get_stats(self, days: int = 30) -> Dict[str, Any]:
         """Compute aggregate statistics over merged entries."""
-        cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         entries = [
             e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff
         ]
@@ -397,7 +398,7 @@ class LogFileReader:
         self, days: int = 7, granularity: str = "hour"
     ) -> List[Dict[str, Any]]:
         """Return time-bucketed counts for charts."""
-        cutoff = datetime.now() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         cutoff_iso = cutoff.isoformat()
         entries = [
             e
@@ -478,7 +479,7 @@ class LogFileReader:
 
     def get_model_distribution(self, days: int = 30) -> List[Dict[str, Any]]:
         """Return model usage distribution."""
-        cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         entries = [
             e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff
         ]
@@ -513,7 +514,25 @@ def get_reader() -> LogFileReader:
 # Router
 # ---------------------------------------------------------------------------
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+# Traefik's stripprefix middleware sets X-Forwarded-Prefix to the stripped
+# prefix. Requests through the unprotected /api router get
+# X-Forwarded-Prefix: <PUBLIC_URL>/api, while requests through the
+# OAuth-protected /dashboard/api router get X-Forwarded-Prefix: <PUBLIC_URL>.
+# In development (no Traefik) the header is absent, so we allow those through.
+_PUBLIC_URL = os.getenv("REACT_APP_CROSSBAR_LLM_ROOT_PATH", "/llm")
+
+
+def _require_dashboard_access(request: Request) -> None:
+    forwarded_prefix = request.headers.get("X-Forwarded-Prefix")
+    if forwarded_prefix is not None and forwarded_prefix != _PUBLIC_URL:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+
+router = APIRouter(
+    prefix="/dashboard",
+    tags=["dashboard"],
+    dependencies=[Depends(_require_dashboard_access)],
+)
 
 
 # -- Stats ----------------------------------------------------------------
@@ -522,9 +541,9 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 @router.get("/api/stats")
 async def get_stats(days: int = Query(30, ge=1, le=365)):
     reader = get_reader()
-    stats = reader.get_stats(days)
-    stats["model_distribution"] = reader.get_model_distribution(days)
-    stats["recent_errors"] = reader.get_recent_errors()
+    stats = await asyncio.to_thread(reader.get_stats, days)
+    stats["model_distribution"] = await asyncio.to_thread(reader.get_model_distribution, days)
+    stats["recent_errors"] = await asyncio.to_thread(reader.get_recent_errors)
     return stats
 
 
@@ -533,7 +552,7 @@ async def get_timeline(
     days: int = Query(7, ge=1, le=365),
     granularity: str = Query("hour", regex="^(hour|day)$"),
 ):
-    return get_reader().get_timeline(days, granularity)
+    return await asyncio.to_thread(get_reader().get_timeline, days, granularity)
 
 
 # -- Logs -----------------------------------------------------------------
@@ -553,7 +572,8 @@ async def get_logs(
     sort_by: str = Query("timestamp"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
 ):
-    return get_reader().get_logs(
+    return await asyncio.to_thread(
+        get_reader().get_logs,
         page=page,
         limit=limit,
         status=status,
@@ -570,7 +590,7 @@ async def get_logs(
 
 @router.get("/api/logs/{request_id}")
 async def get_log_detail(request_id: str):
-    entry = get_reader().get_log_detail(request_id)
+    entry = await asyncio.to_thread(get_reader().get_log_detail, request_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Log entry not found")
     return entry
@@ -581,4 +601,4 @@ async def get_log_detail(request_id: str):
 
 @router.get("/api/filters")
 async def get_filters():
-    return get_reader().get_filters()
+    return await asyncio.to_thread(get_reader().get_filters)

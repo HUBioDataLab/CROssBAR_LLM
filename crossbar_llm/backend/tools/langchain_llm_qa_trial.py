@@ -388,7 +388,6 @@ class QueryChain:
             "node_properties_sample": self.schema.get("node_properties", [])[:3]
         }
 
-    @timeout(300)
     @validate_call
     def run_cypher_chain(
         self,
@@ -592,7 +591,6 @@ class QueryChain:
             structured_logger.end_step(step, "failed", e)
             raise
 
-    @timeout(180)
     def regenerate_query_with_error(
         self,
         question: str,
@@ -723,7 +721,6 @@ class QueryChain:
             structured_logger.end_step(step, "failed", e)
             raise
 
-    @timeout(180)
     def regenerate_query_on_empty(
         self,
         question: str,
@@ -1271,6 +1268,16 @@ class RunPipeline:
                     embedding=processed_embedding,
                     conversation_context=conversation_context,
                 )
+
+            if not corrected_query and hasattr(query_chain, 'generated_query') and query_chain.generated_query:
+                Logger.warning(
+                    "[RUN_FOR_QUERY] Schema correction returned empty query, falling back to raw generated query",
+                    extra={
+                        "raw_generated_query": query_chain.generated_query[:300],
+                        "question": question,
+                    }
+                )
+                corrected_query = query_chain.generated_query
 
             pipeline_duration_ms = (time() - pipeline_start_time) * 1000
             

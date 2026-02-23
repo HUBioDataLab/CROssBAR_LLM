@@ -35,6 +35,9 @@ import {
 } from 'recharts';
 import { getStats, getTimeline } from '../services/api';
 import { format, parseISO } from 'date-fns';
+import { tz } from '@date-fns/tz';
+
+const DASHBOARD_TZ = tz('Europe/Istanbul');
 
 // ---------- Stat Card ----------
 
@@ -154,7 +157,7 @@ export default function Overview() {
     let label;
     try {
       const d = parseISO(t.time);
-      label = timeRange === '7' ? format(d, 'MMM d HH:mm') : format(d, 'MMM d');
+      label = timeRange === '7' ? format(d, 'MMM d HH:mm', { in: DASHBOARD_TZ }) : format(d, 'MMM d', { in: DASHBOARD_TZ });
     } catch {
       label = t.time;
     }
@@ -424,7 +427,7 @@ export default function Overview() {
                   {stats.recent_errors.map((err) => (
                     <Box
                       key={err.request_id}
-                      onClick={() => navigate(`/logs/${err.request_id}`)}
+                      onClick={() => navigate(`/dashboard/logs/${err.request_id}`)}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -445,7 +448,7 @@ export default function Overview() {
                         <Typography variant="caption" color="text.secondary" sx={{ mb: 0 }}>
                           {err.model_name} &middot;{' '}
                           {err.timestamp
-                            ? format(parseISO(err.timestamp), 'MMM d, HH:mm')
+                            ? format(parseISO(err.timestamp), 'MMM d, HH:mm', { in: DASHBOARD_TZ })
                             : ''}
                         </Typography>
                       </Box>
