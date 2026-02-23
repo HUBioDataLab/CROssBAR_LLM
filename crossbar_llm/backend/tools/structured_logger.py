@@ -14,7 +14,7 @@ import traceback
 import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass, field, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 from time import time
 from typing import Any, Dict, List, Optional, Union
@@ -184,7 +184,7 @@ class StructuredLogger:
         # Prevent duplicate handlers
         if not self.json_logger.handlers:
             # Daily rotating log file
-            today = datetime.now().strftime("%Y-%m-%d")
+            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             log_file = os.path.join(STRUCTURED_LOGS_DIR, f"query_log_{today}.jsonl")
 
             # Rotating file handler (10MB max, keep 30 backups)
@@ -249,7 +249,7 @@ class StructuredLogger:
         Returns:
             QueryLogEntry: The created log entry
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         log_entry = QueryLogEntry(
             request_id=request_id or self.generate_request_id(),
             timestamp=now.isoformat(),
@@ -292,7 +292,7 @@ class StructuredLogger:
         if not log:
             return StepLog()
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         step = StepLog(
             step_name=step_name,
             step_number=len(log.steps) + 1,
@@ -319,7 +319,7 @@ class StructuredLogger:
             status: Final status (completed, failed)
             error: Optional exception if failed
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         step.end_time = now.isoformat()
         step.status = status
 
@@ -435,7 +435,7 @@ class StructuredLogger:
         if not log:
             return None
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         log.end_time = now.isoformat()
         log.status = status
 
@@ -470,7 +470,7 @@ class StructuredLogger:
     def _write_log_entry(self, log: QueryLogEntry):
         """Write a log entry to the JSON Lines file."""
         try:
-            today = datetime.now().strftime("%Y-%m-%d")
+            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             log_file = os.path.join(STRUCTURED_LOGS_DIR, f"query_log_{today}.jsonl")
 
             # Convert dataclass to dict, handling nested dataclasses
@@ -523,7 +523,7 @@ class StructuredLogger:
         """Log an event to the standard logger as well."""
         log_message = json.dumps({
             "event": event_type,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **data
         }, default=str)
         logging.info(f"[STRUCTURED_LOG] {log_message}")
@@ -561,7 +561,7 @@ def timed_operation(operation_name: str):
     """
     timing = {
         "operation": operation_name,
-        "start_time": datetime.now().isoformat(),
+        "start_time": datetime.now(timezone.utc).isoformat(),
         "end_time": None,
         "duration_ms": 0.0
     }
@@ -570,7 +570,7 @@ def timed_operation(operation_name: str):
         yield timing
     finally:
         end = time()
-        timing["end_time"] = datetime.now().isoformat()
+        timing["end_time"] = datetime.now(timezone.utc).isoformat()
         timing["duration_ms"] = (end - start) * 1000
 
 

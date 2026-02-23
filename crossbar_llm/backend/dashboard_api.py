@@ -9,7 +9,7 @@ import json
 import logging
 import os
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
@@ -363,7 +363,7 @@ class LogFileReader:
 
     def get_stats(self, days: int = 30) -> Dict[str, Any]:
         """Compute aggregate statistics over merged entries."""
-        cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         entries = [
             e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff
         ]
@@ -398,7 +398,7 @@ class LogFileReader:
         self, days: int = 7, granularity: str = "hour"
     ) -> List[Dict[str, Any]]:
         """Return time-bucketed counts for charts."""
-        cutoff = datetime.now() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         cutoff_iso = cutoff.isoformat()
         entries = [
             e
@@ -479,7 +479,7 @@ class LogFileReader:
 
     def get_model_distribution(self, days: int = 30) -> List[Dict[str, Any]]:
         """Return model usage distribution."""
-        cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         entries = [
             e for e in self._all_entries() if (e.get("timestamp") or "") >= cutoff
         ]
