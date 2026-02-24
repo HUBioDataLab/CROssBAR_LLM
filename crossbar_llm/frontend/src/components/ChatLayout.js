@@ -261,6 +261,11 @@ function ChatLayout({
     'llama3.2-405b', 'deepseek/deepseek-r1', 'gemini-3-pro-preview', 'gemini-3-flash-preview'
   ];
 
+  // Clear error when user starts a new conversation (sessionId changes)
+  useEffect(() => {
+    setError(null);
+  }, [sessionId]);
+
   // Fetch available models on mount
   useEffect(() => {
     const fetchModels = async () => {
@@ -1119,13 +1124,23 @@ function ChatLayout({
         setEmbeddingType(example.embeddingType || '');
         setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
 
-        // Load vector file from public folder if specified
+        // Load vector file from public folder if specified; otherwise clear any previous vector file
         if (example.vectorFilePath) {
           loadVectorFileFromPath(example.vectorFilePath);
+        } else {
+          setVectorFile(null);
+          setSelectedFile(null);
         }
+      } else {
+        // Non-vector example: clear vector file and vector-related state
+        setVectorFile(null);
+        setSelectedFile(null);
       }
     } else {
       setQuestion(example);
+      // Regular (non-vector) example: clear vector file
+      setVectorFile(null);
+      setSelectedFile(null);
     }
     inputRef.current?.focus();
   };
