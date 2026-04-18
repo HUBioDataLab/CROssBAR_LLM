@@ -55,12 +55,9 @@ function App() {
 
   // Conversation memory state
   const [sessionId, setSessionId] = useState(() => {
-    // Generate or retrieve session ID from sessionStorage
-    let id = sessionStorage.getItem('conversationSessionId');
-    if (!id) {
-      id = crypto.randomUUID();
-      sessionStorage.setItem('conversationSessionId', id);
-    }
+    // Generate a fresh session ID on each page load
+    const id = crypto.randomUUID();
+    sessionStorage.setItem('conversationSessionId', id);
     return id;
   });
   const [conversationHistory, setConversationHistory] = useState([]);
