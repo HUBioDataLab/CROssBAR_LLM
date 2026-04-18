@@ -8,14 +8,9 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Collapse,
   Divider,
   Grid,
   IconButton,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
   Tooltip,
   Typography,
   useTheme,
@@ -223,7 +218,6 @@ function TurnCard({ entry, index, navigate }) {
 export default function SessionDetail() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const theme = useTheme();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -258,10 +252,10 @@ export default function SessionDetail() {
 
   if (!session) return null;
 
-  const { queries = [], summary = {} } = session;
+  const queries = session.queries || [];
   const timeRange =
-    summary.first_activity && summary.last_activity
-      ? `${format(parseISO(summary.first_activity), 'MMM d, HH:mm', { in: DASHBOARD_TZ })} — ${format(parseISO(summary.last_activity), 'MMM d, HH:mm', { in: DASHBOARD_TZ })}`
+    session.first_activity && session.last_activity
+      ? `${format(parseISO(session.first_activity), 'MMM d, HH:mm', { in: DASHBOARD_TZ })} — ${format(parseISO(session.last_activity), 'MMM d, HH:mm', { in: DASHBOARD_TZ })}`
       : '-';
 
   return (
@@ -295,7 +289,7 @@ export default function SessionDetail() {
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>
                 Turns
               </Typography>
-              <Typography variant="h4" sx={{ mb: 0 }}>{summary.turn_count ?? queries.length}</Typography>
+              <Typography variant="h4" sx={{ mb: 0 }}>{session.turn_count ?? queries.length}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -306,7 +300,7 @@ export default function SessionDetail() {
                 Duration
               </Typography>
               <Typography variant="h4" sx={{ mb: 0, fontFamily: '"JetBrains Mono", monospace' }}>
-                {formatDuration(summary.total_duration_ms)}
+                {formatDuration(session.total_duration_ms)}
               </Typography>
             </CardContent>
           </Card>
@@ -317,8 +311,8 @@ export default function SessionDetail() {
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>
                 Internal Knowledge
               </Typography>
-              <Typography variant="h4" sx={{ mb: 0, color: summary.internal_knowledge_count ? 'warning.dark' : 'text.primary' }}>
-                {summary.internal_knowledge_count || 0}
+              <Typography variant="h4" sx={{ mb: 0, color: session.internal_knowledge_count ? 'warning.dark' : 'text.primary' }}>
+                {session.internal_knowledge_count || 0}
               </Typography>
             </CardContent>
           </Card>
@@ -330,10 +324,10 @@ export default function SessionDetail() {
                 Models
               </Typography>
               <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', flexWrap: 'wrap', mt: 0.5 }}>
-                {(summary.models_used || []).map((m) => (
+                {(session.models_used || []).map((m) => (
                   <Chip key={m} label={m} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
                 ))}
-                {(!summary.models_used || summary.models_used.length === 0) && <Typography variant="body2">-</Typography>}
+                {(!session.models_used || session.models_used.length === 0) && <Typography variant="body2">-</Typography>}
               </Box>
             </CardContent>
           </Card>
@@ -345,39 +339,49 @@ export default function SessionDetail() {
                 Client
               </Typography>
               <Typography variant="body2" sx={{ fontFamily: '"JetBrains Mono", monospace', mb: 0 }}>
-                {summary.client_id || '-'}
+                {session.client_id || '-'}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Query timeline */}
+      {/* Conversation timeline */}
       <Typography variant="h5" sx={{ mb: 1.5 }}>Conversation Timeline</Typography>
-      <Stepper orientation="vertical" activeStep={-1}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         {queries.map((entry, i) => (
-          <Step key={entry.request_id || i} completed={entry.status === 'completed'}>
-            <StepLabel
-              error={entry.status === 'failed'}
-              optional={
-                <Typography variant="caption" color="text.secondary">
-                  {formatDuration(entry.total_duration_ms)}
-                </Typography>
-              }
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body2" noWrap sx={{ maxWidth: 400, mb: 0 }}>
-                  {entry.question || entry.request_id || `Turn ${i + 1}`}
-                </Typography>
-                <StatusChip status={entry.status} />
-              </Box>
-            </StepLabel>
-            <StepContent>
+          <Box
+            key={entry.request_id || i}
+            sx={{
+              display: 'flex',
+              gap: 2,
+              position: 'relative',
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 24, flexShrink: 0 }}>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  bgcolor: entry.status === 'completed' ? 'success.main'
+                    : entry.status === 'failed' ? 'error.main'
+                    : 'grey.400',
+                  mt: '18px',
+                  flexShrink: 0,
+                }}
+              />
+              {i < queries.length - 1 && (
+                <Box sx={{ flex: 1, width: 2, bgcolor: 'divider', minHeight: 20 }} />
+              )}
+            </Box>
+            {/* Content */}
+            <Box sx={{ flex: 1, pb: 2 }}>
               <TurnCard entry={entry} index={i} navigate={navigate} />
-            </StepContent>
-          </Step>
+            </Box>
+          </Box>
         ))}
-      </Stepper>
+      </Box>
 
       {queries.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
@@ -391,7 +395,7 @@ export default function SessionDetail() {
           <Button
             variant="outlined"
             startIcon={<OpenIcon />}
-            onClick={() => navigate(`/dashboard/logs?session_id=${sessionId}`)}
+            onClick={() => navigate(`/dashboard/logs`, { state: { sessionId } })}
           >
             View All Logs for This Session
           </Button>

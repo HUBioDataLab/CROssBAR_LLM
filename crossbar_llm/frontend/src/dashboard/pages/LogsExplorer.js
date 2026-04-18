@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
 Card,
@@ -89,6 +89,7 @@ function truncate(str, len = 60) {
 export default function LogsExplorer() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
@@ -107,7 +108,16 @@ export default function LogsExplorer() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [internalKnowledgeOnly, setInternalKnowledgeOnly] = useState(false);
+  const [sessionIdFilter, setSessionIdFilter] = useState('');
   const [sortModel, setSortModel] = useState([{ field: 'timestamp', sort: 'desc' }]);
+
+  useEffect(() => {
+    if (location.state?.sessionId) {
+      setSessionIdFilter(location.state.sessionId);
+      setPage(0);
+      window.history.replaceState({}, '');
+    }
+  }, []);
 
   // Fetch filter options once
   useEffect(() => {
@@ -130,6 +140,7 @@ export default function LogsExplorer() {
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
         used_internal_knowledge: internalKnowledgeOnly || undefined,
+        session_id: sessionIdFilter || undefined,
         sort_by: sort.field,
         sort_order: sort.sort,
       });
@@ -140,7 +151,7 @@ export default function LogsExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, status, model, provider, searchType, dateFrom, dateTo, internalKnowledgeOnly, sortModel]);
+  }, [page, pageSize, search, status, model, provider, searchType, dateFrom, dateTo, internalKnowledgeOnly, sessionIdFilter, sortModel]);
 
   useEffect(() => {
     fetchData();
@@ -165,10 +176,11 @@ export default function LogsExplorer() {
     setDateFrom('');
     setDateTo('');
     setInternalKnowledgeOnly(false);
+    setSessionIdFilter('');
     setPage(0);
   };
 
-  const hasActiveFilters = search || status || model || provider || searchType || dateFrom || dateTo || internalKnowledgeOnly;
+  const hasActiveFilters = search || status || model || provider || searchType || dateFrom || dateTo || internalKnowledgeOnly || sessionIdFilter;
 
   // CSV export
   const handleExport = () => {
@@ -396,6 +408,16 @@ export default function LogsExplorer() {
               onClick={() => { setInternalKnowledgeOnly(!internalKnowledgeOnly); setPage(0); }}
               sx={{ cursor: 'pointer' }}
             />
+
+            {sessionIdFilter && (
+              <Chip
+                label={`Session: ${sessionIdFilter.slice(0, 8)}...`}
+                size="small"
+                color="secondary"
+                variant="filled"
+                onDelete={() => { setSessionIdFilter(''); setPage(0); }}
+              />
+            )}
 
             {/* Actions */}
             {hasActiveFilters && (
