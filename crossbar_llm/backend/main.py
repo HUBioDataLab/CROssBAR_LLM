@@ -784,7 +784,8 @@ async def generate_query(
         vector_index=generate_query_request.vector_index,
         embedding_provided=generate_query_request.embedding is not None,
         verbose=generate_query_request.verbose,
-        client_id=client_id
+        client_id=client_id,
+        session_id=generate_query_request.session_id
     )
 
     Logger.info(
@@ -1152,6 +1153,7 @@ async def run_query(
                 search_type="query_execution",
                 verbose=run_query_request.verbose,
                 client_id=client_id,
+                session_id=run_query_request.session_id,
                 request_id=run_query_request.request_id
             )
             Logger.info(
@@ -1167,7 +1169,8 @@ async def run_query(
             top_k=run_query_request.top_k,
             search_type="query_execution",
             verbose=run_query_request.verbose,
-            client_id=client_id
+            client_id=client_id,
+            session_id=run_query_request.session_id
         )
         Logger.info(
             f"[API] /run_query/ - Created new log",
@@ -1586,6 +1589,7 @@ async def run_query_with_retry(
                     search_type="query_execution_with_retry",
                     verbose=run_query_request.verbose,
                     client_id=client_id,
+                    session_id=run_query_request.session_id,
                     request_id=run_query_request.request_id
                 )
                 Logger.info(
@@ -1608,7 +1612,8 @@ async def run_query_with_retry(
                 top_k=run_query_request.top_k,
                 search_type="query_execution_with_retry",
                 verbose=run_query_request.verbose,
-                client_id=client_id
+                client_id=client_id,
+                session_id=run_query_request.session_id
             )
             Logger.info(
                 f"[API] /run_query_with_retry/ - Created new log",

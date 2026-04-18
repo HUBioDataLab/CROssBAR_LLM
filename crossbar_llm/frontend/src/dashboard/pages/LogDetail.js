@@ -29,9 +29,11 @@ import {
   HourglassEmpty as PendingIcon,
   Schedule as DurationIcon,
   Link as LinkIcon,
+  Forum as SessionIcon,
 } from '@mui/icons-material';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Link } from 'react-router-dom';
 import { getLogDetail } from '../services/api';
 import { format, parseISO } from 'date-fns';
 import { tz } from '@date-fns/tz';
@@ -167,6 +169,27 @@ function OverviewTab({ log }) {
         <InfoRow label="Top K" value={log.top_k} />
         <InfoRow label="Vector Index" value={log.vector_index} />
         <InfoRow label="Client" value={log.client_ip || log.client_id} mono />
+        {log.session_id && (
+          <InfoRow
+            label="Session"
+            value={
+              <Link
+                to={`/dashboard/sessions/${log.session_id}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  fontFamily: '"JetBrains Mono", monospace',
+                }}
+              >
+                <SessionIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+                <span style={{ color: 'primary' }}>{log.session_id.slice(0, 8)}...</span>
+              </Link>
+            }
+          />
+        )}
         {log.linked_request_id && (
           <InfoRow
             label="Linked Request"
@@ -606,6 +629,16 @@ export default function LogDetail() {
             </Typography>
             <CopyButton text={requestId} />
             <StatusChip status={log.status} />
+            {log.session_id && (
+              <Chip
+                icon={<SessionIcon sx={{ fontSize: 14 }} />}
+                label={`Session ${log.session_id.slice(0, 8)}...`}
+                size="small"
+                variant="outlined"
+                onClick={() => navigate(`/dashboard/sessions/${log.session_id}`)}
+                sx={{ cursor: 'pointer' }}
+              />
+            )}
             <Chip
               label={searchTypeLabel(log.search_type)}
               size="small"

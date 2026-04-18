@@ -6,6 +6,8 @@ import Layout from './components/Layout';
 import Overview from './pages/Overview';
 import LogsExplorer from './pages/LogsExplorer';
 import LogDetail from './pages/LogDetail';
+import SessionsExplorer from './pages/SessionsExplorer';
+import SessionDetail from './pages/SessionDetail';
 
 // ---------- Color Mode Context ----------
 
@@ -43,6 +45,8 @@ export default function DashboardApp() {
         <Routes>
           <Route path="/dashboard" element={<Layout />}>
             <Route index element={<Overview />} />
+            <Route path="sessions" element={<SessionsExplorer />} />
+            <Route path="sessions/:sessionId" element={<SessionDetail />} />
             <Route path="logs" element={<LogsExplorer />} />
             <Route path="logs/:requestId" element={<LogDetail />} />
           </Route>

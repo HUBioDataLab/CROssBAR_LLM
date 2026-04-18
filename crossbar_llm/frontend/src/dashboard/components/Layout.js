@@ -21,6 +21,7 @@ import {
 import {
   Dashboard as DashboardIcon,
   FormatListBulleted as LogsIcon,
+  Forum as SessionsIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   ChevronLeft as CollapseIcon,
@@ -35,11 +36,14 @@ const DRAWER_COLLAPSED = 68;
 
 const NAV_ITEMS = [
   { label: 'Overview', path: '/dashboard', icon: <DashboardIcon /> },
+  { label: 'Sessions', path: '/dashboard/sessions', icon: <SessionsIcon /> },
   { label: 'Logs Explorer', path: '/dashboard/logs', icon: <LogsIcon /> },
 ];
 
 function getPageTitle(pathname) {
   if (pathname === '/dashboard' || pathname === '/dashboard/') return 'Overview';
+  if (pathname === '/dashboard/sessions') return 'Sessions';
+  if (pathname.startsWith('/dashboard/sessions/')) return 'Session Detail';
   if (pathname === '/dashboard/logs') return 'Logs Explorer';
   if (pathname.startsWith('/dashboard/logs/')) return 'Log Detail';
   return 'Dashboard';
@@ -47,7 +51,12 @@ function getPageTitle(pathname) {
 
 function getBreadcrumbs(pathname) {
   const crumbs = [{ label: 'Dashboard', path: '/dashboard' }];
-  if (pathname === '/dashboard/logs') {
+  if (pathname === '/dashboard/sessions') {
+    crumbs.push({ label: 'Sessions', path: '/dashboard/sessions' });
+  } else if (pathname.startsWith('/dashboard/sessions/')) {
+    crumbs.push({ label: 'Sessions', path: '/dashboard/sessions' });
+    crumbs.push({ label: 'Detail', path: pathname });
+  } else if (pathname === '/dashboard/logs') {
     crumbs.push({ label: 'Logs Explorer', path: '/dashboard/logs' });
   } else if (pathname.startsWith('/dashboard/logs/')) {
     crumbs.push({ label: 'Logs Explorer', path: '/dashboard/logs' });

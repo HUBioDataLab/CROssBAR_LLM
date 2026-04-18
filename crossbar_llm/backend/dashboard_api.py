@@ -286,10 +286,13 @@ class LogFileReader:
         sort_by: str = "timestamp",
         sort_order: str = "desc",
         search_type: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         entries = self._all_entries()
 
         # -- filters --
+        if session_id:
+            entries = [e for e in entries if e.get("session_id") == session_id]
         if status:
             entries = [e for e in entries if e.get("status") == status]
         if model:
@@ -392,6 +395,7 @@ class LogFileReader:
             "avg_duration_ms": round(avg_duration, 1),
             "total_tokens": total_tokens,
             "period_days": days,
+            "unique_sessions": len({e.get("session_id") for e in entries if e.get("session_id")}),
         }
 
     def get_timeline(
@@ -498,6 +502,123 @@ class LogFileReader:
         entries.sort(key=lambda e: e.get("timestamp", ""), reverse=True)
         return entries[:limit]
 
+    # -- Sessions -------------------------------------------------------------
+
+    def get_sessions(
+        self,
+        page: int = 1,
+        limit: int = 50,
+        search: Optional[str] = None,
+        client_id: Optional[str] = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        sort_by: str = "last_activity",
+        sort_order: str = "desc",
+    ) -> Dict[str, Any]:
+        """Group entries by session_id and return paginated session summaries."""
+        entries = self._all_entries()
+
+        # Group by session_id (skip entries without one)
+        groups: Dict[str, List[dict]] = defaultdict(list)
+        for e in entries:
+            sid = e.get("session_id")
+            if sid:
+                groups[sid].append(e)
+
+        # Build session summaries
+        sessions = []
+        for sid, group in groups.items():
+            group.sort(key=lambda e: e.get("timestamp", ""))
+            first_ts = group[0].get("timestamp", "")
+            last_ts = group[-1].get("timestamp", "")
+            status_counts: Dict[str, int] = defaultdict(int)
+            for e in group:
+                status_counts[e.get("status", "unknown")] += 1
+
+            sessions.append({
+                "session_id": sid,
+                "client_id": group[0].get("client_id", ""),
+                "first_activity": first_ts,
+                "last_activity": last_ts,
+                "turn_count": len(group),
+                "models_used": sorted({e.get("model_name", "") for e in group if e.get("model_name")}),
+                "providers_used": sorted({e.get("provider", "") for e in group if e.get("provider")}),
+                "status_summary": dict(status_counts),
+                "total_duration_ms": sum(e.get("total_duration_ms", 0) or 0 for e in group),
+                "first_question": group[0].get("question", ""),
+                "last_question": group[-1].get("question", ""),
+            })
+
+        # -- filters --
+        if search:
+            q = search.lower()
+            sessions = [
+                s for s in sessions
+                if q in s["session_id"].lower()
+                or q in (s.get("first_question") or "").lower()
+                or q in (s.get("last_question") or "").lower()
+            ]
+        if client_id:
+            sessions = [s for s in sessions if s["client_id"] == client_id]
+        if date_from:
+            sessions = [s for s in sessions if s["last_activity"] >= date_from]
+        if date_to:
+            date_to_end = date_to + "T23:59:59" if len(date_to) == 10 else date_to
+            sessions = [s for s in sessions if s["first_activity"] <= date_to_end]
+
+        total = len(sessions)
+
+        # -- sort --
+        reverse = sort_order == "desc"
+        sessions.sort(key=lambda s: s.get(sort_by, ""), reverse=reverse)
+
+        # -- paginate --
+        start = (page - 1) * limit
+        page_sessions = sessions[start : start + limit]
+
+        return {
+            "items": page_sessions,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "pages": max(1, (total + limit - 1) // limit),
+        }
+
+    def get_session_detail(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Return all queries for a session in chronological order."""
+        entries = [
+            e for e in self._all_entries()
+            if e.get("session_id") == session_id
+        ]
+        if not entries:
+            return None
+
+        entries.sort(key=lambda e: e.get("timestamp", ""))
+        status_counts: Dict[str, int] = defaultdict(int)
+        for e in entries:
+            status_counts[e.get("status", "unknown")] += 1
+
+        return {
+            "session_id": session_id,
+            "client_id": entries[0].get("client_id", ""),
+            "first_activity": entries[0].get("timestamp", ""),
+            "last_activity": entries[-1].get("timestamp", ""),
+            "turn_count": len(entries),
+            "models_used": sorted({e.get("model_name", "") for e in entries if e.get("model_name")}),
+            "providers_used": sorted({e.get("provider", "") for e in entries if e.get("provider")}),
+            "status_summary": dict(status_counts),
+            "total_duration_ms": sum(e.get("total_duration_ms", 0) or 0 for e in entries),
+            "queries": entries,
+        }
+
+    def get_session_filters(self) -> Dict[str, List[str]]:
+        """Return unique client_ids for session filter dropdowns."""
+        entries = self._all_entries()
+        client_ids = sorted(
+            {e.get("client_id", "") for e in entries if e.get("client_id") and e.get("session_id")}
+        )
+        return {"client_ids": client_ids}
+
 
 # Singleton reader
 _reader: Optional[LogFileReader] = None
@@ -571,6 +692,7 @@ async def get_logs(
     date_to: Optional[str] = None,
     sort_by: str = Query("timestamp"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    session_id: Optional[str] = None,
 ):
     return await asyncio.to_thread(
         get_reader().get_logs,
@@ -585,6 +707,7 @@ async def get_logs(
         date_to=date_to,
         sort_by=sort_by,
         sort_order=sort_order,
+        session_id=session_id,
     )
 
 
@@ -602,3 +725,43 @@ async def get_log_detail(request_id: str):
 @router.get("/api/filters")
 async def get_filters():
     return await asyncio.to_thread(get_reader().get_filters)
+
+
+# -- Sessions ---------------------------------------------------------------
+
+
+@router.get("/api/sessions")
+async def get_sessions(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
+    search: Optional[str] = None,
+    client_id: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    sort_by: str = Query("last_activity"),
+    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+):
+    return await asyncio.to_thread(
+        get_reader().get_sessions,
+        page=page,
+        limit=limit,
+        search=search,
+        client_id=client_id,
+        date_from=date_from,
+        date_to=date_to,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+
+
+@router.get("/api/sessions/{session_id}")
+async def get_session_detail(session_id: str):
+    result = await asyncio.to_thread(get_reader().get_session_detail, session_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return result
+
+
+@router.get("/api/session-filters")
+async def get_session_filters():
+    return await asyncio.to_thread(get_reader().get_session_filters)

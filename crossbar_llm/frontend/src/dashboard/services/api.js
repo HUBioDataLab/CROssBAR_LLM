@@ -47,4 +47,14 @@ export const getLogDetail = (requestId) =>
 export const getFilters = () =>
   api.get('/api/filters').then((r) => r.data);
 
+// Sessions
+export const getSessions = (params) =>
+  api.get('/api/sessions', { params }).then((r) => r.data);
+
+export const getSessionDetail = (sessionId) =>
+  api.get(`/api/sessions/${sessionId}`).then((r) => r.data);
+
+export const getSessionFilters = () =>
+  api.get('/api/session-filters').then((r) => r.data);
+
 export default api;

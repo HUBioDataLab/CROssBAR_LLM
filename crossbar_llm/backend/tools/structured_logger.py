@@ -113,6 +113,7 @@ class QueryLogEntry:
     request_id: str = ""
     timestamp: str = ""
     client_id: str = ""
+    session_id: Optional[str] = None
 
     # Request parameters
     question: str = ""
@@ -229,6 +230,7 @@ class StructuredLogger:
         embedding_provided: bool = False,
         verbose: bool = False,
         client_id: str = "",
+        session_id: Optional[str] = None,
         request_id: Optional[str] = None
     ) -> QueryLogEntry:
         """
@@ -255,6 +257,7 @@ class StructuredLogger:
             timestamp=now.isoformat(),
             start_time=now.isoformat(),
             client_id=client_id,
+            session_id=session_id,
             question=question,
             provider=provider,
             model_name=model_name,
