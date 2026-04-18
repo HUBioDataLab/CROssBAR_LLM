@@ -219,6 +219,17 @@ export default function SessionsExplorer() {
       renderCell: ({ value }) => <StatusSummaryChips summary={value} />,
     },
     {
+      field: 'internal_knowledge_count',
+      headerName: 'Fallback',
+      width: 90,
+      renderCell: ({ value }) =>
+        value ? (
+          <Chip label={value} size="small" color="warning" variant="outlined" sx={{ fontWeight: 600 }} />
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 0 }}>-</Typography>
+        ),
+    },
+    {
       field: 'total_duration_ms',
       headerName: 'Duration',
       width: 100,

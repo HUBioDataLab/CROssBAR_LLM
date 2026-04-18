@@ -106,6 +106,7 @@ export default function LogsExplorer() {
   const [searchType, setSearchType] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [internalKnowledgeOnly, setInternalKnowledgeOnly] = useState(false);
   const [sortModel, setSortModel] = useState([{ field: 'timestamp', sort: 'desc' }]);
 
   // Fetch filter options once
@@ -128,6 +129,7 @@ export default function LogsExplorer() {
         search_type: searchType || undefined,
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
+        used_internal_knowledge: internalKnowledgeOnly || undefined,
         sort_by: sort.field,
         sort_order: sort.sort,
       });
@@ -138,7 +140,7 @@ export default function LogsExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, status, model, provider, searchType, dateFrom, dateTo, sortModel]);
+  }, [page, pageSize, search, status, model, provider, searchType, dateFrom, dateTo, internalKnowledgeOnly, sortModel]);
 
   useEffect(() => {
     fetchData();
@@ -162,10 +164,11 @@ export default function LogsExplorer() {
     setSearchType('');
     setDateFrom('');
     setDateTo('');
+    setInternalKnowledgeOnly(false);
     setPage(0);
   };
 
-  const hasActiveFilters = search || status || model || provider || searchType || dateFrom || dateTo;
+  const hasActiveFilters = search || status || model || provider || searchType || dateFrom || dateTo || internalKnowledgeOnly;
 
   // CSV export
   const handleExport = () => {
@@ -383,6 +386,15 @@ export default function LogsExplorer() {
               onChange={(e) => { setDateTo(e.target.value); setPage(0); }}
               InputLabelProps={{ shrink: true }}
               sx={{ width: 150 }}
+            />
+
+            <Chip
+              label="Internal Knowledge Only"
+              size="small"
+              variant={internalKnowledgeOnly ? 'filled' : 'outlined'}
+              color={internalKnowledgeOnly ? 'warning' : 'default'}
+              onClick={() => { setInternalKnowledgeOnly(!internalKnowledgeOnly); setPage(0); }}
+              sx={{ cursor: 'pointer' }}
             />
 
             {/* Actions */}

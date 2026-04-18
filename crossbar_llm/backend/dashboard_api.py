@@ -287,6 +287,7 @@ class LogFileReader:
         sort_order: str = "desc",
         search_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        used_internal_knowledge: Optional[bool] = None,
     ) -> Dict[str, Any]:
         entries = self._all_entries()
 
@@ -295,6 +296,8 @@ class LogFileReader:
             entries = [e for e in entries if e.get("session_id") == session_id]
         if status:
             entries = [e for e in entries if e.get("status") == status]
+        if used_internal_knowledge:
+            entries = [e for e in entries if e.get("used_internal_knowledge")]
         if model:
             entries = [e for e in entries if e.get("model_name") == model]
         if provider:
@@ -387,6 +390,10 @@ class LogFileReader:
                 usage = call.get("token_usage") or {}
                 total_tokens += usage.get("total_tokens", 0)
 
+        internal_knowledge_count = sum(
+            1 for e in entries if e.get("used_internal_knowledge")
+        )
+
         return {
             "total_queries": total,
             "completed": completed,
@@ -396,6 +403,8 @@ class LogFileReader:
             "total_tokens": total_tokens,
             "period_days": days,
             "unique_sessions": len({e.get("session_id") for e in entries if e.get("session_id")}),
+            "internal_knowledge_count": internal_knowledge_count,
+            "internal_knowledge_rate": round(internal_knowledge_count / total * 100, 1) if total else 0,
         }
 
     def get_timeline(
@@ -547,6 +556,7 @@ class LogFileReader:
                 "total_duration_ms": sum(e.get("total_duration_ms", 0) or 0 for e in group),
                 "first_question": group[0].get("question", ""),
                 "last_question": group[-1].get("question", ""),
+                "internal_knowledge_count": sum(1 for e in group if e.get("used_internal_knowledge")),
             })
 
         # -- filters --
@@ -608,6 +618,7 @@ class LogFileReader:
             "providers_used": sorted({e.get("provider", "") for e in entries if e.get("provider")}),
             "status_summary": dict(status_counts),
             "total_duration_ms": sum(e.get("total_duration_ms", 0) or 0 for e in entries),
+            "internal_knowledge_count": sum(1 for e in entries if e.get("used_internal_knowledge")),
             "queries": entries,
         }
 
@@ -693,6 +704,7 @@ async def get_logs(
     sort_by: str = Query("timestamp"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
     session_id: Optional[str] = None,
+    used_internal_knowledge: Optional[bool] = None,
 ):
     return await asyncio.to_thread(
         get_reader().get_logs,
@@ -708,6 +720,7 @@ async def get_logs(
         sort_by=sort_by,
         sort_order=sort_order,
         session_id=session_id,
+        used_internal_knowledge=used_internal_knowledge,
     )
 
 

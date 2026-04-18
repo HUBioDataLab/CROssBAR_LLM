@@ -142,6 +142,9 @@ class QueryLogEntry:
     # Response
     natural_language_response: str = ""
 
+    # Fallback tracking
+    used_internal_knowledge: bool = False
+
     # Timing
     total_duration_ms: float = 0.0
     start_time: str = ""
@@ -420,7 +423,8 @@ class StructuredLogger:
         generated_query: Optional[str] = None,
         final_query: Optional[str] = None,
         natural_language_response: Optional[str] = None,
-        status: str = "completed"
+        status: str = "completed",
+        used_internal_knowledge: bool = False
     ) -> Optional[QueryLogEntry]:
         """
         Finalize the current query log and write it to file.
@@ -430,6 +434,7 @@ class StructuredLogger:
             final_query: The final corrected query
             natural_language_response: The NL response
             status: Final status
+            used_internal_knowledge: Whether LLM used internal knowledge instead of DB results
 
         Returns:
             The finalized QueryLogEntry
@@ -452,6 +457,7 @@ class StructuredLogger:
             log.final_query = final_query
         if natural_language_response:
             log.natural_language_response = natural_language_response
+        log.used_internal_knowledge = used_internal_knowledge
 
         # Write to JSON log file
         self._write_log_entry(log)

@@ -161,6 +161,9 @@ function TurnCard({ entry, index, navigate }) {
             </Typography>
           )}
           <Box sx={{ flex: 1 }} />
+          {entry.used_internal_knowledge && (
+            <Chip label="Internal Knowledge" size="small" color="warning" variant="filled" sx={{ fontSize: '0.65rem', height: 20, fontWeight: 600 }} />
+          )}
           <StatusChip status={entry.status} />
           {entry.model_name && (
             <Chip label={entry.model_name} size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />
@@ -286,7 +289,7 @@ export default function SessionDetail() {
 
       {/* Summary cards */}
       <Grid container spacing={1.5} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} md={2.4}>
           <Card>
             <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>
@@ -296,7 +299,7 @@ export default function SessionDetail() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} md={2.4}>
           <Card>
             <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>
@@ -308,7 +311,19 @@ export default function SessionDetail() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} md={2.4}>
+          <Card>
+            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, textAlign: 'center' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>
+                Internal Knowledge
+              </Typography>
+              <Typography variant="h4" sx={{ mb: 0, color: summary.internal_knowledge_count ? 'warning.dark' : 'text.primary' }}>
+                {summary.internal_knowledge_count || 0}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={6} sm={3} md={2.4}>
           <Card>
             <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>
@@ -323,7 +338,7 @@ export default function SessionDetail() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} md={2.4}>
           <Card>
             <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 0, display: 'block' }}>

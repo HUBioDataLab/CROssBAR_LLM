@@ -201,6 +201,14 @@ function OverviewTab({ log }) {
             }
           />
         )}
+        {log.used_internal_knowledge && (
+          <InfoRow
+            label="Answer Source"
+            value={
+              <Chip label="LLM Internal Knowledge" size="small" color="warning" variant="filled" />
+            }
+          />
+        )}
         <Divider sx={{ my: 2 }} />
         <Typography variant="h5" sx={{ mb: 2 }}>Timing</Typography>
         <InfoRow label="Start" value={log.start_time} mono />
@@ -645,6 +653,15 @@ export default function LogDetail() {
               color={log.search_type === 'generate_and_execute' ? 'primary' : 'default'}
               variant="outlined"
             />
+            {log.used_internal_knowledge && (
+              <Chip
+                label="Internal Knowledge"
+                size="small"
+                color="warning"
+                variant="filled"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0 }}>
             {log.timestamp

@@ -19,6 +19,7 @@ import {
   Token as TokenIcon,
   ErrorOutline as ErrorIcon,
   Forum as SessionsIcon,
+  Psychology as InternalKnowledgeIcon,
 } from '@mui/icons-material';
 import {
   AreaChart,
@@ -193,7 +194,7 @@ export default function Overview() {
 
       {/* Stat cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} lg={2.4}>
+        <Grid item xs={12} sm={6} lg={2}>
           <StatCard
             icon={<QueriesIcon />}
             label="Total Queries"
@@ -203,7 +204,7 @@ export default function Overview() {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={2.4}>
+        <Grid item xs={12} sm={6} lg={2}>
           <StatCard
             icon={<SessionsIcon />}
             label="Unique Sessions"
@@ -213,7 +214,17 @@ export default function Overview() {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={2.4}>
+        <Grid item xs={12} sm={6} lg={2}>
+          <StatCard
+            icon={<InternalKnowledgeIcon />}
+            label="Internal Knowledge"
+            value={stats?.internal_knowledge_count ?? '-'}
+            subtitle={stats ? `${stats.internal_knowledge_rate}% of queries` : ''}
+            color={theme.palette.warning.dark}
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} lg={2}>
           <StatCard
             icon={<SuccessIcon />}
             label="Success Rate"
@@ -223,7 +234,7 @@ export default function Overview() {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={2.4}>
+        <Grid item xs={12} sm={6} lg={2}>
           <StatCard
             icon={<LatencyIcon />}
             label="Avg Latency"
@@ -233,7 +244,7 @@ export default function Overview() {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={2.4}>
+        <Grid item xs={12} sm={6} lg={2}>
           <StatCard
             icon={<TokenIcon />}
             label="Total Tokens"

@@ -2095,7 +2095,8 @@ async def run_query_with_retry(
                 finalize_query_log(
                     final_query=current_query,
                     natural_language_response=fallback_response,
-                    status="completed"
+                    status="completed",
+                    used_internal_knowledge=True
                 )
 
                 yield {
