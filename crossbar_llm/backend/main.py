@@ -1440,7 +1440,8 @@ async def run_query(
         finalize_query_log(
             final_query=run_query_request.query,
             natural_language_response=nl_response,
-            status="completed"
+            status="completed",
+            follow_up_questions=follow_up_questions
         )
 
     except Exception as e:
@@ -1899,7 +1900,8 @@ async def run_query_with_retry(
                 finalize_query_log(
                     final_query=current_query,
                     natural_language_response=nl_response,
-                    status="completed"
+                    status="completed",
+                    follow_up_questions=follow_up_questions
                 )
 
                 # Send completion event
@@ -2096,7 +2098,8 @@ async def run_query_with_retry(
                     final_query=current_query,
                     natural_language_response=fallback_response,
                     status="completed",
-                    used_internal_knowledge=True
+                    used_internal_knowledge=True,
+                    follow_up_questions=follow_up_questions
                 )
 
                 yield {

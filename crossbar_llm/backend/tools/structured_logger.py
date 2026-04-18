@@ -141,6 +141,7 @@ class QueryLogEntry:
 
     # Response
     natural_language_response: str = ""
+    follow_up_questions: List[str] = field(default_factory=list)
 
     # Fallback tracking
     used_internal_knowledge: bool = False
@@ -424,7 +425,8 @@ class StructuredLogger:
         final_query: Optional[str] = None,
         natural_language_response: Optional[str] = None,
         status: str = "completed",
-        used_internal_knowledge: bool = False
+        used_internal_knowledge: bool = False,
+        follow_up_questions: Optional[List[str]] = None
     ) -> Optional[QueryLogEntry]:
         """
         Finalize the current query log and write it to file.
@@ -435,6 +437,7 @@ class StructuredLogger:
             natural_language_response: The NL response
             status: Final status
             used_internal_knowledge: Whether LLM used internal knowledge instead of DB results
+            follow_up_questions: Generated follow-up question suggestions
 
         Returns:
             The finalized QueryLogEntry
@@ -458,6 +461,8 @@ class StructuredLogger:
         if natural_language_response:
             log.natural_language_response = natural_language_response
         log.used_internal_knowledge = used_internal_knowledge
+        if follow_up_questions:
+            log.follow_up_questions = follow_up_questions
 
         # Write to JSON log file
         self._write_log_entry(log)

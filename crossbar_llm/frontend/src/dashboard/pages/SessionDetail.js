@@ -142,7 +142,8 @@ function CollapsibleResponse({ text }) {
   );
 }
 
-function TurnCard({ entry, index, navigate }) {
+function TurnCard({ entry, index, navigate, isFollowUp }) {
+  const followUps = entry.follow_up_questions || [];
   return (
     <Card>
       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -156,6 +157,9 @@ function TurnCard({ entry, index, navigate }) {
             </Typography>
           )}
           <Box sx={{ flex: 1 }} />
+          {isFollowUp && (
+            <Chip label="Follow-up" size="small" color="info" variant="filled" sx={{ fontSize: '0.65rem', height: 20, fontWeight: 600 }} />
+          )}
           {entry.used_internal_knowledge && (
             <Chip label="Internal Knowledge" size="small" color="warning" variant="filled" sx={{ fontSize: '0.65rem', height: 20, fontWeight: 600 }} />
           )}
@@ -197,6 +201,21 @@ function TurnCard({ entry, index, navigate }) {
               Response
             </Typography>
             <CollapsibleResponse text={entry.natural_language_response} />
+          </Box>
+        )}
+
+        {followUps.length > 0 && (
+          <Box sx={{ mt: 1.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+              Suggested Follow-ups
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {followUps.map((q, i) => (
+                <Typography key={i} variant="caption" sx={{ pl: 1, borderLeft: '2px solid', borderColor: 'divider', color: 'text.secondary', mb: 0 }}>
+                  {q}
+                </Typography>
+              ))}
+            </Box>
           </Box>
         )}
 
@@ -349,38 +368,44 @@ export default function SessionDetail() {
       {/* Conversation timeline */}
       <Typography variant="h5" sx={{ mb: 1.5 }}>Conversation Timeline</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {queries.map((entry, i) => (
-          <Box
-            key={entry.request_id || i}
-            sx={{
-              display: 'flex',
-              gap: 2,
-              position: 'relative',
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 24, flexShrink: 0 }}>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  bgcolor: entry.status === 'completed' ? 'success.main'
-                    : entry.status === 'failed' ? 'error.main'
-                    : 'grey.400',
-                  mt: '18px',
-                  flexShrink: 0,
-                }}
-              />
-              {i < queries.length - 1 && (
-                <Box sx={{ flex: 1, width: 2, bgcolor: 'divider', minHeight: 20 }} />
-              )}
+        {queries.map((entry, i) => {
+          const prevFollowUps = i > 0 ? (queries[i - 1].follow_up_questions || []) : [];
+          const isFollowUp = prevFollowUps.some(
+            (q) => q.trim().toLowerCase() === (entry.question || '').trim().toLowerCase()
+          );
+          return (
+            <Box
+              key={entry.request_id || i}
+              sx={{
+                display: 'flex',
+                gap: 2,
+                position: 'relative',
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 24, flexShrink: 0 }}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: entry.status === 'completed' ? 'success.main'
+                      : entry.status === 'failed' ? 'error.main'
+                      : 'grey.400',
+                    mt: '18px',
+                    flexShrink: 0,
+                  }}
+                />
+                {i < queries.length - 1 && (
+                  <Box sx={{ flex: 1, width: 2, bgcolor: 'divider', minHeight: 20 }} />
+                )}
+              </Box>
+              {/* Content */}
+              <Box sx={{ flex: 1, pb: 2 }}>
+                <TurnCard entry={entry} index={i} navigate={navigate} isFollowUp={isFollowUp} />
+              </Box>
             </Box>
-            {/* Content */}
-            <Box sx={{ flex: 1, pb: 2 }}>
-              <TurnCard entry={entry} index={i} navigate={navigate} />
-            </Box>
-          </Box>
-        ))}
+          );
+        })}
       </Box>
 
       {queries.length === 0 && (
