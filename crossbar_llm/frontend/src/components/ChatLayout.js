@@ -224,12 +224,12 @@ function ChatLayout({
   // Vector search example queries
   const vectorExampleQueries = [
     {
-      question: "Give me distinct Biological Processes that are similar to cell growth <Biological Process> and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
+      question: "Give me distinct Biological Processes that are similar to cell growth <BiologicalProcess> and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
       vectorCategory: "BiologicalProcess",
       embeddingType: "Anc2vec"
     },
     {
-      question: "Find a protein domain that is similar to Protein kinase domain <Domain>. Then, find proteins that possess this similar domain.",
+      question: "Find a protein domain that is similar to Prot_kinase_dom <ProteinDomain>. Then, find proteins that possess this similar domain.",
       vectorCategory: "ProteinDomain",
       embeddingType: "Dom2vec"
     },
