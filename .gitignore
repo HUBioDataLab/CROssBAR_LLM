@@ -1,0 +1,49 @@
+# Secrets and local environment files
+.env
+*.env
+!.env.example
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Virtual environments and local Python version
+.venv/
+venv/
+env/
+.python-version
+
+# Coverage and test output
+.coverage
+.coverage.*
+htmlcov/
+
+# Logs
+*.log
+logs/
+crossbar_llm/agent_tools/logs/
+
+# Local benchmark and generated artifacts
+.benchmarks/
+crossbar_llm/tests/.benchmarks/
+crossbar_llm/tests/.pytest_cache/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/

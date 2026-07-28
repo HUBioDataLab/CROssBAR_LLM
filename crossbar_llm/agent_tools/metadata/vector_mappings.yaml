@@ -1,0 +1,39 @@
+SmallMolecule:
+  index_name: SelformerEmbeddings
+  property_name: selformer_embedding
+  vector_size: 768
+Protein:
+  - index_name: Prott5Embeddings
+    property_name: prott5_embedding
+    vector_size: 1024
+  - index_name: Esm2Embeddings
+    property_name: esm2_embedding
+    vector_size: 1280
+GOTerm:
+  index_name: Anc2vecEmbeddings
+  property_name: anc2vec_embedding
+  vector_size: 200
+Phenotype:
+  index_name: CadaEmbeddings
+  property_name: cada_embedding
+  vector_size: 160
+Disease:
+  index_name: Doc2vecEmbeddings
+  property_name: doc2vec_embedding
+  vector_size: 100
+ProteinDomain:
+  index_name: Dom2vecEmbeddings
+  property_name: dom2vec_embedding
+  vector_size: 50
+EcNumber:
+  index_name: RxnfpEmbeddings
+  property_name: rxnfp_embedding
+  vector_size: 256
+Pathway:
+  index_name: BiokeenEmbeddings
+  property_name: biokeen_embedding
+  vector_size: 200
+Gene:
+  index_name: NtEmbeddings
+  property_name: nt_embedding
+  vector_size: 2560

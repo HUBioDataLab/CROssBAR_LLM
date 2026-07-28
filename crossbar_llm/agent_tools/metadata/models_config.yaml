@@ -1,0 +1,92 @@
+OpenAI:
+  models:
+    - gpt-5.4-mini
+    - gpt-5.4-nano
+    - gpt-5.4
+    - gpt-5.2
+    - gpt-5-mini
+    - gpt-5.1
+    - gpt-5
+    - gpt-5-nano
+    - gpt-4o
+    - gpt-4.1
+    - gpt-4o-mini
+    - o4-mini
+    - o3
+    - o3-mini
+    - gpt-4.1-nano
+  free_models:
+    - gpt-5-mini
+
+Anthropic:
+  models:
+    - claude-opus-4-8
+    - claude-sonnet-4-6
+    - claude-opus-4-6
+    - claude-sonnet-4-5
+    - claude-haiku-4-5
+
+Google:
+  models:
+    - gemini-3.5-flash
+    - gemini-3.1-pro-preview
+    - gemini-3-flash-preview
+    - gemini-3-pro-preview
+    - gemini-2.5-pro
+    - gemini-2.5-flash
+  free_models:
+    - gemini-3-flash-preview
+
+Groq:
+  models:
+    - openai/gpt-oss-120b
+    - openai/gpt-oss-20b
+    - llama-3.3-70b-versatile
+    - meta-llama/llama-4-scout-17b-16e-instruct
+    - llama-3.1-8b-instant
+    - groq/compound
+    - groq/compound-mini
+
+OpenRouter:
+  models:
+    - deepseek/deepseek-v4-flash
+    - deepseek/deepseek-v4-pro
+    - deepseek/deepseek-r1
+    - qwen/qwen3.7-max
+    - qwen/qwen3.6-flash
+    - qwen/qwen3.6-max-preview
+    - moonshotai/kimi-k2.6
+    - x-ai/grok-4.1-fast
+    - x-ai/grok-4
+    - minimax/minimax-m2.5
+    - google/gemma-4-26b-a4b-it
+    - z-ai/glm-5.2
+
+Ollama:
+  models:
+    - codestral:latest
+    - llama3:instruct
+    - tomasonjo/codestral-text2cypher:latest
+    - tomasonjo/llama3-text2cypher-demo:latest
+    - llama3.1:8b
+    - qwen2:7b-instruct
+    - gemma2:latest
+
+provider_aliases:
+  openai: OpenAI
+  anthropic: Anthropic
+  google_genai: Google
+  groq: Groq
+  openrouter: OpenRouter
+  ollama: Ollama
+
+provider_to_api_key_attr:
+  OpenAI: openai_api_key
+  Anthropic: anthropic_api_key
+  Google: gemini_api_key
+  Groq: groq_api_key
+  OpenRouter: openrouter_api_key
+
+supported_models_for_search:
+  - gpt-5.1
+  - gemini-3-pro-preview

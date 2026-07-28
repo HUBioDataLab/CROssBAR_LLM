@@ -1,0 +1,44 @@
+GOTerm:
+  index_name: GOTermNames
+  property_name: name
+  fulltext_analyzer: english
+ProteinDomain:
+  index_name: ProteinDomainNames
+  property_name: name
+  fulltext_analyzer: standard-no-stop-words
+SideEffect:
+  index_name: SideEffectNames
+  property_name: name
+  fulltext_analyzer: english
+SmallMolecule:
+  index_name: SmallMoleculeNames
+  property_name: name
+  fulltext_analyzer: english
+Gene:
+  index_name: GeneNames
+  property_name: gene_symbol
+  fulltext_analyzer: standard-no-stop-words
+Pathway:
+  index_name: PathwayNames
+  property_name: name
+  fulltext_analyzer: english
+Protein:
+  index_name: ProteinNames
+  property_name: primary_protein_name
+  fulltext_analyzer: english
+Phenotype:
+  index_name: PhenotypeNames
+  property_name: name
+  fulltext_analyzer: english
+OrganismTaxon:
+  index_name: OrganismTaxonNames
+  property_name: organism_name
+  fulltext_analyzer: standard-no-stop-words
+Disease:
+  index_name: DiseaseNames
+  property_name: name
+  fulltext_analyzer: english
+EcNumber:
+  index_name: EcNumberNames
+  property_name: name
+  fulltext_analyzer: standard-no-stop-words

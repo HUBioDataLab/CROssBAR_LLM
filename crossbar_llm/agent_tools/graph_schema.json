@@ -1,0 +1,1229 @@
+{
+    "nodes": [
+        {
+            "labels": [
+                "BiologicalProcess",
+                "GOTerm",
+                "ProteinDomain",
+                "SideEffect",
+                "SmallMolecule",
+                "Compound",
+                "Gene",
+                "Pathway",
+                "Protein",
+                "Drug",
+                "Phenotype",
+                "MolecularFunction",
+                "OrganismTaxon",
+                "Disease",
+                "EcNumber",
+                "Reaction",
+                "CellularComponent"
+            ]
+        }
+    ],
+    "node_properties": [
+        {
+            "labels": "BiologicalProcess",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "anc2vec_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "GOTerm",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "anc2vec_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "ProteinDomain",
+            "properties": [
+                {
+                    "property": "protein_count",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pfam",
+                    "type": "LIST"
+                },
+                {
+                    "property": "pdb",
+                    "type": "LIST"
+                },
+                {
+                    "property": "dom2vec_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "parent_list",
+                    "type": "LIST"
+                },
+                {
+                    "property": "child_list",
+                    "type": "LIST"
+                },
+                {
+                    "property": "ec",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "SideEffect",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "synonyms",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "SmallMolecule",
+            "properties": [
+                {
+                    "property": "smiles",
+                    "type": "STRING"
+                },
+                {
+                    "property": "type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "full_mwt",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "species",
+                    "type": "STRING"
+                },
+                {
+                    "property": "heavy_atoms",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "alogp",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "inchi",
+                    "type": "STRING"
+                },
+                {
+                    "property": "inchikey",
+                    "type": "STRING"
+                },
+                {
+                    "property": "qed_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "selformer_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "cas_number",
+                    "type": "STRING"
+                },
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "groups",
+                    "type": "LIST"
+                },
+                {
+                    "property": "general_references",
+                    "type": "LIST"
+                },
+                {
+                    "property": "atc_codes",
+                    "type": "LIST"
+                },
+                {
+                    "property": "kegg_drug",
+                    "type": "STRING"
+                },
+                {
+                    "property": "rxcui",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pharmgkb",
+                    "type": "STRING"
+                },
+                {
+                    "property": "drugcentral",
+                    "type": "STRING"
+                },
+                {
+                    "property": "chembl",
+                    "type": "STRING"
+                },
+                {
+                    "property": "clinicaltrials",
+                    "type": "STRING"
+                },
+                {
+                    "property": "chebi",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pubchem",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pdb",
+                    "type": "STRING"
+                },
+                {
+                    "property": "zinc",
+                    "type": "STRING"
+                },
+                {
+                    "property": "bindingdb",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "Compound",
+            "properties": [
+                {
+                    "property": "smiles",
+                    "type": "STRING"
+                },
+                {
+                    "property": "type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "full_mwt",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "species",
+                    "type": "STRING"
+                },
+                {
+                    "property": "heavy_atoms",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "alogp",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "inchi",
+                    "type": "STRING"
+                },
+                {
+                    "property": "inchikey",
+                    "type": "STRING"
+                },
+                {
+                    "property": "qed_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "selformer_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "Gene",
+            "properties": [
+                {
+                    "property": "gene_names",
+                    "type": "LIST"
+                },
+                {
+                    "property": "kegg_ids",
+                    "type": "LIST"
+                },
+                {
+                    "property": "gene_symbol",
+                    "type": "STRING"
+                },
+                {
+                    "property": "nt_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "ensembl_transcript_ids",
+                    "type": "LIST"
+                },
+                {
+                    "property": "ensembl_gene_ids",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "Pathway",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "organism",
+                    "type": "STRING"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "biokeen_embedding",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "Protein",
+            "properties": [
+                {
+                    "property": "length",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "mass",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "primary_protein_name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "protein_names",
+                    "type": "LIST"
+                },
+                {
+                    "property": "xref_proteomes",
+                    "type": "LIST"
+                },
+                {
+                    "property": "organism_id",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "sequence",
+                    "type": "STRING"
+                },
+                {
+                    "property": "prott5_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "esm2_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "Drug",
+            "properties": [
+                {
+                    "property": "smiles",
+                    "type": "STRING"
+                },
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "groups",
+                    "type": "LIST"
+                },
+                {
+                    "property": "pdb",
+                    "type": "STRING"
+                },
+                {
+                    "property": "zinc",
+                    "type": "STRING"
+                },
+                {
+                    "property": "chembl",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pubchem",
+                    "type": "STRING"
+                },
+                {
+                    "property": "inchi",
+                    "type": "STRING"
+                },
+                {
+                    "property": "inchikey",
+                    "type": "STRING"
+                },
+                {
+                    "property": "selformer_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "bindingdb",
+                    "type": "STRING"
+                },
+                {
+                    "property": "chebi",
+                    "type": "STRING"
+                },
+                {
+                    "property": "cas_number",
+                    "type": "STRING"
+                },
+                {
+                    "property": "clinicaltrials",
+                    "type": "STRING"
+                },
+                {
+                    "property": "rxcui",
+                    "type": "STRING"
+                },
+                {
+                    "property": "general_references",
+                    "type": "LIST"
+                },
+                {
+                    "property": "atc_codes",
+                    "type": "LIST"
+                },
+                {
+                    "property": "kegg_drug",
+                    "type": "STRING"
+                },
+                {
+                    "property": "drugcentral",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pharmgkb",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "Phenotype",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "synonyms",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "cada_embedding",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "MolecularFunction",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "anc2vec_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "OrganismTaxon",
+            "properties": [
+                {
+                    "property": "organism_name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "Disease",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "synonyms",
+                    "type": "LIST"
+                },
+                {
+                    "property": "doid",
+                    "type": "STRING"
+                },
+                {
+                    "property": "omim",
+                    "type": "STRING"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "doc2vec_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "mesh",
+                    "type": "STRING"
+                },
+                {
+                    "property": "orphanet",
+                    "type": "STRING"
+                },
+                {
+                    "property": "hp",
+                    "type": "STRING"
+                },
+                {
+                    "property": "umls",
+                    "type": "STRING"
+                },
+                {
+                    "property": "ncit",
+                    "type": "STRING"
+                },
+                {
+                    "property": "icd9",
+                    "type": "STRING"
+                },
+                {
+                    "property": "efo",
+                    "type": "STRING"
+                },
+                {
+                    "property": "icd10cm",
+                    "type": "STRING"
+                },
+                {
+                    "property": "meddra",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "labels": "EcNumber",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "rxnfp_embedding",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "Reaction",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "rxnfp_embedding",
+                    "type": "LIST"
+                }
+            ]
+        },
+        {
+            "labels": "CellularComponent",
+            "properties": [
+                {
+                    "property": "name",
+                    "type": "STRING"
+                },
+                {
+                    "property": "anc2vec_embedding",
+                    "type": "LIST"
+                },
+                {
+                    "property": "id",
+                    "type": "STRING"
+                }
+            ]
+        }
+    ],
+    "edges": [
+        "(:BiologicalProcess)-[:Biological_process_is_a_biological_process]->(:BiologicalProcess)",
+        "(:BiologicalProcess)-[:Biological_process_is_a_biological_process]->(:GOTerm)",
+        "(:BiologicalProcess)-[:Biological_process_positively_regulates_molecular_function]->(:GOTerm)",
+        "(:BiologicalProcess)-[:Biological_process_positively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:BiologicalProcess)-[:Biological_process_part_of_biological_process]->(:BiologicalProcess)",
+        "(:BiologicalProcess)-[:Biological_process_part_of_biological_process]->(:GOTerm)",
+        "(:BiologicalProcess)-[:Biological_process_positively_regulates_biological_process]->(:BiologicalProcess)",
+        "(:BiologicalProcess)-[:Biological_process_positively_regulates_biological_process]->(:GOTerm)",
+        "(:BiologicalProcess)-[:Biological_process_negatively_regulates_biological_process]->(:BiologicalProcess)",
+        "(:BiologicalProcess)-[:Biological_process_negatively_regulates_biological_process]->(:GOTerm)",
+        "(:BiologicalProcess)-[:Biological_process_negatively_regulates_molecular_function]->(:GOTerm)",
+        "(:BiologicalProcess)-[:Biological_process_negatively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:GOTerm)-[:Biological_process_part_of_biological_process]->(:BiologicalProcess)",
+        "(:GOTerm)-[:Biological_process_part_of_biological_process]->(:GOTerm)",
+        "(:GOTerm)-[:Biological_process_is_a_biological_process]->(:BiologicalProcess)",
+        "(:GOTerm)-[:Biological_process_is_a_biological_process]->(:GOTerm)",
+        "(:GOTerm)-[:Biological_process_negatively_regulates_biological_process]->(:BiologicalProcess)",
+        "(:GOTerm)-[:Biological_process_negatively_regulates_biological_process]->(:GOTerm)",
+        "(:GOTerm)-[:Biological_process_positively_regulates_biological_process]->(:BiologicalProcess)",
+        "(:GOTerm)-[:Biological_process_positively_regulates_biological_process]->(:GOTerm)",
+        "(:GOTerm)-[:Biological_process_positively_regulates_molecular_function]->(:GOTerm)",
+        "(:GOTerm)-[:Biological_process_positively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:GOTerm)-[:Biological_process_negatively_regulates_molecular_function]->(:GOTerm)",
+        "(:GOTerm)-[:Biological_process_negatively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:GOTerm)-[:Molecular_function_is_a_molecular_function]->(:GOTerm)",
+        "(:GOTerm)-[:Molecular_function_is_a_molecular_function]->(:MolecularFunction)",
+        "(:GOTerm)-[:Cellular_component_is_a_cellular_component]->(:GOTerm)",
+        "(:GOTerm)-[:Cellular_component_is_a_cellular_component]->(:CellularComponent)",
+        "(:GOTerm)-[:Cellular_component_part_of_cellular_component]->(:GOTerm)",
+        "(:GOTerm)-[:Cellular_component_part_of_cellular_component]->(:CellularComponent)",
+        "(:GOTerm)-[:Molecular_function_positively_regulates_molecular_function]->(:GOTerm)",
+        "(:GOTerm)-[:Molecular_function_positively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:ProteinDomain)-[:Protein_domain_enables_molecular_function]->(:GOTerm)",
+        "(:ProteinDomain)-[:Protein_domain_enables_molecular_function]->(:MolecularFunction)",
+        "(:ProteinDomain)-[:Protein_domain_located_in_cellular_component]->(:GOTerm)",
+        "(:ProteinDomain)-[:Protein_domain_located_in_cellular_component]->(:CellularComponent)",
+        "(:ProteinDomain)-[:Protein_domain_involved_in_biological_process]->(:BiologicalProcess)",
+        "(:ProteinDomain)-[:Protein_domain_involved_in_biological_process]->(:GOTerm)",
+        "(:SideEffect)-[:Side_effect_is_a_side_effect]->(:SideEffect)",
+        "(:SmallMolecule)-[:Compound_targets_protein]->(:Protein)",
+        "(:SmallMolecule)-[:Drug_targets_protein]->(:Protein)",
+        "(:SmallMolecule)-[:Drug_interacts_with_drug]->(:SmallMolecule)",
+        "(:SmallMolecule)-[:Drug_interacts_with_drug]->(:Drug)",
+        "(:SmallMolecule)-[:Drug_has_side_effect]->(:SideEffect)",
+        "(:SmallMolecule)-[:Drug_upregulates_gene]->(:Gene)",
+        "(:SmallMolecule)-[:Drug_downregulates_gene]->(:Gene)",
+        "(:SmallMolecule)-[:Drug_has_target_in_pathway]->(:Pathway)",
+        "(:Compound)-[:Compound_targets_protein]->(:Protein)",
+        "(:Gene)-[:Gene_encodes_protein]->(:Protein)",
+        "(:Gene)-[:Gene_is_related_to_disease]->(:Disease)",
+        "(:Gene)-[:Gene_is_orthologous_with_gene]->(:Gene)",
+        "(:Gene)-[:Gene_regulates_gene]->(:Gene)",
+        "(:Pathway)-[:Pathway_participates_pathway]->(:Pathway)",
+        "(:Pathway)-[:Pathway_is_part_of_pathway]->(:Pathway)",
+        "(:Pathway)-[:Pathway_is_ortholog_to_pathway]->(:Pathway)",
+        "(:Protein)-[:Protein_belongs_to_organism]->(:OrganismTaxon)",
+        "(:Protein)-[:Protein_involved_in_biological_process]->(:BiologicalProcess)",
+        "(:Protein)-[:Protein_involved_in_biological_process]->(:GOTerm)",
+        "(:Protein)-[:Protein_located_in_cellular_component]->(:GOTerm)",
+        "(:Protein)-[:Protein_located_in_cellular_component]->(:CellularComponent)",
+        "(:Protein)-[:Protein_enables_molecular_function]->(:GOTerm)",
+        "(:Protein)-[:Protein_enables_molecular_function]->(:MolecularFunction)",
+        "(:Protein)-[:Protein_is_active_in_cellular_component]->(:GOTerm)",
+        "(:Protein)-[:Protein_is_active_in_cellular_component]->(:CellularComponent)",
+        "(:Protein)-[:Protein_interacts_with_protein]->(:Protein)",
+        "(:Protein)-[:Protein_catalyzes_ec_number]->(:EcNumber)",
+        "(:Protein)-[:Protein_catalyzes_ec_number]->(:Reaction)",
+        "(:Protein)-[:Protein_has_domain]->(:ProteinDomain)",
+        "(:Protein)-[:Protein_is_associated_with_phenotype]->(:Phenotype)",
+        "(:Protein)-[:Protein_take_part_in_pathway]->(:Pathway)",
+        "(:Protein)-[:Protein_part_of_cellular_component]->(:GOTerm)",
+        "(:Protein)-[:Protein_part_of_cellular_component]->(:CellularComponent)",
+        "(:Protein)-[:Protein_contributes_to_molecular_function]->(:GOTerm)",
+        "(:Protein)-[:Protein_contributes_to_molecular_function]->(:MolecularFunction)",
+        "(:Drug)-[:Drug_targets_protein]->(:Protein)",
+        "(:Drug)-[:Drug_upregulates_gene]->(:Gene)",
+        "(:Drug)-[:Drug_interacts_with_drug]->(:SmallMolecule)",
+        "(:Drug)-[:Drug_interacts_with_drug]->(:Drug)",
+        "(:Drug)-[:Drug_has_side_effect]->(:SideEffect)",
+        "(:Drug)-[:Drug_downregulates_gene]->(:Gene)",
+        "(:Drug)-[:Drug_has_target_in_pathway]->(:Pathway)",
+        "(:Phenotype)-[:Phenotype_is_a_phenotype]->(:Phenotype)",
+        "(:Phenotype)-[:Phenotype_is_associated_with_disease]->(:Disease)",
+        "(:MolecularFunction)-[:Molecular_function_is_a_molecular_function]->(:GOTerm)",
+        "(:MolecularFunction)-[:Molecular_function_is_a_molecular_function]->(:MolecularFunction)",
+        "(:MolecularFunction)-[:Molecular_function_negatively_regulates_molecular_function]->(:GOTerm)",
+        "(:MolecularFunction)-[:Molecular_function_negatively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:MolecularFunction)-[:Molecular_function_positively_regulates_molecular_function]->(:GOTerm)",
+        "(:MolecularFunction)-[:Molecular_function_positively_regulates_molecular_function]->(:MolecularFunction)",
+        "(:OrganismTaxon)-[:Organism_causes_disease]->(:Disease)",
+        "(:Disease)-[:Disease_is_associated_with_disease]->(:Disease)",
+        "(:Disease)-[:Disease_is_a_disease]->(:Disease)",
+        "(:Disease)-[:Disease_modulates_pathway]->(:Pathway)",
+        "(:Disease)-[:Disease_is_treated_by_drug]->(:SmallMolecule)",
+        "(:Disease)-[:Disease_is_treated_by_drug]->(:Drug)",
+        "(:Disease)-[:Disease_is_comorbid_with_disease]->(:Disease)",
+        "(:EcNumber)-[:Ec_number_is_a_ec_number]->(:EcNumber)",
+        "(:EcNumber)-[:Ec_number_is_a_ec_number]->(:Reaction)",
+        "(:Reaction)-[:Ec_number_is_a_ec_number]->(:EcNumber)",
+        "(:Reaction)-[:Ec_number_is_a_ec_number]->(:Reaction)",
+        "(:CellularComponent)-[:Cellular_component_part_of_cellular_component]->(:GOTerm)",
+        "(:CellularComponent)-[:Cellular_component_part_of_cellular_component]->(:CellularComponent)",
+        "(:CellularComponent)-[:Cellular_component_is_a_cellular_component]->(:GOTerm)",
+        "(:CellularComponent)-[:Cellular_component_is_a_cellular_component]->(:CellularComponent)"
+    ],
+    "edge_properties": [
+        {
+            "properties": [
+                {
+                    "property": "reference",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_involved_in_biological_process"
+        },
+        {
+            "properties": [
+                {
+                    "property": "reference",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_enables_molecular_function"
+        },
+        {
+            "properties": [
+                {
+                    "property": "activity_value",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "confidence_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "pchembl",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "activity_type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "references",
+                    "type": "LIST"
+                },
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "known_action",
+                    "type": "STRING"
+                },
+                {
+                    "property": "dgidb_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "mechanism_of_action_type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "stitch_combined_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "direct_interaction",
+                    "type": "BOOLEAN"
+                },
+                {
+                    "property": "disease_efficacy",
+                    "type": "BOOLEAN"
+                },
+                {
+                    "property": "mechanism_of_action",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Drug_targets_protein"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "pubmed_id",
+                    "type": "LIST"
+                },
+                {
+                    "property": "tf_effect",
+                    "type": "STRING"
+                },
+                {
+                    "property": "dorothea_confidence_level",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Gene_regulates_gene"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "string_combined_score",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "pubmed_ids",
+                    "type": "LIST"
+                },
+                {
+                    "property": "method",
+                    "type": "STRING"
+                },
+                {
+                    "property": "interaction_type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "intact_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "string_physical_combined_score",
+                    "type": "INTEGER"
+                }
+            ],
+            "type": "Protein_interacts_with_protein"
+        },
+        {
+            "properties": [
+                {
+                    "property": "pubmed_ids",
+                    "type": "LIST"
+                },
+                {
+                    "property": "evidence",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Phenotype_is_associated_with_disease"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "STRING"
+                },
+                {
+                    "property": "licence",
+                    "type": "STRING"
+                },
+                {
+                    "property": "version",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Gene_encodes_protein"
+        },
+        {
+            "properties": [
+                {
+                    "property": "reference",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_is_active_in_cellular_component"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "proportional_reporting_ratio",
+                    "type": "STRING"
+                },
+                {
+                    "property": "frequency",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Drug_has_side_effect"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "disgenet_gene_disease_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "opentargets_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "variant_source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "disgenet_variant_disease_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "dbsnp_id",
+                    "type": "LIST"
+                },
+                {
+                    "property": "allele_id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "clinical_significance",
+                    "type": "STRING"
+                },
+                {
+                    "property": "review_status",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "variation_id",
+                    "type": "STRING"
+                },
+                {
+                    "property": "pubmed_ids",
+                    "type": "LIST"
+                }
+            ],
+            "type": "Gene_is_related_to_disease"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "pchembl",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "activity_value",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "activity_type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "assay_chembl",
+                    "type": "LIST"
+                },
+                {
+                    "property": "confidence_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "references",
+                    "type": "LIST"
+                },
+                {
+                    "property": "stitch_combined_score",
+                    "type": "FLOAT"
+                }
+            ],
+            "type": "Compound_targets_protein"
+        },
+        {
+            "properties": [
+                {
+                    "property": "recommendation",
+                    "type": "STRING"
+                },
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "interaction_level",
+                    "type": "STRING"
+                },
+                {
+                    "property": "interaction_type",
+                    "type": "LIST"
+                }
+            ],
+            "type": "Drug_interacts_with_drug"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "references",
+                    "type": "LIST"
+                }
+            ],
+            "type": "Drug_upregulates_gene"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "relation_type",
+                    "type": "STRING"
+                },
+                {
+                    "property": "oma_orthology_score",
+                    "type": "FLOAT"
+                }
+            ],
+            "type": "Gene_is_orthologous_with_gene"
+        },
+        {
+            "properties": [
+                {
+                    "property": "reference",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_part_of_cellular_component"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "disgenet_jaccard_genes_score",
+                    "type": "FLOAT"
+                },
+                {
+                    "property": "disgenet_jaccard_variants_score",
+                    "type": "FLOAT"
+                }
+            ],
+            "type": "Disease_is_associated_with_disease"
+        },
+        {
+            "properties": [
+                {
+                    "property": "reference",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_located_in_cellular_component"
+        },
+        {
+            "properties": [
+                {
+                    "property": "start",
+                    "type": "STRING"
+                },
+                {
+                    "property": "end",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_has_domain"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                }
+            ],
+            "type": "Disease_modulates_pathway"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Drug_has_target_in_pathway"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "max_phase",
+                    "type": "INTEGER"
+                },
+                {
+                    "property": "pubmed_ids",
+                    "type": "LIST"
+                }
+            ],
+            "type": "Disease_is_treated_by_drug"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "LIST"
+                },
+                {
+                    "property": "references",
+                    "type": "LIST"
+                }
+            ],
+            "type": "Drug_downregulates_gene"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "STRING"
+                },
+                {
+                    "property": "licence",
+                    "type": "STRING"
+                },
+                {
+                    "property": "version",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_belongs_to_organism"
+        },
+        {
+            "properties": [
+                {
+                    "property": "reference",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_contributes_to_molecular_function"
+        },
+        {
+            "properties": [
+                {
+                    "property": "source",
+                    "type": "STRING"
+                },
+                {
+                    "property": "evidence_code",
+                    "type": "STRING"
+                }
+            ],
+            "type": "Protein_take_part_in_pathway"
+        }
+    ]
+}
