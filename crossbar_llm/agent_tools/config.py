@@ -106,7 +106,7 @@ class Neo4jConfig(BaseSettings):
     neo4j_uri: str = Field(alias="NEO4J_URI")
 
 class ReasoningConfig(BaseModel):
-    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+    model_config = ConfigDict(extra="forbid")
     enabled: bool = False
     effort: Optional[Literal["low", "medium", "high"]] = None
 
@@ -183,7 +183,7 @@ class ReasoningConfig(BaseModel):
     
 
 class LLMConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=False)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     model: str
     provider: Optional[Literal["openai", "anthropic", "google_genai", "groq", "openrouter", "ollama"]] = None
     temperature: float = 1.

@@ -80,12 +80,6 @@ class BiologicalRelevanceValidatorStrategy(BaseModel):
     relevant: bool = Field(description="Whether the user's question is biologically relevant based on the content of the question.")
     reason: Optional[str] = Field(description="Explanation of why the question is or isn't biologically relevant.")
 
-"""
-There are some specific implementations for providers:
-https://docs.langchain.com/oss/python/integrations/chat/openrouter
-
-"""
-
 class LLMFactory:
     def __init__(
             self, 
