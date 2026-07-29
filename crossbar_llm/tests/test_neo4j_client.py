@@ -87,7 +87,7 @@ def test_create_graph_schema_variables_queries_db_and_writes_file(mock_neo4j_cli
             "properties": [
                 {"property": "name", "type": "STRING"},
             ]
-            }],
+        }],
         "edges": ["(:BiologicalProcess)-[:Biological_process_is_a_biological_process]->(:BiologicalProcess)"],
         "edge_properties": [
             {
@@ -99,57 +99,32 @@ def test_create_graph_schema_variables_queries_db_and_writes_file(mock_neo4j_cli
         ],
     }
 
-    mock_driver.execute_query.side_effect = [
-        (
-            [{"output": expected_schema["node_properties"][0]}],
-            None,
-            None,
-        ),
-        (
-            [{"output": expected_schema["nodes"][0]}],
-            None,
-            None,
-        ),
-        (
-            [{"output": expected_schema["edge_properties"][0]}],
-            None,
-            None,
-        ),
-        (
-            [{"output": expected_schema["edges"][0]}],
-            None,
-            None,
-        ),
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+
+    mock_session.run.side_effect = [
+        [{"output": expected_schema["node_properties"][0]}],
+        [{"output": expected_schema["nodes"][0]}],
+        [{"output": expected_schema["edge_properties"][0]}],
+        [{"output": expected_schema["edges"][0]}],
     ]
 
-    mocker.patch(
-        "crossbar_llm.agent_tools.neo4j_client.GraphDatabase.driver",
-        return_value=mock_driver,
-    )
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
 
     result = mock_neo4j_client.create_graph_schema_variables()
+
     assert result == expected_schema
     assert mock_neo4j_client.file_path.exists()
     assert json.loads(mock_neo4j_client.file_path.read_text()) == expected_schema
 
-    assert mock_driver.execute_query.call_count == 4
+    assert mock_session.run.call_count == 4
 
-    mock_driver.execute_query.assert_any_call(
-        node_properties_query,
-        database_=mock_neo4j_client.cfg.neo4j_db_name,
-    )
-    mock_driver.execute_query.assert_any_call(
-        node_query,
-        database_=mock_neo4j_client.cfg.neo4j_db_name,
-    )
-    mock_driver.execute_query.assert_any_call(
-        rel_properties_query,
-        database_=mock_neo4j_client.cfg.neo4j_db_name,
-    )
-    mock_driver.execute_query.assert_any_call(
-        rel_query,
-        database_=mock_neo4j_client.cfg.neo4j_db_name,
-    )
+    mock_session.run.assert_any_call(node_properties_query)
+    mock_session.run.assert_any_call(node_query)
+    mock_session.run.assert_any_call(rel_properties_query)
+    mock_session.run.assert_any_call(rel_query)
 
 
 def test_get_db_version_returns_cached_value(mock_neo4j_client):
@@ -178,12 +153,13 @@ def test_get_db_version_queries_db_and_caches_result(mock_neo4j_client, mocker, 
     fake_record = mocker.MagicMock()
     fake_record.data.return_value = {"version": "5.22.0"}
 
-    mock_driver.execute_query.return_value = ([fake_record], None, None)
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+    mock_session.run.return_value.single.return_value = fake_record
 
-    mocker.patch(
-        "crossbar_llm.agent_tools.neo4j_client.GraphDatabase.driver",
-        return_value=mock_driver,
-    )
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
 
     assert mock_neo4j_client.get_db_version() == "5.22.0"
 
@@ -202,21 +178,18 @@ def test_get_db_version_queries_db_and_caches_result(mock_neo4j_client, mocker, 
 def test_execute_query_limit_injection(mock_neo4j_client, mocker, mock_driver, query, top_k, expected_fragment):
     fake_record = mocker.MagicMock()
     fake_record.data.return_value = {"name": "ProteinA", "embedding": [0.1, 0.2]}
-    mock_driver.execute_query.return_value = (
-        [fake_record],
-        None,
-        None,
-    )
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+    mock_session.run.return_value = [fake_record]
 
-    mocker.patch(
-        "crossbar_llm.agent_tools.neo4j_client.GraphDatabase.driver",
-        return_value=mock_driver,
-    )
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
 
     result = mock_neo4j_client.execute_query(query, top_k=top_k)
 
-    assert mock_driver.execute_query.call_count == 1
-    assert expected_fragment in mock_driver.execute_query.call_args.args[0]
+    assert mock_session.run.call_count == 1
+    assert expected_fragment in mock_session.run.call_args.args[0]
     assert result == [{"name": "ProteinA"}]
 
 @pytest.mark.parametrize(
@@ -229,17 +202,66 @@ def test_execute_query_limit_injection(mock_neo4j_client, mocker, mock_driver, q
     ],
 )
 def test_execute_query_maps_errors(mock_neo4j_client, mocker, mock_driver, error, expected_prefix):
-    mock_driver.execute_query.side_effect = error
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+    mock_session.run.side_effect = error
 
-    mocker.patch(
-        "crossbar_llm.agent_tools.neo4j_client.GraphDatabase.driver",
-        return_value=mock_driver,
-    )
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
 
     result = mock_neo4j_client.execute_query("MATCH (n) RETURN n")
 
     assert isinstance(result, str)
     assert result.startswith(expected_prefix)
+
+def test_execute_query_disable_limit_removes_limit_clause(mock_neo4j_client, mocker, mock_driver):
+    fake_record = mocker.MagicMock()
+    fake_record.data.return_value = {"name": "ProteinA", "embedding": [0.1, 0.2]}
+
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+    mock_session.run.return_value = [fake_record]
+
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
+
+    result = mock_neo4j_client.execute_query(
+        "MATCH (n) RETURN n LIMIT 99",
+        top_k=3,
+        disable_limit=True,
+    )
+
+    assert mock_session.run.call_count == 1
+    executed_query = mock_session.run.call_args.args[0]
+
+    assert "LIMIT" not in executed_query.upper()
+    assert executed_query == "MATCH (n) RETURN n"
+    assert result == [{"name": "ProteinA"}]
+
+def test_execute_query_disable_limit_keeps_query_without_limit_unchanged(mock_neo4j_client, mocker, mock_driver):
+    fake_record = mocker.MagicMock()
+    fake_record.data.return_value = {"name": "ProteinA"}
+
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+    mock_session.run.return_value = [fake_record]
+
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
+
+    result = mock_neo4j_client.execute_query(
+        "MATCH (n) RETURN n",
+        top_k=3,
+        disable_limit=True,
+    )
+
+    executed_query = mock_session.run.call_args.args[0]
+
+    assert executed_query == "MATCH (n) RETURN n"
+    assert result == [{"name": "ProteinA"}]
 
 def test_fulltext_search_adds_rank(mock_neo4j_client, mocker):
     mocked_execute_query = mocker.patch.object(
@@ -286,10 +308,19 @@ def test_fulltext_search_returns_error_passthrough(mock_neo4j_client, mocker):
 
 def test_init_runs_enabled_startup_actions(mocker):
     reset_db_schema_mock = mocker.patch.object(Neo4jClient, "reset_db_schema")
+    reset_db_schema_mock.__name__ = "reset_db_schema"
+
     create_vector_indexes_mock = mocker.patch.object(Neo4jClient, "create_vector_indexes")
+    create_vector_indexes_mock.__name__ = "create_vector_indexes"
+
     delete_vector_indexes_mock = mocker.patch.object(Neo4jClient, "delete_vector_indexes")
+    delete_vector_indexes_mock.__name__ = "delete_vector_indexes"
+
     create_fulltext_indexes_mock = mocker.patch.object(Neo4jClient, "create_fulltext_indexes")
+    create_fulltext_indexes_mock.__name__ = "create_fulltext_indexes"
+
     delete_fulltext_indexes_mock = mocker.patch.object(Neo4jClient, "delete_fulltext_indexes")
+    delete_fulltext_indexes_mock.__name__ = "delete_fulltext_indexes"
 
     Neo4jClient(
         cfg=Neo4jConfig(),

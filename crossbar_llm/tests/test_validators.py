@@ -165,7 +165,7 @@ def test_validate_query_returns_ok_true_when_all_validators_pass(mock_neo4j_cfg,
         return_value=properties_validator_instance,
     )
 
-    result = validate_query("MATCH (n) RETURN n", mock_neo4j_cfg)
+    result = validate_query("MATCH (n) RETURN n", cypher_mode="db_search", cfg=mock_neo4j_cfg)
 
     mock_neo4j_driver.assert_called_once_with(
         mock_neo4j_cfg.neo4j_uri,
@@ -224,7 +224,7 @@ def test_validate_query_returns_ok_false_when_syntax_fails(mock_neo4j_cfg, mock_
         return_value=properties_validator_instance,
     )
 
-    result = validate_query("INVALID QUERY", mock_neo4j_cfg)
+    result = validate_query("INVALID QUERY", cypher_mode="db_search", cfg=mock_neo4j_cfg)
 
     assert result["ok"] is False
     assert result["checks"]["syntax"] == {"ok": False, "message": ["Syntax error"]}
@@ -272,7 +272,7 @@ def test_validate_query_uses_threshold_of_point_9(
         return_value=properties_validator_instance,
     )
 
-    result = validate_query("MATCH (n) RETURN n", mock_neo4j_cfg)
+    result = validate_query("MATCH (n) RETURN n", cypher_mode="db_search", cfg=mock_neo4j_cfg)
 
     assert result["checks"]["schema"]["ok"] is expected_schema_ok
     assert result["checks"]["properties"]["ok"] is expected_props_ok
@@ -302,7 +302,7 @@ def test_validate_query_passes_strict_flag_to_properties_validator(mock_neo4j_cf
         return_value=properties_validator_instance,
     )
 
-    validate_query("MATCH (n) RETURN n", mock_neo4j_cfg, strict=False)
+    validate_query("MATCH (n) RETURN n", cypher_mode="db_search", cfg=mock_neo4j_cfg, strict=False)
 
     properties_validator_instance.validate.assert_called_once_with(
         "MATCH (n) RETURN n",
@@ -328,9 +328,15 @@ def test_validate_and_correct_query_returns_validation_result_when_validation_fa
         query="INVALID QUERY",
         cfg=mock_neo4j_cfg,
         edge_schema=["(:Gene)-[:Gene_is_related_to_disease]->(:Disease)"],
+        cypher_mode="db_search",
     )
 
-    validate_query_mock.assert_called_once_with("INVALID QUERY", mock_neo4j_cfg, True)
+    validate_query_mock.assert_called_once_with(
+        "INVALID QUERY",
+        mock_neo4j_cfg,
+        "db_search",
+        True,
+    )
     correct_query_mock.assert_not_called()
 
     assert result == {
@@ -366,11 +372,13 @@ def test_validate_and_correct_query_sets_corrected_query_when_validation_passes(
         query="MATCH (g:Gene)-[:Gene_is_related_to_disease]->(d:Disease) RETURN g",
         cfg=mock_neo4j_cfg,
         edge_schema=edge_schema,
+        cypher_mode="db_search"
     )
 
     validate_query_mock.assert_called_once_with(
         "MATCH (g:Gene)-[:Gene_is_related_to_disease]->(d:Disease) RETURN g",
         mock_neo4j_cfg,
+        "db_search",
         True,
     )
     correct_query_mock.assert_called_once_with(
@@ -409,6 +417,7 @@ def test_validate_and_correct_query_marks_schema_failure_when_correction_returns
         query="MATCH (g:Gene)-[:WRONG_REL]->(d:Disease) RETURN g",
         cfg=mock_neo4j_cfg,
         edge_schema=["(:Gene)-[:REL]->(:Disease)"],
+        cypher_mode="db_search"
     )
 
     assert result["ok"] is False
@@ -427,7 +436,7 @@ def test_validate_query_integration_with_valid_query(neo4j_cfg_integration):
     LIMIT 3
     """.strip()
 
-    result = validate_query(query, neo4j_cfg_integration)
+    result = validate_query(query, neo4j_cfg_integration, cypher_mode="db_search")
 
     assert isinstance(result, dict)
     assert "ok" in result
@@ -441,7 +450,7 @@ def test_validate_query_integration_with_valid_query(neo4j_cfg_integration):
 def test_validate_query_integration_with_invalid_syntax(neo4j_cfg_integration):
     query = "MACH (g:Gene) RETURN g"
 
-    result = validate_query(query, neo4j_cfg_integration)
+    result = validate_query(query, neo4j_cfg_integration, cypher_mode="db_search")
 
     assert result["ok"] is False
     assert result["checks"]["syntax"]["ok"] is False
@@ -454,7 +463,7 @@ def test_validate_query_integration_with_wrong_relation_direction(neo4j_cfg_inte
     LIMIT 3
     """.strip()
 
-    result = validate_query(query, neo4j_cfg_integration)
+    result = validate_query(query, neo4j_cfg_integration, cypher_mode="db_search")
 
     assert isinstance(result, dict)
     assert result["checks"]["syntax"]["ok"] is True
@@ -468,7 +477,7 @@ def test_validate_query_integration_with_invalid_property(neo4j_cfg_integration)
     LIMIT 3
     """.strip()
 
-    result = validate_query(query, neo4j_cfg_integration)
+    result = validate_query(query, neo4j_cfg_integration, cypher_mode="db_search")
 
     assert isinstance(result, dict)
     assert result["checks"]["syntax"]["ok"] is True
@@ -486,7 +495,7 @@ def test_validate_and_correct_query_integration_corrects_relation_direction(neo4
         "(:Gene)-[:Gene_is_related_to_disease]->(:Disease)",
     ]
 
-    result = validate_and_correct_query(query, neo4j_cfg_integration, edge_schema=edge_schema)
+    result = validate_and_correct_query(query, neo4j_cfg_integration, edge_schema=edge_schema, cypher_mode="db_search")
 
     assert isinstance(result, dict)
     assert "ok" in result
@@ -509,7 +518,7 @@ def test_validate_and_correct_query_integration_returns_expected_shape(neo4j_cfg
         "(:Gene)-[:Gene_is_related_to_disease]->(:Disease)",
     ]
 
-    result = validate_and_correct_query(query, neo4j_cfg_integration, edge_schema=edge_schema)
+    result = validate_and_correct_query(query, neo4j_cfg_integration, edge_schema=edge_schema, cypher_mode="db_search")
 
     assert isinstance(result, dict)
     assert "ok" in result
@@ -527,7 +536,7 @@ def test_validate_and_correct_query_integration_with_wrong_relation_label(neo4j_
         "(:Gene)-[:Gene_is_related_to_disease]->(:Disease)",
     ]
 
-    result = validate_and_correct_query(query, neo4j_cfg_integration, edge_schema=edge_schema)
+    result = validate_and_correct_query(query, neo4j_cfg_integration, edge_schema=edge_schema, cypher_mode="db_search")
 
     assert isinstance(result, dict)
     assert result["ok"] is False and result["corrected_query"] is None

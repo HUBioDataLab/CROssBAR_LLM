@@ -426,7 +426,7 @@ def correct_query(query: str, edge_schema: list) -> str:
     return corrected_query
 
 @validate_call(validate_return=True)
-def validate_query(query: str, cfg: Neo4jConfig, cypher_mode: Literal["vector_search", "db_search"],strict: bool = True) -> dict:
+def validate_query(query: str, cfg: Neo4jConfig, cypher_mode: Literal["vector_search", "db_search"], strict: bool = True) -> dict:
     """
     Validate the Cypher query syntax, schema, and properties.
     

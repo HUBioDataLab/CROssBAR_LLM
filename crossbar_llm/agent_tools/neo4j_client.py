@@ -523,7 +523,7 @@ class Neo4jClient:
         )
         regex_pattern = r"\bLIMIT\s+\d+\b"
         if disable_limit:
-            query = re.sub(regex_pattern, "", query.strip())
+            query = re.sub(regex_pattern, "", query.strip()).strip()
         elif "show" in query.lower():
             query = query.strip()
         elif "LIMIT" in query:
