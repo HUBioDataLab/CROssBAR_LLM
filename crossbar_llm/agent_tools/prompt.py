@@ -38,6 +38,14 @@ Do not use double quotes symbols in generated Cypher query (i.e., ''x'' or ""x""
 SmallMolecule is parent label for Drug and Compounds. If the question asks for both Drug and Compound, use SmallMolecule.
 Whenever the query returns nodes (entities), if the user explicitly requests a specific property or set of properties, return those requested properties. If the user does not explicitly specify which property to return, you MUST include the node's `id` property in the RETURN clause by default.
 
+If a question could be answered through multiple schema-valid paths, do not automatically include all of them in the initial query. Prefer the single most direct, semantically relevant, and efficient path first.
+However, if the wording of the user's question explicitly implies multiple semantically distinct but equally relevant target routes, include each of those routes even if this requires more than one path pattern.
+Examples of such cases include:
+- combined entity references such as "drug/compound", "gene or protein", or similar wording
+- questions whose wording naturally covers both direct and indirect associations
+- cases where restricting the query to only one path type would omit results that clearly fall within the user’s stated intent
+When multiple paths are needed, keep the number of alternative paths as small as possible. Avoid broad multi-branch queries that significantly increase runtime unless they are necessary for correctness.
+
 ENTITY NAME PARSING RULE: 
 If the question contains an entity followed by a node type in angle brackets, such as X <Disease> or Y <Protein>, treat the type hint as schema guidance only. 
 When matching entity names in the query, use only the entity name X and never include the <Type> hint in string literals.
