@@ -134,8 +134,28 @@ class QueryCorrector:
                 m for i, m in enumerate(matched) if i not in [1, len(matched) - 1]
             ]
             path = "".join(matched)
-            idx = query.find(path) + len(path) - len(matched[-1])
+
+            absolute_pos = query.find(path, idx)
+            if absolute_pos == -1:
+                break
+
+            next_idx = absolute_pos + len(path) - len(matched[-1])
+            if next_idx <= idx:
+                logger.error(
+                    "extract_paths made no forward progress",
+                    event_type="no_forward_progress",
+                    component="QueryCorrector.extract_paths",
+                    idx=idx,
+                    next_idx=next_idx,
+                    path=path
+                )
+                raise RuntimeError(
+                    f"extract_paths made no forward progress: idx={idx}, next_idx={next_idx}, path={path!r}"
+                )
+            
             paths.append(path)
+            idx = next_idx
+
         logger.debug(
             "Extracted paths",
             event_type="paths_extracted",
