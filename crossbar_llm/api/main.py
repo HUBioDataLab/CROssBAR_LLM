@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -10,6 +11,7 @@ from crossbar_llm.api.routers.health import router as health_router
 from crossbar_llm.api.routers.db_search import router as db_search_router
 from crossbar_llm.api.routers.resume import router as resume_router
 from crossbar_llm.api.routers.vector_search import router as vector_search_router
+from crossbar_llm.api.routers.models import router as models_router
 
 from crossbar_llm.agent_tools.logging_config import disable_logging
 
@@ -25,6 +27,20 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# In development the React dev server (localhost:3000) talks to the API (localhost:8000)
+# cross-origin with credentials, so it needs an explicit CORS allow-list.
+if settings.is_dev:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 app.include_router(
@@ -46,6 +62,10 @@ app.include_router(
 
 app.include_router(
     vector_search_router
+)
+
+app.include_router(
+    models_router
 )
 
 
