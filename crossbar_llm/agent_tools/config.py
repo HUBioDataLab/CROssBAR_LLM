@@ -374,18 +374,13 @@ class LLMConfig(BaseModel):
 
         return self
         
-class AgentConfig(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=ConfigPaths.ENV_FILE,
-        env_file_encoding="utf-8",
-        frozen=True,
-        extra="ignore",
-    )
+class AgentConfig(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
     max_iterations: int = Field(default=3, description="Maximum number of iterations for the agent to attempt generating valid and executable Cypher query.")
     enable_web_search: bool = Field(default=False, description="Enable web search agent")
     enable_entity_resolution: bool = Field(default=True, description="Enable entity resolution agent")
     web_search_model: Literal["gpt-5.1", "gemini-3-pro-preview"] = Field(default="gpt-5.1", description="Model to be used for web search tool. Options are 'gpt-5.1' and 'gemini-3-pro-preview'.")
-    biological_relevance_validation_model: str = Field(default="gpt-5.4-nano", description="Model to be used for biological relevance validation. Set via BIOLOGICAL_RELEVANCE_VALIDATION_MODEL env var (must be a model name that exists in models_config.yaml under a provider you have an API key for).")
+    biological_relevance_validation_model: str = Field(default="gpt-5.4-nano", description="Model to be used for biological relevance validation.")
     keep_last_n_messages: int = Field(default=24, description="Number of recent messages to keep in memory")
 
 # Entity Resolver Configurations
