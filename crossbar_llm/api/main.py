@@ -33,13 +33,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 if settings.is_dev:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-        ],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=settings.allowed_origins,
+        allow_credentials=settings.allowed_credentials,
+        allow_methods=settings.allowed_methods,
+        allow_headers=settings.allowed_headers,
     )
 
 

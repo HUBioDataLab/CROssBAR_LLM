@@ -97,8 +97,28 @@ class Settings(BaseModel):
 
     max_upload_size_mb: int = 5
 
-    # Frontend / CORS
-    # allowed_origins: list[str]
+    # CORS
+    allowed_origins: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ],
+        description="List of allowed origins for CORS. Only used in development mode."
+    )
+    allowed_credentials: bool = Field(
+        default=True,
+        description="Whether to allow credentials (cookies, authorization headers, etc.) in CORS requests. Only used in development mode."
+    )
+
+    allowed_methods: list[str] = Field(
+        default=["*"],
+        description="List of allowed HTTP methods for CORS. Only used in development mode."
+    )
+
+    allowed_headers: list[str] = Field(
+        default=["*"],
+        description="List of allowed HTTP headers for CORS. Only used in development mode."
+    )
 
 
     @property
