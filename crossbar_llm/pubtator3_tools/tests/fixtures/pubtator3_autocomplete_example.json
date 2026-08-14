@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "@GENE_JAK1",
+    "biotype": "gene",
+    "db_id": "3716",
+    "db": "ncbi_gene",
+    "name": "JAK1",
+    "description": "All Species",
+    "match": "Matched on name <m>JAK1</m>"
+  },
+  {
+    "_id": "@GENE_JAK1.S",
+    "biotype": "gene",
+    "db_id": "446697",
+    "db": "ncbi_gene",
+    "name": "jak1.S",
+    "description": "All Species",
+    "match": "Matched on name <m>jak1.S</m>"
+  },
+  {
+    "_id": "@GENE_JAK_1",
+    "biotype": "gene",
+    "db_id": "574391",
+    "db": "ncbi_gene",
+    "name": "JAK-1",
+    "description": "All Species",
+    "match": "Matched on synonyms <m>JAK1</m>"
+  },
+  {
+    "_id": "@GENE_LOC108897047",
+    "biotype": "gene",
+    "db_id": "108897047",
+    "db": "ncbi_gene",
+    "name": "LOC108897047",
+    "description": "All Species",
+    "match": "Matched on synonyms <m>jak1</m>"
+  },
+  {
+    "_id": "@GENE_LOC101879666",
+    "biotype": "gene",
+    "db_id": "101879666",
+    "db": "ncbi_gene",
+    "name": "LOC101879666",
+    "description": "All Species",
+    "match": "Matched on synonyms <m>JAK1</m>"
+  }
+]
