@@ -844,3 +844,20 @@ async def test_degeneration_on_a_rule_character_is_still_caught():
 
     assert out["final_answer"] == "Real answer.---"
     assert any("degenerate character run" in w for w in out["warnings"])
+
+
+async def test_router_failure_falls_back_to_broad_not_one_corpus():
+    """The failure path must not narrow the search.
+
+    `source=None` is the documented default; pinning a single corpus here
+    was a leftover from when MCP required an explicit `-s`.
+    """
+    async def boom(state):
+        raise RuntimeError("router exploded")
+
+    g = build_graph(router=boom, synthesizer=_synth, adapter=FakeAdapter())
+    out = await g.ainvoke({"question": "What treats X?"})
+
+    assert out["question_type"] == "keyword_search"
+    assert out["source"] is None
+    assert any("router failed" in w for w in out["warnings"])

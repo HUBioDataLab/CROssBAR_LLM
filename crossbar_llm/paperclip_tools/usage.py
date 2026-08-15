@@ -1,4 +1,4 @@
-"""Token-usage capture / logging helpers for the PubTator3 graph.
+"""Token-usage capture / logging helpers for the Paperclip graph.
 
 Both helpers wrap a graph invocation in `get_usage_metadata_callback`,
 which aggregates `usage_metadata` from every chat-model call made under
@@ -14,7 +14,7 @@ import logging
 from langchain_core.callbacks import get_usage_metadata_callback
 
 
-_usage_logger = logging.getLogger("crossbar_llm.pubtator3.usage")
+_usage_logger = logging.getLogger("crossbar_llm.paperclip.usage")
 
 
 def _flatten_usage(usage_metadata: dict) -> dict:
@@ -61,7 +61,7 @@ async def ainvoke_with_usage_logging(graph, state: dict, **kwargs) -> dict:
     """Invoke `graph` and log aggregated LLM token usage for the run.
 
     Totals are logged per model name at INFO level on
-    `crossbar_llm.pubtator3.usage`.
+    `crossbar_llm.paperclip.usage`.
     """
     with get_usage_metadata_callback() as cb:
         result = await graph.ainvoke(state, **kwargs)
@@ -71,7 +71,7 @@ async def ainvoke_with_usage_logging(graph, state: dict, **kwargs) -> dict:
         reasoning = out_details.get("reasoning")
         cache_read = in_details.get("cache_read")
         _usage_logger.info(
-            "pubtator3 llm usage model=%s input=%s output=%s reasoning=%s "
+            "paperclip llm usage model=%s input=%s output=%s reasoning=%s "
             "cache_read=%s total=%s",
             model,
             usage.get("input_tokens"),

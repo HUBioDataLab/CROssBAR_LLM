@@ -825,3 +825,12 @@ async def test_full_text_true_keeps_body_sections(httpx_mock, fx):
     assert "METHODS" in sections
     assert "TITLE" in sections
     assert "ABSTRACT" in sections
+
+
+def test_nodes_star_import_does_not_break():
+    """`__all__` must only name things the module actually defines."""
+    import crossbar_llm.pubtator3_tools.nodes as nodes
+
+    missing = [n for n in nodes.__all__ if not hasattr(nodes, n)]
+    assert not missing, f"__all__ names absent from module: {missing}"
+    exec("from crossbar_llm.pubtator3_tools.nodes import *", {})

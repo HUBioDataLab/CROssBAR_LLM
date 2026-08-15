@@ -22,7 +22,7 @@ Design notes:
   (source, depth, fallback) live in the node layer.
 - **Per-event-loop singletons** for the MCP client + loaded tool, keyed in a
   `WeakKeyDictionary`, so `asyncio.run` in tests/scripts doesn't hit "event loop
-  is closed" (mirrors `pubtator3/client.py`).
+  is closed" (mirrors `pubtator3_tools/client.py`).
 - Command errors surface as `PaperclipError`; the tool layer converts those to
   never-raise error envelopes. REST failures surface as
   `PaperclipRestUnavailable` internally, caught by `_execute`/`search` to

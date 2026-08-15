@@ -234,7 +234,10 @@ def build_graph(
             )
             decision = PaperclipRouterDecision(
                 question_type="keyword_search",
-                source="pmc",
+                # Broad, matching the documented default. Narrowing to one
+                # corpus is a guess, and the failure path is the worst place
+                # to make one.
+                source=None,
                 search_query=state["question"],
                 map_question=state["question"],
                 rationale=f"router error fallback: {e}",

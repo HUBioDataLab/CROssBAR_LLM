@@ -1,12 +1,13 @@
 """LangGraph orchestrator for PubTator3 literature evidence.
 
 This module defines `build_graph`, which wires the standalone nodes from
-`agents.nodes` together with three inline LLM-bound nodes (router,
-synthesizer, depth evaluator) that close over the chat model and prompts.
+`crossbar_llm.pubtator3_tools.nodes` together with three inline LLM-bound
+nodes (router, synthesizer, depth evaluator) that close over the chat model
+and prompts.
 
-Pydantic schemas live in `agents.schemas`; token-usage helpers live in
-`agents.usage`. The names are re-exported here for backwards compatibility
-with code that imported them from this module directly.
+Pydantic schemas live in `crossbar_llm.pubtator3_tools.schemas`; token-usage
+helpers live in `crossbar_llm.pubtator3_tools.usage`. Both are re-exported
+here so a caller can import the whole public surface from one module.
 """
 from __future__ import annotations
 

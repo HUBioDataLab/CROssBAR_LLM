@@ -341,8 +341,6 @@ async def export_node(state: PubTator3State, *, max_documents: int = 10) -> dict
 
 __all__ = [
     "_add_warning",
-    "_message_content_to_text",
-    "_extract_json_object",
     "_ainvoke_structured_with_json_fallback",
     "_is_confident_match",
     "resolve_node",
