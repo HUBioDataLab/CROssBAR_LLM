@@ -13,11 +13,6 @@ from crossbar_llm.api.routers.resume import router as resume_router
 from crossbar_llm.api.routers.vector_search import router as vector_search_router
 from crossbar_llm.api.routers.models import router as models_router
 
-from crossbar_llm.agent_tools.logging_config import disable_logging
-
-disable_logging()
-
-
 settings = Settings()
 
 app = FastAPI(

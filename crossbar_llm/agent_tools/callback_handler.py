@@ -217,7 +217,7 @@ class UsageMetricsCallback(BaseCallbackHandler):
 
         normalized = self.normalize_usage(usage_metadata)
         # antropic does not provide reasoning tokens in the main usage metadata, but provides it in llm_output.
-        if normalized["reasoning"] == 0 and hasattr(response, "llm_output") and getattr(response.llm_output, "get"):
+        if normalized["reasoning"] == 0 and hasattr(response, "llm_output"):
             llm_output = getattr(response, "llm_output", {}) or {}
             usage = llm_output.get("usage", {}) or {}
             output_tokens_details = usage.get("output_tokens_details", {}) or {}

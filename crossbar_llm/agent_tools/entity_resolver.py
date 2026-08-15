@@ -56,6 +56,7 @@ class EntityToolExecution(BaseModel):
     correction_attempts: int = 0
     final_entity_name: Optional[str] = None
     final_node_type: Optional[str] = None
+    message_history: list[BaseMessage] = Field(default_factory=list)
 
 
     @property
@@ -298,6 +299,8 @@ class EntityResolver:
             max_attempts=self.entity_resolver_config.max_attempts,
         )
 
+        conversation: list[BaseMessage] = list(prior_messages or [])
+
         original_entity_name = final_tool_args["entity_name"]
         for char in self.entity_resolver_config.replace_chars:
             final_tool_args["entity_name"] = final_tool_args["entity_name"].replace(char, "")
@@ -312,15 +315,22 @@ class EntityResolver:
                 sanitized_entity_name=final_tool_args["entity_name"]
             )
 
-        tool_response = self.run_entity_search(**original_tool_args)
-        tool_messages.append(ToolMessage(content=tool_response.model_dump(), tool_call_id=tool_call_id))
+        # Use sanitized args on the first call too
+        tool_response = self.run_entity_search(**final_tool_args)
+        conversation.append(
+            ToolMessage(
+                content=tool_response.model_dump(),
+                tool_call_id=tool_call_id,
+            )
+        )
+
         logger.debug(
             "Initial entity search completed",
             event_type="entity_search_completed",
             component="EntityResolver.run_single_entity_tool_call_with_retry",
             tool_call_id=tool_call_id,
             response_kind=tool_response.kind,
-            original_tool_args=original_tool_args,
+            tool_args=final_tool_args,
             tool_response=tool_response
         )
 
@@ -362,7 +372,7 @@ class EntityResolver:
                 extracted_entities=tool_response.model_dump_json(),
                 llm=llm,
                 prompt=prompt,
-                prior_messages=prior_messages + tool_messages if prior_messages else tool_messages
+                prior_messages=conversation
             )
 
             if not repair_res.tool_calls:
@@ -375,11 +385,19 @@ class EntityResolver:
                 )
                 break
 
-            final_tool_args = repair_res.tool_calls[0]["args"]
+            conversation.append(repair_res)
+            repaired_tool_call = repair_res.tool_calls[0]
+            tool_call_id = repaired_tool_call["id"]
+            final_tool_args = repaired_tool_call["args"]
             correction_attempts += 1
             
             tool_response = self.run_entity_search(**final_tool_args)
-            tool_messages.append(ToolMessage(content=tool_response.model_dump(), tool_call_id=tool_call_id))
+            conversation.append(
+            ToolMessage(
+                content=tool_response.model_dump(),
+                tool_call_id=tool_call_id,
+                )
+            )
 
             logger.debug(
                 "Error correction attempt completed",
@@ -409,5 +427,6 @@ class EntityResolver:
             was_corrected=correction_attempts > 0 and was_corrected,
             final_entity_name=corrected_entity_name,
             final_node_type=corrected_node_type,
-            correction_attempts=correction_attempts
+            correction_attempts=correction_attempts,
+            message_history=conversation
         )

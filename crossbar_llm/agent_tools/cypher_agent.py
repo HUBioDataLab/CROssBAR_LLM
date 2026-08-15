@@ -342,14 +342,25 @@ class CypherAgent:
             )}
         
 
-        tool_call_results: list[EntityToolExecution] = [
-            self.entity_resolver.run_single_entity_tool_call_with_retry(
-                tool_call=tool_call, question=state["question"], llm=entity_resolution_llm_with_tools, prompt=prompt, prior_messages=[tool_plan]
+        tool_call_results: list[EntityToolExecution] = []
+        for tool_call in tool_plan.tool_calls:
+            single_tool_request = AIMessage(
+                content=tool_plan.content if isinstance(tool_plan.content, str) else "",
+                tool_calls=[tool_call],
             )
-            for tool_call in tool_plan.tool_calls
-        ]
 
-        tool_messages = [call_result.as_tool_message for call_result in tool_call_results]
+            result = self.entity_resolver.run_single_entity_tool_call_with_retry(
+                tool_call=tool_call,
+                question=state["question"],
+                llm=entity_resolution_llm_with_tools,
+                prompt=prompt,
+                prior_messages=[single_tool_request],
+            )
+            tool_call_results.append(result)
+
+        resolution_messages: list[BaseMessage] = []
+        for call_result in tool_call_results:
+            resolution_messages.extend(call_result.message_history)
 
         logger.debug(
             "Completed entity tool calls",
@@ -367,7 +378,7 @@ class CypherAgent:
             llm=entity_resolution_structured_llm,
             prompt=prompt,
             extracted_entities=extracted_entities.model_dump_json(),
-            prior_messages=[tool_plan, *tool_messages]
+            prior_messages=resolution_messages
         )
 
         if resolution_result:

@@ -17,7 +17,7 @@ def configure_logging(
     max_log_file_size: int = 50 * 1024 * 1024,
     backup_count: int = 3,
     session_id: str,
-    app_logger_names: tuple[str, ...] = ("agent_tools",),
+    app_logger_names: tuple[str, ...] = ("crossbar_llm.agent_tools",),
 ):
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / f"session_{session_id}.jsonl"
@@ -84,7 +84,7 @@ def _clear_logging_handlers(logger: logging.Logger):
 
 def _reset_logging_state(
         *,
-        app_logger_names: tuple[str, ...] = ("agent_tools",),
+        app_logger_names: tuple[str, ...] = ("crossbar_llm.agent_tools",),
         reset_root_logger: bool = True,
         root_level: int = logging.NOTSET,
         app_level: int = logging.NOTSET,
@@ -109,7 +109,7 @@ def _reset_logging_state(
 
 def reset_logging(
         *,
-        app_logger_names: tuple[str, ...] = ("agent_tools",),
+        app_logger_names: tuple[str, ...] = ("crossbar_llm.agent_tools",),
         reset_root_logger: bool = True,
     ):
     _reset_logging_state(
@@ -124,7 +124,7 @@ def reset_logging(
 
 def disable_logging(
         *,
-        app_logger_names: tuple[str, ...] = ("agent_tools",),
+        app_logger_names: tuple[str, ...] = ("crossbar_llm.agent_tools",),
         reset_root_logger: bool = True,
     ):
     _reset_logging_state(
