@@ -11,7 +11,7 @@ import axios from 'axios';
 const REACT_APP_CROSSBAR_LLM_ROOT_PATH = process.env.REACT_APP_CROSSBAR_LLM_ROOT_PATH || '/llm';
 
 const baseURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:8000`
+  ? `http://localhost:8001`
   : `https://crossbarv2.hubiodatalab.com${REACT_APP_CROSSBAR_LLM_ROOT_PATH}/api`;
 
 const instance = axios.create({

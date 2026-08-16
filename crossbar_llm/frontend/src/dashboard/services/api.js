@@ -12,7 +12,7 @@ const getApiBaseUrl = () => {
   
   // In development, use localhost
   if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:8000/dashboard';
+    return 'http://localhost:8001/dashboard';
   }
   
   // In production, derive from the current location.
