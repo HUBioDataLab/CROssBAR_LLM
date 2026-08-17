@@ -13,7 +13,7 @@ class ModelConfigRequest(BaseModel):
     model: str
     top_k: int = Field(default=10, ge=1, le=100)
     reasoning_enabled: bool = Field(default=False)
-    reasoning_effort: Literal["low", "medium", "high"] = None
+    reasoning_effort: Literal["low", "medium", "high"] | None = None
 
     @model_validator(mode="after")
     def validate_reasoning(self) -> Self:

@@ -196,9 +196,6 @@ function ChatLayout({
     "Compound": "Selformer",
     "Protein": ["Prott5", "Esm2"],
     "GOTerm": "Anc2vec",
-    "CellularComponent": "Anc2vec",
-    "BiologicalProcess": "Anc2vec",
-    "MolecularFunction": "Anc2vec",
     "Phenotype": "Cada",
     "Disease": "Doc2vec",
     "ProteinDomain": "Dom2vec",
@@ -220,7 +217,7 @@ function ChatLayout({
   const vectorExampleQueries = [
     {
       question: "Give me distinct Biological Processes that are similar to cell growth <BiologicalProcess> and drugs targeting proteins involved in these similar processes. Return 10 similar Biological Processes.",
-      vectorCategory: "BiologicalProcess",
+      vectorCategory: "GOTerm",
       embeddingType: "Anc2vec"
     },
     {
@@ -527,7 +524,7 @@ function ChatLayout({
     model: llmType,
     top_k: topK,
     reasoning_enabled: reasoningEnabled,
-    reasoning_effort: reasoningEnabled ? reasoningEffort : null,
+    ...(reasoningEnabled ? { reasoning_effort: reasoningEffort } : {}),
     ...overrides,
   }), [provider, llmType, topK, reasoningEnabled, reasoningEffort]);
 
