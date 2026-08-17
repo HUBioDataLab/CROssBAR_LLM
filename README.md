@@ -17,5 +17,5 @@ Environment file:
 
 How to run the API with reload:
 ```bash
-uv run uvicorn crossbar_llm.api.main:app --host 127.0.0.1 --port 8002 --reload
+uv run uvicorn crossbar_llm.api.main:app --host 127.0.0.1 --port 8001 --reload
 ```
