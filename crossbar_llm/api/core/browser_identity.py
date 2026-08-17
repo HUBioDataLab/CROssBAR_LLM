@@ -70,7 +70,8 @@ def set_browser_cookie(response: Response, browser_id: str) -> None:
         key=settings.browser_cookie_name,
         value=signed_value,
         max_age=settings.browser_cookie_max_age_seconds,
-        secure=settings.browser_cookie_secure,
+        # Secure cookies can't be stored over http://localhost, so drop the flag in dev.
+        secure=settings.browser_cookie_secure and not settings.is_dev,
         samesite=settings.browser_cookie_samesite,
         httponly=True,
         path="/"

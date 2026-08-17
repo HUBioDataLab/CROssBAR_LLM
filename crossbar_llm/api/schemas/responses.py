@@ -25,3 +25,20 @@ class PendingResumeResponse(BaseModel):
     question: str
     mode: SearchMode
     generated_cypher: str | None = None
+
+
+class ProviderModels(BaseModel):
+    models: list[str]
+    free_models: list[str] = Field(default_factory=list)
+
+
+class ModelsResponse(BaseModel):
+    """Available LLM providers and models, keyed by runtime provider name.
+
+    `default_provider` / `default_model` give a sensible seed for clients that
+    have no preference (prefers a free model when one exists).
+    """
+    providers: dict[str, ProviderModels]
+    default_provider: str
+    default_model: str
+    supported_models_for_search: list[str] = Field(default_factory=list)
