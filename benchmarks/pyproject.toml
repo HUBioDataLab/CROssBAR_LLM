@@ -1,0 +1,19 @@
+[project]
+name = "benchmarks"
+version = "0.1.0"
+requires-python = "==3.12.11"
+dependencies = [
+    "crossbar-llm",
+    "torch",
+    "torchmetrics>=1.9.0",
+    "transformers[torch]>=5.15.1",
+]
+
+[tool.uv.sources]
+crossbar-llm = { path = "..", editable = true }
+torch = { index = "pytorch-cu126" }
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
