@@ -1,7 +1,10 @@
 SmallMolecule:
-  index_name: SelformerEmbeddings
-  property_name: selformer_embedding
-  vector_size: 768
+  - index_name: SelformerEmbeddings
+    property_name: selformer_embedding
+    vector_size: 768
+  - index_name: MolFormerEmbeddings
+    property_name: molformer_embedding
+    vector_size: 768
 Protein:
   - index_name: Prott5Embeddings
     property_name: prott5_embedding

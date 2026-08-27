@@ -1,0 +1,4062 @@
+H-NS complex
+spermatoproteasome complex
+RQC complex
+microtubule cytoskeleton
+actin cytoskeleton
+type II protein secretion system complex
+SeqA-DNA complex
+core primosome complex
+pre-primosome complex
+amyloplast ADPG pyrophosphorylase complex
+heterotetrameric ADPG pyrophosphorylase complex
+anchoring collagen complex
+chloroplast ADPG pyrophosphorylase complex
+transmembrane collagen trimer
+sheet-forming collagen trimer
+collagen type XVIII trimer
+collagen type XVII trimer
+homotetrameric ADPG pyrophosphorylase complex
+ADPG pyrophosphorylase complex
+ribonucleoside-diphosphate reductase complex
+protein farnesyltransferase complex
+phosphorylase kinase complex
+mitochondrial pyruvate dehydrogenase complex
+serine-pyruvate aminotransferase complex
+Rab-protein geranylgeranyltransferase complex
+Smc5-Smc6 complex
+high molecular weight kininogen receptor complex
+cortical microtubule cytoskeleton
+lateral part of motile cell
+leading edge membrane
+tertiary granule
+cell projection membrane
+cell trailing edge
+uropod membrane
+HDA1 complex
+SHREC complex
+cell trailing edge membrane
+tertiary granule membrane
+lamellipodium membrane
+Sin3-type complex
+lateral loop
+compact myelin
+PAN complex
+cell leading edge
+anaerobic ribonucleoside-triphosphate reductase complex
+Schmidt-Lanterman incisure
+extrinsic component of cell outer membrane
+extrinsic component of periplasmic side of cell outer membrane
+extrinsic component of external side of cell outer membrane
+protein acetyltransferase complex
+replication fork protection complex
+ectoplasm
+SOSS complex
+microprocessor complex
+RAVE complex
+apoptosome
+contractile fiber
+mitochondrial glutamate synthase complex (NADH)
+apical junction complex
+CHRAC
+epsilon DNA polymerase complex
+SOD1-Bcl-2 complex
+pollen coat
+HULC complex
+rhabdomere membrane
+high-affinity iron permease complex
+ESCRT-0 complex
+rDNA heterochromatin
+Slx1-Slx4 complex
+monopolin complex
+telomere-telomerase complex
+BRISC complex
+TAF4B-containing transcription factor TFIID complex
+synaptobrevin 2-SNAP-25-syntaxin-3-complexin complex
+lysosomal multienzyme complex
+PCNA-p21 complex
+alphaM-beta2 integrin-CD63 complex
+mitotic checkpoint complex
+TSC1-TSC2 complex
+BRCA2-MAGE-D1 complex
+elongator holoenzyme complex
+RISC-loading complex
+ERCC4-ERCC1 complex
+alpha4-beta1 integrin-CD81 complex
+alpha4-beta1 integrin-CD82 complex
+alpha4-beta1 integrin-CD63 complex
+DNA replication factor C core complex
+alpha4-beta1 integrin-CD53 complex
+alphaIIb-beta3 integrin-talin complex
+CAK-ERCC2 complex
+SRF-myogenin-E12 complex
+PeBoW complex
+BRCA1-C complex
+BRCA1-A complex
+BRCA1-B complex
+signal recognition particle, chloroplast targeting
+Ost-alpha/Ost-beta complex
+mitotic spindle pole body
+NMDA selective glutamate receptor complex
+NHE3/E3KARP/ACTN4 complex
+mitochondrial electron transfer flavoprotein complex
+Golgi transport complex
+protein N-acetylglucosaminyltransferase complex
+glutamate-cysteine ligase complex
+proteasome core complex, alpha-subunit complex
+proteasome core complex, beta-subunit complex
+single-stranded DNA-dependent ATP-dependent DNA helicase complex
+methyl coenzyme M reductase complex
+7,8-didemethyl-8-hydroxy-5-deazariboflavin synthase complex
+formyl-methanofuran dehydrogenase (molybdenum enzyme) complex
+formyl-methanofuran dehydrogenase (tungsten enzyme) complex
+CoB-CoM heterodisulfide reductase complex
+methyl-tetrahydromethanopterin:coenzyme M methyltransferase complex
+methanophenazine reducing hydrogenase complex
+sulfopyruvate decarboxylase complex
+methylthiol:coenzyme M methyltransferase complex
+lamellipodium
+interleukin-12 receptor complex
+host cell nucleus
+Z disc
+transcription repressor complex
+negative cofactor 2 complex
+serine C-palmitoyltransferase complex
+CCR4-NOT core complex
+CCR4-NOT complex
+sarcomere
+myofibril
+Dsc E3 ubiquitin ligase complex
+HICS complex
+TRAPP complex
+bacterial thylakoid
+ficolin-1-rich granule
+ficolin-1-rich granule membrane
+mitochondrial tricarboxylic acid cycle enzyme complex
+cytolytic granule membrane
+mitochondrial crista
+host-symbiont bicellular tight junction
+meprin A complex
+cell-substrate junction
+cell junction
+desmosome
+hemidesmosome
+nucleolar exosome (RNase complex)
+3-methyl-2-oxobutanoate dehydrogenase (lipoamide) complex
+mitochondrial processing peptidase complex
+ATP-dependent citrate lyase complex
+MLL1/2 complex
+MLL3/4 complex
+intracellular cyclic nucleotide activated cation channel complex
+nucleolar peripheral inclusion body
+acetyl-CoA decarbonylase/synthase-carbon monoxide dehydrogenase complex
+protein folding chaperone complex
+small ribosomal subunit processing complex
+CARD8 inflammasome complex
+type I pilus
+ER-to-endosome phospholipid transfer complex
+chloroplast photosystem I
+chloroplast photosystem II
+plasma membrane-derived photosystem I
+plasma membrane-derived thylakoid photosystem II
+phycobilisome
+B875 antenna complex
+B800-850 antenna complex
+B800-820 antenna complex
+PSI associated light-harvesting complex I, LHCIb subcomplex
+PSI associated light-harvesting complex I, LHCIa subcomplex
+PSII associated light-harvesting complex II, peripheral complex, LHCIIb subcomplex
+plasma membrane light-harvesting complex
+light-harvesting complex
+light-harvesting complex, peripheral complex
+light-harvesting complex, core complex
+neutrophil extracellular trap
+urease activator complex
+primary dendrite
+dendritic spine origin
+enzyme activator complex
+distal dendrite
+ADA complex
+ATAC complex
+basal proximal dendrite
+apical proximal dendrite
+basal distal dendrite
+apical distal dendrite
+dihydropyrimidine dehydrogenase (NAD+) complex
+cell cortex of non-growing cell tip
+mannan polymerase I complex
+migrasome
+mannan polymerase II complex
+neuronal cell body membrane
+DNA ligase IV complex
+carboxy-terminal domain protein kinase complex
+cellular bud neck septin collar
+host cell projection
+host cell junction
+host thylakoid
+host cell wall
+host thylakoid membrane
+host cell cytoplasmic vesicle membrane
+host cell cytoplasmic vesicle
+host cell cytosol
+host cytoskeleton
+host cell endoplasmic reticulum lumen
+host cell endoplasmic reticulum
+hyphal septin ring
+prospore septin ring
+chlamydospore septin filament array
+septin filament array
+cleavage apparatus septin structure
+hyphal septin cap
+prospore septin filament array
+mating projection septin band
+hyphal septin band
+host cell rough endoplasmic reticulum
+host cell endoplasmic reticulum membrane
+host cell rough endoplasmic reticulum membrane
+host cell smooth endoplasmic reticulum membrane
+host cell smooth endoplasmic reticulum
+host cell endoplasmic reticulum-Golgi intermediate compartment membrane
+host cell endoplasmic reticulum-Golgi intermediate compartment
+phosphoenolpyruvate-dependent sugar phosphotransferase complex
+host cell endosome membrane
+IgZ immunoglobulin complex
+host cell endosome
+heavy chain immunoglobulin complex
+host cell Golgi apparatus
+host cell filopodium
+IgY immunoglobulin complex
+prospore contractile ring
+septin band
+septin cytoskeleton
+septin cap
+cell division site
+cleavage furrow
+mitotic septin complex
+meiotic septin complex
+host cell Golgi membrane
+host cell late endosome
+histamine-gated chloride channel complex
+host cell lipid droplet
+snRNA-activating protein complex
+host cell late endosome membrane
+host cell lysosomal membrane
+host cell lysosome
+4-aminobutyrate transaminase complex
+LUBAC complex
+host cell mitochondrial outer membrane
+host cell mitochondrial inner membrane
+nucleoplasmic reticulum
+cytolytic granule
+host cell nucleolus
+host cell nuclear envelope
+endoplasmic reticulum cisternal network
+endoplasmic reticulum tubular network
+chromosome passenger complex
+host cell mitochondrial membrane
+host cell mitochondrial envelope
+IgD immunoglobulin complex
+IgD immunoglobulin complex, circulating
+IgG immunoglobulin complex, circulating
+IgG B cell receptor complex
+IgG immunoglobulin complex
+post-lysosomal vacuole
+viral portal complex
+dimeric IgA immunoglobulin complex
+secretory IgA immunoglobulin complex
+IgM immunoglobulin complex, circulating
+IgM B cell receptor complex
+secretory dimeric IgA immunoglobulin complex
+IgM immunoglobulin complex
+IgW immunoglobulin complex
+IgX immunoglobulin complex
+pentameric IgM immunoglobulin complex
+hexameric IgM immunoglobulin complex
+polymeric IgA immunoglobulin complex
+IgD B cell receptor complex
+host caveola
+germ tube
+IgE immunoglobulin complex, circulating
+IgE B cell receptor complex
+cellular bud neck split septin rings
+IgD immunoglobulin complex, GPI-anchored
+medial membrane band
+IgE immunoglobulin complex
+IgA B cell receptor complex
+monomeric IgA immunoglobulin complex
+IgA immunoglobulin complex
+IgA immunoglobulin complex, circulating
+cytochrome b6f complex
+plasmodesmatal endoplasmic reticulum
+plasmodesmatal desmotubule
+leucoplast
+granal stacked thylakoid
+glyoxysome
+etioplast
+chromoplast
+plastid chromosome
+chloroplast
+plasmodesma
+photosystem II
+photosystem I
+photosystem
+plastid outer membrane
+plastid envelope
+phragmosome
+phragmoplast
+middle lamella
+PSI associated light-harvesting complex I
+PSII associated light-harvesting complex II
+amyloplast
+plant-type cell wall
+cell plate
+thylakoid light-harvesting complex
+bacterial-type flagellum basal body, MS ring
+bacterial-type flagellum basal body, C ring
+bacterial-type flagellum basal body, proximal rod
+bacterial-type flagellum filament
+bacterial-type flagellum hook
+bacterial-type flagellum hook-filament junction
+bacterial-type flagellum filament cap
+bacterial-type flagellum basal body, distal rod, P ring
+bacterial-type flagellum basal body, distal rod, L ring
+bacterial-type flagellum basal body, distal rod
+bacterial-type flagellum basal body
+pilus tip
+pilus shaft
+monolayer-surrounded lipid storage body outer lipid monolayer
+Vps55/Vps68 complex
+autophagosome lumen
+aleurone grain lumen
+etioplast membrane
+etioplast envelope
+gerontoplast
+nuclear dicing body
+glycosome lumen
+esterosome lumen
+chromaffin granule lumen
+Golgi stack lumen
+BBSome
+Mpp10 complex
+UTP-C complex
+t-UTP complex
+centriolar satellite
+clathrin complex
+cytoplasmic stress granule
+melanosome lumen
+hydrogenosome lumen
+protein storage vacuole lumen
+microneme lumen
+Myo2p-Vac17p-Vac8p transport complex
+npBAF complex
+nucleus-vacuole junction
+nBAF complex
+cellular birth scar
+Nem1-Spo7 phosphatase complex
+neuronal ribonucleoprotein granule
+secondary plasmodesma
+primary plasmodesma
+chromosome, centromeric core domain
+chloroplast starch grain
+amyloplast starch grain
+primary cell wall
+chloroplast thylakoid
+chloroplast stromal thylakoid
+plastid stroma
+secondary cell wall
+photosystem I reaction center
+proplastid
+plastid
+chloroplast thylakoid membrane
+plastid intermembrane space
+plastid inner membrane
+etioplast prolamellar body
+elaioplast
+chloroplast ATP synthase complex
+chloroplast thylakoid lumen
+granum
+cellulose microfibril
+plasmodesmatal plasma membrane
+plastid ribosome
+plasmodesmatal cytoplasmic sleeve
+photosystem II reaction center
+chloroplast stroma
+preprophase band
+chloroplast ribulose bisphosphate carboxylase complex
+proplastid stroma
+etioplast stroma
+elaioplast stroma
+leucoplast stroma
+chromoplast stroma
+thylakoid
+RNA cap binding complex
+proteasome storage granule
+synaptic vesicle lumen
+rhoptry lumen
+intercellular canaliculus
+Cdc42 GTPase complex
+NAD(P)H dehydrogenase complex (plastoquinone)
+eukaryotic translation initiation factor 3 complex, eIF3m
+eukaryotic translation initiation factor 3 complex, eIF3e
+pi-body
+piP-body
+dosage compensation complex
+U4/U6 x U5 tri-snRNP complex
+phosphopantothenoylcysteine decarboxylase complex
+galectin lattice
+decoy receptor complex
+TIS granule
+GW body
+RNP body
+SOD1-calcineurin complex
+CBM complex
+activin responsive factor complex
+actin filament bundle
+filopodium tip
+cuticular plate
+stereocilium bundle
+stereocilium
+stereocilium tip
+decaprenyl diphosphate synthase complex
+homodimeric decaprenyl diphosphate synthase complex
+heterotetrameric decaprenyl diphosphate synthase complex
+cytoplasmic side of mitochondrial outer membrane
+virion component
+counting factor complex
+protein aggregate center
+chromosome, telomeric repeat region
+perforant pathway to dendrate granule cell synapse
+SLAC complex
+DNA topoisomerase III-beta-TDRD3 complex
+pathogen-containing vacuole
+pathogen-containing vacuole membrane
+pathogen-containing vacuole lumen
+BCOR complex
+endoplasmic reticulum-endosome membrane contact site
+MIB complex
+endoplasmic reticulum-plasma membrane contact site
+Woronin body
+GBAF complex
+DBIRD complex
+nuclear pore nuclear basket
+nuclear pore linkers
+nuclear pore inner ring
+nuclear pore cytoplasmic filaments
+nuclear pore central transport channel
+myosin phosphatase complex
+secondary cell wall cellulose synthase complex
+primary cell wall cellulose synthase complex
+[Ni-Fe] hydrogenase complex
+starch utilization system complex
+cortical endoplasmic reticulum
+CURI complex
+dendrite membrane
+host cell periphery
+insulin-responsive compartment
+dendritic spine membrane
+supraspliceosomal complex
+protein storage vacuole membrane
+ruffle membrane
+growth cone membrane
+multivesicular body membrane
+trans-Golgi network membrane
+neuron projection membrane
+Golgi cisterna membrane
+NSL complex
+apical lamina of hyaline layer
+aleurone grain membrane
+AP-5 adaptor complex
+fatty acid elongase complex
+auxin efflux carrier complex
+longitudinal side of cell surface
+basal plasma membrane
+chloroplast envelope
+cell surface
+MMXD complex
+BAT3 complex
+hydrogenosomal membrane
+DUBm complex
+chlorosome
+glycosome membrane
+glyoxysomal membrane
+satellite fibril
+host cell nuclear inner membrane
+mitochondrial derivative
+PCNA complex
+major mitochondrial derivative
+delta DNA polymerase complex
+minor mitochondrial derivative
+dystrophin-associated glycoprotein complex
+dystroglycan complex
+sarcoglycan complex
+syntrophin complex
+dystrobrevin complex
+xanthophore
+Nebenkern
+cytosolic proteasome regulatory particle, lid subcomplex
+spindle pole centrosome
+nuclear proteasome regulatory particle, lid subcomplex
+cytosolic proteasome regulatory particle, base subcomplex
+nuclear proteasome regulatory particle, base subcomplex
+symbiosome
+host symbiosome
+host extracellular space
+host cell
+host intracellular region
+nuclear proteasome core complex, alpha-subunit complex
+cytosolic proteasome core complex
+cytosolic proteasome core complex, beta-subunit complex
+cytosolic proteasome core complex, alpha-subunit complex
+bacteroid-containing symbiosome
+nuclear proteasome core complex, beta-subunit complex
+cytosolic proteasome regulatory particle
+nuclear proteasome core complex
+G-protein beta/gamma-subunit complex
+H zone
+I band
+A band
+plasma membrane-derived thylakoid membrane
+subrhabdomeral cisterna
+cytoplasmic replisome
+nuclear replisome
+zeta DNA polymerase complex
+multi-eIF complex
+membrane
+inaD signaling complex
+rhabdomere
+bacterial nucleoid
+exosporium
+endospore external encapsulating structure
+outer endospore membrane
+endospore coat
+cytosolic proteasome complex
+neuromuscular junction
+nuclear proteasome complex
+nuclear proteasome regulatory particle
+centrosomal corona
+nuclear replication fork
+endospore cortex
+cytoplasmic DNA replication factor C complex
+cytoplasmic replication fork
+nuclear DNA replication factor C complex
+nucleotide-activated protein kinase complex
+mating projection tip polarisome
+cellular bud tip polarisome
+hyphal tip polarisome
+UDP-N-acetylglucosamine transferase complex
+6-phosphofructo-2-kinase/fructose-2,6-biphosphatase complex
+Ku70:Ku80 complex
+Tpg-containing telomere binding complex
+ubiquitin conjugating enzyme complex
+mating projection tip
+Golgi-associated vesicle lumen
+translation initiation complex
+translation preinitiation complex
+CENP-A containing nucleosome
+activin A complex
+motile cilium
+tRNA (m1A) methyltransferase complex
+CBF3 complex
+PcG protein complex
+SUMO activating enzyme complex
+Mis6-Sim4 complex
+activin B complex
+inhibin A complex
+inhibin complex
+interleukin-12 complex
+inhibin B complex
+mannosyltransferase complex
+dolichyl-phosphate-mannose-protein mannosyltransferase complex
+Tea1 cell-end complex
+tRNA methyltransferase complex
+GET complex
+tRNA (m2G10) methyltransferase complex
+cellular bud neck polarisome
+mRNA cap methyltransferase complex
+filopodium membrane
+microvillus membrane
+brush border membrane
+plasma membrane of cell tip
+Myb complex
+spitzenkorper
+cell envelope Sec protein transport complex
+myosin XII complex
+myosin XIII complex
+myosin X complex
+myosin XI complex
+myosin V complex
+myosin VI complex
+myosin IV complex
+myosin IX complex
+myosin VII complex
+myosin VIII complex
+ethanolamine degradation polyhedral organelle
+propanediol degradation polyhedral organelle
+carboxysome
+Cul4A-RING E3 ubiquitin ligase complex
+Cul4B-RING E3 ubiquitin ligase complex
+Cul2-RING ubiquitin ligase complex
+Cul3-RING ubiquitin ligase complex
+bacterial microcompartment
+Cul5-RING ubiquitin ligase complex
+Cul7-RING ubiquitin ligase complex
+cullin-RING ubiquitin ligase complex
+viral terminase complex
+CLRC complex
+TRAMP complex
+myosin XVI complex
+myosin XVII complex
+myosin XIV complex
+myosin XV complex
+myosin XVIII complex
+X chromosome located dosage compensation complex, transcription activating
+RISC complex
+proton-transporting two-sector ATPase complex
+methylcrotonoyl-CoA carboxylase complex
+vacuolar proton-transporting V-type ATPase complex
+sodium ion-transporting two-sector ATPase complex
+sodium ion-transporting F-type ATPase complex
+sodium ion-transporting V-type ATPase complex
+myosin complex
+myosin II complex
+unconventional myosin complex
+chaperonin ATPase complex
+interleukin-10 receptor complex
+host cell PML body
+gerontoplast stroma
+toxin-antitoxin complex
+B-WICH complex
+ammonium transmembrane transporter complex
+cellularization cleavage furrow
+cellularization cleavage furrow invagination front
+TTT Hsp90 cochaperone complex
+cell tip
+cell cortex of cell tip
+mitotic actomyosin contractile ring
+extrinsic component of synaptic membrane
+meiotic actomyosin contractile ring
+nucleus leading edge
+nucleus lagging edge
+follicle-stimulating hormone complex
+insulin-like growth factor binding protein complex
+glycine-gated chloride channel complex
+kinesin I complex
+kinesin II complex
+molybdenum-iron nitrogenase complex
+vanadium-iron nitrogenase complex
+G protein-coupled receptor dimeric complex
+postsynaptic density
+G protein-coupled receptor heterodimeric complex
+G protein-coupled receptor homodimeric complex
+acrosomal membrane
+outer acrosomal membrane
+meiotic spindle pole
+caveolar macromolecular signaling complex
+polkadots
+inner acrosomal membrane
+eukaryotic translation initiation factor 4F complex
+eukaryotic 43S preinitiation complex
+DNA polymerase III, clamp loader complex
+DNA polymerase III, proofreading complex
+DNA polymerase III, clamp loader chi/psi subcomplex
+chromoplast inner membrane
+prefoldin complex
+Tic complex
+chromoplast envelope
+RecFOR complex
+methanol-CoM methyltransferase complex
+lysosomal glycocalyx
+oral apparatus
+contractile vacuole pore
+cytostome
+cytoproct
+microbody lumen
+glyoxysomal lumen
+early endosome membrane
+late endosome membrane
+chromoplast outer membrane
+early endosome lumen
+late endosome lumen
+microbody membrane
+endosome lumen
+apicolateral plasma membrane
+lateral plasma membrane
+host cellular component
+filamentous actin
+basolateral plasma membrane
+i-AAA complex
+apical plasma membrane
+mating-type region heterochromatin
+TORC2 complex
+TORC1 complex
+nuclear lumen
+nuclear matrix
+vesicle
+Golgi cisterna
+proteinoplast
+vesicle lumen
+organelle subcompartment
+plastid thylakoid lumen
+plasma membrane-derived thylakoid lumen
+plastid thylakoid
+thylakoid lumen
+organelle envelope lumen
+membrane-enclosed lumen
+envelope
+chloroplast intermembrane space
+chromoplast intermembrane space
+organelle envelope
+organelle outer membrane
+nuclear membrane
+mitochondrial membrane
+chloroplast membrane
+catenin complex
+carotenoid vesicle
+cyanosome
+pterinosome
+extracellular membrane-bounded organelle
+ectexine
+peribacteroid fluid
+peribacteroid membrane
+host peribacteroid membrane
+host bacteroid-containing symbiosome
+host peribacteroid fluid
+exine
+pollen wall
+endexine
+foot layer
+sexine
+nexine
+sculpture element
+columella
+tectum
+axon terminus
+intine
+filiform apparatus
+type IV secretion system complex
+leucosome
+iridosome
+Dbf4-dependent protein kinase complex
+M band
+BRCA1-BARD1 complex
+box C/D RNP complex
+box H/ACA snoRNP complex
+invertasome
+RecQ family helicase-topoisomerase III complex
+NatC complex
+NatA complex
+NatB complex
+cytoplasmic vesicle
+N-terminal protein acetyltransferase complex
+gas vesicle
+translation release factor complex
+RNAi effector complex
+transcription factor TFIIK complex
+pre-T cell receptor complex
+endoplasmic reticulum exit site
+acidocalcisome lumen
+Ctf18 RFC-like complex
+Elg1 RFC-like complex
+inositol phosphoceramide synthase complex
+Ddb1-Wdr21 complex
+bursicon neuropeptide hormone complex
+MPF complex
+Ddb1-Ckn1 complex
+Rad17 RFC-like complex
+nuclear RNA-directed RNA polymerase complex
+viral RNA-directed RNA polymerase complex
+RNA-directed RNA polymerase complex
+CRD-mediated mRNA stability complex
+contractile ring
+UBC13-MMS2 complex
+Dsl1/NZR complex
+ornithine carbamoyltransferase inhibitor complex
+caveola neck
+caveola bulb
+ferroxidase complex
+mitotic spindle astral microtubule end
+cytoplasmic microtubule bundle
+perisynaptic space
+adrenomedullin receptor complex
+actomyosin contractile ring actin filament
+actin filament of cell cortex of cell tip
+cytosolic region
+presynaptic cytosol
+postsynaptic cytosol
+synapse-associated extracellular matrix
+Ras guanyl-nucleotide exchange factor complex
+secretory vesicle
+exocytic vesicle membrane
+ascospore-type prospore nucleus
+post-anaphase array microtubule
+supramolecular fiber
+polymeric cytoskeletal fiber
+post-anaphase array microtubule end
+potassium:proton antiporter complex
+copper ion transmembrane transporter complex
+silver ion transmembrane transporter complex
+ribonuclease III complex
+hemidesmosome associated protein complex
+basal layer of collagen and cuticulin-based cuticle extracellular matrix
+alae of collagen and cuticulin-based cuticle extracellular matrix
+RNA decapping complex
+exon-exon junction complex
+IKKalpha-IKKalpha complex
+large latent transforming growth factor-beta complex
+RNA polymerase IV transcription regulator complex
+RNA polymerase V transcription regulator complex
+RNA polymerase II transcription regulator complex
+RNA polymerase III transcription regulator complex
+RNA polymerase IV transcription repressor complex
+RNA polymerase V transcription repressor complex
+RNA polymerase II transcription repressor complex
+RNA polymerase III transcription repressor complex
+RNA polymerase I transcription repressor complex
+unicellular trichome tip
+unicellular trichome apex
+WICH complex
+NoRC complex
+cation-transporting ATPase complex
+calcium ion-transporting ATPase complex
+endodeoxyribonuclease complex
+endonuclease complex
+CERF complex
+exoribonuclease complex
+CHD-type complex
+Flemming body
+eisosome membrane domain/MCC
+endopeptidase complex
+peptidase complex
+GTPase complex
+beta-N-acetylhexosaminidase complex
+serine-type endopeptidase complex
+CCAAT-binding factor complex
+nuclear body
+PML body
+LYSP100-associated nuclear domain
+nuclear speck
+nitrogenase complex
+iron-iron nitrogenase complex
+flotillin complex
+semaphorin receptor complex
+polycystin complex
+podosome
+BRCA2-BRAF35 complex
+VRK3/VHR/ERK complex
+nodal receptor complex
+manchette
+palmitoyltransferase complex
+homodimeric serine palmitoyltransferase complex
+3-methylcrotonyl-CoA carboxylase complex, mitochondrial
+stereocilia tip link
+stereocilia ankle link
+stereocilia ankle link complex
+cytosolic tRNA wobble base thiouridylase complex
+stereocilia coupling link
+tenascin complex
+site of DNA damage
+cofilin-actin rod
+Las1 complex
+ERBB3:ERBB2 complex
+EGFR:ERBB2 complex
+pigment granule membrane
+ERBB4:ERBB2 complex
+ERBB4-ERBB4 complex
+ERBB4-ERBB3 complex
+ERBB4-EGFR complex
+basal pole of outer hair cell
+5-lipoxygenase complex
+creatine kinase complex
+cytosolic creatine kinase complex
+mitochondrial creatine kinase complex
+ribose phosphate diphosphokinase complex
+MAML1-RBP-Jkappa- ICN1 complex
+xanthine dehydrogenase complex
+zona pellucida receptor complex
+cortical dynamic polarity patch
+central region of growth cone
+peripheral region of growth cone
+U2AF complex
+type I interferon receptor complex
+Cbf1-Met4-Met28 complex
+Pip2-Oaf1 complex
+trichome papilla
+Scc2-Scc4 cohesin loading complex
+Wpl/Pds5 cohesin loading/unloading complex
+mitochondrial membrane scission site
+serine-type peptidase complex
+neuronal dense core vesicle membrane
+extrinsic component of postsynaptic recycling endosome membrane
+extrinsic component of presynaptic endosome membrane
+cleavage furrow leading edge
+cleavage furrow rim
+vesicle tethering complex
+perinuclear endoplasmic reticulum lumen
+cortical endoplasmic reticulum lumen
+neuronal dense core vesicle lumen
+basolateral recycling endosome
+basolateral cytoplasm
+apical recycling endosome
+apical cytoplasm
+cone matrix sheath
+glycoprotein complex
+box H/ACA telomerase RNP complex
+extracellular core region of desmosome
+outer dense plaque of desmosome
+inner dense plaque of desmosome
+microsporidian-type endospore
+microsporidian-type exospore
+secondary cell septum
+postsynaptic specialization, intracellular component
+postsynaptic density, intracellular component
+vestibular calyx terminal
+static microtubule bundle
+mitochondrion-derived vesicle
+dynamic microtubule bundle
+BORC complex
+supramolecular complex
+supramolecular polymer
+synaptonemal structure
+actin body
+activating signal cointegrator 1 complex
+cyanelle inner membrane
+cyanelle outer membrane
+cyanelle intermembrane space
+scintillon
+mucocyst
+calcitonin family receptor complex
+filtration diaphragm
+slit diaphragm
+glomerular endothelium fenestra
+MKS complex
+protein C inhibitor-plasma kallikrein complex
+protein C inhibitor-PLAU complex
+protein C inhibitor-thrombin complex
+protein C inhibitor-KLK3 complex
+protein C inhibitor-TMPRSS7 complex
+protein C inhibitor-TMPRSS11E complex
+protein C inhibitor-PLAT complex
+endolysosome membrane
+endolysosome lumen
+endolysosome
+tubovesicular membrane network
+mitochondrial inner boundary membrane
+haustorium
+hyphal membrane
+glutathione synthase complex
+extrahaustorial matrix
+extrahaustorial membrane
+ciliary plasm
+phagocytic vesicle lumen
+arbuscule
+periarbuscular membrane
+acroblast
+ciliary basal body
+presynaptic periactive zone
+amylin receptor complex
+apoplast
+postsynaptic specialization of symmetric synapse
+postsynaptic endocytic zone cytoplasmic component
+postsynaptic specialization membrane
+matrix side of mitochondrial inner membrane
+extrinsic component of matrix side of mitochondrial inner membrane
+postsynaptic specialization
+glutamatergic postsynaptic density
+postsynaptic cytoskeleton
+presynaptic cytoskeleton
+cytoplasmic region
+phosphopyruvate hydratase complex
+exosome (RNase complex)
+skeletal muscle myofibril
+amyloid-beta complex
+mCRD-mediated mRNA stability complex
+Rb-E2F complex
+collagen and cuticulin-based cuticle extracellular matrix
+female germline ring canal inner rim
+annuli extracellular matrix
+sigma factor antagonist complex
+annular furrow extracellular matrix
+medial layer of collagen and cuticulin-based cuticle extracellular matrix
+female germline ring canal outer rim
+surface coat of collagen and cuticulin-based cuticle extracellular matrix
+epicuticle of collagen and cuticulin-based cuticle extracellular matrix
+cortical layer of collagen and cuticulin-based cuticle extracellular matrix
+spine synapse
+apicomedial cortex
+mannosyl-oligosaccharide 1,2-alpha-mannosidase complex
+clathrin-sculpted vesicle
+clathrin-sculpted glutamate transport vesicle
+synapsis initiation complex
+SUMO ligase complex
+membrane protein complex
+presynapse
+postsynapse
+outer mitochondrial membrane protein complex
+plasma membrane protein complex
+mitochondrial protein-containing complex
+mitotic nuclear membrane microtubule tethering complex
+nuclear membrane protein complex
+curli
+NAGS/NAGK complex
+m7G(5^)pppN diphosphatase complex
+nuclear membrane microtubule tethering complex
+EDS1 disease-resistance complex
+ciliary membrane
+stereocilium membrane
+Golgi apparatus subcompartment
+dendritic knob
+cell pole
+Knl1/Spc105 complex
+photoreceptor outer segment
+Barr body
+XY body
+stress fiber
+ruffle
+RQC-trigger complex
+sex chromatin
+immunological synapse
+FACT complex
+PRC1 complex
+sweet taste receptor complex
+taste receptor complex
+extrinsic component of synaptic vesicle membrane
+podocyte primary projection
+HCN channel complex
+lytic vacuole membrane
+endoplasmic reticulum-vacuole membrane contact site
+actin-based cell projection
+actin filament bundle of actin-based cell projection
+membrane microdomain
+actin filament bundle of filopodium
+cluster of actin-based cell projections
+actin filament bundle of stereocilium
+NuA4 histone acetyltransferase complex
+TOR complex
+RNA polymerase II termination complex
+Cdr2 medial cortical node complex
+Aim21-Tda2 complex
+magnetosome
+ubiquinone biosynthesis complex
+spindle midzone
+serotonergic synapse
+extrinsic component of postsynaptic density membrane
+magnetosome lumen
+magnetosome membrane
+postsynaptic intermediate filament cytoskeleton
+postsynaptic specialization of symmetric synapse, intracellular component
+cellular anatomical entity
+postsynaptic specialization membrane of symmetric synapse
+calpain complex
+reelin complex
+PAK family kinase-Sog2 complex
+transforming growth factor beta complex
+mitochondrial iron-sulfur cluster assembly complex
+presynaptic actin cytoskeleton
+chromosome, subtelomeric region
+cerebellar Golgi cell to granule cell synapse
+postsynaptic spectrin-associated cytoskeleton
+presynaptic intermediate filament cytoskeleton
+interleukin-7 receptor complex
+interleukin-15 receptor complex
+sperm flagellum
+CatSper complex
+fatty acid beta-oxidation multienzyme complex
+hyaluranon cable
+protein-cysteine S-palmitoyltransferase complex
+protein phosphatase type 2A complex
+protein phosphatase type 1 complex
+cytoplasmic exosome (RNase complex)
+nuclear exosome (RNase complex)
+ribonuclease MRP complex
+inner dynein arm
+outer dynein arm
+type Is terminal bouton
+type I terminal bouton
+type II terminal bouton
+type Ib terminal bouton
+cyclin D1-CDK6 complex
+cyclin D3-CDK4 complex
+cyclin A2-CDK1 complex
+cyclin A1-CDK1 complex
+cyclin A2-CDK2 complex
+cyclin A1-CDK2 complex
+cyclin B2-CDK1 complex
+cyclin B1-CDK1 complex
+cyclin D1-CDK4 complex
+cyclin B3-CDK2 complex
+cyclin D2-CDK4 complex
+BIM-BCL-xl complex
+PUMA-BCL-2 complex
+BIM-BCL-2 complex
+cyclin D3-CDK6 complex
+cyclin D2-CDK6 complex
+cyclin E2-CDK2 complex
+cyclin E1-CDK2 complex
+BAD-BCL-xl complex
+Bcl-2 family protein complex
+BID-BCL-2 complex
+BAD-BCL-2 complex
+muscle cell projection membrane
+muscle cell projection
+early phagosome membrane
+activin receptor complex
+omegasome membrane
+Set1C/COMPASS complex
+Lid2 complex
+activin complex
+activin AB complex
+cell cortex region
+interferon regulatory factor 3 complex
+interferon regulatory factor complex
+interferon regulatory factor 7 complex
+interferon regulatory factor 5 complex
+transforming growth factor beta activated kinase 1 complex
+interferon regulatory factor 3-interferon regulatory factor 7 complex
+interferon regulatory factor 3-interferon regulatory factor 5 complex
+FAL1-SGD1 complex
+DNA replication termination region
+synaptic membrane
+CRLF-CLCF1 complex
+TRAF2-GSTP1 complex
+CNTFR-CLCF1 complex
+C zone
+intercalated disc
+free sarcoplasmic reticulum membrane
+junctional sarcoplasmic reticulum membrane
+phosphatase complex
+MPP7-DLG1-LIN7 complex
+perinuclear endoplasmic reticulum
+spectrin-associated cytoskeleton
+nucleotide-excision repair complex
+nucleotide-excision repair factor 2 complex
+nucleotide-excision repair factor 1 complex
+Golgi membrane
+Golgi trans cisterna
+Golgi cis cisterna
+mannan polymerase complex
+cellular bud neck septin ring
+cellular bud neck contractile ring
+1,3-beta-D-glucan synthase complex
+exocyst
+cytoplasmic ubiquitin ligase complex
+nuclear ubiquitin ligase complex
+ubiquitin ligase complex
+histone deacetylase complex
+nucleotide-excision repair factor 4 complex
+nucleotide-excision repair factor 3 complex
+RNA polymerase I transcription regulator complex
+transcription factor TFIIIC complex
+transcription factor TFIIIB complex
+SAGA complex
+histone acetyltransferase complex
+polarisome
+incipient cellular bud site
+pre-snoRNP complex
+gamma-secretase-Delta1 complex
+gamma-secretase complex
+nuclear pore transmembrane ring
+Delta1 complex
+synaptotagmin-synaptobrevin 2-SNAP-25-syntaxin-1a-syntaxin-1b-Unc13 complex
+alphaIIb-beta3 integrin-CIB complex
+endobrevin-synaptobrevin 2-alpha-SNAP-NSF-syntaxin-4 complex
+BRCA1-Rad51 complex
+acrosomal matrix
+acrosomal lumen
+alphaIIb-beta3 integrin-CD47-Src complex
+PAS complex
+P granule
+alphaIIb-beta3 integrin-CD47-FAK complex
+H3 histone acetyltransferase complex
+MOZ/MORF histone acetyltransferase complex
+extrinsic component of nuclear outer membrane
+tripartite ATP-independent periplasmic transporter complex
+extrinsic component of mitochondrial inner membrane
+extrinsic component of mitochondrial outer membrane
+extrinsic component of organelle membrane
+extrinsic component of endosome membrane
+intracellular organelle
+core mediator complex
+external side of cell outer membrane
+periplasmic side of cell outer membrane
+nuclear SCF ubiquitin ligase complex
+cytoplasmic SCF ubiquitin ligase complex
+organelle
+non-membrane-bounded organelle
+membrane-bounded organelle
+intracellular membrane-bounded organelle
+extracellular organelle
+extrinsic component of cytoplasmic side of plasma membrane
+extrinsic component of external side of plasma membrane
+extrinsic component of periplasmic side of plasma membrane
+organelle lumen
+intracellular non-membrane-bounded organelle
+receptor complex
+Fanconi anaemia nuclear complex
+megasome
+extraorganismal space
+RNA polymerase I core factor complex
+chloroplast ribosome
+endoplasmic reticulum palmitoyltransferase complex
+P6 peroxisome
+immunoglobulin complex
+type III site-specific deoxyribonuclease complex
+B cell receptor complex
+P1 peroxisome
+P3 peroxisome
+P2 peroxisome
+P5 peroxisome
+P4 peroxisome
+type I site-specific deoxyribonuclease complex
+retroviral intasome
+gut granule membrane
+gut granule
+gut granule lumen
+plasma membrane bounded cell projection cytoplasm
+dendrite cytoplasm
+plasma membrane raft
+outer membrane
+organelle inner membrane
+PAT complex
+exopher
+Cyc8(Ssn6)-Tup1 general repressor complex
+polytene chromosome chromocenter
+polytene chromosome
+polytene chromosome puff
+polytene chromosome weak point
+polytene chromosome interband
+polytene chromosome band
+polytene chromosome ectopic fiber
+TMEM240-body
+pericentric heterochromatin
+chiasma
+early recombination nodule
+recombination nodule
+late recombination nodule
+glideosome
+macropinosome membrane
+kinesin complex
+actin capping protein of dynactin complex
+plus-end kinesin complex
+minus-end kinesin complex
+microtubule associated complex
+microtubule
+striated muscle thin filament
+cytoplasmic dynein complex
+dynactin complex
+MHC class I peptide loading complex
+TAP complex
+platelet dense granule
+nuclear microtubule
+intermediate filament
+cytoplasmic microtubule
+actin filament
+neurofilament
+plasma membrane
+Arp2/3 protein complex
+spindle microtubule
+axonemal microtubule
+eukaryotic translation initiation factor 2B complex
+eukaryotic translation initiation factor 2 complex
+eukaryotic translation elongation factor 1 complex
+eukaryotic translation initiation factor 3 complex
+polysome
+nuclear cap binding complex
+mRNA cap binding complex
+mRNA cleavage stimulating factor complex
+mRNA cleavage and polyadenylation specificity factor complex
+mRNA cleavage factor complex
+muscle thin filament tropomyosin
+troponin complex
+striated muscle myosin thick filament
+nascent polypeptide-associated complex
+cytoskeleton
+muscle myosin complex
+axonemal dynein complex
+smooth endoplasmic reticulum membrane
+rough endoplasmic reticulum membrane
+RENT complex
+cortical actin cytoskeleton
+cortical cytoskeleton
+voltage-gated calcium channel complex
+sodium:potassium-exchanging ATPase complex
+interleukin-2 receptor complex
+acetylcholine-gated channel complex
+interleukin-5 receptor complex
+interleukin-3 receptor complex
+interleukin-9 receptor complex
+interleukin-6 receptor complex
+potassium:proton exchanging ATPase complex
+autosome
+central vacuole
+insulin receptor complex
+interleukin-13 receptor complex
+VCB complex
+meiotic cohesin complex
+mitotic cohesin complex
+apolipoprotein B mRNA editing enzyme complex
+replisome
+HOPS complex
+checkpoint clamp complex
+RNA polymerase complex
+beta-catenin destruction complex
+interleukin-20 receptor complex
+Mre11 complex
+rDNA protrusion
+nucleolar chromatin
+steroid hormone aporeceptor complex
+inner plaque of spindle pole body
+intermediate layer of spindle pole body
+outer plaque of spindle pole body
+central plaque of spindle pole body
+actomyosin contractile ring
+half bridge of spindle pole body
+kinetochore microtubule
+polar microtubule
+cytosol
+ribosome
+hemoglobin complex
+chaperonin-containing T-complex
+fatty acid synthase complex
+heterotrimeric G-protein complex
+fatty-acyl-CoA synthase complex
+proteasome core complex
+proteasome regulatory particle
+trans-Golgi network
+cis-Golgi network
+lipid droplet
+centrosome
+microtubule organizing center
+centriole
+spindle pole body
+spindle
+aster
+collagen type VII trimer
+collagen type XI trimer
+collagen type VIII trimer
+collagen type IX trimer
+FACIT collagen trimer
+collagen type XIV trimer
+collagen type XII trimer
+short-chain collagen trimer
+collagen type XVI trimer
+collagen type X trimer
+small nuclear ribonucleoprotein complex
+extracellular region
+cellular_component
+MCM complex
+fibrinogen complex
+granulocyte macrophage colony-stimulating factor receptor complex
+collagen trimer
+fibrillar collagen trimer
+collagen type XV trimer
+collagen type II trimer
+collagen type I trimer
+NLS-dependent protein nuclear import complex
+collagen type IV trimer
+RNA nuclear export complex
+collagen type III trimer
+hydrogenosome
+collagen type VI trimer
+insulin-like growth factor ternary complex
+collagen type V trimer
+insulin-like growth factor binary complex
+membrane attack complex
+immunoglobulin complex, circulating
+midbody
+smooth muscle dense body
+smooth muscle contractile fiber
+actin cortical patch
+actin cap
+melanosome
+chitosan layer of spore wall
+dityrosine layer of spore wall
+ascus lipid droplet
+inner layer of spore wall
+prospore membrane
+nuclear outer membrane
+annulate lamellae
+nuclear envelope lumen
+nuclear pore
+nuclear envelope
+nucleus
+nuclear inner membrane
+lamin filament
+laminin-6 complex
+laminin-5 complex
+complement component C1 complex
+classical-complement-pathway C3/C5 convertase complex
+basement membrane
+laminin-1 complex
+laminin-3 complex
+laminin-2 complex
+laminin-4 complex
+capsule
+intracellular anatomical structure
+egg chorion
+cellular bud scar
+endospore-forming forespore
+laminin-7 complex
+extracellular space
+interstitial matrix
+larval serum protein complex
+ascospore wall
+cell wall
+transcription factor TFIIE complex
+transcription factor TFIIA complex
+transcription factor TFIIH holo complex
+transcription factor TFIIF complex
+chromatin silencing complex
+RNA polymerase transcription factor SL1 complex
+transcription regulator complex
+endosomal scaffold complex
+SREBP-SCAP complex
+SREBP-SCAP-Insig complex
+Fc-alpha receptor I complex
+protein-DNA complex
+protein-lipid complex
+protein-containing complex
+protein-carbohydrate complex
+Fc receptor complex
+Fc-epsilon receptor I complex
+Bcl3-Bcl10 complex
+myosin filament
+kainate selective glutamate receptor complex
+T-tubule
+external encapsulating structure
+junctional membrane complex
+cell envelope
+nuclear RNA export factor complex
+type III protein secretion system complex
+type I protein secretion system complex
+insulin control element activator complex
+dynein complex
+outer membrane-bounded periplasmic space
+cell wall-bounded periplasmic space
+protein phosphatase 4 complex
+cerebellar granule cell to Purkinje cell synapse
+postsynaptic Golgi apparatus
+postsynaptic septin cytoskeleton
+amylin receptor complex 1
+cerebellar climbing fiber to Purkinje cell synapse
+amylin receptor complex 2
+amylin receptor complex 3
+distal axon
+multiple synapse bouton, contacting multiple dendrites
+multiple synapse bouton
+multiple synapse bouton, contacting single dendrite
+growth cone
+dendrite
+cell septum
+site of polarized growth
+axon
+hyphal cell wall
+yeast-form cell wall
+nuclear inclusion body
+extrinsic component of endoplasmic reticulum membrane
+host cell cytoplasm
+paraspeckles
+sarcolemma
+ferredoxin-thioredoxin reductase complex
+myosin III complex
+serine-tRNA ligase complex
+large ribosomal subunit pre-assembly complex
+encapsulin nanocompartment
+NLRP6 inflammasome complex
+subtelomeric heterochromatin
+mitotic nuclear bridge midzone membrane domain
+host apoplast
+MIM complex
+TOM complex
+aminoacyl-tRNA synthetase multienzyme complex
+methionyl glutamyl tRNA synthetase complex
+host cell chloroplast thylakoid membrane
+host cell chloroplast part
+host cell chloroplast
+host cell plastid
+SWI/SNF superfamily-type complex
+host cell cytoplasm part
+host cell mitochondrion
+host intracellular membrane-bounded organelle
+host cell part
+host intracellular organelle
+host intracellular part
+host cell endomembrane system
+host cell membrane
+neuron projection
+EGFR-Shc-Grb2-Sos complex
+UDP-N-acetylglucosamine-lysosomal-enzyme N-acetylglucosaminephosphotransferase complex
+EGFR-Grb2-Sos complex
+Grb2-Sos complex
+Shc-Grb2-Sos complex
+NADPH oxidase complex
+Mei2 nuclear dot complex
+micronucleus
+Rpd3L complex
+macronucleus
+glutamate synthase complex
+glutamate synthase complex (NADH)
+plastid mRNA editing complex
+interphase microtubule organizing center
+mitochondrial mRNA editing complex
+pericanalicular vesicle
+Ino80 complex
+extracellular matrix
+ISWI-type complex
+plastid ADPG pyrophosphorylase complex
+actin rod
+actin tubule
+potassium ion-transporting ATPase complex
+BLOC complex
+BLOC-1 complex
+nuclear pore outer ring
+ATP-binding cassette (ABC) transporter complex, integrated substrate binding
+ATP-binding cassette (ABC) transporter complex, substrate-binding subunit-containing
+BLOC-2 complex
+BLOC-3 complex
+germ cell nucleus
+megasporocyte nucleus
+macropinocytic cup cytoskeleton
+macropinocytic cup
+macropinocytic cup membrane
+nucleocytoplasmic transport complex
+antipodal cell nucleus
+polar nucleus
+megagametophyte egg cell nucleus
+synaptic cleft
+Ski complex
+Cul4-RING E3 ubiquitin ligase complex
+P-TEFb complex
+FHF complex
+CTDK-1 complex
+P-TEFb-cap methyltransferase complex
+dense core granule
+neuronal cell body
+isoamylase complex
+formin-nucleated actin cable
+Ubisch body
+costamere
+starch grain
+cortical microtubule
+nuclear DNA-directed RNA polymerase complex
+platelet alpha granule lumen
+platelet dense tubular network
+platelet alpha granule
+periplasmic flagellum
+platelet alpha granule membrane
+medial cortex
+platelet dense tubular network membrane
+symplast
+platelet dense tubular network lumen
+organelle membrane
+plastid thylakoid membrane
+virion membrane
+platelet dense granule membrane
+recycling endosome
+HAUS complex
+platelet dense granule lumen
+recycling endosome membrane
+trichocyst
+nuclear cyclin-dependent protein kinase holoenzyme complex
+cyclin-dependent protein kinase activating kinase holoenzyme complex
+mitochondrial pyruvate dehydrogenase (lipoamide) phosphatase complex
+sarcosine oxidase complex
+actin wave
+Kir2 inward rectifier potassium channel complex
+meiotic spindle midzone
+organomineral extracellular matrix
+upstream stimulatory factor complex
+DNA repair complex
+EFF-1 complex
+3M complex
+CUE1-UBC7 ubiquitin-conjugating enzyme complex
+Cus cation efflux complex
+dehydrodolichyl diphosphate synthase complex
+double membrane vesicle viral factory lumen
+double membrane vesicle viral factory inner membrane
+exocytic vesicle lumen
+chloroplast vesicle
+double membrane vesicle viral factory membrane
+double membrane vesicle viral factory outer membrane
+Smp focus
+Bre1-Rad6 ubiquitin ligase complex
+UBR1-RAD6 ubiquitin ligase complex
+MUB1-RAD6-UBR2 ubiquitin ligase complex
+RAD6-UBR2 ubiquitin ligase complex
+RSP5-BUL ubiquitin ligase complex
+Mcs4 RR-MAPKKK complex
+Atg1/ULK1 kinase complex
+Gin4 complex
+collagen type XIX trimer
+collagen type XX trimer
+IscS-IscU complex
+collagen type XXI trimer
+collagen type XXII trimer
+collagen type XXIII trimer
+collagen type XXIV trimer
+collagen type XXVI trimer
+collagen type XXVII trimer
+collagen type XXVIII trimer
+collagen type XXV trimer
+RPB4-RPB7 complex
+IscS-TusA complex
+cytoplasmic microtubule minus-end
+laminin-15 complex
+thrombospondin complex
+Hpa2 acetyltransferase complex
+Ire1 complex
+mitotic checkpoint complex, CDC20-MAD2 subcomplex
+Bfa1-Bub2 complex
+laminin-14 complex
+laminin-522 complex
+glucose transporter complex
+transporter complex
+BRE1 E3 ubiquitin ligase complex
+heterochromatin island
+heterochromatin domain
+BID-BCL-xl complex
+PKM2 protein kinase complex
+PKM2 pyruvate kinase complex
+Fused-Smurf ubiquitin ligase complex
+activated SUMO-E1 ligase complex
+terminal web
+xylanosome
+phosphatidylinositol transporter complex
+serine/threonine protein kinase complex
+endoribonuclease complex
+Bunina body
+glial cytoplasmic inclusion
+fibrillary inclusion
+GMP reductase complex
+CHOP-C/EBP complex
+H4 histone acetyltransferase complex
+chromatophore ribulose bisphosphate carboxylase complex
+plasma membrane-derived thylakoid ribulose bisphosphate carboxylase complex
+hyaline inclusion
+classical Lewy body
+Lewy body
+Lewy body-like hyaline inclusion
+cortical Lewy body
+neurofibrillary tangle
+nematosome
+ribulose bisphosphate carboxylase complex
+Pick body
+phagolysosome membrane
+somatodendritic compartment
+cytoplasmic ribonucleoprotein granule
+karyomere
+keratohyalin granule
+glycerol-3-phosphate-transporting ATPase complex
+thioredoxin-disulfide reductase complex
+methionine-importing complex
+thiazole synthase complex
+2-iminoacetate synthase complex
+C/EBP complex
+calprotectin complex
+iNOS-S100A8/A9 complex
+transnitrosylase complex
+S100A8 complex
+S100A9 complex
+Nkx-2.5 complex
+AnxA2-p11 complex
+PCSK9-LDLR complex
+PCSK9-AnxA2 complex
+CSF1-CSF1R complex
+Golgi cis cisterna membrane
+Golgi medial cisterna membrane
+Golgi trans cisterna membrane
+mitochondrial inner membrane assembly complex
+protein-lipid-RNA complex
+HDL-containing protein-lipid-RNA complex
+LDL-containing protein-lipid-RNA complex
+USH2 complex
+small ribosomal subunit
+large ribosomal subunit
+IRE1-TRAF2-ASK1 complex
+Sad1-Kms1 LINC complex
+Kelch-containing formin regulatory complex
+CHOP-ATF4 complex
+ANPR-A receptor complex
+ESCRT IV complex
+CHOP-ATF3 complex
+Herring body
+phospholamban complex
+IRE1-RACK1-PP2A complex
+mutator focus
+proximal dendrite
+serotonin-activated cation-selective channel complex
+separase-securin complex
+INA complex
+Ste12p-Dig1p-Dig2p complex
+Tec1p-Ste12p-Dig1p complex
+Rvs161p-Rvs167p complex
+glycosylphosphatidylinositol-mannosyltransferase I complex
+Cdc50p-Drs2p complex
+phospholipid-translocating ATPase complex
+Dom34-Hbs1 complex
+mitotic spindle polar microtubule
+TERT-RMRP complex
+syndecan-syntenin-ALIX complex
+extracellular exosome complex
+HSP90-CDC37 chaperone complex
+I(KACh) inward rectifier potassium channel complex
+DPS complex
+meiotic spindle astral microtubule
+perinuclear endoplasmic reticulum membrane
+ATF1-ATF4 transcription factor complex
+cardiac Troponin complex
+divisome complex
+FtsQBL complex
+FtsBL complex
+ATF4-CREB1 transcription factor complex
+AIP1-IRE1 complex
+PAM complex, Tim23 associated import motor
+SAM complex
+mating projection base
+hyphal tip
+eif4e-cup complex
+exon-exon junction subcomplex mago-y14
+dendritic lamellar body
+CKM complex
+PYM-mago-Y14 complex
+plasma lipoprotein particle
+photosynthetic membrane
+mature chylomicron
+alpha-D-ribose 1-methylphosphonate 5-triphosphate synthase complex
+transferase complex, transferring phosphorus-containing groups
+pituitary gonadotropin complex
+pyrroline-5-carboxylate reductase complex
+glutamate decarboxylase complex
+prespliceosome
+catalytic step 2 spliceosome
+post-mRNA release spliceosomal complex
+precatalytic spliceosome
+catalytic step 1 spliceosome
+U12-type catalytic step 1 spliceosome
+U12-type catalytic step 2 spliceosome
+U12-type prespliceosome
+A axonemal microtubule
+U12-type precatalytic spliceosome
+G protein-coupled receptor complex
+U12-type post-mRNA release spliceosomal complex
+Tor2-Mei2-Ste11 complex
+Ric1-Rgp1 guanyl-nucleotide exchange factor complex
+cyanelle stroma
+tricellular tight junction
+B axonemal microtubule
+host cell nuclear membrane
+host cell nuclear lamina
+chromoplast membrane
+host cell nuclear outer membrane
+mesosome
+host cell nuclear matrix
+translation initiation ternary complex
+host cell plasmodesma
+external side of plasma membrane
+other organism cell membrane
+cytoplasmic side of plasma membrane
+other organism part
+host cell synapse
+host cell perinuclear region of cytoplasm
+pirellulosome
+anammoxosome
+apical pole of neuron
+juxtaparanode region of axon
+methane-oxidizing organelle
+basal pole of neuron
+host cell periplasmic space
+host cell surface
+host cell envelope
+organelle membrane contact site
+host cell presynaptic membrane
+FANCM-MHF complex
+dense nuclear body
+virion transport vesicle
+extrachromosomal DNA
+Rpd3S complex
+subplasmalemmal coating
+mitochondrial crista junction
+peg and socket contact
+AMPA glutamate receptor complex
+plastid acetyl-CoA carboxylase complex
+symmetric synapse
+plastid acetate CoA-transferase complex
+mitochondrial inner-outer membrane contact site
+puncta adhaerentia
+dendrite terminus
+cell-cell contact zone
+dendritic growth cone
+dendriole
+dendritic tuft
+axonal growth cone
+cell body membrane
+cell body
+asymmetric synapse
+mitochondrial intracristal space
+C-fiber
+mitochondria-associated endoplasmic reticulum membrane
+ribonuclease H2 complex
+DNA methyltransferase complex
+KICSTOR complex
+cnida
+mBAF complex
+bBAF complex
+esBAF complex
+microtubule organizing center attachment site
+exoneme
+osmiophilic body
+crystalloid
+rod spherule
+cone cell pedicle
+Ecsit-NDUFAF1 complex
+FHL3-CREB complex
+FHL2-CREB complex
+endoplasmic reticulum quality control compartment
+dendritic spine neck
+dendritic spine head
+angiogenin-PRI complex
+Swi5-Swi2 complex
+Sid2-Mob1 complex
+cleavage body
+PDX1-PBX1b-MRG1 complex
+ABIN2-NFKB1-MAP3K8 complex
+new mitotic spindle pole body
+mismatch repair complex
+MutSalpha complex
+elastic fiber
+Set3 complex
+old mitotic spindle pole body
+MutSbeta complex
+micropinosome
+pinosome
+XPC complex
+Myc-Max complex
+cell periphery
+pore complex
+prominosome
+axonal spine
+dendritic branch
+neuron spine
+cerebellar mossy fiber
+dentate gyrus mossy fiber
+climbing fiber
+main axon
+axon collateral
+neuron projection terminus
+calyx of Held
+RasGAP-Fyn-Lyn-Yes complex
+SC5b-7 complex
+meiotic nuclear membrane microtubule tethering complex
+oligosaccharyltransferase II complex
+oligosaccharyltransferase I complex
+alphav-beta5 integrin-vitronectin complex
+MHC class Ib protein complex
+photoreceptor connecting cilium
+MutLbeta complex
+MutLalpha complex
+macropinosome
+host outer membrane
+host chromosome
+ribosomal subunit
+microspike
+Ragulator complex
+sperm individualization complex
+mating projection tip membrane
+RSF complex
+investment cone
+laminin-8 complex
+laminin complex
+laminin-10 complex
+laminin-9 complex
+SCAR complex
+laminin-11 complex
+Sec62/Sec63 complex
+laminin-12 complex
+extracellular non-membrane-bounded organelle
+cellulosome
+cell body fiber
+SNARE complex
+TACC/TOG complex
+endoplasmic reticulum Sec complex
+TRAIL death-inducing signaling complex
+death-inducing signaling complex
+CD95 death-inducing signaling complex
+chrorion micropyle
+myelin sheath
+paraferritin complex
+Ndc80 complex
+pseudopodium membrane
+DNA replication preinitiation complex
+lysosomal lumen
+perikaryon
+axon hillock
+stigma papilla
+plant cell papilla
+leaf papilla
+sarcoplasm
+sarcoplasmic reticulum
+protein kinase 5 complex
+core-binding factor complex
+SWI/SNF complex
+interleukin-4 receptor complex
+mitochondrial fatty acid beta-oxidation multienzyme complex
+ACF complex
+RNA polymerase II, holoenzyme
+mediator complex
+Cdc73/Paf1 complex
+NuRD complex
+RSC-type complex
+Isw1 complex
+NURF complex
+FAR/SIN/STRIPAK complex
+pollen tube tip
+unicellular trichome branch
+pollen tube
+extrinsic component of Golgi membrane
+haptoglobin-hemoglobin complex
+inclusion body
+aggresome
+procollagen-proline 4-dioxygenase complex
+acidocalcisome membrane
+cellular bud membrane
+Cvt vesicle
+cis-Golgi network membrane
+chlorosome envelope
+plasma membrane proton-transporting V-type ATPase complex
+CAF-1 complex
+dolichol-phosphate-mannose synthase complex
+proton-transporting V-type ATPase, V1 domain
+proton-transporting V-type ATPase, V0 domain
+proton-transporting two-sector ATPase complex, catalytic domain
+gas vesicle shell
+proton-transporting two-sector ATPase complex, proton-transporting domain
+proton-transporting V-type ATPase complex
+chloroplast proton-transporting ATP synthase complex, coupling factor CF(o)
+chloroplast proton-transporting ATP synthase complex, catalytic core CF(1)
+ARC complex
+melanosome membrane
+hyaline layer
+interphotoreceptor matrix
+microneme membrane
+intermediate filament cytoskeleton
+cytoskeletal calyx
+pronucleus
+membrane raft
+ferritin complex
+extracellular ferritin complex
+RES complex
+mRNA editing complex
+tubulin complex
+external side of fungal-type cell wall
+transcription factor TFIIIE complex
+mating projection membrane
+inner membrane pellicle complex
+integrin complex
+caspase complex
+growing cell tip
+non-growing cell tip
+activator ecdysone receptor complex
+repressor ecdysone receptor complex
+ecdysone receptor holocomplex
+meiotic recombination initiation complex
+egg coat
+gamma-tubulin small complex
+cohesin complex
+DNA helicase A complex
+alphav-beta3 integrin-PKCalpha complex
+DNA helicase complex
+alphav-beta3 integrin-IGF-1-IGF1R complex
+alphav-beta3 integrin-HMGB1 complex
+ciliary transition zone
+site of double-strand break
+1-alkyl-2-acetylglycerophosphocholine esterase complex
+Seh1-associated complex
+oligosaccharyltransferase complex
+old growing cell tip
+new growing cell tip
+old cell tip after activation of bipolar cell growth
+endonuclear canal
+ASTRA complex
+CORVET complex
+cytosolic electron transfer flavoprotein complex
+cytosolic oxoglutarate dehydrogenase complex
+cytosolic tricarboxylic acid cycle enzyme complex
+cytosol pyruvate dehydrogenase (lipoamide) phosphatase complex
+cytosolic pyruvate dehydrogenase complex
+electron transfer flavoprotein complex
+pyruvate dehydrogenase complex
+oxoglutarate dehydrogenase complex
+pyruvate dehydrogenase (lipoamide) phosphatase complex
+Bcl3/NF-kappaB2 complex
+I-kappaB/NF-kappaB complex
+SAS acetyltransferase complex
+vacuolar transporter chaperone complex
+plasma membrane succinate dehydrogenase complex (ubiquinone)
+proton-transporting ATP synthase complex
+succinate dehydrogenase complex (ubiquinone)
+proton-transporting ATP synthase complex, catalytic core F(1)
+plasma membrane proton-transporting ATP synthase complex, catalytic core F(1)
+plasma membrane proton-transporting ATP synthase complex
+proton-transporting ATP synthase, stator stalk
+plasma membrane proton-transporting ATP synthase, stator stalk
+proton-transporting ATP synthase complex, coupling factor F(o)
+plasma membrane proton-transporting ATP synthase complex, coupling factor F(o)
+inward rectifying potassium channel
+protein serine/threonine phosphatase complex
+proton-transporting ATP synthase, central stalk
+proton-transporting ATP synthase, catalytic core
+plasma membrane proton-transporting ATP synthase, catalytic core
+plasma membrane respiratory chain complex I
+respiratory chain complex II
+plasma membrane proton-transporting ATP synthase, central stalk
+respiratory chain complex I
+plasma membrane respiratory chain complex III
+respiratory chain complex IV
+plasma membrane respiratory chain complex II
+respiratory chain complex III
+plasma membrane respiratory chain complex IV
+fumarate reductase complex
+plasma membrane fumarate reductase complex
+succinate dehydrogenase complex
+plasma membrane succinate dehydrogenase complex
+Rpd3L-Expanded complex
+Snt2C complex
+CSK-GAP-A.p62 complex
+F-actin capping protein complex
+synapse
+postsynaptic membrane
+eukaryotic 80S initiation complex
+eukaryotic 48S preinitiation complex
+intraconoid microtubule
+protein C inhibitor-acrosin complex
+TAT protein transport complex
+paranode region of axon
+transcription factor TFTC complex
+serotonin receptor complex
+G protein-coupled serotonin receptor complex
+protein complex involved in cell-cell adhesion
+protein complex involved in cell adhesion
+protein complex involved in cell-matrix adhesion
+neurofilament cytoskeleton
+network-forming collagen trimer
+collagen network
+collagen sheet
+banded collagen fibril
+complex of collagen trimers
+collagen beaded filament
+collagen anchoring fibril
+perivitelline space
+male germ cell nucleus
+acrosomal vesicle
+female germ cell nucleus
+fibrillar center
+dense fibrillar component
+granular component
+oligosaccharyltransferase III complex
+subapical complex
+box H/ACA scaRNP complex
+box H/ACA RNP complex
+EMC complex
+interleukin-23 receptor complex
+perineuronal net
+endothelial microparticle
+blood microparticle
+NLRP1 inflammasome complex
+IPAF inflammasome complex
+NLRP3 inflammasome complex
+PR-DUB complex
+urease complex
+NF-kappaB p50/p65 complex
+host cell viral assembly compartment
+specific granule lumen
+azurophil granule membrane
+azurophil granule lumen
+specific granule membrane
+axon microtubule bundle
+dendritic microtubule
+keratin filament
+synaptobrevin 2-SNAP-25-syntaxin-2 complex
+synaptobrevin 2-SNAP-25-syntaxin-3 complex
+type III intermediate filament
+synaptobrevin 2-SNAP-25-syntaxin-1a complex
+endobrevin-SNAP-25-syntaxin-2 complex
+synaptobrevin 2-SNAP-25-syntaxin-4 complex
+endobrevin-SNAP-25-syntaxin-1a complex
+interleukin-18 receptor complex
+subcortical maternal complex
+amyloplast envelope
+aleurone grain
+Weibel-Palade body
+attachment organelle
+amyloplast inner membrane
+amyloplast membrane
+alphav-beta1 integrin-osteopontin complex
+alphav-beta5 integrin-osteopontin complex
+synaptobrevin 2-SNAP-25-syntaxin-1a-complexin I complex
+synaptobrevin 2-SNAP-25-syntaxin-1a-complexin II complex
+extracellular exosome
+syntaxin-6-syntaxin-16-Vti1a complex
+VAMP4-syntaxin-6-syntaxin-16-Vti1a complex
+cellubrevin-VAMP4-syntaxin-16 complex
+cellubrevin-VAMP4-endobrevin-syntaxin-6 complex
+cytochrome complex
+prospore membrane leading edge
+prospore membrane spindle pole body attachment site
+tricarboxylic acid cycle enzyme complex
+dihydrolipoyl dehydrogenase complex
+cytosolic isocitrate dehydrogenase complex (NAD+)
+succinate-CoA ligase complex (GDP-forming)
+cytosolic alpha-ketoglutarate dehydrogenase complex
+isocitrate dehydrogenase complex (NAD+)
+internode region of axon
+node of Ranvier
+Grb2-SHP-2 complex
+basal labyrinth
+ISGF3 complex
+BMP receptor complex
+Yb body
+Tle3-Aes complex
+alphaPDGFR-SHP-2 complex
+alphaPDGFR-PLC-gamma-1-PI3K-SHP-2 complex
+septin complex
+SUMO-targeted ubiquitin ligase complex
+interleukin-23 complex
+interleukin-27 complex
+interleukin-35 complex
+striated muscle dense body
+spindle envelope
+spore wall
+contractile vacuolar membrane
+pseudopodium
+inner mucus layer
+outer mucus layer
+mucus layer
+H4/H2A histone acetyltransferase complex
+cell septum edging
+axon initial segment
+varicosity
+terminal bouton
+dendritic shaft
+dendritic spine
+ATP-binding cassette (ABC) transporter complex
+actin cytoskeleton of dendritic spine
+postsynaptic recycling endosome membrane
+photoreceptor inner segment membrane
+ascus epiplasm
+extrinsic component of dense core granule membrane
+TRC complex
+ER membrane insertion complex
+neuronal dense core vesicle
+extrinsic component of postsynaptic early endosome membrane
+extrinsic component of postsynaptic endosome membrane
+male pronucleus
+uropod
+female pronucleus
+Hedgehog signaling complex
+histone locus body
+Cul8-RING ubiquitin ligase complex
+Toll-like receptor 1-Toll-like receptor 2 protein complex
+Toll-like receptor 2-Toll-like receptor 6 protein complex
+SPOTS complex
+male germline ring canal
+female germline ring canal
+cortical granule
+COPII vesicles tethering complex
+MSL complex
+reservosome membrane
+reservosome matrix
+reservosome lumen
+reservosome
+symbiont cell surface
+tRNA (m7G46) methyltransferase complex
+clathrin-coated endocytic vesicle lumen
+phagolysosome vesicle membrane
+phagolysosome vesicle lumen
+COPII-coated vesicle lumen
+COPI-coated vesicle lumen
+cytoplasmic side of plasma membrane, cell tip
+host cell Cajal body
+host multivesicular body
+host cell endosome lumen
+host cell mitochondrial intermembrane space
+lumenal side of lysosomal membrane
+lumenal side of membrane
+cytoplasmic side of lysosomal membrane
+active sex chromosome
+inactive sex chromosome
+condensed chromatin of inactivated sex chromosome
+plasma membrane region
+goblet cell theca
+mucin granule
+external side of apical plasma membrane
+cytoplasmic side of apical plasma membrane
+host cell synaptic vesicle
+host cell synaptic vesicle membrane
+bounding membrane of organelle
+cytoplasmic side of late endosome membrane
+methyl accepting chemotaxis protein complex
+lumenal side of endoplasmic reticulum membrane
+cytoplasmic side of endoplasmic reticulum membrane
+lumenal side of late endosome membrane
+side of membrane
+cytoplasmic side of smooth endoplasmic reticulum membrane
+lumenal side of smooth endoplasmic reticulum membrane
+lumenal side of rough endoplasmic reticulum membrane
+cytoplasmic side of rough endoplasmic reticulum membrane
+cytoplasmic side of early endosome membrane
+lumenal side of plastid thylakoid membrane
+stromal side of plastid thylakoid membrane
+stromal side of plastid inner membrane
+trans-Golgi network transport vesicle lumen
+lumenal side of endosome membrane
+cytoplasmic side of membrane
+external side of mycolate outer membrane
+internal side of mycolate outer membrane
+transport vesicle lumen
+periplasmic side of plasma membrane
+deuterosome
+ATPase dependent transmembrane transport complex
+cytoplasmic side of transport vesicle membrane
+lumenal side of transport vesicle membrane
+lumenal side of early endosome membrane
+lumenal side of trans-Golgi network transport vesicle membrane
+cytoplasmic side of trans-Golgi network transport vesicle membrane
+lumenal side of Golgi membrane
+cytoplasmic side of Golgi membrane
+somatic ring canal
+excitatory neuromuscular junction
+inhibitory neuromuscular junction
+neuromuscular junction of somatic muscle myotube
+excitatory neuromuscular junction of somatic myotube
+neuromuscular junction of skeletal muscle fiber
+neuromuscular junction of myotube
+inhibitory neuromuscular junction of somatic myotube
+neuromuscular junction of somatic muscle
+voltage-gated sodium channel complex
+outer dense fiber
+microfibril
+cornified envelope
+radial spoke
+radial spoke head
+radial spoke stalk
+phosphatidylinositol 3-kinase complex, class III
+omega speckle
+translation repressor complex
+ATPase inhibitor complex
+brahma complex
+interchromatin granule
+RCAF complex
+kinocilium
+inhibitory synapse
+excitatory synapse
+synaptic ribbon
+arciform density
+extrinsic component of neuronal dense core vesicle membrane
+histone methyltransferase complex
+ESC/E(Z) complex
+noradrenergic synapse
+glycinergic synapse
+dopaminergic synapse
+Schaffer collateral - CA1 synapse
+hippocampal mossy fiber to CA3 synapse
+cochlear hair cell ribbon synapse
+photoreceptor ribbon synapse
+chromosomal region
+parallel fiber to Purkinje cell synapse
+extracellular vesicle
+collagen type VII anchoring fibril
+basement membrane collagen trimer
+CENP-A recruiting complex
+peri-centrosomal recycling endosome
+presynaptic endocytic zone
+presynaptic endosome
+presynaptic active zone cytoplasmic component
+cytoskeleton of dendritic spine
+postsynaptic recycling endosome
+presynaptic endocytic zone cytoplasmic component
+presynaptic endocytic zone membrane
+postsynaptic density membrane
+ciliary rootlet
+postsynaptic endocytic zone
+postsynaptic endocytic zone membrane
+postsynaptic early endosome
+postsynaptic endosome
+podocyte foot
+clathrin-sculpted acetylcholine transport vesicle
+clathrin-sculpted acetylcholine transport vesicle membrane
+clathrin-sculpted acetylcholine transport vesicle lumen
+clathrin-sculpted glutamate transport vesicle membrane
+clathrin-sculpted glutamate transport vesicle lumen
+cytoplasmic vesicle lumen
+trans-synaptic protein complex
+endoplasmic reticulum tubular network membrane
+endoplasmic reticulum subcompartment
+cortical microtubule plus-end
+inner mitochondrial membrane protein complex
+respiratory chain complex
+non-motile cilium membrane
+plasma membrane signaling receptor complex
+chloroplast thylakoid membrane protein complex
+extrinsic component of presynaptic endocytic zone membrane
+postsynaptic endosome membrane
+extrinsic component of postsynaptic specialization membrane
+extrinsic component of postsynaptic endocytic zone
+dense core granule lumen
+spine apparatus lumen
+postsynaptic early endosome membrane
+spine apparatus membrane
+photoreceptor inner segment
+postsynaptic actin cytoskeleton
+epididymosome
+neurotransmitter receptor complex
+germ plasm
+extrinsic component of postsynaptic membrane
+extrinsic component of presynaptic active zone membrane
+extrinsic component of presynaptic membrane
+phagocytic cup
+cytoneme
+glutaminase complex
+G-protein beta/gamma-Btk complex
+integrin alphaIIb-beta3 complex
+pole plasm
+Mad-Max-mSin3B complex
+Mad-Max complex
+elongin complex
+Shc-EGFR complex
+Mad-Max-mSin3A complex
+Grb2-EGFR complex
+Grb2-Shc complex
+alphav-beta3 integrin-collagen alpha3(VI) complex
+SAGA-type complex
+RC-1 DNA recombination complex
+alpha1-beta1 integrin-alpha3(VI) complex
+alpha2-beta1 integrin-alpha3(VI) complex
+respirasome
+interleukin4-interleukin-4 receptor complex
+cell hair
+Ku-DNA ligase complex
+DNA ligase III-XRCC1 complex
+G-protein beta/gamma-Raf-1 complex
+DNA-dependent protein kinase complex
+nonhomologous end joining complex
+tight junction
+anchoring junction
+shelterin complex
+Lsd1/2 complex
+DRM complex
+fusome
+intercellular bridge
+germline ring canal
+apical part of cell
+basal part of cell
+spectrosome
+apical cortex
+organellar chromatophore
+organellar chromatophore membrane
+ciliary neurotrophic factor receptor complex
+organellar chromatophore intermembrane space
+organellar chromatophore thylakoid
+organellar chromatophore inner membrane
+organellar chromatophore outer membrane
+basal cortex
+organellar chromatophore thylakoid lumen
+organellar chromatophore thylakoid membrane
+growth hormone receptor complex
+NuA3 histone acetyltransferase complex
+myelin sheath adaxonal region
+myelin sheath abaxonal region
+COP9 signalosome
+ATP-binding cassette (ABC) transporter complex, transmembrane substrate-binding subunit-containing
+host cell postsynaptic membrane
+cyanelle thylakoid membrane
+cyanelle thylakoid lumen
+cyanelle membrane
+cyanelle envelope
+esterosome membrane
+esterosome
+endoplasmic reticulum-Golgi intermediate compartment membrane
+ribonucleoprotein granule
+attachment organelle membrane
+Cvt vesicle membrane
+myosin I complex
+type VI protein secretion system complex
+tRNA-splicing ligase complex
+interleukin-12-interleukin-12 receptor complex
+mitotic spindle
+bI3 intron splicing complex
+CD19-Vav-PIK3R1 complex
+bI4 intron splicing complex
+transforming growth factor beta ligand-receptor complex
+meiotic spindle
+alphav-beta3 integrin-osteopontin complex
+intracellular organelle lumen
+alphav-beta3 integrin-thrombospondin complex
+sucrase-isomaltase complex
+metaphase plate
+clathrin-sculpted monoamine transport vesicle membrane
+polyhydroxyalkanoate granule
+clathrin-sculpted monoamine transport vesicle
+clathrin-sculpted monoamine transport vesicle lumen
+mononeme
+transcription elongation factor complex
+synaptic vesicle
+cyclin/CDK positive transcription elongation factor complex
+CD40 receptor complex
+mitochondrial prohibitin complex
+root hair
+root hair tip
+chitosome
+phosphatidylinositol 3-kinase complex, class II
+phosphatidylinositol 3-kinase complex, class I
+U4atac/U6atac snRNP
+platelet SNARE complex
+penta-snRNP complex
+unencapsulated part of cell
+U4/U6 snRNP
+U2-type catalytic step 1 spliceosome
+Asi complex
+U2-type catalytic step 2 spliceosome
+U2-type prespliceosome
+U2-type precatalytic spliceosome
+U2-type post-mRNA release spliceosomal complex
+U4atac/U6atac x U5 tri-snRNP complex
+extrinsic component of omegasome membrane
+phagophore assembly site membrane
+exomer complex
+post-spliceosomal complex
+U2-type post-spliceosomal complex
+SL snRNP
+extrinsic component of phagophore assembly site membrane
+U12-type post-spliceosomal complex
+trans spliceosomal complex
+longitudinal flagellum
+transverse flagellum
+endocytic patch
+cell surface furrow
+dinoflagellate sulcus
+dinoflagellate cingulum
+dinoflagellate hypocone
+dinoflagellate epicone
+dinoflagellate sulcal notch
+PTEX complex
+glutathione hydrolase complex
+mitotic spindle astral microtubule
+GTPase activator complex
+luminal surveillance complex
+VCP-NPL4-UFD1 AAA ATPase complex
+Cbp3p-Cbp6 complex
+type III polyketide synthase complex
+type II polyketide synthase complex
+polyketide synthase complex
+alphaV-beta3 integrin-paxillin-Pyk2 complex
+alpha6-beta4 integrin-Fyn complex
+alpha3-beta1 integrin-thrombospondin complex
+alphaV-beta3 integrin-gelsolin complex
+alphaV-beta6 integrin-TGFbeta-3 complex
+alphaIIb-beta3 integrin-fibronectin-tissue transglutaminase complex
+alpha5-beta1 integrin-fibronectin-tissue transglutaminase complex
+alpha6-beta4 integrin-CD9 complex
+alpha1-beta1 integrin-tissue transglutaminase complex
+alpha3-beta1 integrin-tissue transglutaminase complex
+alphaIIb-beta3 integrin-CD9-CD47-platelet glycoprotein Ib complex
+alpha11-beta1 integrin-collagen type I complex
+alpha2-beta1 integrin-CD47 complex
+alphaIIb-beta3 integrin-CD9 complex
+alpha5-beta1 integrin-tissue transglutaminase complex
+alphaV-beta3 integrin-tissue transglutaminase complex
+alpha7-beta1 integrin-CD151 complex
+alpha6-beta4 integrin-CD151 complex
+bacterial extracellular vesicle
+alpha9-beta1 integrin-ADAM2 complex
+dinoflagellate apex
+alpha9-beta1 integrin-ADAM3 complex
+dinoflagellate apical groove
+alpha9-beta1 integrin-ADAM1 complex
+dinoflagellate antapex
+alphav-beta3 integrin-ADAM15 complex
+dinoflagellate antapical horn
+alpha3-beta1 integrin-CD151 complex
+dinoflagellate apical horn
+alpha9-beta1 integrin-ADAM9 complex
+alpha9-beta1 integrin-ADAM15 complex
+alpha6-beta1 integrin-CD151 complex
+ocelloid
+alpha9-beta1 integrin-tenascin complex
+alphaV-beta3 integrin-CD47-FCER2 complex
+alpha3-beta1 integrin-basigin complex
+SCF-Ufo1/Pof10 ubiquitin ligase complex
+alpha3-beta1 integrin-CD63 complex
+CUGBP1-eIF2 complex
+SCF-Ctf13 ubiquitin ligase complex
+SCF-Cdc4 ubiquitin ligase complex
+SCF-Dia2/Pof3 ubiquitin ligase complex
+SCF-Das1 ubiquitin ligase complex
+alpha2-beta1 integrin-chondroadherin complex
+SCF-Mdm30 ubiquitin ligase complex
+SCF-Grr1/Pof2 ubiquitin ligase complex
+SCF-Rcy1/Pof6 ubiquitin ligase complex
+fibronectin-tissue transglutaminase complex
+SCF-Met30/Pof1 ubiquitin ligase complex
+SCF-Skp2 ubiquitin ligase complex
+SCF-Saf1/Pof9 ubiquitin ligase complex
+alpha4-beta1 integrin-thrombospondin-2 complex
+alphaE-beta7 integrin-E-cadherin complex
+SCF-Pof5 ubiquitin ligase complex
+alpha9-beta1 integrin-vascular cell adhesion molecule-1 complex
+SCF-YDR131C ubiquitin ligase complex
+alphav-beta3 integrin-vitronectin complex
+SCF-YLR352W ubiquitin ligase complex
+SCF-Ucc1 ubiquitin ligase complex
+alpha9-beta1 integrin-ADAM12 complex
+alpha4-beta1 integrin-thrombospondin-1 complex
+SCF-Hrt3/Pof7 ubiquitin ligase complex
+alphav-beta3 integrin-ADAM23 complex
+GABA receptor complex
+GABA-A receptor complex
+MICOS complex
+G protein-coupled GABA receptor complex
+cell cortex of growing cell tip
+CENP-A containing chromatin
+dendritic filopodium
+cytoplasmic side of endosome membrane
+Toc complex
+cortical microtubule, transverse to long axis
+endosome membrane
+magnesium chelatase complex
+Cry-Per complex
+CLOCK-BMAL transcription complex
+cytoplasmic microtubule plus-end
+tRNA-specific adenosine-34 deaminase complex
+nuclear exosome targeting complex
+archaeal proton-transporting A-type ATPase complex
+catalase complex
+low-density lipoprotein receptor complex
+cargo receptor complex
+adhesive extracellular matrix
+mitotic spindle microtubule
+raps-insc complex
+hyphae septin collar
+complement component C1q complex
+mitochondrial ATP-gated potassium channel complex
+contractile vacuole complex
+curli secretion complex
+spongiome
+MutSgamma complex
+chitin-based extracellular matrix
+early phagosome lumen
+Nbp35-Cfd1 ATPase complex
+phenyloplast
+LinE complex
+viral capsid, internal space
+CGRP receptor complex
+eyespot apparatus
+RZZ complex
+ryanodine receptor complex
+stereocilia tip-link density
+peroxisomal importomer complex
+type V protein secretion system complex
+CSL-Notch-Mastermind transcription factor complex
+lower tip-link density
+upper tip-link density
+channel complex
+ankyrin-1 complex
+nonsense-mediated decay complex
+viral capsid, fiber
+viral capsid, decoration
+virus tail
+viral capsid, major subunit
+viral capsid, minor subunit
+Pi Mi complex
+histone mRNA stem-loop binding complex
+pollen aperture
+icosahedral viral capsid, collar
+icosahedral viral capsid, neck
+icosahedral viral capsid, neck fiber
+icosahedral viral capsid, collar fiber
+omegasome
+virus tail, fiber
+Parkin-FBXW7-Cul1 ubiquitin ligase complex
+virus tail, tip
+nucleosome disassembly/reassembly complex
+virus tail, tube
+L-type voltage-gated calcium channel complex
+virus tail, baseplate
+PTEN phosphatase complex
+virus tail, shaft
+virus tail, sheath
+pexophagosome
+icosahedral viral capsid, spike
+lateral cortical node
+NuA3a histone acetyltransferase complex
+NuA3b histone acetyltransferase complex
+Rhino-Deadlock-Cutoff Complex
+Ycf2/FtsHi complex
+Yae1-Lto1 complex
+ATG2-ATG18 complex
+phenylacetyl-CoA 1,2-epoxidase complex
+Clr6 histone deacetylase complex I^^
+synaptic vesicle, readily releasable pool
+synaptic vesicle, recycling pool
+synaptic vesicle, resting pool
+MTREC complex
+viral terminase, large subunit
+SKA complex
+virogenic stroma
+peristromal region viral factory
+spherule viral factory
+viroplasm viral factory
+tube viral factory
+double membrane vesicle viral factory
+viral factory
+nuclear viral factory
+cytoplasmic viral factory
+protein-DNA-RNA complex
+clathrin-sculpted gamma-aminobutyric acid transport vesicle
+clathrin-sculpted gamma-aminobutyric acid transport vesicle lumen
+clathrin-sculpted gamma-aminobutyric acid transport vesicle membrane
+septal periplasm
+methionine adenosyltransferase complex
+pairing center
+amphisome membrane
+tubulobulbar complex
+eisosome filament
+Wnt signalosome
+pectic matrix
+ATPase complex
+suberin network
+lignin network
+hemicellulose network
+glycoprotein network
+ciliary pocket collar
+old cell pole
+new cell pole
+ribonucleoprotein complex
+dinoflagellate peduncle
+accessory outer segment
+beta-catenin-TCF complex
+Cdc48p-Npl4p-Vms1p AAA ATPase complex
+Casparian strip
+sperm head plasma membrane
+Isp3 layer of spore wall
+ooplasm
+neuron projection cytoplasm
+Sm-like protein family complex
+Lsm2-8 complex
+flagella connector
+flagellum attachment zone
+bilobe structure
+tripartite attachment complex
+bacterial-type flagellum motor
+bacterial-type flagellum stator complex
+bacterial-type flagellum secretion apparatus
+centriolar subdistal appendage
+mitotic actomyosin contractile ring, proximal layer
+mitotic actomyosin contractile ring, intermediate layer
+mitotic actomyosin contractile ring, distal actin filament layer
+bacterial-type flagellum rotor complex
+R2TP complex
+proximal portion of axoneme
+distal portion of axoneme
+M/G1 phase-specific MADS box-forkhead transcription factor complex
+simple sieve plate
+sperm midpiece
+sperm connecting piece
+sperm annulus
+sperm mitochondrial sheath
+sperm end piece
+sperm principal piece
+ubiquitin activating enzyme complex
+membrane fusion priming complex
+PNGase complex
+lamellar body membrane
+epidermal lamellar body membrane
+alveolar lamellar body membrane
+MIH complex
+PAR polarity complex
+phagocytic cup lip
+phagocytic cup base
+epidermal lamellar body
+alveolar lamellar body
+host cell centrosome
+host cell peroxisome
+sieve plate
+sieve area
+compound sieve plate
+Cdc24p-Far1p-Gbetagamma complex
+cone photoreceptor outer segment
+tetraspanin-enriched microdomain
+Shu complex
+apoptotic body
+nuclear stress granule
+AIM2 inflammasome complex
+serine protease inhibitor complex
+protein C inhibitor-coagulation factor Xa complex
+protein C inhibitor-coagulation factor V complex
+protein C inhibitor-coagulation factor XI complex
+protease inhibitor complex
+BAX complex
+PUMA-BCL-xl complex
+NOXA-BCL-xl complex
+BAK complex
+BCL-2 complex
+NOXA-BCL-2 complex
+centralspindlin complex
+terminal cisterna lumen
+longitudinal sarcoplasmic reticulum lumen
+terminal cisterna
+longitudinal sarcoplasmic reticulum
+tRNA-intron endonuclease complex
+vacuolar proton-transporting V-type ATPase, V1 domain
+vacuolar proton-transporting V-type ATPase, V0 domain
+central cylinder
+nuclear chromosome
+plasma membrane proton-transporting V-type ATPase, V1 domain
+plasma membrane proton-transporting V-type ATPase, V0 domain
+MWP complex
+growth cone filopodium
+vacuole-mitochondrion membrane contact site
+mating projection actin fusion focus
+nucleoplasmic periphery of the nuclear pore complex
+lysosomal matrix
+left posteriolateral basal body
+right posteriolateral basal body
+left anterior basal body
+right anterior basal body
+left caudal basal body
+right caudal basal body
+left ventral basal body
+right ventral basal body
+alpha5-beta1 integrin-LPP3 complex
+alphaV-beta3 integrin-laminin alpha-4 complex
+alpha9-beta1 integrin-thrombospondin-1 complex
+alpha7-beta1 integrin-focal adhesion kinase complex
+alphaX-beta2 integrin-ICAM-4 complex
+alpha9-beta1 integrin-ADAM8 complex
+alpha5-beta5-fibronectin-SFRP2 complex
+alpha7-beta1 integrin-laminin alpha-2 complex
+alphaV-beta3 integrin-CD98 complex
+glucosidase complex
+alpha4-beta1 integrin-CD47 complex
+alpha9-beta1 integrin-VEGF-C complex
+alpha1-beta1 integrin-tyrosine-protein phosphatase non-receptor type 2 complex
+alpha9-beta1 integrin-VEGF-D complex
+alpha9-beta1 integrin-VEGF-A complex
+alpha9-beta1 integrin-osteopontin complex
+alpha5-beta1 integrin-osteopontin complex
+alphaV-beta3 integrin-EGFR complex
+alphaV-beta6 integrin-osteopontin complex
+alphaV-beta3 integrin-LPP3 complex
+metallochaperone complex
+superoxide dismutase complex
+superoxide dismutase copper chaperone complex
+G-protein alpha(q)-synembrin complex
+G-protein alpha(o)-synembrin complex
+paraflagellar rod
+mastigoneme
+G-protein alpha(i)1-synembrin complex
+G-protein alpha(13)-synembrin complex
+NF-kappaB complex
+SMAD protein complex
+homomeric SMAD protein complex
+heteromeric SMAD protein complex
+eNoSc complex
+Tapasin-ERp57 complex
+kinociliary basal body
+ciliary vesicle
+9+0 motile cilium
+blepharoplast
+9+2 motile cilium
+9+0 non-motile cilium
+non-motile cilium
+photoreceptor cell cilium
+9+2 non-motile cilium
+DIM/DIP cell wall layer
+chromatin lock complex
+alpha4-beta4 integrin-EMILIN-1 complex
+alphaIIb-beta3 integrin-ICAM-4 complex
+alpha6-beta1 integrin-CYR61 complex
+alpha5-beta1 integrin-fibronectin-NOV complex
+alphaV-beta3 integrin-tumstatin complex
+alpha5-beta1 integrin-endostatin complex
+alphaV-beta3 integrin-NOV complex
+intracellular vesicle
+alpha7-beta1 integrin-nicotinamide riboside kinase complex
+alpha4-beta1 integrin-JAM2 complex
+alpha4-beta1 integrin-paxillin complex
+alphaV-beta8 integrin-MMP14-TGFbeta-1 complex
+viral terminase, small subunit
+COMA complex
+ESCRT III complex
+ESCRT II complex
+ESCRT I complex
+Swr1 complex
+GINS complex
+MAML3-RBP-Jkappa-ICN3 complex
+MAML3-RBP-Jkappa-ICN4 complex
+MAML3-RBP-Jkappa-ICN2 complex
+MAML2-RBP-Jkappa-ICN1 complex
+MAML2-RBP-Jkappa-ICN4 complex
+MAML3-RBP-Jkappa-ICN1 complex
+MAML2-RBP-Jkappa-ICN2 complex
+MAML2-RBP-Jkappa-ICN3 complex
+CMG complex
+Kv4.3-KChIP1 channel complex
+Kv4.2-Kv4.3 channel complex
+Kv4.2-KChIP3 channel complex
+Kv4.2-KChIP4 channel complex
+Kv4.1-DPP6 channel complex
+Kv4.1-DPP10 channel complex
+cytoplasmic origin of replication recognition complex
+origin recognition complex
+Z chromosome
+Y chromosome
+X chromosome
+W chromosome
+sex chromosome
+transverse filament
+central element
+lateral element
+Kv4.2-KChIP1 channel complex
+Kv4.2-KChIP2 channel complex
+protocadherin-alpha-v7-protocadherin-gamma-b2 complex
+protocadherin-alpha-v7-protocadherin-gamma-b4 complex
+protocadherin-alpha-v4-protocadherin-gamma-a3 complex
+protocadherin-alpha-v4-protocadherin-gamma-b2 complex
+protocadherin-alpha-protocadherin-gamma complex
+protocadherin-alpha-v4-protocadherin-gamma-a1 complex
+protocadherin-alpha-v7-protocadherin-gamma-a3 complex
+protocadherin-alpha-v4-protocadherin-gamma-b4 complex
+protocadherin-alpha-v7-protocadherin-gamma-a1 complex
+condensed chromosome, centromeric region
+kinetochore
+chromosome, centromeric region
+telomere cap complex
+chromosome, telomeric region
+nucleosome
+chromatin
+nuclear telomere cap complex
+condensed chromosome
+heterochromatin
+euchromatin
+pigment granule
+condensin complex
+synaptonemal complex
+condensed nuclear chromosome
+laminin-5B complex
+anterior cell cortex
+posterior cell cortex
+fibronectin fibril
+nucleoid
+senescence-associated vacuole
+actin filament branch point
+ventral surface of cell
+intranuclear rod
+concave side of sperm head
+apical ectoplasmic specialization
+basal ectoplasmic specialization
+CENP-T-W-S-X complex
+plasma membrane of growing cell tip
+mitochondrial DNA-directed RNA polymerase complex
+chloroplast outer membrane translocon
+ring centriole
+podosome core
+podosome ring
+ciliary cap
+inward rectifier potassium channel complex
+sperm head
+apical tubulobulbar complex
+basal tubulobulbar complex
+plastoglobule
+nuclear periphery
+MLL1 complex
+medial cortical node
+Prp19 complex
+exodeoxyribonuclease VII complex
+acetyl-CoA carboxylase complex
+3-isopropylmalate dehydratase complex
+alkyl hydroperoxide reductase complex
+phosphoribosylaminoimidazole carboxylase complex
+nitrate reductase complex
+D-amino-acid dehydrogenase complex
+trimethylamine-N-oxide reductase complex
+acetate CoA-transferase complex
+phenylalanine-tRNA ligase complex
+formate dehydrogenase complex
+cytochrome o ubiquinol oxidase complex
+leading edge of axonal growth cone
+leading edge of dendritic growth cone
+phagophore
+ethanolamine ammonia-lyase complex
+mitochondrial oxoglutarate dehydrogenase complex
+polyphosphate kinase complex
+protein-N(PI)-phosphohistidine-sugar phosphotransferase complex
+aminodeoxychorismate synthase complex
+DNA polymerase V complex
+type II site-specific deoxyribonuclease complex
+external side of cell wall
+succinate-CoA ligase complex (ADP-forming)
+DNA polymerase III complex
+protein histidine kinase complex
+endopeptidase Clp complex
+enterobactin synthetase complex
+glutamate-tRNA ligase complex
+glycerol-3-phosphate dehydrogenase complex
+DNA topoisomerase type II (double strand cut, ATP-hydrolyzing) complex
+sulfate adenylyltransferase complex (ATP)
+3-phenylpropionate dioxygenase complex
+cysteine synthase complex
+glycolate oxidase complex
+exodeoxyribonuclease V complex
+sulfite reductase complex (NADPH)
+pyrophosphate-dependent phosphofructokinase complex, beta-subunit complex
+pyrophosphate-dependent phosphofructokinase complex, alpha-subunit complex
+stromule
+pyrophosphate-dependent phosphofructokinase complex
+cellulose synthase complex
+glutamate synthase complex (NADPH)
+beta-galactosidase complex
+DNA topoisomerase IV complex
+aspartate carbamoyltransferase complex
+ATP-independent citrate lyase complex
+glycine-tRNA ligase complex
+nitrite reductase complex [NAD(P)H]
+riboflavin synthase complex
+dimethyl sulfoxide reductase complex
+calcium:proton antiporter complex
+HslUV protease complex
+ferredoxin hydrogenase complex
+Holliday junction helicase complex
+imidazoleglycerol-phosphate synthase complex
+excinuclease repair complex
+perinucleolar chromocenter
+chromocenter
+chloroplast isoamylase complex
+extracellular isoamylase complex
+Pwp2p-containing subcomplex of 90S preribosome
+triglyceride-rich plasma lipoprotein particle
+TOC-TIC supercomplex I
+NVT complex
+spherical high-density lipoprotein particle
+very-low-density lipoprotein particle
+chylomicron remnant
+discoidal high-density lipoprotein particle
+high-density lipoprotein particle
+intermediate-density lipoprotein particle
+low-density lipoprotein particle
+MAD1 complex
+fungal-type vacuole membrane
+fungal-type vacuole lumen
+lytic vacuole within protein storage vacuole
+protein storage vacuole
+plant-type vacuole
+fungal-type vacuole
+lytic vacuole
+storage vacuole
+rhoptry membrane
+sarcoplasmic reticulum lumen
+sarcoplasmic reticulum membrane
+guanylate cyclase complex, soluble
+porosome
+perinuclear theca
+voltage-gated potassium channel complex
+paranodal junction
+nucleomorph
+Fc-gamma receptor III complex
+Fc-gamma receptor I complex
+intracellular ferritin complex
+mitochondrial degradosome
+eRF1 methyltransferase complex
+Mon1-Ccz1 complex
+Nrd1 complex
+Rad51B-Rad51C-Rad51D-XRCC2 complex
+DNA recombinase mediator complex
+Rad51B-Rad51C complex
+Rad51C-XRCC3 complex
+XRCC2-RAD51D complex
+light-activated voltage-gated calcium channel complex
+NOS2-CD74 complex
+macrophage migration inhibitory factor receptor complex
+sperm fibrous sheath
+spectrin
+postsynapse of neuromuscular junction
+polyadic synapse
+glutamatergic synapse
+GABA-ergic synapse
+symmetric, GABA-ergic, inhibitory synapse
+presynaptic density
+cholinergic synapse
+T-bar
+neuron to neuron synapse
+asymmetric, glutamatergic, excitatory synapse
+fertilization envelope
+vitelline envelope
+presynaptic endosome membrane
+outer membrane protein complex
+hydroxyisourate hydrolase complex
+UBC13-UEV1A complex
+microtubule plus-end
+extracellular matrix of synaptic cleft
+Nicalin-NOMO complex
+perisynaptic extracellular matrix
+PTW/PP1 phosphatase complex
+pre-B cell receptor complex
+Nsk1-Dlc1 complex
+ERMES complex
+extrinsic component of membrane
+extrinsic component of plasma membrane
+DNA polymerase processivity factor complex
+NarGHI complex
+COPI-coated inter-Golgi transport vesicle
+COPI-coated Golgi to ER transport vesicle
+secretory granule
+trans-Golgi network transport vesicle
+endocytic vesicle
+nematocyst
+clathrin coat of coated pit
+glucosidase II complex
+clathrin adaptor complex
+COPII-coated ER to Golgi transport vesicle
+transport vesicle
+clathrin-coated vesicle
+coated vesicle
+SMN complex
+COPI-coated vesicle
+Swi5-Sfr1 complex
+clathrin coat of trans-Golgi network vesicle
+clathrin coat of synaptic vesicle
+clathrin coat of endocytic vesicle
+AP-1 adaptor complex
+vesicle coat
+AP-3 adaptor complex
+AP-2 adaptor complex
+super elongation complex
+clathrin vesicle coat
+AP-4 adaptor complex
+COPII vesicle coat
+COPI vesicle coat
+clathrin coat
+membrane coat
+plastid membrane
+AP-type membrane coat adaptor complex
+nuclear outer membrane-endoplasmic reticulum membrane network
+glycocalyx
+slime layer
+piccolo histone acetyltransferase complex
+S-layer
+amphisome
+autolysosome
+T cell receptor complex
+alpha-beta T cell receptor complex
+gamma-delta T cell receptor complex
+filopodium
+DNA polymerase III, beta sliding clamp processivity factor complex
+single-stranded DNA-binding protein complex
+DNA polymerase III, core complex
+nuclear protein-containing complex
+mitotic nuclear bridge
+mitotic nuclear bridge stalk
+mitotic nuclear bridge midzone
+intracellular protein-containing complex
+endoplasmic reticulum protein-containing complex
+antipodal site
+TEAD-YAP complex
+spore inner membrane
+histone H3-containing nucleosome
+mitochondrial respiratory chain complex III
+mitochondrial respiratory chain complex IV
+mitochondrial proton-transporting ATP synthase, catalytic core
+mitochondrial proton-transporting ATP synthase complex
+m-AAA complex
+TIM23 mitochondrial import inner membrane translocase complex
+glycine reductase complex
+mitochondrial respiratory chain complex I
+mitochondrial respirasome
+mitochondrial respiratory chain complex II, succinate dehydrogenase complex (ubiquinone)
+mitochondrial ribosome
+gamma DNA polymerase complex
+mitochondrial small ribosomal subunit
+mitochondrial large ribosomal subunit
+lysosomal membrane
+lysosome
+mitochondrial proton-transporting ATP synthase, central stalk
+mitochondrial intermembrane space
+mitochondrial permeability transition pore complex
+mitochondrial matrix
+succinate-CoA ligase complex
+plasma membrane-derived chromatophore
+plasma membrane-derived chromatophore membrane
+yolk granule
+mitochondrial intermembrane space protein transporter complex
+nucleolus
+sno(s)RNA-containing ribonucleoprotein complex
+nucleolus organizer region
+alpha-heterochromatin
+beta-heterochromatin
+intercalary heterochromatin
+extrachromosomal circular DNA
+perichromatin fibrils
+2-micrometer circle DNA
+extrachromosomal rDNA circle
+DASH complex
+mitochondrial outer membrane
+mitochondrial envelope
+mitochondrial inner membrane peptidase complex
+mitochondrial inner membrane
+TIM22 mitochondrial import inner membrane insertion complex
+mitochondrial outer membrane translocase complex
+RNA polymerase I complex
+cytoplasm
+mitochondrion
+smooth endoplasmic reticulum
+rough endoplasmic reticulum
+Golgi apparatus
+endoplasmic reticulum-Golgi intermediate compartment
+Golgi lumen
+Golgi stack
+Golgi-associated vesicle
+Golgi medial cisterna
+endoplasmic reticulum membrane
+endoplasmic reticulum lumen
+late endosome
+multivesicular body
+vacuolar membrane
+vacuole
+autophagosome
+vacuolar lumen
+secondary lysosome
+primary lysosome
+early endosome
+endosome
+extrinsic component of intraperoxisomal membrane
+endoplasmic reticulum
+peroxisomal matrix
+signal recognition particle receptor complex
+Sec61 translocon complex
+signal peptidase complex
+signal recognition particle, endoplasmic reticulum targeting
+peroxisomal membrane
+peroxisome
+polysomal ribosome
+presynaptic membrane
+endosperm protein body
+giant axon
+intracellular immature spore
+ascospore-type prospore
+GPI-anchor transamidase complex
+transcription factor TFIID complex
+anaphase-promoting complex
+U5 snRNP
+spliceosomal complex
+U2-type spliceosomal complex
+U7 snRNP
+U2 snRNP
+U1 snRNP
+U6 snRNP
+U4 snRNP
+nuclear lamina
+nucleolar ribonuclease P complex
+nucleoplasm
+DNA replication factor A complex
+nuclear origin of replication recognition complex
+DNA replication factor C complex
+RNA polymerase III complex
+RNA polymerase II, core complex
+replication fork
+nuclear pre-replicative complex
+alpha DNA polymerase:primase complex
+Cajal body
+prothylakoid membrane
+thylakoid membrane
+mitochondrial respiratory chain complex I, peripheral segment
+mitochondrial respiratory chain complex I, membrane segment
+merozoite dense granule membrane
+secretory granule membrane
+clathrin-coated endocytic vesicle membrane
+Golgi-associated vesicle membrane
+coated vesicle membrane
+chitosome membrane
+COPI-coated vesicle membrane
+endocytic vesicle membrane
+clathrin-coated vesicle membrane
+cytoplasmic vesicle membrane
+transport vesicle membrane
+U6atac snRNP
+U4atac snRNP
+U12 snRNP
+U11 snRNP
+chromosome
+telomerase holoenzyme complex
+U12-type spliceosomal complex
+MHC class II protein complex
+MHC protein complex
+MHC class I protein complex
+chylomicron
+mast cell granule
+photoreceptor outer segment membrane
+Noc4p-Nop14p complex
+bacterial-type flagellum basal body, rod
+Noc2p-Noc3p complex
+Noc1p-Noc2p complex
+methane monooxygenase complex
+Noc complex
+multimeric ribonuclease P complex
+preribosome
+90S preribosome
+nucleolar preribosome
+preribosome, small subunit precursor
+preribosome, large subunit precursor
+plastid nucleoid
+proplastid nucleoid
+chloroplast chromosome
+prothylakoid
+dimeric ribonuclease P complex
+actomyosin
+actomyosin, myosin complex part
+chloroplast nucleoid
+mitochondrial nucleoid
+cyanelle ribonuclease P complex
+mitochondrial ribonuclease P complex
+clathrin-coated phagocytic vesicle membrane
+phagocytic vesicle membrane
+axolemma
+synaptic vesicle membrane
+ribonuclease P complex
+centrosomal core
+iRhom2/ADAM17 sheddase complex
+DNA polymerase complex
+microbody
+mannosome
+specific granule
+azurophil granule
+chromaffin granule
+chromaffin granule membrane
+germinal vesicle
+glycogen granule
+zymogen granule
+zymogen granule membrane
+periplasmic space
+lamellar body
+collagen type XIII trimer
+transcription-coupled nucleotide-excision repair, DNA damage recognition complex
+nuclear exosome focus
+Syp1 complex
+atf1-pcr1 complex
+uniplex complex
+nucleotide-excision repair, DNA damage recognition complex
+piccolo-bassoon transport vesicle
+platelet-derived growth factor receptor-ligand complex
+platelet-derived growth factor complex
+efflux pump complex
+post-anaphase microtubule array
+bub1-bub3 complex
+SsuD-SsuE complex
+alkanesulfonate monooxygenase complex
+FMN reductase complex
+MdtBC Complex
+oxidoreductase complex
+taurine dioxygenase complex
+EmrE multidrug transporter complex
+cell leading edge cell cortex
+GroEL-GroES complex
+iron-sulfur cluster transfer complex
+STING complex
+L-cysteine desulfurase complex
+ProVWX complex
+rhoptry neck
+sulfurtransferase complex
+iron-sulfur cluster assembly complex
+phosphomannomutase complex
+intramolecular phosphotransferase complex
+transferase complex
+diamine N-acetyltransferase complex
+yolk
+yolk plasma
+nitric-oxide synthase complex
+extrinsic component of stromal side of plastid thylakoid membrane
+extrinsic component of plastid membrane
+extrinsic component of plastid inner membrane
+extrinsic component of stromal side of plastid inner membrane
+extrinsic component of lumenal side of plastid thylakoid membrane
+extrinsic component of thylakoid membrane
+extrinsic component of plastid thylakoid membrane
+beta-catenin-TCF7L2 complex
+GATA1-TAL1-TCF3-Lmo2 complex
+GATA2-TAL1-TCF3-Lmo2 complex
+alphav-beta3 integrin-CD47 complex
+synaptotagmin-synaptobrevin 2-SNAP-25-syntaxin-1a-syntaxin-1b-Rab3a-complexin II complex
+synaptotagmin-synaptobrevin 2-SNAP-25-syntaxin-1a-syntaxin-1b-Rab3a complex
+transcription export complex 2
+exocytic vesicle
+endosome to plasma membrane transport vesicle
+procollagen-proline 4-dioxygenase complex, alpha(I) type
+procollagen-proline 4-dioxygenase complex, alpha(II) type
+egasyn-beta-glucuronidase complex
+procollagen-proline 4-dioxygenase complex, alpha(III) type
+katanin complex
+ionotropic glutamate receptor complex
+chloroplast proton-transporting ATP synthase complex
+IkappaB kinase complex
+rhabdomere microvillus
+rhabdomere microvillus membrane
+senescence-associated heterochromatin focus
+transcription factor AP-1 complex
+meiotic spindle pole body
+SBF transcription complex
+Golgi to plasma membrane transport vesicle
+ATR-ATRIP complex
+RGS6-DNMT1-DMAP1 complex
+nucleosomal methylation activator complex
+RAD52-ERCC4-ERCC1 complex
+CD20-Lck-Fyn complex
+CD20-Lck-Lyn-Fyn complex
+alpha6-beta4 integrin-Shc-Grb2 complex
+alpha6-beta4 integrin-laminin 5 complex
+interleukin-1 receptor complex
+phagocytic vesicle
+clathrin-coated phagocytic vesicle
+clathrin-coated endocytic vesicle
+lipid tube
+chromatoid body
+plasma membrane respirasome
+endospore core
+proteasome regulatory particle, base subcomplex
+proteasome regulatory particle, lid subcomplex
+proteasome activator complex
+NADH dehydrogenase complex
+glutamyl-tRNA(Gln) amidotransferase complex
+RITS complex
+laminated body
+granular vesicle
+amorphous vesicle
+membrane stack
+neurosecretory vesicle
+recurrent axon collateral
+Schaffer axon collateral
+complex laminated body
+presynaptic grid
+orthogonal array
+ensheathing process
+neck portion of tanycyte
+somatic portion of tanycyte
+tail portion of tanycyte
+axon cytoplasm
+pericellular basket
+pinceau fiber
+parallel fiber
+dendritic branch point
+mitotic spindle midzone
+C bouton
+F bouton
+hippocampal mossy fiber expansion
+S bouton
+sub-surface cisterna
+linear element
+Lewy body core
+Lewy body corona
+hypolemmal cisterna
+intraciliary transport particle
+intraciliary transport particle B
+intraciliary transport particle A
+axonemal heterotrimeric kinesin-II complex
+spindle matrix
+maltose transport complex
+bacterial degradosome
+RPAP3/R2TP/prefoldin-like complex
+Bam protein complex
+Dxr protein complex
+TRAPPI protein complex
+TRAPPII protein complex
+TRAPPIII protein complex
+perforation plate
+cell projection
+periciliary membrane compartment
+primosome complex
+DnaA-L2 complex
+DnaA-Hda complex
+DnaA-Dps complex
+Hda-beta clamp complex
+replication inhibiting complex
+caveola
+oncostatin-M receptor complex
+brush border
+microvillus
+clathrin-coated pit
+adherens junction
+cell-cell junction
+spot adherens junction
+fascia adherens
+zonula adherens
+septate junction
+nephrocyte diaphragm
+pleated septate junction
+acid phosphatase complex
+MBF transcription complex
+retromer, cargo-selective complex
+anthranilate synthase complex
+cAMP-dependent protein kinase complex
+carbamoyl-phosphate synthase complex
+phosphatidylinositol 3-kinase complex, class IA
+phosphatidylinositol 3-kinase complex
+6-phosphofructokinase complex
+phosphatidylinositol 3-kinase complex, class IB
+mitochondrial alpha-ketoglutarate dehydrogenase complex
+alpha,alpha-trehalose-phosphate synthase complex (UDP-forming)
+retromer, tubulation complex
+acetolactate synthase complex
+retromer complex
+peptidase inhibitor complex
+protein tyrosine phosphatase complex
+glycine cleavage complex
+magnesium-dependent protein serine/threonine phosphatase complex
+mitochondrial isocitrate dehydrogenase complex (NAD+)
+calcium- and calmodulin-dependent protein kinase complex
+CAAX-protein geranylgeranyltransferase complex
+protein kinase CK2 complex
+calcineurin complex
+DNA-dependent protein kinase-DNA ligase 4 complex
+axoneme
+gap junction
+smooth septate junction
+bicellular tight junction
+connexin complex
+focal adhesion
+muscle tendon junction
+cilium
+septin ring
+axonemal nexin link
+cellular bud tip
+cellular bud
+cellular bud neck
+cell cortex
+mating projection
+hemozoin formation complex
+multi-pass translocon complex
+SIN/MEN signaling complex
+interphase SIN signaling complex
+new spindle pole body SIN signaling complex
+non-canonical inflammasome complex
+branched-chain alpha-keto acid dehydrogenase complex
+axonemal microtubule doublet ribbon
+axonemal microtubule doublet inner sheath
+axonemal A tubule inner sheath
+axonemal B tubule inner sheath
+axonemal microtubule doublet inner junction
+axonemal microtubule doublet outer junction
+tertiary granule lumen
+host cell viral nucleoid
+virion nucleoid
+viral inner membrane
+T=219 icosahedral capsid
+T=169 icosahedral viral capsid
+viral inner capsid
+viral outer capsid
+T=147 icosahedral capsid
+viral intermediate capsid
+T=13 icosahedral viral capsid
+T=7 icosahedral viral capsid
+T=25 icosahedral viral capsid
+T=16 icosahedral viral capsid
+T=pseudo3 icosahedral viral capsid
+T=3 icosahedral viral capsid
+T=4 icosahedral viral capsid
+T=2 icosahedral viral capsid
+T=1 icosahedral viral capsid
+viral occlusion body
+viral capsid, turret
+host organelle outer membrane
+host cell outer membrane
+TBK1-IKKE-DDX3 complex
+collagen-containing extracellular matrix
+GATOR1 complex
+Gtr1-Gtr2 GTPase complex
+messenger ribonucleoprotein complex
+DiaA complex
+mitochondrial respiratory chain complex IV pre-assembly complex
+MPT synthase complex
+CoA-synthesizing protein complex
+molybdopterin cofactor (Moco) biosynthesis adenylyltransferase complex
+lymphotoxin complex
+protein phosphatase inhibitor complex
+VEGF-A complex
+enzyme IIA-maltose transporter complex
+glutamate dehydrogenase complex
+lipopolysaccharide transport system
+DnaB-DnaC-Rep-PriC complex
+DnaB helicase complex
+biofilm matrix
+DnaB-DnaG complex
+DnaA-DnaB-DnaC complex
+DnaB-DnaC-DnaT-PriA-PriB complex
+DnaB-DnaC-DnaT-PriA-PriC complex
+fungal biofilm matrix
+MalFGK2 complex
+amino acid transport complex
+IHF-DNA complex
+HU-DNA complex
+cobalamin transport complex
+BtuCD complex
+macrolide transmembrane transporter complex
+MacAB-TolC complex
+methionine-importing ABC transporter complex
+contractile vacuole
+plant-type vacuole lumen
+MutS complex
+beta-catenin-ICAT complex
+HFE-transferrin receptor complex
+survivin complex
+axonemal central apparatus
+axonemal central bridge
+axonemal central pair projection
+C1 axonemal microtubule
+C2 axonemal microtubule
+DAPK1-calmodulin complex
+cytoplasmic periphery of the nuclear pore complex
+galectin complex
+Lsm1-7-Pat1 complex
+tubulin folding cofactor complex
+mitotic spindle assembly checkpoint MAD1-MAD2 complex
+VCP-NSFL1C complex
+pyrenoid
+titin-telethonin complex
+microvesicle
+EARP complex
+microtubule end
+equatorial cell cortex
+translocon complex
+cytoplasmic U snRNP body
+Ssh1 translocon complex
+subsynaptic reticulum
+Kv4.2-DPP6 channel complex
+Kv4.3-DPP6 channel complex
+histone pre-mRNA 3^end processing complex
+Kv4.3-DPP10 channel complex
+WASH complex
+inner kinetochore
+GARP complex
+dolipore septum
+primary cell septum
+division septum
+porous cell septum
+adventitious septum
+P-body
+gamma-tubulin ring complex
+gamma-tubulin complex
+retrotransposon nucleocapsid
+outer kinetochore
+equatorial microtubule organizing center
+spindle pole
+Hrd1p ubiquitin ligase ERAD-L complex
+Hrd1p ubiquitin ligase ERAD-M complex
+Doa10p ubiquitin ligase complex
+Hrd1p ubiquitin ligase complex
+ER ubiquitin ligase complex
+growth cone leading edge
+leading edge of lamellipodium
+fungal-type cell wall
+Gram-negative-bacterium-type cell wall
+Gram-positive-bacterium-type cell wall
+peptidoglycan-based cell wall
+cell outer membrane
+retrograde transporter complex, Golgi to ER
+bacterial-type flagellum
+neuron projection branch point
+dendritic spine cytoplasm
+pilus
+high-affinity iron exporter complex
+plastid pyruvate dehydrogenase complex
+enhanceosome
+phosphatidylinositol 3-kinase complex, class III, type II
+phosphatidylinositol 3-kinase complex, class III, type I
+Cvt complex
+Atg12-Atg5-Atg16 complex
+pyruvate kinase complex
+protein kinase complex
+mitochondrial chromosome
+mitochondrial proton-transporting ATP synthase complex, coupling factor F(o)
+mitochondrial proton-transporting ATP synthase complex, catalytic sector F(1)
+mitochondrial proton-transporting ATP synthase, stator stalk
+H-gal-GP complex
+Wnt-Frizzled-LRP5/6 complex
+astral microtubule
+commitment complex
+pericentriolar material
+Pho85-Pho80 CDK-cyclin complex
+Ubp3-Bre5 deubiquitination complex
+nuclear membrane complex Bqt3-Bqt4
+Vma12-Vma22 assembly complex
+nucleoplasmic side of nuclear pore
+cytoplasmic side of nuclear pore
+FNIP-folliculin RagC/D GAP
+CST complex
+Kibra-Ex-Mer complex
+trimethylamine-N-oxide reductase (cytochrome c) complex
+cytolytic granule lumen
+ascus membrane
+cellular bud neck septin structure
+viral membrane
+ficolin-1-rich granule lumen
+TCR signalosome
+RNA N6-methyladenosine methyltransferase complex
+medial cortex septin ring
+pre-replicative complex
+bacterial pre-replicative complex
+primary endosperm nucleus
+myofilament
+MCM core complex
+photoreceptor disc membrane
+ripoptosome
+Rix1 complex
+INO80-type complex
+host cell endocytic vesicle membrane
+TAM protein secretion complex
+apical plasma membrane urothelial plaque
+fusiform vesicle
+hinge region between urothelial plaques of apical plasma membrane
+MCM8-MCM9 complex
+CIA complex
+perinucleolar compartment
+stereocilium shaft
+stereocilium base
+plasma membrane bounded cell projection
+host cell uropod
+bacterial biofilm matrix
+bacterial biofilm matrix surface
+growth cone lamellipodium
+smooth endoplasmic reticulum cisterna
+proximal neuron projection
+rough endoplasmic reticulum cisterna
+cytoplasmic side of dendritic spine plasma membrane
+lipoprotein particle
+glycoprotein Ib-IX-V complex
+MECO complex
+periphagosomal region of cytoplasm
+GLI-SUFU complex
+basolateral part of cell
+rod bipolar cell terminal bouton
+photoreceptor cell terminal bouton
+vacuole-isolation membrane contact site
+glycosylphosphatidylinositol-mannosyltransferase II complex
+procentriole
+procentriole replication complex
+cytoplasmic cyclin-dependent protein kinase holoenzyme complex
+cyclin-dependent protein kinase holoenzyme complex
+cytoophidium
+cyclin K-CDK12 complex
+cyclin K-CDK13 complex
+tumor necrosis factor receptor superfamily complex
+telomerase catalytic core complex
+THO complex
+transcription export complex
+cytosolic DNA-directed RNA polymerase complex
+plastid-encoded plastid RNA polymerase complex B
+plastid-encoded plastid RNA polymerase complex A
+organellar large ribosomal subunit
+organellar small ribosomal subunit
+organellar ribosome
+plastid small ribosomal subunit
+plastid large ribosomal subunit
+Hechtian strand
+radial spoke 1
+radial spoke 2
+radial spoke 3
+radial spoke head 1
+radial spoke head 2
+radial spoke head 3
+radial spoke base
+radial spoke base 1
+radial spoke base 2
+nuclear envelope adjacent to nuclear pore complex
+telopode
+perinuclear region of cytoplasm
+Holliday junction resolvase complex
+coated membrane
+rixosome complex
+multivesicular body, internal vesicle
+multivesicular body lumen
+multivesicular body, internal vesicle lumen
+multivesicular body, internal vesicle membrane
+radial spoke base 3
+radial spoke neck
+H-NS-Hha complex
+ribbon synapse
+mossy fiber rosette
+gemmule
+Lewy neurite
+somatic spine
+thorny excrescence
+type III terminal bouton
+muscle cell postsynaptic specialization
+leaflet of membrane bilayer
+half bridge of mitotic spindle pole body
+inner plaque of mitotic spindle pole body
+intermediate layer of mitotic spindle pole body
+outer plaque of mitotic spindle pole body
+central plaque of mitotic spindle pole body
+astrocyte end-foot
+basal dendrite
+apical dendrite
+sorting endosome
+CA3 pyramidal cell dendrite
+presynaptic active zone dense projection
+spine apparatus
+dendritic tree
+astrocyte projection
+spine mat
+GAIT complex
+glial limiting end-foot
+Schwann cell microvillus
+mesaxon
+terminal loop
+spiny bracelet of Nageotte
+hippocampal mossy fiber
+skein-like inclusion
+mitochondrion-associated adherens complex
+tubular endosome
+nucleolus-associated heterochromatin
+microtubule bundle
+glial filament
+mitotic spindle pole
+dense body
+RNA polymerase V complex
+RNA polymerase IV complex
+HIR complex
+DNA-directed RNA polymerase complex
+plastid-encoded plastid RNA polymerase complex
+autophagosome membrane
+glial cell projection
+capitate projection
+EKC/KEOPS complex
+phagophore assembly site
+Mst2 histone acetyltransferase complex
+H-NS-Cnu complex
+histone H3-K14 acetyltransferase complex
+mycolate outer membrane
+transcription factor TFIIH core complex
+core TFIIH complex portion of holo TFIIH complex
+core TFIIH complex portion of NEF3 complex
+lysosomal HOPS complex
+multivesicular body HOPS complex
+nucleoplasmic THO complex
+vacuolar HOPS complex
+THO complex part of transcription export complex
+MIS12/MIND type complex
+adenylyltransferase complex
+ESCRT complex
+growth factor complex
+microtubule minus-end
+Isw1a complex
+Isw1b complex
+extrinsic component of mycolate outer membrane
+extrinsic component of external side of mycolate outer membrane
+ASAP complex
+acyl-CoA ceramide synthase complex
+nucleotide-excision repair, preincision complex
+protein-DNA ISRE complex
+sperm plasma membrane
+transcription ternary complex
+spliceosomal tri-snRNP complex
+spliceosomal snRNP complex
+Y-shaped link
+ciliary transition fiber
+ciliary necklace
+Gemini of coiled bodies
+Rad6-Rad18 complex
+dendritic cell dendrite
+myosin II filament
+cardiac myofibril
+asexual spore wall
+sexual spore wall
+contractile actin filament bundle
+microvillar actin bundle
+DNA recombinase complex
+parallel actin filament bundle
+microsporocyte nucleus
+rod telodendria
+sperm head-tail coupling apparatus
+matrilin complex
+DNA gyrase complex
+subapical part of cell
+basal body patch
+rod photoreceptor outer segment
+cone photoreceptor disc membrane
+rod photoreceptor disc membrane
+rod photoreceptor disc lumen
+photoreceptor proximal connecting cilium
+photoreceptor distal connecting cilium
+telodendria
+cone telodendria
+stereocilium coat
+sperm glycocalyx
+vascular endothelial glycocalyx
+platelet glycocalyx
+outer dynein arm docking complex
+DNA recombinase auxiliary factor complex
+7SK snRNP
+ventral disc lateral crest
+ventral disc microtubule array
+ventral disc overlap zone
+dolichyl-phosphate-mannose-protein mannosyltransferase Pmt5p-Pmt2p dimer complex
+dolichyl-phosphate-mannose-protein mannosyltransferase Pmt1p-Pmt3p dimer complex
+dolichyl-phosphate-mannose-protein mannosyltransferase Pmt4p homodimer complex
+dolichyl-phosphate-mannose-protein mannosyltransferase Pmt5p-Pmt3p dimer complex
+MutLgamma complex
+archaeal-type flagellum
+ciliary microtubule quartet
+lateral wall of outer hair cell
+ventral disc crossbridge
+ventral disc dorsal microribbon
+ventral disc
+ventral disc supernumerary microtubule array
+sperm cytoplasmic droplet
+Z granule
+left nucleus
+cyst wall
+left lateral basal body pair
+right caudal flagellum
+right lateral basal body pair
+left middle basal body pair
+left tetrad
+right middle basal body pair
+median body
+right tetrad
+lateral shield
+ciliary pro-basal body
+autolysosome membrane
+autolysosome lumen
+pellicular membrane
+ciliary centrin arm
+dolichyl-phosphate-mannose-protein mannosyltransferase Pmt1p-Pmt2p dimer complex
+right nucleus
+lateral cell cortex
+lateral part of cell
+acetyltransferase complex
+catalytic complex
+transmembrane transporter complex
+axonemal central pair
+ciliary tip
+axonemal basal plate
+ciliary shaft
+ciliary inversin compartment
+ciliary base
+axonemal outer doublet
+synaptic vesicle protein transport vesicle
+left caudal flagellum
+transcription preinitiation complex
+right anterior flagellum
+left anterior flagellum
+right posteriolateral flagellum
+left posteriolateral flagellum
+right ventral flagellum
+left ventral flagellum
+dynein axonemal particle
+glycosylphosphatidylinositol-N-acetylglucosaminyltransferase (GPI-GnT) complex
+proteasome complex
+RNA polymerase I upstream activating factor complex
+monolayer-surrounded lipid storage body
+trans-Golgi network transport vesicle membrane
+Golgi to ER transport vesicle membrane
+inter-Golgi transport vesicle membrane
+vesicle membrane
+ER to Golgi transport vesicle membrane
+endomembrane system
+PET complex
+nucleolus-like body
+Derlin-1 retrotranslocation complex
+mitotic spindle kinetochore microtubule
+UFD1-NPL4 complex
+Derlin-1-VIMP complex
+generative cell nucleus
+NPHP complex
+actin cytoskeleton-regulatory complex
+EMILIN complex
+multimerin complex
+transmembrane actin-associated (TAN) line
+signal recognition particle
+signal recognition particle, plasma membrane targeting
+smooth endoplasmic reticulum lumen
+rough endoplasmic reticulum lumen
+heparanase complex
+presynaptic active zone
+cytoskeleton of presynaptic active zone
+presynaptic active zone membrane
+chaperone-mediated autophagy translocation complex
+glucose-1-phosphate adenylyltransferase complex
+canonical inflammasome complex
+pyroptosome complex
+GATOR2 complex
+bacterial outer membrane vesicle
+thioglucosidase complex
+ER body
+host cell membrane pore complex
+host cell nuclear part
+type IV pilus
+host cell nucleoplasm
+NADH dehydrogenase complex (plastoquinone)
+endocytic vesicle lumen
+polar tube
+sensory dendrite
+chloroplast outer membrane
+chloroplast inner membrane
+plant-type vacuole membrane
+chloride channel complex
+sodium channel complex
+potassium channel complex
+calcium channel complex
+methylosome
+methyltransferase complex
+cation channel complex
+monoatomic ion channel complex
+lysosomal proton-transporting V-type ATPase complex
+lysosomal proton-transporting V-type ATPase, V1 domain
+lysosomal proton-transporting V-type ATPase, V0 domain
+SCF ubiquitin ligase complex
+molybdopterin synthase complex
+GCH1 complex
+cytosolic ribosome
+cytosolic small ribosomal subunit
+chloroplast large ribosomal subunit
+chloroplast small ribosomal subunit
+PSII associated light-harvesting complex II, core complex
+photosystem II oxygen evolving complex
+proteasome-activating nucleotidase complex
+proteasome accessory complex
+cytosolic large ribosomal subunit
+PSII associated light-harvesting complex II, peripheral complex
+phagolysosome
+inhibin-betaglycan-ActRII complex
+subpellicular microtubule
+kinetoplast
+acidocalcisome
+merozoite dense granule
+early phagosome
+basal ring of apical complex
+polar ring of apical complex
+infected host cell surface knob
+integrin alpha2-beta1 complex
+integrin alpha1-beta1 complex
+Ig heavy chain-bound endoplasmic reticulum chaperone complex
+interleukin-28 receptor complex
+endoplasmic reticulum chaperone complex
+integrin alpha4-beta7 complex
+integrin alpha4-beta1 complex
+integrin alpha3-beta1 complex
+CFTR-NHERF-ezrin complex
+apicoplast
+ciliary pocket membrane
+ciliary pocket
+glycosome
+icosahedral viral capsid
+viral envelope
+food vacuole
+viral replication complex
+viral tegument
+viral transcriptional complex
+viral integration complex
+GID complex
+microneme
+rhoptry
+symbiont-containing vacuole
+host cell plasma membrane
+apical complex
+symbiont-containing vacuolar membrane network
+symbiont-containing vacuole membrane
+symbiont-containing vacuolar space
+conoid
+helical viral capsid
+viral capsid
+organelle-enclosing lipid monolayer
+viral nucleocapsid
+mitosome
+guanyl-nucleotide exchange factor complex
+micropexophagy-specific membrane apparatus
+small-subunit processome
+DSIF complex
+integrator complex
+integrin alphaE-beta7 complex
+integrin alphaD-beta2 complex
+U11/U12 snRNP
+E.F.G complex
+integrin alphaM-beta2 complex
+integrin alphaL-beta2 complex
+integrin alphav-beta8 complex
+integrin alphav-beta6 complex
+integrin alphaX-beta2 complex
+integrin alpha10-beta1 complex
+NELF complex
+integrin alphav-beta5 complex
+integrin alphav-beta3 complex
+integrin alphav-beta1 complex
+integrin alpha11-beta1 complex
+Maurer^s cleft
+pellicle
+subpellicular network
+integrin alpha7-beta1 complex
+Slit-Robo signaling complex
+integrin alpha6-beta4 complex
+integrin alpha6-beta1 complex
+catenin-TCF7L2 complex
+integrin alpha5-beta1 complex
+gamma-catenin-TCF7L2 complex
+mitochondrial cloud
+integrin alpha9-beta1 complex
+integrin alpha8-beta1 complex
+sphere organelle
+type IV site-specific deoxyribonuclease complex
+intracellular canaliculus
+SLIK (SAGA-like) complex
+lipopolysaccharide receptor complex
+bleb
+cyanelle
+mitochondrial endopeptidase Clp complex
+chloroplastic endopeptidase Clp complex
+cyanelle thylakoid
+viral scaffold
+replication compartment
+Scrib-APC-beta-catenin complex
+Scrib-APC complex
+Par3-APC-KIF3A complex
+APC-IQGAP complex
+APC-tubulin-IQGAP1 complex
+TFIIIC-TOP1-SUB1 complex
+APC-IQGAP1-CLIP-170 complex
+APC-IQGAP1-Rac1 complex
+APC-IQGAP1-Cdc42 complex
+transcription factor TFIIIB-alpha complex
+Lsm-containing SMN-Sm protein complex
+SmD-containing SMN-Sm protein complex
+transcription factor TFIIIC2 complex
+transcription factor TFIIIC1 complex
+transcription factor TFIIIB-beta complex
+sporoplasm
+photosystem II antenna complex
+photosystem I antenna complex
+SMN-Gemin2 complex
+Gemin6-Gemin7-unrip complex
+Gemin3-Gemin4-Gemin5 complex
+pICln-Sm protein complex
+SMN-Sm protein complex
+deep fiber
+eisosome
+dense core granule membrane
+secretory granule lumen
+horsetail-astral microtubule array
+SMC loading complex
+recycling endosome lumen
+viral procapsid
+capsomere
+ModE complex
+MsbA transporter complex
+carbon phosphorus lyase complex
+phosphatidylinositol phosphate phosphatase complex
+DnaB-DnaC complex
+DnaA-oriC complex
+DnaA-DiaA complex
+DnaA-HU complex
+DNA bending complex
+nuclear aryl hydrocarbon receptor complex
+cytosolic aryl hydrocarbon receptor complex
+aryl hydrocarbon receptor complex
+germ tube septin cap
+germ tube septin ring
+pseudohyphal septin ring
+mating projection septin ring
+split septin rings
+septin collar

@@ -13,6 +13,8 @@ __pycache__/
 .ruff_cache/
 .cache/
 
+node_modules
+
 # Virtual environments and local Python version
 .venv/
 venv/
@@ -47,3 +49,6 @@ dist/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Other
+deneme.py
