@@ -669,6 +669,29 @@ class Neo4jClient:
         )
 
         return execution_result
+
+    def list_vector_indexes(self) -> list[str]:
+        with self.driver.session(
+            database=self.cfg.neo4j_db_name,
+            default_access_mode=neo4j.READ_ACCESS
+        ) as session:
+            query = """
+            SHOW VECTOR INDEXES YIELD name 
+            RETURN name
+            """
+            records = session.run(query)
+
+            indexes = [res.data()["name"] for res in records]
+
+        logger.info(
+            "Retrieved list of vector indexes",
+            event_type="vector_index_list_retrieved",
+            component="Neo4jClient.list_vector_indexes",
+            index_count=len(indexes),
+            indexes=indexes
+        )
+
+        return indexes
     
     # In case I decide to use it as a context manager in the future
     def __enter__(self) -> Self:
