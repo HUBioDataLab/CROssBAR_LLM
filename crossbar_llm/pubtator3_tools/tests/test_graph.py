@@ -6,6 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 
 from crossbar_llm.pubtator3_tools.agent import (
+    _router_decision_gaps,
     DepthEvaluation,
     EntityMention,
     RouterDecision,
@@ -334,7 +335,20 @@ async def test_keyword_search_flow_skips_resolve_and_partner_discovery(httpx_moc
     assert final["final_answer"] is not None
 
 
-async def test_keyword_search_with_empty_query_warns_and_still_synthesizes(httpx_mock):
+async def test_keyword_search_with_empty_query_falls_back_to_question(httpx_mock):
+    """An empty `keyword_query` must not mean "issue no query at all".
+
+    keyword_search is the one route with no accession or relation expression
+    to search instead, so a router slip that leaves `keyword_query` null used
+    to send the question straight to synthesis with zero evidence. The
+    question text is a valid PubMed expression; we search it verbatim.
+    """
+    httpx_mock.add_response(
+        url=_url_pattern("/search/"),
+        json={"results": [], "count": 0},
+        is_reusable=True,
+    )
+
     decision = RouterDecision(
         question_type="keyword_search",
         keyword_query="",
@@ -347,8 +361,28 @@ async def test_keyword_search_with_empty_query_warns_and_still_synthesizes(httpx
     final = await graph.ainvoke({"question": "vague", "warnings": []})
 
     assert final["question_type"] == "keyword_search"
+    assert final["queries_used"] == ["vague"]
+    assert any("without a keyword_query" in w for w in final.get("warnings", []))
+    assert final["final_answer"] is not None
+
+
+async def test_keyword_search_with_no_query_and_no_question_warns(httpx_mock):
+    """Nothing to search at all — the original warning still fires."""
+    decision = RouterDecision(
+        question_type="keyword_search",
+        keyword_query="",
+    )
+    graph = build_graph(
+        router=_make_fake_router(decision),
+        synthesizer=_fake_synth,
+    )
+
+    final = await graph.ainvoke({"question": "", "warnings": []})
+
     assert final["queries_used"] == []
-    assert any("keyword_query" in w for w in final.get("warnings", []))
+    assert any(
+        "needs a non-empty keyword_query" in w for w in final.get("warnings", [])
+    )
     assert final["final_answer"] is not None
 
 
@@ -834,3 +868,182 @@ def test_nodes_star_import_does_not_break():
     missing = [n for n in nodes.__all__ if not hasattr(nodes, n)]
     assert not missing, f"__all__ names absent from module: {missing}"
     exec("from crossbar_llm.pubtator3_tools.nodes import *", {})
+
+def _capturing_chat_model(seen: list[str]):
+    """A chat model stand-in that records the rendered synthesis prompt."""
+
+    async def _call(prompt_value):
+        seen.append(prompt_value.to_string())
+        return AIMessage(content="synthesized answer")
+
+    model = RunnableLambda(_call)
+    # build_graph only reaches for structured output on the router/evaluator
+    # paths, both bypassed here; this keeps the duck-type complete.
+    model.with_structured_output = lambda schema, **kwargs: RunnableLambda(
+        lambda _: None
+    )
+    return model
+
+
+async def test_evidence_block_is_capped_and_truncation_is_disclosed(httpx_mock, fx):
+    """max_documents bounds papers, not text — the evidence block needs its own cap.
+
+    Without it an export whose abstracts split into hundreds of passages built
+    a synthesis prompt that overran the provider's context limit and returned a
+    hard 400 instead of an answer.
+    """
+    httpx_mock.add_response(
+        url=_url_pattern("/search/"),
+        json=fx("pubtator3_search_example"),
+        is_reusable=True,
+    )
+    httpx_mock.add_response(
+        url=_url_pattern("/publications/export/biocjson"),
+        json=fx("pubtator3_export_example"),
+        is_reusable=True,
+    )
+    seen: list[str] = []
+
+    decision = RouterDecision(
+        question_type="keyword_search",
+        keyword_query="imatinib side effects",
+    )
+    graph = build_graph(
+        chat_model=_capturing_chat_model(seen),
+        router=_make_fake_router(decision),
+        abstracts_only=True,
+        max_evidence_chars=200,
+    )
+
+    final = await graph.ainvoke(
+        {"question": "What are the side effects of imatinib?", "warnings": []}
+    )
+
+    assert final["final_answer"] == "synthesized answer"
+    assert len(seen) == 1
+    prompt_text = seen[0]
+    assert "further evidence line(s) were omitted" in prompt_text
+    # The cap trims at a line boundary, so at least one passage survives.
+    assert "[PMID:" in prompt_text
+
+
+async def test_evidence_block_is_not_truncated_under_a_generous_budget(httpx_mock, fx):
+    httpx_mock.add_response(
+        url=_url_pattern("/search/"),
+        json=fx("pubtator3_search_example"),
+        is_reusable=True,
+    )
+    httpx_mock.add_response(
+        url=_url_pattern("/publications/export/biocjson"),
+        json=fx("pubtator3_export_example"),
+        is_reusable=True,
+    )
+    seen: list[str] = []
+
+    decision = RouterDecision(
+        question_type="keyword_search",
+        keyword_query="imatinib side effects",
+    )
+    graph = build_graph(
+        chat_model=_capturing_chat_model(seen),
+        router=_make_fake_router(decision),
+        abstracts_only=True,
+    )
+
+    await graph.ainvoke(
+        {"question": "What are the side effects of imatinib?", "warnings": []}
+    )
+
+    assert "further evidence line(s) were omitted" not in seen[0]
+
+class _ScriptedRouterChatModel:
+    """Hands back a scripted RouterDecision per structured-output call."""
+
+    def __init__(self, decisions: list[RouterDecision]):
+        self.decisions = list(decisions)
+        self.calls = 0
+
+    def with_structured_output(self, schema, **kwargs):
+        async def _next(_values):
+            self.calls += 1
+            return self.decisions.pop(0)
+
+        return RunnableLambda(_next)
+
+
+def _incomplete_partner_discovery() -> RouterDecision:
+    """What weak models actually emit: the flat field, not the nested list."""
+    return RouterDecision(
+        question_type="relation_partner_discovery",
+        mentions=[],
+        relation="inhibit",
+        e2_type=None,
+    )
+
+
+def _search_and_export_mocks(httpx_mock, fx) -> None:
+    httpx_mock.add_response(
+        url=_url_pattern("/search/"),
+        json=fx("pubtator3_search_example"),
+        is_reusable=True,
+    )
+    httpx_mock.add_response(
+        url=_url_pattern("/publications/export/biocjson"),
+        json=fx("pubtator3_export_example"),
+        is_reusable=True,
+    )
+
+
+def test_router_gaps_flags_each_routes_required_fields():
+    assert _router_decision_gaps(_incomplete_partner_discovery()) == [
+        "`mentions` must hold exactly one anchor entity",
+        "`e2_type` is required",
+    ]
+    assert _router_decision_gaps(
+        RouterDecision(question_type="keyword_search", keyword_query="  ")
+    ) == ["`keyword_query` is required"]
+    # A complete decision has no gaps.
+    assert _router_decision_gaps(
+        RouterDecision(
+            question_type="relation_partner_discovery",
+            mentions=[EntityMention(text="BTK", suggested_type="gene")],
+            relation="inhibit",
+            e2_type="Chemical",
+        )
+    ) == []
+
+
+async def test_router_downgrades_an_incomplete_decision(httpx_mock, fx):
+    _search_and_export_mocks(httpx_mock, fx)
+    chat_model = _ScriptedRouterChatModel([_incomplete_partner_discovery()])
+
+    graph = build_graph(
+        chat_model=chat_model,
+        synthesizer=_fake_synth,
+        abstracts_only=True,
+    )
+    final = await graph.ainvoke({"question": "BTK inhibitors?", "warnings": []})
+
+    # Exactly one router call: the guard costs no extra LLM round trip.
+    assert chat_model.calls == 1
+    assert final["question_type"] == "keyword_search"
+    assert final["keyword_query"] == "BTK inhibitors?"
+    assert any("downgraded to keyword_search" in w for w in final["warnings"])
+
+
+async def test_router_guard_can_be_disabled(httpx_mock, fx):
+    _search_and_export_mocks(httpx_mock, fx)
+    chat_model = _ScriptedRouterChatModel([_incomplete_partner_discovery()])
+
+    graph = build_graph(
+        chat_model=chat_model,
+        synthesizer=_fake_synth,
+        abstracts_only=True,
+        router_guard=False,
+    )
+    final = await graph.ainvoke({"question": "BTK inhibitors?", "warnings": []})
+
+    assert chat_model.calls == 1
+    assert final["question_type"] == "relation_partner_discovery"
+    assert not any("downgraded" in w for w in final["warnings"])
+

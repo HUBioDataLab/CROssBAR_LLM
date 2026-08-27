@@ -208,6 +208,19 @@ async def search_node(state: PubTator3State) -> dict:
                 )
     elif qtype == "keyword_search":
         kq = (state.get("keyword_query") or "").strip()
+        if not kq:
+            # The router chose the free-text route but left `keyword_query`
+            # null — a structured-output slip, or a JSON fallback that only
+            # recovered `question_type`. Unlike the structured routes there is
+            # no accession or relation expression to search instead, so an
+            # empty `keyword_query` here means issuing NO query at all. The
+            # question text is always a valid PubMed expression; degrade to it.
+            kq = (state.get("question") or "").strip()
+            if kq:
+                warnings.append(
+                    "router selected keyword_search without a keyword_query; "
+                    "using the question text verbatim."
+                )
         if kq:
             queries.append(kq)
         else:
@@ -242,8 +255,19 @@ async def search_node(state: PubTator3State) -> dict:
     # keyword_search route uses). If the router didn't fill `keyword_query`
     # (e.g. router error fallback set only question_type), use the user's
     # question verbatim as the catastrophic-failure tier.
-    if not pmids and qtype in ("relation_partner_discovery", "relation_known_pair", "single_node"):
+    #
+    # keyword_search is included here too: when its distilled query returns
+    # nothing, the broader raw question is the one remaining tier (the
+    # `in queries` check below keeps us from re-issuing the same string).
+    if not pmids and qtype in (
+        "relation_partner_discovery",
+        "relation_known_pair",
+        "single_node",
+        "keyword_search",
+    ):
         fallback_query = (state.get("keyword_query") or "").strip() or (state.get("question") or "").strip()
+        if fallback_query in queries:
+            fallback_query = (state.get("question") or "").strip()
         if fallback_query and fallback_query not in queries:
             warnings.append(
                 f"structured query returned 0 PMIDs; falling back to "
@@ -339,8 +363,42 @@ async def export_node(state: PubTator3State, *, max_documents: int = 10) -> dict
     }
 
 
+def _router_decision_gaps(decision) -> list[str]:
+    """Required fields the decision omits for the route it selected.
+
+    The router is free to pick any route, but each route's downstream node
+    needs specific fields: no anchor mention means resolve has nothing to
+    look up, no `e2_type` means partner discovery has no target type. A
+    decision missing them is not a routing opinion, it is an unusable answer.
+    """
+    qt = decision.question_type
+    gaps: list[str] = []
+
+    if qt == "single_node":
+        if len(decision.mentions) != 1:
+            gaps.append("`mentions` must hold exactly one entity")
+    elif qt == "relation_known_pair":
+        if len(decision.mentions) != 2:
+            gaps.append("`mentions` must hold exactly two entities, [e1, e2]")
+        if not decision.relation:
+            gaps.append("`relation` is required")
+    elif qt == "relation_partner_discovery":
+        if len(decision.mentions) != 1:
+            gaps.append("`mentions` must hold exactly one anchor entity")
+        if not decision.relation:
+            gaps.append("`relation` is required")
+        if not decision.e2_type:
+            gaps.append("`e2_type` is required")
+    elif qt == "keyword_search":
+        if not (decision.keyword_query or "").strip():
+            gaps.append("`keyword_query` is required")
+
+    return gaps
+
+
 __all__ = [
     "_add_warning",
+    "_router_decision_gaps",
     "_ainvoke_structured_with_json_fallback",
     "_is_confident_match",
     "resolve_node",

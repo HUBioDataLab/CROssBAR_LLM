@@ -26,6 +26,7 @@ from crossbar_llm.pubtator3_tools.structured_output import (
     _message_content_to_text,
 )
 from crossbar_llm.pubtator3_tools.nodes import (
+    _router_decision_gaps,
     _add_warning,
     export_node,
     partner_discovery_node,
@@ -71,6 +72,8 @@ def build_graph(
     max_partners: int = 5,
     max_documents: int = 7,
     abstracts_only: bool = False,
+    max_evidence_chars: int = 120_000,
+    router_guard: bool = True,
 ):
     """Compile the PubTator3 LangGraph.
 
@@ -85,6 +88,24 @@ def build_graph(
     False / None and the depth evaluator's full-text refinement path is
     short-circuited (no second pass). Use it when you want predictable token
     cost and don't need PMC body text.
+
+    `max_evidence_chars` caps the assembled evidence block handed to the
+    synthesizer. `max_documents` bounds how many PAPERS we export, not how
+    much TEXT they carry — PubTator3 splits some abstracts into dozens of
+    passages, so a 10-document export has been observed at 587 passages, and
+    an unbounded evidence block overran a 131K-token provider limit outright
+    (a hard 400, not a degraded answer). The cap trims at a passage boundary
+    and tells the synthesizer that it happened.
+
+    `router_guard` enforces the router's own contract: a model that names a
+    route but omits that route's required fields (e.g. partner discovery with
+    `relation` set but `mentions` empty) leaves the structured path with
+    nothing to resolve, so it limps to the keyword fallback while the state
+    still reports the structured route. The guard downgrades such a decision
+    to an explicit keyword_search, which costs no extra LLM call and keeps
+    `question_type` truthful about what actually ran. Set False to observe
+    the raw router output. Applies only to the LLM path — an injected
+    `router` is a test seam and is trusted as given.
     """
     if (router is None or synthesizer is None) and chat_model is None:
         raise ValueError(
@@ -93,35 +114,70 @@ def build_graph(
     if evaluator is None and chat_model is None:
         evaluator = _always_sufficient_evaluator
 
+    async def _invoke_router(state: PubTator3State):
+        prompt = ChatPromptTemplate.from_messages([
+            SystemMessagePromptTemplate.from_template(ROUTER_SYSTEM_PROMPT),
+            MessagesPlaceholder("chat_history", optional=True),
+            HumanMessagePromptTemplate.from_template("User question: {question}"),
+        ])
+        return await _ainvoke_structured_with_json_fallback(
+            chat_model=chat_model,
+            prompt=prompt,
+            schema=RouterDecision,
+            values={
+                "question": state["question"],
+                "chat_history": state.get("chat_history", []),
+            },
+            json_instruction=(
+                "The previous instruction defines the exact routing schema. "
+                "Return ONLY a valid JSON object for that schema. Do not use "
+                "Markdown, prose, tool calls, or extra keys."
+            ),
+        )
+
     async def router_node(state: PubTator3State) -> dict:
         warnings = list(state.get("warnings", []))
         try:
             if router is not None:
                 decision = await router(state["question"])
             else:
-                prompt = ChatPromptTemplate.from_messages([
-                    SystemMessagePromptTemplate.from_template(ROUTER_SYSTEM_PROMPT),
-                    MessagesPlaceholder("chat_history", optional=True),
-                    HumanMessagePromptTemplate.from_template("User question: {question}"),
-                ])
-                decision, used_json_fallback = await _ainvoke_structured_with_json_fallback(
-                    chat_model=chat_model,
-                    prompt=prompt,
-                    schema=RouterDecision,
-                    values={
-                        "question": state["question"],
-                        "chat_history": state.get("chat_history", []),
-                    },
-                    json_instruction=(
-                        "The previous instruction defines the exact routing schema. "
-                        "Return ONLY a valid JSON object for that schema. Do not use "
-                        "Markdown, prose, tool calls, or extra keys."
-                    ),
-                )
+                decision, used_json_fallback = await _invoke_router(state)
                 if used_json_fallback:
                     warnings.append(
                         "router structured-output unavailable; used JSON fallback."
                     )
+
+                # Contract guard. Weaker models routinely fill the flat fields
+                # (`relation`) while dropping the nested list (`mentions`),
+                # which leaves resolve/partner-discovery with no anchor: the
+                # structured query is never built and the run silently becomes
+                # a keyword search while still reporting the structured route.
+                #
+                # We do NOT re-ask. Benchmarking showed a re-ask costs a full
+                # extra router call on exactly the weak models that then fail
+                # it anyway (9 fires, 1 repaired, 8 downgraded; +54% tokens,
+                # no score change), while strong models never trip the guard
+                # and so never paid for it. Downgrading is free and lands on
+                # the same retrieval the fallback would have reached.
+                if router_guard:
+                    gaps = _router_decision_gaps(decision)
+                    if gaps:
+                        rejected = decision.question_type
+                        decision = RouterDecision(
+                            question_type="keyword_search",
+                            keyword_query=(
+                                (decision.keyword_query or "").strip()
+                                or state["question"]
+                            ),
+                            rationale=(
+                                "downgraded: router could not supply the fields "
+                                f"required by {rejected}."
+                            ),
+                        )
+                        warnings.append(
+                            f"router decision incomplete for {rejected} "
+                            f"({'; '.join(gaps)}); downgraded to keyword_search."
+                        )
         except Exception as e:
             # Provider-side schema validation (e.g. invented relation value)
             # would otherwise crash the run. Degrade to keyword_search so the
@@ -154,16 +210,39 @@ def build_graph(
         if synthesizer is not None:
             answer = await synthesizer(state)
         else:
-            ctx_lines: list[str] = []
+            candidate_lines: list[str] = []
             for p in state.get("passages", []):
-                ctx_lines.append(f"[PMID:{p.pmid}] ({p.section}) {p.text}")
+                candidate_lines.append(f"[PMID:{p.pmid}] ({p.section}) {p.text}")
             for r in state.get("document_relations", []):
-                ctx_lines.append(
+                candidate_lines.append(
                     f"[PMID:{r.pmid}] relation={r.type} "
                     f"{r.role1_accession or '?'}->{r.role2_accession or '?'} "
                     f"score={r.score:.2f}"
                 )
+
+            # Trim to the evidence budget at a whole-line boundary. Passages
+            # come first, so what gets dropped is the tail of the evidence
+            # rather than an arbitrary mid-passage cut.
+            ctx_lines: list[str] = []
+            used = 0
+            dropped = 0
+            for line in candidate_lines:
+                cost = len(line) + 1  # +1 for the join newline
+                if used + cost > max_evidence_chars and ctx_lines:
+                    dropped = len(candidate_lines) - len(ctx_lines)
+                    break
+                ctx_lines.append(line)
+                used += cost
+
             evidence = "\n".join(ctx_lines) if ctx_lines else "(no passages found)"
+
+            truncation_note = ""
+            if dropped:
+                truncation_note = (
+                    f"\n\nNOTE: {dropped} further evidence line(s) were omitted "
+                    f"to stay within the context budget. Answer from what is "
+                    f"shown and do not claim the evidence set is exhaustive."
+                )
 
             # Full-text requested but only title/abstract sections came back
             # means none of the retrieved papers are PMC Open Access. Surface
@@ -174,9 +253,9 @@ def build_graph(
                 p.section not in ("title", "abstract")
                 for p in state.get("passages") or []
             )
-            availability_note = ""
+            availability_note = truncation_note
             if full_text_requested and state.get("passages") and not body_sections_present:
-                availability_note = (
+                availability_note += (
                     "\n\nNOTE: full paper body text was requested but none of "
                     "the retrieved PMIDs are PMC Open Access — only titles "
                     "and abstracts are available. End your paragraph with an "
