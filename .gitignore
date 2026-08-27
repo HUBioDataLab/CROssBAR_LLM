@@ -49,3 +49,6 @@ dist/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Other
+deneme.py

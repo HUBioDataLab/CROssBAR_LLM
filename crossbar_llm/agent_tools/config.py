@@ -404,7 +404,7 @@ class VectorMappings(BaseSettings):
         yaml_file=ConfigPaths.VECTOR_MAPPINGS_FILE,
     )
 
-    SmallMolecule: VectorIndexConfig
+    SmallMolecule: list[VectorIndexConfig]
     Protein: list[VectorIndexConfig]
     GOTerm: VectorIndexConfig
     Phenotype: VectorIndexConfig
