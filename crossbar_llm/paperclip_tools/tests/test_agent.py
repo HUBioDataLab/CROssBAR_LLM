@@ -861,3 +861,52 @@ async def test_router_failure_falls_back_to_broad_not_one_corpus():
     assert out["question_type"] == "keyword_search"
     assert out["source"] is None
     assert any("router failed" in w for w in out["warnings"])
+
+
+# --- narrow-source guard ------------------------------------------------- #
+# Cases taken verbatim from the 100-question BioASQ list run, where `proteins`
+# scored 0.12/5 and `fda` 0.50/5 against 3.5/5 for broad search.
+
+import pytest
+
+from crossbar_llm.paperclip_tools.agent import _narrow_source_allowed
+
+
+@pytest.mark.parametrize("source,question", [
+    ("proteins", "List the essential aminoacids."),
+    ("proteins", "Which tissues express the ACE2 protein?"),
+    ("proteins", "Name three binding partners of cofilin 2."),
+    ("proteins", "Which protein complexes contain mitofilin?"),
+    ("proteins", "Name curated data resources for ChIP-seq data"),
+    ("fda", "List drugs included in the TRIUMEQ pill."),
+    ("fda", "Which drugs are included in PolyIran?"),
+    ("fda", "What are the targets of avapritinib?"),
+    ("trials", "Which two drugs were compared in the ARISTOTLE Trial?"),
+])
+def test_narrow_source_rejected_without_a_named_record(source, question):
+    """Naming a protein or drug is not grounds for a record corpus."""
+    assert _narrow_source_allowed(source, question) is False
+
+
+@pytest.mark.parametrize("source,question", [
+    ("proteins", "What is the sequence length of UniProt P04637?"),
+    ("proteins", "What is the PDB accession for human lysozyme?"),
+    ("chembl", "What is the ChEMBL bioactivity of CHEMBL25?"),
+    ("trials", "What is the enrollment of trial NCT04280705?"),
+    ("fda", "What are the FDA-approved indications for alteplase?"),
+    ("fda", "Does pembrolizumab carry a boxed warning?"),
+    (None, "Which genes are related to psoriasis?"),
+    ("pmc", "Which genes are related to psoriasis?"),
+])
+def test_narrow_source_allowed_for_real_record_lookups(source, question):
+    assert _narrow_source_allowed(source, question) is True
+
+
+async def test_router_downgrades_unusable_narrow_source_and_warns():
+    adapter = FakeAdapter()
+    g = build_graph(router=_router(source="proteins"), synthesizer=_synth, adapter=adapter)
+    out = await g.ainvoke({"question": "Which tissues express the ACE2 protein?"})
+
+    assert out["source"] is None
+    assert any("searching broadly instead" in w for w in out["warnings"])
+    assert adapter.search_calls[0]["source"] is None

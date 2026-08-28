@@ -151,6 +151,41 @@ def _collapse_degenerate_runs(text: str) -> tuple[str, int]:
     return text, total
 
 
+# Narrow corpora measured on 100 BioASQ list questions: broad/pmc scored 3.5/5
+# mean judge, while `proteins` scored 0.12 and `fda` 0.50. They hold database
+# records with no abstracts and no prose, so they can only answer a question
+# that names the exact record or asks for a regulatory/registry field. The
+# router picks them anyway whenever a question merely says "protein" or names a
+# drug -- the prompt has warned against both for two revisions and it still
+# happens -- so the check lives here where it can be tested.
+_RECORD_CORPORA = {"proteins", "pdb", "chembl"}
+_REGISTRY_CORPORA = {"fda", "trials"}
+
+# UniProt accession, ChEMBL id, or the database named outright.
+_RECORD_ID_RE = re.compile(
+    r"\b(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]"
+    r"|CHEMBL[0-9]+|uniprot|swiss-?prot|pdb\b|protein data bank|chembl)\b",
+    re.I,
+)
+# Regulatory/registry intent: an NCT id, or language about the record itself
+# rather than about the drug's biology.
+_REGISTRY_INTENT_RE = re.compile(
+    r"\b(?:NCT[0-9]{6,}|fda[- ]approved|approval status|drug label|package insert"
+    r"|boxed warning|black box|regulatory|marketing authoriz|clinical trial registry"
+    r"|trial phase|enrollment|recruitment status)\b",
+    re.I,
+)
+
+
+def _narrow_source_allowed(source: str | None, question: str) -> bool:
+    """Whether a narrow corpus can actually serve this question."""
+    if source in _RECORD_CORPORA:
+        return bool(_RECORD_ID_RE.search(question))
+    if source in _REGISTRY_CORPORA:
+        return bool(_REGISTRY_INTENT_RE.search(question))
+    return True
+
+
 def build_graph(
     *,
     chat_model: BaseChatModel | None = None,
@@ -242,9 +277,17 @@ def build_graph(
                 map_question=state["question"],
                 rationale=f"router error fallback: {e}",
             )
+        source = decision.source
+        if not _narrow_source_allowed(source, state["question"]):
+            warnings.append(
+                f"router chose source={source!r} but the question names no "
+                "record or regulatory field; searching broadly instead."
+            )
+            source = None
+
         return {
             "question_type": decision.question_type,
-            "source": decision.source,
+            "source": source,
             "search_query": decision.search_query,
             "analogical_query": decision.analogical_query,
             "map_question": decision.map_question,
