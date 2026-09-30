@@ -5,7 +5,7 @@ import random
 import itertools
 
 from typing import Optional, Union
-from pydantic import BaseModel, FilePath, HttpUrl, model_validator, validate_call
+from pydantic import BaseModel, Field, FilePath, HttpUrl, model_validator, validate_call
 
 
 class BioASQConfig(BaseModel):
@@ -13,7 +13,7 @@ class BioASQConfig(BaseModel):
     output_file: Path
     question_type: str
     size: int
-    seed: int = 49
+    seed: list[int] = Field(default_factory=lambda: [49])
 
 
 class Snippets(BaseModel):
@@ -107,8 +107,12 @@ def save_json_file(data: list[dict], file_path: Path) -> None:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
+def output_file_for_seed(output_file: Path, seed: int) -> Path:
+    return output_file.with_name(f"{output_file.stem}_{seed}{output_file.suffix}")
+
+
 @validate_call
-def select_subset_and_save(input_file: Path, output_file: Path, question_type: str, size: int, seed: int) -> None:
+def select_subset_and_save(input_file: Path, output_file: Path, question_type: str, size: int, seeds: list[int]) -> None:
     """
     Load data from the input JSON file, select a subset based on the specified type,
     and save the subset to the output JSON file.
@@ -118,11 +122,12 @@ def select_subset_and_save(input_file: Path, output_file: Path, question_type: s
         output_file (Path): The path to the output JSON file.
         question_type (str): The type to filter by.
         size (int): The number of entries to randomly select from the filtered type.
-        seed (int): The random seed for reproducibility.
+        seeds (list[int]): Random seeds for reproducibility.
     """
     data = load_json_file(input_file)
-    subset = select_subset_by_type(data["questions"], question_type, size, seed)
-    save_json_file(subset, output_file)
+    for seed in seeds:
+        subset = select_subset_by_type(data["questions"], question_type, size, seed)
+        save_json_file(subset, output_file_for_seed(output_file, seed))
 
 def main():
     parser = argparse.ArgumentParser(description="Select a subset of BioASQ benchmark questions based on type.")
@@ -130,7 +135,7 @@ def main():
     parser.add_argument("--output_file", type=Path, help="Path to the output JSON file to save the selected subset.")
     parser.add_argument("--question_type", type=str, help="The type field of BioASQ benchmark questions to filter by (e.g., 'factoid', 'list', 'yesno').")
     parser.add_argument("--size", type=int, default=100, help="The number of entries to randomly select from the filtered type (default: 100).")
-    parser.add_argument("--seed", type=int, default=49, help="Random seed for reproducibility (default: 49).")
+    parser.add_argument("--seed", type=int, nargs="+", default=[49], help="One or more random seeds for reproducibility (default: 49).")
 
     args = parser.parse_args()
 
@@ -146,4 +151,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

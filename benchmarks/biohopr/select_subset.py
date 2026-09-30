@@ -3,14 +3,14 @@ import json
 import argparse
 import random
 
-from pydantic import BaseModel, FilePath
+from pydantic import BaseModel, Field, FilePath
 
 class BioHopRConfig(BaseModel):
     input_file: FilePath
     output_file: Path
     hop_type: str
     size: int
-    seed: int = 49
+    seed: list[int] = Field(default_factory=lambda: [49])
 
 
 def load_json_file(file_path: Path) -> list[dict]:
@@ -67,7 +67,11 @@ def save_json_file(data: list[dict], file_path: Path) -> None:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def select_subset_and_save(input_file: Path, output_file: Path, hop_type: str, size: int, seed: int) -> None:
+def output_file_for_seed(output_file: Path, seed: int) -> Path:
+    return output_file.with_name(f"{output_file.stem}_{seed}{output_file.suffix}")
+
+
+def select_subset_and_save(input_file: Path, output_file: Path, hop_type: str, size: int, seeds: list[int]) -> None:
     """
     Load data from the input JSON file, select a subset based on the specified hop type,
     and save the subset to the output JSON file.
@@ -77,11 +81,12 @@ def select_subset_and_save(input_file: Path, output_file: Path, hop_type: str, s
         output_file (Path): The path to the output JSON file.
         hop_type (str): The hop type to filter by.
         size (int): The number of entries to randomly select from the filtered hop type.
-        seed (int): The random seed for reproducibility.
+        seeds (list[int]): Random seeds for reproducibility.
     """
     data = load_json_file(input_file)
-    subset = select_subset_by_hop_type(data, hop_type, size, seed)
-    save_json_file(subset, output_file)
+    for seed in seeds:
+        subset = select_subset_by_hop_type(data, hop_type, size, seed)
+        save_json_file(subset, output_file_for_seed(output_file, seed))
 
 def main():
     parser = argparse.ArgumentParser(description="Select a subset of BioHopR benchmark data based on hop type.")
@@ -89,7 +94,7 @@ def main():
     parser.add_argument("--output_file", type=Path, required=True, help="Path to the output JSON file to save the selected subset.")
     parser.add_argument("--hop_type", type=str, required=True, help="The hop type to filter by 'relation_hop2' field of BioHopR data (e.g., disease:gene/protein:drug).")
     parser.add_argument("--size", type=int, default=50, help="The number of entries to randomly select from the filtered hop type (default: 50).")
-    parser.add_argument("--seed", type=int, default=49, help="Random seed for reproducibility (default: 49).")
+    parser.add_argument("--seed", type=int, nargs="+", default=[49], help="One or more random seeds for reproducibility (default: 49).")
 
     args = parser.parse_args()
 
