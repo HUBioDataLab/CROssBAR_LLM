@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, UTC
 from threading import Lock
 from collections import defaultdict
+from typing import Any
 from uuid import uuid4
 
 from langgraph.checkpoint.memory import MemorySaver
@@ -15,6 +16,16 @@ class ChatSessionContext:
     browser_id: str
     pending_resume: bool = False
     pending_cypher: str | None = None
+    # The orchestrator's routing plan for a question paused at Cypher review:
+    # the agents that still have to run once the Cypher is approved.
+    pending_plan: Any | None = None
+    # Recent (question, answer) turns, so the router can turn a follow-up such
+    # as "what about its side effects?" into a question the literature agents,
+    # which keep no history of their own, can answer.
+    history: list[Any] = field(default_factory=list)
+    # True while a question or resume is being answered. Two requests on one
+    # session would share its LangGraph thread and bill every agent twice.
+    busy: bool = False
     checkpointer: MemorySaver = field(default_factory=MemorySaver)
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
@@ -110,14 +121,45 @@ class SessionStore:
             if not browser_sessions:
                 self._browser_sessions.pop(session.browser_id, None)
     
-    def mark_resume_pending(self, session_id: str, browser_id: str, pending: bool, pending_cypher: str | None = None) -> None:
+    def mark_resume_pending(
+            self,
+            session_id: str,
+            browser_id: str,
+            pending: bool,
+            pending_cypher: str | None = None,
+            pending_plan: Any | None = None,
+        ) -> None:
         with self._lock:
             session = self._get_session_locked(session_id=session_id, browser_id=browser_id)
             session.pending_resume = pending
             session.pending_cypher = pending_cypher
+            session.pending_plan = pending_plan if pending else None
             session.updated_at = datetime.now(UTC)
 
             self._cleanup_expired_sessions()
+
+    def claim(self, session_id: str, browser_id: str) -> bool:
+        """Mark the session busy. False if another request already holds it."""
+        with self._lock:
+            session = self._get_session_locked(session_id=session_id, browser_id=browser_id)
+            if session.busy:
+                return False
+            session.busy = True
+            return True
+
+    def release(self, session_id: str, browser_id: str) -> None:
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session is not None and session.browser_id == browser_id:
+                session.busy = False
+
+    def record_turn(self, session_id: str, browser_id: str, turn: Any, max_turns: int) -> None:
+        with self._lock:
+            session = self._get_session_locked(session_id=session_id, browser_id=browser_id)
+            # Rebound rather than appended in place: a request that read the
+            # history earlier keeps the snapshot it read.
+            session.history = [*session.history, turn][-max_turns:] if max_turns > 0 else []
+            session.updated_at = datetime.now(UTC)
 
     def __len__(self):
         with self._lock:

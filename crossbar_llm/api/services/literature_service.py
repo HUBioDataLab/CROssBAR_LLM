@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Awaitable, Callable
+from typing import Any
+from collections.abc import Awaitable, Callable, Iterable
 
-from crossbar_llm.agent_tools.callback_handler import UsageMetricsCallback
+from crossbar_llm.agent_tools.callback_handler import UsageMetricsCallback, usage_slice
 from crossbar_llm.agent_tools.config import ReasoningConfig
 from crossbar_llm.agent_tools.logging_config import get_logger
 from crossbar_llm.api.core.settings import Settings
-from crossbar_llm.api.schemas.requests import LiteratureToolsConfig, ModelConfigRequest
-from crossbar_llm.api.schemas.responses import LiteratureToolResult
+from crossbar_llm.api.schemas.requests import ModelConfigRequest
+from crossbar_llm.api.schemas.responses import AgentRunResult
 from crossbar_llm.paperclip_tools.adapter import PaperclipAdapter, PaperclipConfigError
 from crossbar_llm.paperclip_tools.agent import build_graph as build_paperclip_graph
 from crossbar_llm.paperclip_tools.llm import build_chat_model as build_paperclip_model
@@ -27,20 +28,6 @@ class _AdmissionRejected(Exception):
     def __init__(self, tool: str):
         super().__init__(f"{tool} was not admitted")
         self.tool = tool
-
-# Token counters shared with `UsageCounter`. `call_count` is deliberately NOT
-# here: the core agent's `aggregated_usage.totals` carries exactly these keys,
-# and a per-tool total that quietly grew an extra field would be a different
-# shape wearing the same name.
-_USAGE_TOTAL_KEYS = (
-    "input_tokens",
-    "output_tokens",
-    "total_tokens",
-    "cache_read",
-    "cache_write",
-    "reasoning",
-)
-
 
 class LiteratureService:
     """Run enabled literature agents concurrently on the FastAPI event loop."""
@@ -158,34 +145,7 @@ class LiteratureService:
         Note the returned figures are also part of the response's top-level
         `usage` — this is a breakdown of that total, not an addition to it.
         """
-        per_node = {
-            name: record
-            for name, record in summary.get("per_node_usage", {}).items()
-            if name.startswith(prefix)
-        }
-        if not per_node:
-            return {}
-
-        totals = {
-            key: sum((record.get(key, 0) or 0) for record in per_node.values())
-            for key in _USAGE_TOTAL_KEYS
-        }
-        models_by_node = {
-            name: summary.get("aggregated_usage", {})
-            .get("models_by_node", {})
-            .get(name, [])
-            for name in per_node
-        }
-        return {
-            "per_node_usage": per_node,
-            "call_count": sum(
-                (record.get("call_count", 0) or 0) for record in per_node.values()
-            ),
-            "aggregated_usage": {
-                "totals": totals,
-                "models_by_node": models_by_node,
-            },
-        }
+        return usage_slice(summary, lambda node: node.startswith(prefix))
 
     def _paperclip_citations(self, state: dict[str, Any]) -> list[dict[str, Any]]:
         citations = state.get("citations") or []
@@ -274,159 +234,178 @@ class LiteratureService:
         warning: str,
         summary: dict[str, Any],
         usage_prefix: str,
-    ) -> LiteratureToolResult:
-        return LiteratureToolResult(
+    ) -> AgentRunResult:
+        return AgentRunResult(
             status="failed",
             warnings=[warning],
             # Tokens spent before the failure were still spent — report them.
             usage=self._tool_usage(summary, usage_prefix),
         )
 
-    async def run(
+    def _runner(
         self,
+        name: str,
         *,
         question: str,
         payload: ModelConfigRequest,
         callback: UsageMetricsCallback,
-    ) -> dict[str, LiteratureToolResult]:
-        selected: list[tuple[str, Callable[[], Awaitable[dict[str, Any]]], str]] = []
-        tools: LiteratureToolsConfig = payload.literature_tools
-
-        if tools.paperclip:
-            selected.append(
-                (
-                    "paperclip",
-                    lambda: self._run_paperclip(
-                        question=question, payload=payload, callback=callback
-                    ),
-                    "paperclip.",
-                )
+    ) -> Callable[[], Awaitable[dict[str, Any]]]:
+        if name == "paperclip":
+            return lambda: self._run_paperclip(
+                question=question, payload=payload, callback=callback
             )
-        if tools.pubtator3:
-            selected.append(
-                (
-                    "pubtator3",
-                    lambda: self._run_pubtator3(
-                        question=question, payload=payload, callback=callback
-                    ),
-                    "pubtator3.",
-                )
+        if name == "pubtator3":
+            return lambda: self._run_pubtator3(
+                question=question, payload=payload, callback=callback
             )
+        raise ValueError(f"Unknown literature tool: {name!r}")
 
+    async def run(
+        self,
+        *,
+        question: str,
+        tools: Iterable[str],
+        payload: ModelConfigRequest,
+        callback: UsageMetricsCallback,
+    ) -> dict[str, AgentRunResult]:
+        """Run several tools concurrently; one tool's failure never hides another's."""
+        selected = list(dict.fromkeys(tools))
         if not selected:
             return {}
+        results = await asyncio.gather(
+            *(
+                self.run_tool(
+                    name, question=question, payload=payload, callback=callback
+                )
+                for name in selected
+            )
+        )
+        return dict(zip(selected, results))
+
+    async def run_tool(
+        self,
+        name: str,
+        *,
+        question: str,
+        payload: ModelConfigRequest,
+        callback: UsageMetricsCallback,
+    ) -> AgentRunResult:
+        """Run one tool and report how it went.
+
+        Every failure of the tool becomes a `failed` or `skipped` result, so the
+        caller can run tools side by side without one taking the others down.
+        Only cancellation propagates: that is the caller stopping the work.
+        """
+        runner = self._runner(name, question=question, payload=payload, callback=callback)
+        usage_prefix = f"{name}."
 
         if not question or not question.strip():
-            # The caller asked for these tools but has no question to run them
-            # on. Say so rather than returning an empty object that reads as
-            # "you never enabled anything".
-            return {
-                name: LiteratureToolResult(
-                    status="skipped",
-                    warnings=[
-                        f"{name} was skipped: no question was available for this request."
-                    ],
-                )
-                for name, _, _ in selected
-            }
+            # The caller asked for this tool but has no question to run it on.
+            # Say so rather than returning nothing, which reads as "never asked".
+            return AgentRunResult(
+                status="skipped",
+                warnings=[
+                    f"{name} was skipped: no question was available for this request."
+                ],
+            )
 
-        raw_results = await asyncio.gather(
-            *(self._run_admitted(name, runner) for name, runner, _ in selected),
-            return_exceptions=True,
-        )
+        try:
+            raw = await self._run_admitted(name, runner)
+        except _AdmissionRejected:
+            # Not a failure of the tool — this server was saturated. Says so
+            # plainly so the operator sees capacity, not flakiness.
+            limit = self._admission_limit(name)
+            logger.warning(
+                "Literature tool not admitted",
+                event_type="literature_tool_not_admitted",
+                component="LiteratureService.run_tool",
+                tool=name,
+                max_concurrent=limit,
+                waited_seconds=self.settings.literature_admission_wait_seconds,
+            )
+            return AgentRunResult(
+                status="skipped",
+                warnings=[
+                    f"{name} was skipped: the server is at its capacity of "
+                    f"{limit} concurrent {name} runs. Try again shortly."
+                ],
+            )
+        except asyncio.TimeoutError:
+            return self._failed(
+                name,
+                f"{name} timed out after "
+                f"{self.settings.literature_tool_timeout_seconds:g} seconds.",
+                callback.get_summary(),
+                usage_prefix,
+            )
+        except Exception as error:
+            logger.error(
+                "Literature tool failed",
+                event_type="literature_tool_failed",
+                component="LiteratureService.run_tool",
+                tool=name,
+                error_type=type(error).__name__,
+                error=str(error),
+                exc_info=error,
+            )
+            return self._failed(
+                name,
+                self._failure_warning(name, error),
+                callback.get_summary(),
+                usage_prefix,
+            )
+        return self._normalize(name, raw, callback.get_summary(), usage_prefix)
 
-        summary = callback.get_summary()
-        normalized: dict[str, LiteratureToolResult] = {}
-        for (name, _, usage_prefix), raw in zip(selected, raw_results):
-            if isinstance(raw, _AdmissionRejected):
-                # Not a failure of the tool — this server was saturated. Says
-                # so plainly so the operator sees capacity, not flakiness.
-                limit = self._admission_limit(name)
-                logger.warning(
-                    "Literature tool not admitted",
-                    event_type="literature_tool_not_admitted",
-                    component="LiteratureService.run",
-                    tool=name,
-                    max_concurrent=limit,
-                    waited_seconds=self.settings.literature_admission_wait_seconds,
-                )
-                normalized[name] = LiteratureToolResult(
-                    status="skipped",
-                    warnings=[
-                        f"{name} was skipped: the server is at its capacity of "
-                        f"{limit} concurrent {name} runs. Try again shortly."
-                    ],
-                )
-                continue
-            if isinstance(raw, asyncio.TimeoutError):
-                normalized[name] = self._failed(
-                    name,
-                    f"{name} timed out after "
-                    f"{self.settings.literature_tool_timeout_seconds:g} seconds.",
-                    summary,
-                    usage_prefix,
-                )
-                continue
-            if isinstance(raw, BaseException):
-                logger.error(
-                    "Literature tool failed",
-                    event_type="literature_tool_failed",
-                    component="LiteratureService.run",
-                    tool=name,
-                    error_type=type(raw).__name__,
-                    error=str(raw),
-                    exc_info=raw,
-                )
-                normalized[name] = self._failed(
-                    name, self._failure_warning(name, raw), summary, usage_prefix
-                )
-                continue
-            if not isinstance(raw, dict):
-                logger.error(
-                    "Literature tool returned an unexpected result type",
-                    event_type="literature_tool_bad_result",
-                    component="LiteratureService.run",
-                    tool=name,
-                    result_type=type(raw).__name__,
-                )
-                normalized[name] = self._failed(
-                    name,
-                    f"{name} returned an unexpected result type "
-                    f"({type(raw).__name__}).",
-                    summary,
-                    usage_prefix,
-                )
-                continue
+    def _normalize(
+        self,
+        name: str,
+        raw: Any,
+        summary: dict[str, Any],
+        usage_prefix: str,
+    ) -> AgentRunResult:
+        if not isinstance(raw, dict):
+            logger.error(
+                "Literature tool returned an unexpected result type",
+                event_type="literature_tool_bad_result",
+                component="LiteratureService._normalize",
+                tool=name,
+                result_type=type(raw).__name__,
+            )
+            return self._failed(
+                name,
+                f"{name} returned an unexpected result type "
+                f"({type(raw).__name__}).",
+                summary,
+                usage_prefix,
+            )
 
-            try:
-                citations = (
-                    self._paperclip_citations(raw)
-                    if name == "paperclip"
-                    else self._pubtator_citations(raw)
-                )
-                normalized[name] = LiteratureToolResult(
-                    status="completed",
-                    answer=raw.get("final_answer"),
-                    citations=citations,
-                    warnings=list(raw.get("warnings") or []),
-                    usage=self._tool_usage(summary, usage_prefix),
-                )
-            except Exception as error:
-                logger.error(
-                    "Literature tool result normalization failed",
-                    event_type="literature_tool_normalization_failed",
-                    component="LiteratureService.run",
-                    tool=name,
-                    error_type=type(error).__name__,
-                    error=str(error),
-                    exc_info=error,
-                )
-                normalized[name] = self._failed(
-                    name,
-                    f"{name} returned a result this server could not read "
-                    f"({type(error).__name__}).",
-                    summary,
-                    usage_prefix,
-                )
-
-        return normalized
+        try:
+            citations = (
+                self._paperclip_citations(raw)
+                if name == "paperclip"
+                else self._pubtator_citations(raw)
+            )
+            return AgentRunResult(
+                status="completed",
+                answer=raw.get("final_answer"),
+                citations=citations,
+                warnings=list(raw.get("warnings") or []),
+                usage=self._tool_usage(summary, usage_prefix),
+            )
+        except Exception as error:
+            logger.error(
+                "Literature tool result normalization failed",
+                event_type="literature_tool_normalization_failed",
+                component="LiteratureService._normalize",
+                tool=name,
+                error_type=type(error).__name__,
+                error=str(error),
+                exc_info=error,
+            )
+            return self._failed(
+                name,
+                f"{name} returned a result this server could not read "
+                f"({type(error).__name__}).",
+                summary,
+                usage_prefix,
+            )
