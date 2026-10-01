@@ -111,7 +111,9 @@ PaperclipSource = Literal[
 # Document-id prefixes Paperclip uses across corpora, for parsing search output
 # and for choosing the citation-URL namespace. arXiv ids are `YYMM.NNNNN`
 # (contain a literal dot) -- NOT a hex-digit class, unlike bio_/med_'s hashes.
-_DOC_ID_RE = re.compile(r"(PMC\d+|bio_[0-9a-fA-F]+|med_[0-9a-fA-F]+|arx_[\w.]+|fda_\w+|tri_\w+|NCT\w+)")
+# Word-bounded so a fragment of an ordinary word ("FUNCTIONAL" holds "NCT…")
+# is never taken for an id.
+_DOC_ID_RE = re.compile(r"\b(PMC\d+|bio_[0-9a-fA-F]+|med_[0-9a-fA-F]+|arx_[\w.]+|fda_\w+|tri_\w+|NCT\d+)\b")
 # Trailing timing/footer lines the CLI appends, e.g. "[75ms]" or
 # "[357ms, saved to s_c7326471]". Stripped before JSON parsing.
 _TIMING_FOOTER_RE = re.compile(r"^\s*\[\d+ms.*\]\s*$", re.MULTILINE)
@@ -527,6 +529,26 @@ def _extract_json_object(text: str) -> dict:
     raise PaperclipError("Paperclip response did not contain a JSON object.")
 
 
+def _block_doc_id(lines: list[str]) -> str | None:
+    """The doc_id of one search hit, read from the lines after its title.
+
+    The `<doc_id> · <source> · <date>` line is authoritative. Searching the
+    whole block instead picked up ids that merely appear in the title — a paper
+    titled "Results of NCT01234567 in melanoma" was parsed as the trial, so
+    `get_meta` failed and the answer cited the wrong document.
+    """
+    for line in lines:
+        if " · " in line:
+            m = _DOC_ID_RE.fullmatch(line.split(" · ", 1)[0].strip())
+            if m:
+                return m.group(1)
+    for line in lines:
+        m = _DOC_ID_RE.search(line)
+        if m:
+            return m.group(1)
+    return None
+
+
 def _parse_search(text: str) -> list[PaperHit]:
     """Parse the human-readable `search` listing into PaperHit rows.
 
@@ -550,10 +572,9 @@ def _parse_search(text: str) -> list[PaperHit]:
         if not lines:
             continue
         title = lines[0].strip()
-        m = _DOC_ID_RE.search(block)
-        if not m:
+        doc_id = _block_doc_id(lines[1:])
+        if doc_id is None:
             continue  # header line ("Found N papers") or a malformed block
-        doc_id = m.group(1)
 
         authors = source = date = url = snippet = ""
         for ln in lines[1:]:
@@ -589,7 +610,7 @@ def _doc_root(source: str | None) -> str:
 
 
 # UniProt accession format (proteins corpus doc ids), e.g. O95251, Q09472, P04637.
-_UNIPROT_ACC_RE = re.compile(r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$")
+_UNIPROT_ACC_RE = re.compile(r"^(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2})$")
 
 
 def infer_source_from_doc_id(doc_id: str) -> str:

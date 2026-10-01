@@ -37,6 +37,34 @@ def _message_content_to_text(message: Any) -> str:
     return str(content)
 
 
+def _answer_text(message: Any) -> str:
+    """The user-facing text of a model reply, and nothing else.
+
+    Unlike `_message_content_to_text`, which keeps every block so a JSON payload
+    can be recovered from it, this drops reasoning/thinking blocks: they are the
+    model's private working, not part of the answer. Providers that return a
+    list of content blocks (Anthropic with reasoning, some Gemini setups) would
+    otherwise put that working, or a Python repr of the blocks, in front of the
+    user.
+    """
+    content = getattr(message, "content", message)
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return str(content)
+    parts: list[str] = []
+    for item in content:
+        if isinstance(item, str):
+            parts.append(item)
+        elif (
+            isinstance(item, dict)
+            and item.get("type", "text") == "text"
+            and isinstance(item.get("text"), str)
+        ):
+            parts.append(item["text"])
+    return "".join(parts)
+
+
 def _extract_json_object(text: str) -> dict[str, Any]:
     stripped = text.strip()
     if stripped.startswith("```"):
@@ -111,6 +139,7 @@ async def _ainvoke_structured_with_json_fallback(
 
 __all__ = [
     "_ainvoke_structured_with_json_fallback",
+    "_answer_text",
     "_extract_json_object",
     "_message_content_to_text",
 ]

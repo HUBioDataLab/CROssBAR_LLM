@@ -361,15 +361,27 @@ class AgentService:
             config=config
         )
 
-        self.session_store.mark_resume_pending(session_id=session_id, browser_id=browser_id, pending=False)
+        # An approved query that fails execution is retried, and in generate
+        # mode the retry pauses at human review again. The session must stay
+        # pending with the new Cypher, or the next resume is turned away.
+        interrupts = result.get("__interrupt__")
+        pending = bool(interrupts)
+        self.session_store.mark_resume_pending(
+            session_id=session_id,
+            browser_id=browser_id,
+            pending=pending,
+            pending_cypher=interrupts[0].value.get("current_cypher") if pending else None,
+        )
 
         # Literature runs after the Cypher approval rather than alongside it:
         # in generate mode the question sits idle awaiting review, and paying
         # for literature evidence before the user has approved anything would
-        # bill work the user may well discard.
+        # bill work the user may well discard. The same holds when the resume
+        # pauses for review again: that response carries no literature, so the
+        # tools wait for the resume that actually completes.
         literature = None
         literature_callback = None
-        if self._literature_enabled(payload):
+        if self._literature_enabled(payload) and not pending:
             literature_callback = self._new_literature_callback(session_id)
             # `question` comes from the checkpointed state; a resume request has
             # no question of its own. An empty one still reaches the service so

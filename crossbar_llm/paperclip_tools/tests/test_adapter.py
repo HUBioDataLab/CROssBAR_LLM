@@ -1056,3 +1056,38 @@ async def test_map_reports_unparseable_output_verbatim(monkeypatch):
     with pytest.raises(PaperclipError) as exc:
         await PaperclipAdapter().run_map("s_1", "q")
     assert "something unexpected" in str(exc.value)
+
+
+def test_parse_search_takes_doc_id_from_id_line_not_title():
+    """A trial id in a paper's title must not become that paper's doc_id —
+    `get_meta` would then fail and the answer would cite the trial instead."""
+    text = (
+        "Found 1 papers  [s_abc]\n\n"
+        "  1. Results of NCT01234567 in advanced melanoma\n"
+        "     Some Author\n"
+        "     PMC7654321 · PMC · 2021-05-01\n"
+        "     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7654321/\n"
+        '     "a snippet"\n'
+    )
+    hits = _parse_search(text)
+    assert [h.doc_id for h in hits] == ["PMC7654321"]
+
+
+def test_parse_search_ignores_id_shaped_fragments_inside_words():
+    """'FUNCTIONAL' contains 'NCT…'; without word boundaries it parsed as a
+    trial id and the hit was kept with a fake doc_id."""
+    text = (
+        "Found 1 papers  [s_abc]\n\n"
+        "  1. FUNCTIONAL GENOMICS OF EGFR\n"
+        "     Some Author\n"
+        "     no id here · PMC · 2021-05-01\n"
+    )
+    assert _parse_search(text) == []
+
+
+def test_uniprot_accession_must_match_whole_string():
+    """The two accession shapes were alternated without a group, so the first
+    branch had no end anchor and any string starting like an accession passed."""
+    assert infer_source_from_doc_id("P04637") == "proteins"
+    assert infer_source_from_doc_id("A0A023GPI8") == "proteins"
+    assert infer_source_from_doc_id("P12345 and more") != "proteins"

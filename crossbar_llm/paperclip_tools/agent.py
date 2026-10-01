@@ -29,6 +29,7 @@ from langgraph.graph import END, StateGraph
 # first, plain-JSON fallback) rather than re-deriving it.
 from crossbar_llm.paperclip_tools.structured_output import (
     _ainvoke_structured_with_json_fallback,
+    _answer_text,
 )
 from crossbar_llm.paperclip_tools.nodes import (
     _add_warning,
@@ -347,7 +348,7 @@ def build_graph(
                 },
                 config={"metadata": {"node_name": "paperclip.synthesize"}},
             )
-            answer = msg.content if isinstance(msg.content, str) else str(msg.content)
+            answer = _answer_text(msg)
         answer, degenerate_runs = _collapse_degenerate_runs(answer)
         if degenerate_runs:
             return {

@@ -235,15 +235,22 @@ async def search_node(state: PubTator3State) -> dict:
 
     if queries:
         results = await asyncio.gather(*(_one(q) for q in queries))
+        pages: list[list[int]] = []
         for q, out in results:
             if out.error:
                 warnings.append(f"search failed for '{q}': {out.error}")
                 continue
             total += out.total
-            for hit in out.hits:
-                if hit.pmid not in seen:
-                    seen.add(hit.pmid)
-                    pmids.append(hit.pmid)
+            pages.append([hit.pmid for hit in out.hits])
+        # Take PMIDs from each page in turn. Export keeps only the first
+        # `max_documents`, and one page already holds more than that, so
+        # appending pages whole let the first partner's search fill every
+        # export slot and the answer covered that partner alone.
+        for rank in range(max((len(page) for page in pages), default=0)):
+            for page in pages:
+                if rank < len(page) and page[rank] not in seen:
+                    seen.add(page[rank])
+                    pmids.append(page[rank])
 
     # Zero-results fallback. Structured PubTator3 queries (relations:|...|...,
     # bare accession) often return nothing even when the literature clearly

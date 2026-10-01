@@ -22,6 +22,7 @@ from langgraph.graph import END, StateGraph
 
 from crossbar_llm.pubtator3_tools.structured_output import (
     _ainvoke_structured_with_json_fallback,
+    _answer_text,
     _extract_json_object,
     _message_content_to_text,
 )
@@ -282,7 +283,7 @@ def build_graph(
                 },
                 config={"metadata": {"node_name": "pubtator3.synthesize"}},
             )
-            answer = msg.content if isinstance(msg.content, str) else str(msg.content)
+            answer = _answer_text(msg)
         return {"final_answer": answer}
 
     async def evaluate_depth_node(state: PubTator3State) -> dict:

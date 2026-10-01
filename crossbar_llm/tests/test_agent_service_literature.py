@@ -353,3 +353,101 @@ def test_relevance_is_revalidated_for_each_question_in_a_session():
     assert first["biological_relevance"] is True
     assert len(judged) == 2, "second question reused the first question's verdict"
     assert second["biological_relevance"] is False
+
+
+class _SessionStore:
+    def __init__(self, pending_cypher="MATCH (n) RETURN n"):
+        self.session = SimpleNamespace(
+            pending_resume=True, pending_cypher=pending_cypher
+        )
+        self.marks = []
+
+    def get_session(self, session_id, browser_id):
+        return self.session
+
+    def mark_resume_pending(self, session_id, browser_id, pending, pending_cypher=None):
+        self.marks.append((pending, pending_cypher))
+
+
+def _resume_payload():
+    from crossbar_llm.api.schemas.requests import ResumeRequest
+
+    return ResumeRequest(
+        provider="openai",
+        model="gpt-4o-mini",
+        search_mode="db_search",
+        action="approve",
+        edited_cypher="MATCH (n) RETURN n",
+        literature_tools=LiteratureToolsConfig(paperclip=True, pubtator3=True),
+    )
+
+
+def _resume_service(monkeypatch, graph_result, literature_run):
+    service = _service(literature_run)
+    service.session_store = _SessionStore()
+    class _ResumeGraph:
+        async def ainvoke(self, command, config):
+            return graph_result
+
+    graph = _ResumeGraph()
+    callback = UsageMetricsCallback("session")
+    monkeypatch.setattr(
+        service,
+        "_build_agent_graph",
+        lambda **kwargs: (graph, None, callback, {}),
+    )
+    return service
+
+
+@pytest.mark.asyncio
+async def test_resume_that_pauses_for_review_again_skips_literature(monkeypatch):
+    """A failed approved query retries and pauses at human review again.
+
+    That response is a `PendingResumeResponse`, which carries no literature, so
+    running the tools here would pay for evidence the user never sees — and
+    again on every later resume. The session must also stay pending, with the
+    NEW Cypher, or the next resume is rejected as "not pending".
+    """
+    from crossbar_llm.api.schemas.responses import PendingResumeResponse
+
+    async def unexpected_literature(**kwargs):
+        raise AssertionError("literature ran for a response that discards it")
+
+    interrupt = SimpleNamespace(
+        value={"question": "What is EGFR?", "current_cypher": "MATCH (m) RETURN m"}
+    )
+    service = _resume_service(
+        monkeypatch,
+        {"__interrupt__": [interrupt], "question": "What is EGFR?"},
+        unexpected_literature,
+    )
+
+    response = await service.resume(
+        session_id="session", browser_id="browser", payload=_resume_payload()
+    )
+
+    assert isinstance(response, PendingResumeResponse)
+    assert response.generated_cypher == "MATCH (m) RETURN m"
+    assert service.session_store.marks == [(True, "MATCH (m) RETURN m")]
+
+
+@pytest.mark.asyncio
+async def test_completed_resume_runs_literature(monkeypatch):
+    calls = []
+
+    async def literature_run(**kwargs):
+        calls.append(kwargs["question"])
+        return {}
+
+    service = _resume_service(
+        monkeypatch,
+        {"is_ok": True, "final_answer": "graph answer", "question": "What is EGFR?"},
+        literature_run,
+    )
+
+    await service.resume(
+        session_id="session", browser_id="browser", payload=_resume_payload()
+    )
+
+    assert calls == ["What is EGFR?"]
+    assert service.session_store.marks == [(False, None)]
