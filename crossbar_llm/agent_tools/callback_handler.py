@@ -319,6 +319,58 @@ class UsageMetricsCallback(BaseCallbackHandler):
         )
 
 
+def merge_usage_summaries(*summaries: dict[str, Any]) -> dict[str, Any]:
+    """Combine several `get_summary()` results into one request-level total.
+
+    Used where one request is served by more than one callback — the core agent
+    runs strict (a provider that hides usage metadata should fail loudly rather
+    than bill silently), while optional side agents run lenient because their
+    JSON-fallback path legitimately produces responses without it. Keeping two
+    handlers preserves both behaviours; this puts the numbers back together.
+
+    Node names are expected to be unique across summaries (side agents
+    namespace theirs). On a collision the later summary wins for `model`, and
+    token counts are summed.
+    """
+    merged_nodes: dict[str, dict[str, Union[int, str]]] = {}
+    totals = UsageCounter()
+    models_by_node: dict[str, list[str]] = {}
+    session_id: str | None = None
+
+    for summary in summaries:
+        if not summary:
+            continue
+        session_id = session_id or summary.get("session_id")
+
+        for node, record in (summary.get("per_node_usage") or {}).items():
+            existing = merged_nodes.get(node)
+            if existing is None:
+                merged_nodes[node] = dict(record)
+                continue
+            for key in ("input_tokens", "output_tokens", "total_tokens",
+                        "cache_read", "cache_write", "reasoning", "call_count"):
+                existing[key] = (existing.get(key, 0) or 0) + (record.get(key, 0) or 0)
+            if record.get("model"):
+                existing["model"] = record["model"]
+
+        aggregated = summary.get("aggregated_usage") or {}
+        totals.add_usage(aggregated.get("totals") or {})
+        for node, models in (aggregated.get("models_by_node") or {}).items():
+            bucket = models_by_node.setdefault(node, [])
+            for model in models:
+                if model not in bucket:
+                    bucket.append(model)
+
+    return {
+        "session_id": session_id,
+        "per_node_usage": merged_nodes,
+        "aggregated_usage": {
+            "totals": totals.to_dict(),
+            "models_by_node": models_by_node,
+        },
+    }
+
+
 # ---------------------------------------------------------------
 # CHECK:
 # WHAT HAPPEN WITH DIFFERENT LLM PROVIDERS OTHER THAN OPENAI?

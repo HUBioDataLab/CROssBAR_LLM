@@ -8,12 +8,22 @@ from crossbar_llm.agent_tools.config import VectorMappings
 from crossbar_llm.api.schemas.common import ExecutionControl, SearchMode
 
 
+class LiteratureToolsConfig(BaseModel):
+    """Per-request switches for optional literature evidence agents."""
+
+    paperclip: bool = Field(default=False)
+    pubtator3: bool = Field(default=False)
+
+
 class ModelConfigRequest(BaseModel):
     provider: str
     model: str
     top_k: int = Field(default=10, ge=1, le=100)
     reasoning_enabled: bool = Field(default=False)
     reasoning_effort: Literal["low", "medium", "high"] | None = None
+    literature_tools: LiteratureToolsConfig = Field(
+        default_factory=LiteratureToolsConfig
+    )
 
     @model_validator(mode="after")
     def validate_reasoning(self) -> Self:
@@ -63,6 +73,8 @@ class UploadVectorSearchRequest(VectorSearchRequest):
         top_k: int = Form(10),
         reasoning_enabled: bool = Form(False),
         reasoning_effort: Literal["low", "medium", "high"] | None = Form(None),
+        paperclip: bool = Form(False),
+        pubtator3: bool = Form(False),
         vector_category: str = Form(...),
         embedding_type: str = Form(...),
     ) -> Self:
@@ -74,6 +86,10 @@ class UploadVectorSearchRequest(VectorSearchRequest):
             top_k=top_k,
             reasoning_enabled=reasoning_enabled,
             reasoning_effort=reasoning_effort,
+            literature_tools=LiteratureToolsConfig(
+                paperclip=paperclip,
+                pubtator3=pubtator3,
+            ),
             vector_category=vector_category,
             embedding_type=embedding_type,
         )
@@ -94,7 +110,6 @@ class ResumeRequest(ModelConfigRequest):
         if not value:
             raise ValueError("Edited Cypher cannot be empty or whitespace")
         return value
-
 
 
 

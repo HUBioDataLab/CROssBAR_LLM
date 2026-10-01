@@ -24,8 +24,7 @@ async def db_query(
     agent_service: AgentService = Depends(get_runtime_service)
     ):
 
-    return agent_service.run_db(session_id=session_id, browser_id=identity.browser_id, payload=payload)
-
+    return await agent_service.run_db(session_id=session_id, browser_id=identity.browser_id, payload=payload)
 
 
 

@@ -23,4 +23,4 @@ async def resume_session(
     agent_service: AgentService = Depends(get_runtime_service)
     ):
 
-    return agent_service.resume(session_id=session_id, browser_id=identity.browser_id, payload=payload)
+    return await agent_service.resume(session_id=session_id, browser_id=identity.browser_id, payload=payload)

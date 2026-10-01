@@ -1,0 +1,424 @@
+{
+    "results": [
+        {
+            "_id": "33849366",
+            "pmid": 33849366,
+            "title": "Investigating the root cause of N-nitrosodimethylamine formation in metformin pharmaceutical products.",
+            "journal": "Expert Opin Drug Saf",
+            "authors": [
+                "Nasr NEH",
+                "Metwaly MG",
+                "Ahmed EO",
+                "Fares AR",
+                "ElMeshad AN"
+            ],
+            "date": "2021-07-01T00:00:00Z",
+            "doi": "10.1080/14740338.2021.1917547",
+            "meta_date_publication": "2021 Jul",
+            "meta_volume": "20",
+            "meta_issue": "7",
+            "meta_pages": "855-862",
+            "score": 100984.84,
+            "text_hl": "Investigating the root cause of @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@N-nitrosodimethylamine@@@ formation in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ pharmaceutical products.",
+            "citations": {
+                "NLM": "Nasr NEH, Metwaly MG, Ahmed EO, Fares AR, ElMeshad AN. Investigating the root cause of N-nitrosodimethylamine formation in metformin pharmaceutical products. Expert Opin Drug Saf. 2021 Jul;20(7):855-862. PMID: 33849366",
+                "BibTeX": "@article{33849366, title={Investigating the root cause of N-nitrosodimethylamine formation in metformin pharmaceutical products.}, author={Nasr NEH and Metwaly MG and Ahmed EO and Fares AR and ElMeshad AN}, journal={Expert Opin Drug Saf}, volume={20}, number={7}, pages={855-862}}"
+            }
+        },
+        {
+            "_id": "33422831",
+            "pmid": 33422831,
+            "title": "Insight into the formation of N-nitrosodimethylamine in metformin products.",
+            "journal": "J Pharm Biomed Anal",
+            "authors": [
+                "Jireš J",
+                "Kalášek S",
+                "Gibala P",
+                "Rudovský J",
+                "Douša M",
+                "Kubelka T",
+                "Hrubý J",
+                "Řezanka P"
+            ],
+            "date": "2021-02-20T00:00:00Z",
+            "doi": "10.1016/j.jpba.2020.113877",
+            "meta_date_publication": "2021 Feb 20",
+            "meta_volume": "195",
+            "meta_issue": "",
+            "meta_pages": "113877",
+            "score": 96626.93,
+            "text_hl": "Insight into the formation of @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@N-nitrosodimethylamine@@@ in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ products.",
+            "citations": {
+                "NLM": "Jireš J, Kalášek S, Gibala P, Rudovský J, Douša M, Kubelka T, Hrubý J, Řezanka P. Insight into the formation of N-nitrosodimethylamine in metformin products. J Pharm Biomed Anal. 2021 Feb 20;195():113877. PMID: 33422831",
+                "BibTeX": "@article{33422831, title={Insight into the formation of N-nitrosodimethylamine in metformin products.}, author={Jireš J and Kalášek S and Gibala P and Rudovský J and Douša M and Kubelka T and Hrubý J and Řezanka P}, journal={J Pharm Biomed Anal}, volume={195}, pages={113877}}"
+            }
+        },
+        {
+            "_id": "37031864",
+            "pmid": 37031864,
+            "title": "Dispersant-first dispersive liquid-liquid microextraction (DF-DLLME), a novel sample preparation procedure for NDMA determination in metformin products.",
+            "journal": "J Pharm Sci",
+            "authors": [
+                "Géhin C",
+                "O'Neill N",
+                "Moore A",
+                "Harrison M",
+                "Holman SW",
+                "Blom G"
+            ],
+            "date": "2023-04-07T00:00:00Z",
+            "doi": "10.1016/j.xphs.2023.03.016",
+            "meta_date_publication": "2023 Apr 7",
+            "meta_volume": "",
+            "meta_issue": "",
+            "meta_pages": "",
+            "score": 95949.44,
+            "text_hl": "Dispersant-first dispersive liquid-liquid microextraction (DF-DLLME), a novel sample preparation procedure for @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@ determination in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ products.",
+            "citations": {
+                "NLM": "Géhin C, O'Neill N, Moore A, Harrison M, Holman SW, Blom G. Dispersant-first dispersive liquid-liquid microextraction (DF-DLLME), a novel sample preparation procedure for NDMA determination in metformin products. J Pharm Sci. 2023 Apr 7;():. PMID: 37031864",
+                "BibTeX": "@article{37031864, title={Dispersant-first dispersive liquid-liquid microextraction (DF-DLLME), a novel sample preparation procedure for NDMA determination in metformin products.}, author={Géhin C and O'Neill N and Moore A and Harrison M and Holman SW and Blom G}, journal={J Pharm Sci}}"
+            }
+        },
+        {
+            "_id": "38267707",
+            "pmid": 38267707,
+            "title": "Patient In-Use Stability Testing of FDA-Approved Metformin Combination Products for N-Nitrosamine Impurity.",
+            "journal": "AAPS PharmSciTech",
+            "authors": [
+                "Dharani S",
+                "Mohamed EM",
+                "Rahman Z",
+                "Khan MA"
+            ],
+            "date": "2024-01-24T00:00:00Z",
+            "doi": "10.1208/s12249-023-02724-3",
+            "meta_date_publication": "2024 Jan 24",
+            "meta_volume": "25",
+            "meta_issue": "1",
+            "meta_pages": "19",
+            "score": 95814.66,
+            "text_hl": "When @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ products have @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@ impurities, it is indispensable to check for the same impurities in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ combination products. ",
+            "citations": {
+                "NLM": "Dharani S, Mohamed EM, Rahman Z, Khan MA. Patient In-Use Stability Testing of FDA-Approved Metformin Combination Products for N-Nitrosamine Impurity. AAPS PharmSciTech. 2024 Jan 24;25(1):19. PMID: 38267707",
+                "BibTeX": "@article{38267707, title={Patient In-Use Stability Testing of FDA-Approved Metformin Combination Products for N-Nitrosamine Impurity.}, author={Dharani S and Mohamed EM and Rahman Z and Khan MA}, journal={AAPS PharmSciTech}, volume={25}, number={1}, pages={19}}"
+            }
+        },
+        {
+            "_id": "34213099",
+            "pmid": 34213099,
+            "title": "[Determination of N-nitrosodimethylamine in metformin hydrochloride and its preparations by high performance liquid chromatography-tandem mass spectrometry].",
+            "journal": "Se Pu",
+            "authors": [
+                "Guo C",
+                "Liu Q",
+                "Zhang L",
+                "Zheng J",
+                "Wang Y",
+                "Yang S",
+                "Chu Z",
+                "Niu C",
+                "Xu Y"
+            ],
+            "date": "2020-11-08T00:00:00Z",
+            "doi": "10.3724/SP.J.1123.2020.03008",
+            "meta_date_publication": "2020 Nov 8",
+            "meta_volume": "38",
+            "meta_issue": "11",
+            "meta_pages": "1288-1293",
+            "score": 93813.055,
+            "text_hl": "[Determination of @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@N-nitrosodimethylamine@@@ in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin hydrochloride@@@ and its preparations by high performance liquid chromatography-tandem mass spectrometry].",
+            "citations": {
+                "NLM": "Guo C, Liu Q, Zhang L, Zheng J, Wang Y, Yang S, Chu Z, Niu C, Xu Y. [Determination of N-nitrosodimethylamine in metformin hydrochloride and its preparations by high performance liquid chromatography-tandem mass spectrometry]. Se Pu. 2020 Nov 8;38(11):1288-1293. PMID: 34213099",
+                "BibTeX": "@article{34213099, title={[Determination of N-nitrosodimethylamine in metformin hydrochloride and its preparations by high performance liquid chromatography-tandem mass spectrometry].}, author={Guo C and Liu Q and Zhang L and Zheng J and Wang Y and Yang S and Chu Z and Niu C and Xu Y}, journal={Se Pu}, volume={38}, number={11}, pages={1288-1293}}"
+            }
+        },
+        {
+            "_id": "34280626",
+            "pmid": 34280626,
+            "title": "NDMA formation during ozonation of metformin: Roles of ozone and hydroxyl radicals.",
+            "journal": "Sci Total Environ",
+            "authors": [
+                "Liao X",
+                "Shen L",
+                "Jiang Z",
+                "Gao M",
+                "Qiu Y",
+                "Qi H",
+                "Chen C"
+            ],
+            "date": "2021-11-20T00:00:00Z",
+            "doi": "10.1016/j.scitotenv.2021.149010",
+            "meta_date_publication": "2021 Nov 20",
+            "meta_volume": "796",
+            "meta_issue": "",
+            "meta_pages": "149010",
+            "score": 91602.53,
+            "text_hl": "@<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@ formation during ozonation of @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@: Roles of @CHEMICAL_Ozone @CHEMICAL_MESH:D010126 @@@ozone@@@ and @CHEMICAL_Hydroxyl_Radical @CHEMICAL_MESH:D017665 @@@hydroxyl radicals@@@.",
+            "citations": {
+                "NLM": "Liao X, Shen L, Jiang Z, Gao M, Qiu Y, Qi H, Chen C. NDMA formation during ozonation of metformin: Roles of ozone and hydroxyl radicals. Sci Total Environ. 2021 Nov 20;796():149010. PMID: 34280626",
+                "BibTeX": "@article{34280626, title={NDMA formation during ozonation of metformin: Roles of ozone and hydroxyl radicals.}, author={Liao X and Shen L and Jiang Z and Gao M and Qiu Y and Qi H and Chen C}, journal={Sci Total Environ}, volume={796}, pages={149010}}"
+            }
+        },
+        {
+            "_id": "35449372",
+            "pmid": 35449372,
+            "title": "International Regulatory Collaboration on the Analysis of Nitrosamines in Metformin-Containing Medicines.",
+            "journal": "AAPS J",
+            "authors": [
+                "Keire DA",
+                "Bream R",
+                "Wollein U",
+                "Schmaler-Ripcke J",
+                "Burchardt A",
+                "Conti M",
+                "Zmysłowski A",
+                "Keizers P",
+                "Morin J",
+                "Poh J",
+                "George M",
+                "Wierer M"
+            ],
+            "date": "2022-04-21T00:00:00Z",
+            "doi": "10.1208/s12248-022-00702-4",
+            "meta_date_publication": "2022 Apr 21",
+            "meta_volume": "24",
+            "meta_issue": "3",
+            "meta_pages": "56",
+            "score": 91163.71,
+            "text_hl": "Recalls of some batches of @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ have occurred due to the detection of @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@N-nitrosodimethylamine@@@ (@<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@) in amounts above the acceptable intake (AI) of 96 ng per day. ",
+            "citations": {
+                "NLM": "Keire DA, Bream R, Wollein U, Schmaler-Ripcke J, Burchardt A, Conti M, Zmysłowski A, Keizers P, Morin J, Poh J, George M, Wierer M. International Regulatory Collaboration on the Analysis of Nitrosamines in Metformin-Containing Medicines. AAPS J. 2022 Apr 21;24(3):56. PMID: 35449372",
+                "BibTeX": "@article{35449372, title={International Regulatory Collaboration on the Analysis of Nitrosamines in Metformin-Containing Medicines.}, author={Keire DA and Bream R and Wollein U and Schmaler-Ripcke J and Burchardt A and Conti M and Zmysłowski A and Keizers P and Morin J and Poh J and George M and Wierer M}, journal={AAPS J}, volume={24}, number={3}, pages={56}}"
+            }
+        },
+        {
+            "_id": "34597792",
+            "pmid": 34597792,
+            "title": "NDMA analytics in metformin products: Comparison of methods and pitfalls.",
+            "journal": "Eur J Pharm Sci",
+            "authors": [
+                "Fritzsche M",
+                "Blom G",
+                "Keitel J",
+                "Goettsche A",
+                "Seegel M",
+                "Leicht S",
+                "Guessregen B",
+                "Hickert S",
+                "Reifenberg P",
+                "Cimelli A",
+                "Baranowski R",
+                "Desmartin E",
+                "Barrau E",
+                "Harrison M",
+                "Bristow T",
+                "O'Neill N",
+                "Kirsch A",
+                "Krueger P",
+                "Saal C",
+                "Mouton B",
+                "Schlingemann J"
+            ],
+            "date": "2022-01-01T00:00:00Z",
+            "doi": "10.1016/j.ejps.2021.106026",
+            "meta_date_publication": "2022 Jan 1",
+            "meta_volume": "168",
+            "meta_issue": "",
+            "meta_pages": "106026",
+            "score": 88018.85,
+            "text_hl": "@<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@ analytics in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ products: Comparison of methods and pitfalls.",
+            "citations": {
+                "NLM": "Fritzsche M, Blom G, Keitel J, Goettsche A, Seegel M, Leicht S, Guessregen B, Hickert S, Reifenberg P, Cimelli A, Baranowski R, Desmartin E, Barrau E, Harrison M, Bristow T, O'Neill N, Kirsch A, Krueger P, Saal C, Mouton B, Schlingemann J. NDMA analytics in metformin products: Comparison of methods and pitfalls. Eur J Pharm Sci. 2022 Jan 1;168():106026. PMID: 34597792",
+                "BibTeX": "@article{34597792, title={NDMA analytics in metformin products: Comparison of methods and pitfalls.}, author={Fritzsche M and Blom G and Keitel J and Goettsche A and Seegel M and Leicht S and Guessregen B and Hickert S and Reifenberg P and Cimelli A and Baranowski R and Desmartin E and Barrau E and Harrison M and Bristow T and O'Neill N and Kirsch A and Krueger P and Saal C and Mouton B and Schlingemann J}, journal={Eur J Pharm Sci}, volume={168}, pages={106026}}"
+            }
+        },
+        {
+            "_id": "41368201",
+            "pmid": 41368201,
+            "title": "A Comparative Study in Metformin Tablet Quality Assessment: LC-MS and LC-MS/MS Method Quantification of N-Nitroso-Dimethylamine in the Presence of Dimethyl Formamide.",
+            "journal": "Int J Anal Chem",
+            "authors": [
+                "Sibhat G",
+                "Hassan MA",
+                "Reddy IK",
+                "A Khan M",
+                "Rahman Z"
+            ],
+            "date": "2025-12-01T00:00:00Z",
+            "doi": "10.1155/ianc/5625153",
+            "meta_date_publication": "2025",
+            "meta_volume": "2025",
+            "meta_issue": "",
+            "meta_pages": "5625153",
+            "score": 85866.82,
+            "text_hl": "...@<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@N-nitroso-dimethylamine@@@ (@<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@, acceptable daily intake limit 96 ng/day), a probable @SPECIES_9606 @@@human@@@ @DISEASE_Precancerous_Conditions @DISEASE_MESH:D011230 @@@carcinogenic@@@ impurity, has been reported in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin@@@ formulations. ",
+            "citations": {
+                "NLM": "Sibhat G, Hassan MA, Reddy IK, A Khan M, Rahman Z. A Comparative Study in Metformin Tablet Quality Assessment: LC-MS and LC-MS/MS Method Quantification of N-Nitroso-Dimethylamine in the Presence of Dimethyl Formamide. Int J Anal Chem. 2025;2025():5625153. PMID: 41368201",
+                "BibTeX": "@article{41368201, title={A Comparative Study in Metformin Tablet Quality Assessment: LC-MS and LC-MS/MS Method Quantification of N-Nitroso-Dimethylamine in the Presence of Dimethyl Formamide.}, author={Sibhat G and Hassan MA and Reddy IK and A Khan M and Rahman Z}, journal={Int J Anal Chem}, volume={2025}, pages={5625153}}"
+            }
+        },
+        {
+            "_id": "40841507",
+            "pmid": 40841507,
+            "title": "LC-ESI-HRMS-Based Evaluation of Antioxidants as Additives to Inhibit Genotoxic Nitrosamine Formation in Metformin Hydrochloride Tablets.",
+            "journal": "AAPS PharmSciTech",
+            "authors": [
+                "Dande A",
+                "Pallaprolu N",
+                "Gadilohar S",
+                "Mishra S",
+                "Malayandi R",
+                "Natesan S",
+                "Sahu A",
+                "Kumarasamy M",
+                "Velayutham R",
+                "Peraman R"
+            ],
+            "date": "2025-08-21T00:00:00Z",
+            "doi": "10.1208/s12249-025-03202-8",
+            "meta_date_publication": "2025 Aug 21",
+            "meta_volume": "26",
+            "meta_issue": "7",
+            "meta_pages": "218",
+            "score": 85282.99,
+            "text_hl": "Although @<m>CHEMICAL_Dimethylnitrosamine</m> @CHEMICAL_MESH:D004128 @@@NDMA@@@ formation in @<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@metformin hydrochloride@@@ (@<m>CHEMICAL_Metformin</m> @CHEMICAL_MESH:D008687 @@@MET@@@) tablets under nitrosating conditions is well-established, the potential of antioxidants to inhibit this impurity remains underexplored. ",
+            "citations": {
+                "NLM": "Dande A, Pallaprolu N, Gadilohar S, Mishra S, Malayandi R, Natesan S, Sahu A, Kumarasamy M, Velayutham R, Peraman R. LC-ESI-HRMS-Based Evaluation of Antioxidants as Additives to Inhibit Genotoxic Nitrosamine Formation in Metformin Hydrochloride Tablets. AAPS PharmSciTech. 2025 Aug 21;26(7):218. PMID: 40841507",
+                "BibTeX": "@article{40841507, title={LC-ESI-HRMS-Based Evaluation of Antioxidants as Additives to Inhibit Genotoxic Nitrosamine Formation in Metformin Hydrochloride Tablets.}, author={Dande A and Pallaprolu N and Gadilohar S and Mishra S and Malayandi R and Natesan S and Sahu A and Kumarasamy M and Velayutham R and Peraman R}, journal={AAPS PharmSciTech}, volume={26}, number={7}, pages={218}}"
+            }
+        }
+    ],
+    "facets": {
+        "facet_queries": {},
+        "facet_fields": {
+            "journal": [
+                {
+                    "name": "Front Pharmacol",
+                    "type": "int",
+                    "value": 7
+                },
+                {
+                    "name": "Int J Mol Sci",
+                    "type": "int",
+                    "value": 7
+                },
+                {
+                    "name": "J Pharm Biomed Anal",
+                    "type": "int",
+                    "value": 7
+                },
+                {
+                    "name": "Cancers (Basel)",
+                    "type": "int",
+                    "value": 4
+                },
+                {
+                    "name": "AAPS J",
+                    "type": "int",
+                    "value": 3
+                }
+            ],
+            "type": [
+                {
+                    "name": "Journal Article",
+                    "type": "int",
+                    "value": 153
+                },
+                {
+                    "name": "Review",
+                    "type": "int",
+                    "value": 63
+                },
+                {
+                    "name": "Letter",
+                    "type": "int",
+                    "value": 2
+                },
+                {
+                    "name": "Comment",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "Meta-Analysis",
+                    "type": "int",
+                    "value": 1
+                }
+            ],
+            "year": [
+                {
+                    "name": "2021",
+                    "type": "int",
+                    "value": 35
+                },
+                {
+                    "name": "2022",
+                    "type": "int",
+                    "value": 32
+                },
+                {
+                    "name": "2023",
+                    "type": "int",
+                    "value": 24
+                },
+                {
+                    "name": "2020",
+                    "type": "int",
+                    "value": 21
+                },
+                {
+                    "name": "2025",
+                    "type": "int",
+                    "value": 14
+                },
+                {
+                    "name": "2024",
+                    "type": "int",
+                    "value": 13
+                },
+                {
+                    "name": "2018",
+                    "type": "int",
+                    "value": 6
+                },
+                {
+                    "name": "2019",
+                    "type": "int",
+                    "value": 6
+                },
+                {
+                    "name": "2014",
+                    "type": "int",
+                    "value": 3
+                },
+                {
+                    "name": "2011",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "2015",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "2016",
+                    "type": "int",
+                    "value": 1
+                },
+                {
+                    "name": "2017",
+                    "type": "int",
+                    "value": 1
+                }
+            ]
+        },
+        "facet_ranges": {},
+        "facet_intervals": {},
+        "facet_heatmaps": {}
+    },
+    "page_size": 10,
+    "current": 1,
+    "count": 158,
+    "total_pages": 16
+}

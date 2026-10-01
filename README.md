@@ -57,6 +57,8 @@ GEMINI_API_KEY=
 ANTHROPIC_API_KEY=
 GROQ_API_KEY=
 OPENROUTER_API_KEY=
+PAPERCLIP_API_KEY=
+PAPERCLIP_DISABLE_REST=
 
 NEO4J_USER=
 NEO4J_PASSWORD=
@@ -67,6 +69,12 @@ APP_ENV=
 BROWSER_COOKIE_SECRET=
 RATE_LIMIT_IP_HASH_SECRET=
 ```
+
+Paperclip and PubTator3 are optional literature-evidence tools and are disabled
+by default. Each can be enabled independently from the chat settings. When both
+are enabled, they run concurrently after the biological-relevance check;
+Paperclip requires `PAPERCLIP_API_KEY`. Set `PAPERCLIP_DISABLE_REST=1` to force
+its MCP-only transport.
 
 ## Run the Backend API
 

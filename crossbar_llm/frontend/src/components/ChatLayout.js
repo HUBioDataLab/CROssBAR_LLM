@@ -112,6 +112,7 @@ function ChatLayout({
   const [topK, setTopK] = useState(10);
   const [reasoningEnabled, setReasoningEnabled] = useState(false);
   const [reasoningEffort, setReasoningEffort] = useState('medium');
+  const [literatureTools, setLiteratureTools] = useState({ paperclip: false, pubtator3: false });
   const [copySnackbar, setCopySnackbar] = useState(false);
 
   // Query editing state
@@ -172,6 +173,7 @@ function ChatLayout({
   const [expandedSections, setExpandedSections] = useState({
     examples: true,
     settings: false,
+    literature: true,
     vectorConfig: false,
     query: true,
     results: false,
@@ -273,6 +275,7 @@ function ChatLayout({
         setModelChoices({});
         setSupportedModels([]);
         setModelsLoaded(true);
+        setError('Could not load model providers. Make sure the backend is running on port 8001, then refresh the page.');
       }
     };
     fetchModels();
@@ -515,6 +518,9 @@ function ChatLayout({
       if (Array.isArray(detail)) return detail.map(e => e?.msg || JSON.stringify(e)).join(', ');
       if (typeof detail === 'object') return detail.msg || detail.error || JSON.stringify(detail);
     }
+    if (!err?.response && err?.request) {
+      return 'Cannot reach the backend API. Make sure it is running on port 8001, then refresh the page and try again.';
+    }
     return err?.message || 'An error occurred';
   };
 
@@ -525,8 +531,9 @@ function ChatLayout({
     top_k: topK,
     reasoning_enabled: reasoningEnabled,
     ...(reasoningEnabled ? { reasoning_effort: reasoningEffort } : {}),
+    literature_tools: literatureTools,
     ...overrides,
-  }), [provider, llmType, topK, reasoningEnabled, reasoningEffort]);
+  }), [provider, llmType, topK, reasoningEnabled, reasoningEffort, literatureTools]);
 
   // Run the right query endpoint for the current mode + optional uploaded vector file.
   const runQuery = useCallback((sessionIdVal, baseBody, config) => {
@@ -534,7 +541,19 @@ function ChatLayout({
     const body = { ...baseBody, search_mode: searchMode };
     if (semanticSearchEnabled) {
       const vectorBody = { ...body, vector_category: vectorCategory, embedding_type: embeddingType };
-      if (selectedFile) return vectorUploadSearch(sessionIdVal, vectorBody, selectedFile, config);
+      if (selectedFile) {
+        const { literature_tools, ...multipartBody } = vectorBody;
+        return vectorUploadSearch(
+          sessionIdVal,
+          {
+            ...multipartBody,
+            paperclip: literature_tools?.paperclip || false,
+            pubtator3: literature_tools?.pubtator3 || false,
+          },
+          selectedFile,
+          config,
+        );
+      }
       return vectorSearch(sessionIdVal, vectorBody, config);
     }
     return dbSearch(sessionIdVal, body, config);
@@ -548,6 +567,7 @@ function ChatLayout({
     const result = data?.execution_result || [];
     const followUps = data?.follow_up_questions || [];
     const usage = data?.usage || null;
+    const literature = data?.literature || null;
     const isSemantic = searchMode === 'vector_search';
 
     setQueryResult(cypher);
@@ -555,7 +575,7 @@ function ChatLayout({
     setOriginalQuery(cypher);
     setLastUsage(usage);
 
-    setExecutionResult({ result, response: finalAnswer, followUpQuestions: followUps });
+    setExecutionResult({ result, response: finalAnswer, followUpQuestions: followUps, literature });
 
     addConversationTurn({
       question: userQuestion,
@@ -566,6 +586,7 @@ function ChatLayout({
       isSemanticSearch: isSemantic,
       vectorConfig: isSemantic ? { vectorCategory, embeddingType } : null,
       usage,
+      literature,
       status,
     });
 
@@ -577,6 +598,65 @@ function ChatLayout({
       setExpandedSections(prev => ({ ...prev, visualization: true }));
     }
   }, [vectorCategory, embeddingType, addConversationTurn, hasValidResults, setExecutionResult, setQueryResult]);
+
+  const renderLiterature = (literature) => {
+    if (!literature || Object.keys(literature).length === 0) return null;
+    return (
+      <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {Object.entries(literature).map(([tool, result]) => (
+          <Paper
+            key={tool}
+            variant="outlined"
+            sx={{
+              p: 2,
+              borderRadius: '12px',
+              borderColor: result.status === 'completed'
+                ? alpha(theme.palette.info.main, 0.35)
+                : alpha(theme.palette.warning.main, 0.4),
+              backgroundColor: alpha(
+                result.status === 'completed' ? theme.palette.info.main : theme.palette.warning.main,
+                0.04,
+              ),
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                {tool === 'pubtator3' ? 'PubTator3' : 'Paperclip'} evidence
+              </Typography>
+              <Chip
+                size="small"
+                label={result.status}
+                color={result.status === 'completed' ? 'info' : 'warning'}
+                variant="outlined"
+              />
+            </Box>
+            {result.answer && <ReactMarkdown>{result.answer}</ReactMarkdown>}
+            {result.warnings?.length > 0 && (
+              <Alert severity="warning" sx={{ mt: 1 }}>
+                {result.warnings.join(' ')}
+              </Alert>
+            )}
+            {result.citations?.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>Sources</Typography>
+                {result.citations.map((citation, index) => (
+                  <Typography key={`${tool}-${index}`} variant="caption" display="block">
+                    {citation.url ? (
+                      <a href={citation.url} target="_blank" rel="noreferrer">
+                        [{index + 1}] {citation.title || citation.pmid || citation.doc_id || 'Publication'}
+                      </a>
+                    ) : (
+                      `[${index + 1}] ${citation.title || citation.pmid || citation.doc_id || 'Publication'}`
+                    )}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+          </Paper>
+        ))}
+      </Box>
+    );
+  };
 
   // Render a compact token/usage summary from the agent's usage dict.
   const renderUsageChips = (usage) => {
@@ -1309,6 +1389,8 @@ function ChatLayout({
                 <ReactMarkdown>{turn.response}</ReactMarkdown>
               </Box>
             </Paper>
+
+            {renderLiterature(turn.literature)}
 
             {/* Follow-up Questions - only for latest */}
             {isLatest && turn.followUpQuestions && turn.followUpQuestions.length > 0 && (
@@ -2123,6 +2205,111 @@ function ChatLayout({
                     </Select>
                   </FormControl>
                 )}
+
+              </Box>
+            </Collapse>
+          </Paper>
+
+          {/* Literature Evidence Section */}
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 2,
+              borderRadius: '16px',
+              border: `1px solid ${literatureTools.paperclip || literatureTools.pubtator3
+                ? theme.palette.info.main
+                : theme.palette.divider}`,
+              backgroundColor: literatureTools.paperclip || literatureTools.pubtator3
+                ? alpha(theme.palette.info.main, 0.025)
+                : 'background.paper',
+              overflow: 'hidden',
+            }}
+          >
+            <SectionHeader
+              title="Literature Evidence"
+              icon={<AutoAwesomeIcon fontSize="small" color="info" />}
+              section="literature"
+              badge={(() => {
+                const enabledCount = Number(literatureTools.paperclip) + Number(literatureTools.pubtator3);
+                return enabledCount ? `${enabledCount} enabled` : 'Optional';
+              })()}
+            />
+            <Collapse in={expandedSections.literature}>
+              <Box sx={{ p: 2, pt: 0 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Add publication evidence to the knowledge-graph answer. When both tools are enabled, they run in parallel.
+                </Typography>
+
+                <Box
+                  onClick={() => !isLoading && setLiteratureTools((current) => ({ ...current, paperclip: !current.paperclip }))}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1.5,
+                    p: 1.5,
+                    mb: 1,
+                    borderRadius: '10px',
+                    border: `1px solid ${literatureTools.paperclip
+                      ? alpha(theme.palette.info.main, 0.7)
+                      : theme.palette.divider}`,
+                    backgroundColor: literatureTools.paperclip ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                    cursor: isLoading ? 'default' : 'pointer',
+                    opacity: isLoading ? 0.65 : 1,
+                    '&:hover': isLoading ? {} : { backgroundColor: alpha(theme.palette.info.main, 0.07) },
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Paperclip</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Broad literature search with citable source links.
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={literatureTools.paperclip}
+                    disabled={isLoading}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setLiteratureTools((current) => ({ ...current, paperclip: e.target.checked }))}
+                    color="info"
+                    size="small"
+                    inputProps={{ 'aria-label': 'Enable Paperclip literature search' }}
+                  />
+                </Box>
+
+                <Box
+                  onClick={() => !isLoading && setLiteratureTools((current) => ({ ...current, pubtator3: !current.pubtator3 }))}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1.5,
+                    p: 1.5,
+                    borderRadius: '10px',
+                    border: `1px solid ${literatureTools.pubtator3
+                      ? alpha(theme.palette.info.main, 0.7)
+                      : theme.palette.divider}`,
+                    backgroundColor: literatureTools.pubtator3 ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                    cursor: isLoading ? 'default' : 'pointer',
+                    opacity: isLoading ? 0.65 : 1,
+                    '&:hover': isLoading ? {} : { backgroundColor: alpha(theme.palette.info.main, 0.07) },
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>PubTator3</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      NCBI entity- and relation-aware publication evidence.
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={literatureTools.pubtator3}
+                    disabled={isLoading}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setLiteratureTools((current) => ({ ...current, pubtator3: e.target.checked }))}
+                    color="info"
+                    size="small"
+                    inputProps={{ 'aria-label': 'Enable PubTator3 literature search' }}
+                  />
+                </Box>
               </Box>
             </Collapse>
           </Paper>

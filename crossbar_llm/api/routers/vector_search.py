@@ -25,7 +25,7 @@ async def vector_query(
     agent_service: AgentService = Depends(get_runtime_service)
     ):
 
-    return agent_service.run_vector(session_id=session_id, browser_id=identity.browser_id, payload=payload)
+    return await agent_service.run_vector(session_id=session_id, browser_id=identity.browser_id, payload=payload)
 
 
 @router.post("/upload-query", response_model=ChatResponse | PendingResumeResponse)

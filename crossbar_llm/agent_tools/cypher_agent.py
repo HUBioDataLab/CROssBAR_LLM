@@ -194,49 +194,89 @@ class CypherAgent:
         # when the list is still below the limit.
         return [RemoveMessage(id=REMOVE_ALL_MESSAGES), *combined_messages[-AgentConfig().keep_last_n_messages:]]
     
-    @log_execution_time(logger, component="CypherAgent.initialize_state")
-    def biological_relevance_validation_node(self, state: CypherAgentState):
-
-        logger.info(
-            "Starting biological relevance validation",
-            event_type="biological_relevance_validation_started",
-            component="CypherAgent.biological_relevance_validation_node",
-            question=state["question"]
-        )
-
+    # The sync node and the async preflight below share these three helpers so
+    # the prompt, the metadata tag and the result shape exist in exactly one
+    # place. Only the invoke/ainvoke call itself differs, which is irreducible
+    # while the graph still supports `graph.invoke()`.
+    def _relevance_request(self, question: str):
         prompt = ChatPromptTemplate.from_messages([
                 SystemMessagePromptTemplate.from_template(
                     BIOLOGICAL_RELEVANCE_VALIDATION_TEMPLATE
                 ),
                 HumanMessagePromptTemplate.from_template("{question}")
             ])
-        
-        verdict_llm = self.llm_factory.create_biological_relevance_validator_llm()
 
-        messages = prompt.format_messages(question=state["question"])
-
-        verdict = verdict_llm.invoke(
-            messages,
-            config={
-                "metadata": {
-                    "node_name": "biological_relevance_validation",
-                }
-            }
+        logger.info(
+            "Starting biological relevance validation",
+            event_type="biological_relevance_validation_started",
+            component="CypherAgent._relevance_request",
+            question=question
         )
+
+        return (
+            self.llm_factory.create_biological_relevance_validator_llm(),
+            prompt.format_messages(question=question),
+            {"metadata": {"node_name": "biological_relevance_validation"}},
+        )
+
+    @staticmethod
+    def _relevance_result(verdict, question: str) -> dict[str, object]:
+        parsed = verdict["parsed"]
 
         logger.info(
             "Completed biological relevance validation",
             event_type="biological_relevance_validation_completed",
-            component="CypherAgent.biological_relevance_validation_node",
-            question=state["question"],
-            verdict=verdict["parsed"].relevant,
-            reason=verdict["parsed"].reason
+            component="CypherAgent._relevance_result",
+            question=question,
+            verdict=parsed.relevant,
+            reason=parsed.reason
         )
+
         return {
-            "biological_relevance": verdict["parsed"].relevant,
-            "final_answer": f"Your question is outside the biological/biomedical domain.\nReason: {verdict['parsed'].reason}" if verdict["parsed"].relevant is False else None,
-        }        
-    
+            "biological_relevance": parsed.relevant,
+            "final_answer": (
+                "Your question is outside the biological/biomedical domain.\n"
+                f"Reason: {parsed.reason}"
+                if parsed.relevant is False
+                else None
+            ),
+        }
+
+    @log_execution_time(logger, component="CypherAgent.initialize_state")
+    def biological_relevance_validation_node(self, state: CypherAgentState):
+        # The API orchestrator runs `avalidate_biological_relevance` ahead of the
+        # graph so it can decide whether to launch the literature tools. When it
+        # has, the verdict is already in state and paying for a second identical
+        # LLM call would be pure waste — the router downstream reads the same key
+        # either way, so returning no update keeps the routing identical.
+        if state.get("biological_relevance") is not None:
+            logger.info(
+                "Reusing pre-validated biological relevance verdict",
+                event_type="biological_relevance_validation_reused",
+                component="CypherAgent.biological_relevance_validation_node",
+                question=state["question"],
+                verdict=state["biological_relevance"],
+            )
+            return {}
+
+        verdict_llm, messages, config = self._relevance_request(state["question"])
+        verdict = verdict_llm.invoke(messages, config=config)
+        return self._relevance_result(verdict, state["question"])
+
+    async def avalidate_biological_relevance(
+        self,
+        question: str,
+    ) -> dict[str, object]:
+        """Async relevance preflight used by the API request orchestrator.
+
+        Seed the returned keys into the graph's initial state and
+        `biological_relevance_validation_node` will reuse the verdict instead of
+        re-running it.
+        """
+        verdict_llm, messages, config = self._relevance_request(question)
+        verdict = await verdict_llm.ainvoke(messages, config=config)
+        return self._relevance_result(verdict, question)
+
     def route_after_biological_relevance_validation(self, state: CypherAgentState) -> Literal["entity_resolution", "generate_cypher", "end"]:
         if state["biological_relevance"] is False:
             logger.info(
