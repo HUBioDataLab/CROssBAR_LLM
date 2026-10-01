@@ -6,13 +6,29 @@ from fastapi import Form
 
 from crossbar_llm.agent_tools.config import VectorMappings
 from crossbar_llm.api.schemas.common import ExecutionControl, SearchMode
+from crossbar_llm.orchestrator.registry import AgentId
 
 
-class LiteratureToolsConfig(BaseModel):
-    """Per-request switches for optional literature evidence agents."""
+class AgentsConfig(BaseModel):
+    """Which agents the orchestrator may route this request to.
 
-    paperclip: bool = Field(default=False)
-    pubtator3: bool = Field(default=False)
+    Switching an agent off is a hard limit: the orchestrator never routes to
+    it. Switching it on only makes it eligible — the orchestrator still decides
+    per question whether it is worth asking.
+    """
+
+    knowledge_graph: bool = Field(default=True)
+    paperclip: bool = Field(default=True)
+    pubtator3: bool = Field(default=True)
+
+    @model_validator(mode="after")
+    def validate_any_enabled(self) -> Self:
+        if not self.enabled():
+            raise ValueError("At least one agent must be enabled")
+        return self
+
+    def enabled(self) -> list[AgentId]:
+        return [agent_id for agent_id in AgentId if getattr(self, agent_id.value)]
 
 
 class ModelConfigRequest(BaseModel):
@@ -21,9 +37,7 @@ class ModelConfigRequest(BaseModel):
     top_k: int = Field(default=10, ge=1, le=100)
     reasoning_enabled: bool = Field(default=False)
     reasoning_effort: Literal["low", "medium", "high"] | None = None
-    literature_tools: LiteratureToolsConfig = Field(
-        default_factory=LiteratureToolsConfig
-    )
+    agents: AgentsConfig = Field(default_factory=AgentsConfig)
 
     @model_validator(mode="after")
     def validate_reasoning(self) -> Self:
@@ -57,7 +71,6 @@ class VectorSearchRequest(ChatRequestBase):
 
     @property
     def vector_index(self) -> str:
-        print(f"Getting vector index for category: {self.vector_category}, embedding type: {self.embedding_type}")
         return VectorMappings().get_vector_index_name(self.vector_category, self.embedding_type)
     
 
@@ -73,8 +86,9 @@ class UploadVectorSearchRequest(VectorSearchRequest):
         top_k: int = Form(10),
         reasoning_enabled: bool = Form(False),
         reasoning_effort: Literal["low", "medium", "high"] | None = Form(None),
-        paperclip: bool = Form(False),
-        pubtator3: bool = Form(False),
+        knowledge_graph: bool = Form(True),
+        paperclip: bool = Form(True),
+        pubtator3: bool = Form(True),
         vector_category: str = Form(...),
         embedding_type: str = Form(...),
     ) -> Self:
@@ -86,7 +100,8 @@ class UploadVectorSearchRequest(VectorSearchRequest):
             top_k=top_k,
             reasoning_enabled=reasoning_enabled,
             reasoning_effort=reasoning_effort,
-            literature_tools=LiteratureToolsConfig(
+            agents=AgentsConfig(
+                knowledge_graph=knowledge_graph,
                 paperclip=paperclip,
                 pubtator3=pubtator3,
             ),

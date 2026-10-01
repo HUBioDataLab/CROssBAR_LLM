@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import {
   Box,
@@ -56,22 +56,59 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaunchIcon from '@mui/icons-material/Launch';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { docco, dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import NodeVisualization from './NodeVisualization';
 import {
+  getAgents,
   getModels,
-  dbSearch,
-  vectorSearch,
-  vectorUploadSearch,
-  resumeSession,
+  streamDbSearch,
+  streamVectorSearch,
+  streamVectorUploadSearch,
+  streamResume,
 } from '../services/api';
+import AgentToggleList from './agents/AgentToggleList';
+import AgentTrace from './agents/AgentTrace';
+import AgentUsageBreakdown from './agents/AgentUsageBreakdown';
+import OrchestrationProgress from './agents/OrchestrationProgress';
+import {
+  AGENT_ORDER,
+  DEFAULT_ENABLED_AGENTS,
+  FALLBACK_CATALOG,
+  agentName,
+  effectiveAgents,
+  enabledCount,
+} from './agents/agentMeta';
+import { initialProgress, reduceProgress } from '../utils/orchestrationProgress';
 import axios from 'axios';
 import Fuse from 'fuse.js';
 import { loadSuggestions } from '../utils/loadSuggestions';
 import ReactMarkdown from 'react-markdown';
+import { markdownSx } from '../utils/markdownStyles';
 
 const DRAWER_WIDTH = 420;
+const ENABLED_AGENTS_STORAGE_KEY = 'crossbar_enabled_agents';
+
+/** The user's agent switches from the last visit; every agent on by default. */
+const loadEnabledAgents = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ENABLED_AGENTS_STORAGE_KEY));
+    if (saved && typeof saved === 'object') {
+      const merged = Object.fromEntries(
+        AGENT_ORDER.map((id) => [id, typeof saved[id] === 'boolean' ? saved[id] : DEFAULT_ENABLED_AGENTS[id]]),
+      );
+      if (enabledCount(merged) > 0) return merged;
+    }
+  } catch {
+    // Storage blocked or corrupt: fall through to the defaults.
+  }
+  return DEFAULT_ENABLED_AGENTS;
+};
+
+/** "A", "A and B", "A, B and C". */
+const joinNames = (names) =>
+  names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 
 function ChatLayout({
   // State props
@@ -104,7 +141,7 @@ function ChatLayout({
 
   // Local state
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState('');
+  const [progress, setProgress] = useState(null); // live orchestration progress while loading
   const [pendingUserQuestion, setPendingUserQuestion] = useState(''); // Question being processed
   const [error, setError] = useState(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
@@ -112,7 +149,10 @@ function ChatLayout({
   const [topK, setTopK] = useState(10);
   const [reasoningEnabled, setReasoningEnabled] = useState(false);
   const [reasoningEffort, setReasoningEffort] = useState('medium');
-  const [literatureTools, setLiteratureTools] = useState({ paperclip: false, pubtator3: false });
+  const [enabledAgents, setEnabledAgents] = useState(loadEnabledAgents);
+  const [agentCatalog, setAgentCatalog] = useState(FALLBACK_CATALOG);
+  const [pendingPlan, setPendingPlan] = useState(null); // routing of a question awaiting Cypher review
+  const [lastOrchestration, setLastOrchestration] = useState(null);
   const [copySnackbar, setCopySnackbar] = useState(false);
 
   // Query editing state
@@ -173,7 +213,7 @@ function ChatLayout({
   const [expandedSections, setExpandedSections] = useState({
     examples: true,
     settings: false,
-    literature: true,
+    agents: true,
     vectorConfig: false,
     query: true,
     results: false,
@@ -281,10 +321,45 @@ function ChatLayout({
     fetchModels();
   }, []);
 
+  // Fetch the agent catalog (names, summaries, availability) on mount. On
+  // failure the bundled fallback keeps the panel usable.
+  useEffect(() => {
+    getAgents()
+      .then((data) => {
+        if (Array.isArray(data?.agents) && data.agents.length) setAgentCatalog(data.agents);
+      })
+      .catch((err) => console.error('Error fetching agents:', err));
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ENABLED_AGENTS_STORAGE_KEY, JSON.stringify(enabledAgents));
+    } catch {
+      // Remembering the switches is a convenience; nothing breaks without it.
+    }
+  }, [enabledAgents]);
+
+  // The user's switches go to the server as they are (it skips agents it cannot
+  // run and says why); vector search always runs on the graph agent.
+  const requestAgents = useMemo(() => ({
+    ...enabledAgents,
+    ...(semanticSearchEnabled ? { knowledge_graph: true } : {}),
+  }), [enabledAgents, semanticSearchEnabled]);
+  // ...but only agents that can actually run count towards "something is on".
+  const runnableAgents = useMemo(
+    () => effectiveAgents(requestAgents, agentCatalog),
+    [requestAgents, agentCatalog],
+  );
+  const isGraphAgentOn = runnableAgents.knowledge_graph;
+
+  const handleProgressEvent = useCallback((event, data) => {
+    setProgress((prev) => reduceProgress(prev || initialProgress(), event, data));
+  }, []);
+
   // Scroll to bottom when messages update
   useEffect(() => {
     scrollToBottom();
-  }, [conversationHistory, isLoading]);
+  }, [conversationHistory, isLoading, progress]);
 
 
   // Sync editable query with queryResult 
@@ -481,13 +556,19 @@ function ChatLayout({
       abortControllerRef.current = null;
     }
     setIsLoading(false);
-    setCurrentStep('');
+    setProgress(null);
   };
 
   // Check if settings are valid (API keys are managed server-side now)
   const isSettingsValid = useCallback(() => {
     return !!(provider && llmType);
   }, [provider, llmType]);
+
+  // Agents the paused question will run once its Cypher is approved.
+  const pendingFollowers = (pendingPlan?.selected || []).filter((id) => id !== 'knowledge_graph');
+
+  // At least one agent the server can run must be on.
+  const hasRunnableAgent = enabledCount(runnableAgents) > 0;
 
   // Check if semantic search settings are valid (only when enabled)
   const isSemanticSearchValid = useCallback(() => {
@@ -531,32 +612,23 @@ function ChatLayout({
     top_k: topK,
     reasoning_enabled: reasoningEnabled,
     ...(reasoningEnabled ? { reasoning_effort: reasoningEffort } : {}),
-    literature_tools: literatureTools,
+    agents: requestAgents,
     ...overrides,
-  }), [provider, llmType, topK, reasoningEnabled, reasoningEffort, literatureTools]);
+  }), [provider, llmType, topK, reasoningEnabled, reasoningEffort, requestAgents]);
 
-  // Run the right query endpoint for the current mode + optional uploaded vector file.
-  const runQuery = useCallback((sessionIdVal, baseBody, config) => {
+  // Run the right streaming endpoint for the current mode + optional uploaded
+  // vector file. Progress events go to `onEvent`; resolves with the response.
+  const runQuery = useCallback((sessionIdVal, baseBody, options) => {
     const searchMode = semanticSearchEnabled ? 'vector_search' : 'db_search';
     const body = { ...baseBody, search_mode: searchMode };
     if (semanticSearchEnabled) {
       const vectorBody = { ...body, vector_category: vectorCategory, embedding_type: embeddingType };
       if (selectedFile) {
-        const { literature_tools, ...multipartBody } = vectorBody;
-        return vectorUploadSearch(
-          sessionIdVal,
-          {
-            ...multipartBody,
-            paperclip: literature_tools?.paperclip || false,
-            pubtator3: literature_tools?.pubtator3 || false,
-          },
-          selectedFile,
-          config,
-        );
+        return streamVectorUploadSearch(sessionIdVal, vectorBody, selectedFile, options);
       }
-      return vectorSearch(sessionIdVal, vectorBody, config);
+      return streamVectorSearch(sessionIdVal, vectorBody, options);
     }
-    return dbSearch(sessionIdVal, body, config);
+    return streamDbSearch(sessionIdVal, body, options);
   }, [semanticSearchEnabled, vectorCategory, embeddingType, selectedFile]);
 
   // Apply a completed/failed ChatResponse to local state + conversation history.
@@ -567,15 +639,16 @@ function ChatLayout({
     const result = data?.execution_result || [];
     const followUps = data?.follow_up_questions || [];
     const usage = data?.usage || null;
-    const literature = data?.literature || null;
+    const orchestration = data?.orchestration || null;
     const isSemantic = searchMode === 'vector_search';
 
     setQueryResult(cypher);
     setEditableQuery(cypher);
     setOriginalQuery(cypher);
     setLastUsage(usage);
+    setLastOrchestration(orchestration);
 
-    setExecutionResult({ result, response: finalAnswer, followUpQuestions: followUps, literature });
+    setExecutionResult({ result, response: finalAnswer, followUpQuestions: followUps, orchestration });
 
     addConversationTurn({
       question: userQuestion,
@@ -586,77 +659,21 @@ function ChatLayout({
       isSemanticSearch: isSemantic,
       vectorConfig: isSemantic ? { vectorCategory, embeddingType } : null,
       usage,
-      literature,
+      orchestration,
       status,
     });
 
-    if (status === 'failed') {
-      setError('The agent could not complete this query. Try rephrasing it or selecting a different model.');
+    // An out-of-domain question was answered (with the reason); only a real
+    // failure of every agent asked deserves the error banner.
+    const wasRouted = (orchestration?.routing?.selected || []).length > 0;
+    if (status === 'failed' && wasRouted) {
+      setError('None of the agents could answer this question. Try rephrasing it, selecting a different model, or enabling more agents.');
     }
 
     if (hasValidResults(result)) {
       setExpandedSections(prev => ({ ...prev, visualization: true }));
     }
   }, [vectorCategory, embeddingType, addConversationTurn, hasValidResults, setExecutionResult, setQueryResult]);
-
-  const renderLiterature = (literature) => {
-    if (!literature || Object.keys(literature).length === 0) return null;
-    return (
-      <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-        {Object.entries(literature).map(([tool, result]) => (
-          <Paper
-            key={tool}
-            variant="outlined"
-            sx={{
-              p: 2,
-              borderRadius: '12px',
-              borderColor: result.status === 'completed'
-                ? alpha(theme.palette.info.main, 0.35)
-                : alpha(theme.palette.warning.main, 0.4),
-              backgroundColor: alpha(
-                result.status === 'completed' ? theme.palette.info.main : theme.palette.warning.main,
-                0.04,
-              ),
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                {tool === 'pubtator3' ? 'PubTator3' : 'Paperclip'} evidence
-              </Typography>
-              <Chip
-                size="small"
-                label={result.status}
-                color={result.status === 'completed' ? 'info' : 'warning'}
-                variant="outlined"
-              />
-            </Box>
-            {result.answer && <ReactMarkdown>{result.answer}</ReactMarkdown>}
-            {result.warnings?.length > 0 && (
-              <Alert severity="warning" sx={{ mt: 1 }}>
-                {result.warnings.join(' ')}
-              </Alert>
-            )}
-            {result.citations?.length > 0 && (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="caption" sx={{ fontWeight: 600 }}>Sources</Typography>
-                {result.citations.map((citation, index) => (
-                  <Typography key={`${tool}-${index}`} variant="caption" display="block">
-                    {citation.url ? (
-                      <a href={citation.url} target="_blank" rel="noreferrer">
-                        [{index + 1}] {citation.title || citation.pmid || citation.doc_id || 'Publication'}
-                      </a>
-                    ) : (
-                      `[${index + 1}] ${citation.title || citation.pmid || citation.doc_id || 'Publication'}`
-                    )}
-                  </Typography>
-                ))}
-              </Box>
-            )}
-          </Paper>
-        ))}
-      </Box>
-    );
-  };
 
   // Render a compact token/usage summary from the agent's usage dict.
   const renderUsageChips = (usage) => {
@@ -692,27 +709,43 @@ function ChatLayout({
     ));
   };
 
-  // Generate query only (without running) — execution_mode: "generate" returns a
-  // PendingResumeResponse with the generated Cypher, awaiting human review.
-  const handleGenerateOnly = async (e) => {
-    e?.preventDefault();
-    if (!question.trim() || isLoading) return;
+  // Checks shared by both ways of asking. Returns false (and says why) when
+  // the question cannot be sent yet.
+  const canAsk = () => {
     if (!sessionId) {
       setError('Chat session is not ready yet. Please wait a moment and try again.');
-      return;
+      return false;
     }
-
     if (!isSettingsValid()) {
       setExpandedSections(prev => ({ ...prev, settings: true }));
       setError('Please configure model settings first');
-      return;
+      return false;
     }
-
+    if (!hasRunnableAgent) {
+      setExpandedSections(prev => ({ ...prev, agents: true }));
+      setError('Enable at least one available agent in the Agents panel.');
+      return false;
+    }
     if (!isSemanticSearchValid()) {
       setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
       setError('Please configure vector search settings (category and embedding type)');
+      return false;
+    }
+    return true;
+  };
+
+  // Generate query only (without running) — execution_mode: "generate". When the
+  // orchestrator routes to the graph agent it pauses with the generated Cypher
+  // for review (the other agents wait for the approval); when it does not,
+  // there is nothing to review and the answer comes back straight away.
+  const handleGenerateOnly = async (e) => {
+    e?.preventDefault();
+    if (!question.trim() || isLoading) return;
+    if (!isGraphAgentOn) {
+      setError('Generating a query for review needs the Knowledge Graph agent. Enable it in the Agents panel.');
       return;
     }
+    if (!canAsk()) return;
 
     // Collapse settings and examples panels when submitting a question
     flushSync(() => {
@@ -726,7 +759,8 @@ function ChatLayout({
     setPendingUserQuestion(userQuestion); // Show user's question immediately
     setError(null);
     setIsLoading(true);
-    setCurrentStep('Generating Cypher query...');
+    setProgress(initialProgress());
+    setPendingPlan(null);
     setLastSearchMode(searchMode);
     setLastUsage(null);
     setQueryResult('');
@@ -740,8 +774,17 @@ function ChatLayout({
 
     try {
       const body = buildRequestBody({ question: userQuestion, execution_mode: 'generate' });
-      const data = await runQuery(sessionId, body, { signal });
+      const data = await runQuery(sessionId, body, { signal, onEvent: handleProgressEvent });
 
+      if (data.status !== 'awaiting_human_review') {
+        // Routed away from the graph: no query to review, just the answer.
+        setPendingQuestion('');
+        setPendingUserQuestion('');
+        applyChatResponse(data, userQuestion, searchMode);
+        return;
+      }
+
+      setPendingPlan(data.orchestration?.routing || null);
       const cypherQuery = data.generated_cypher || '';
       setQueryResult(cypherQuery);
       setEditableQuery(cypherQuery);
@@ -762,7 +805,7 @@ function ChatLayout({
       }
     } finally {
       setIsLoading(false);
-      setCurrentStep('');
+      setProgress(null);
       abortControllerRef.current = null;
     }
   };
@@ -789,7 +832,7 @@ function ChatLayout({
     setViewingHistoryIndex(null); // Reset history viewing state
     setPendingUserQuestion(pendingQuestion); // Show user's question immediately
     setIsLoading(true);
-    setCurrentStep('Executing query...');
+    setProgress(initialProgress());
     setLastUsage(null);
 
     abortControllerRef.current = new AbortController();
@@ -805,10 +848,26 @@ function ChatLayout({
         action,
         edited_cypher: edited,
       });
-      const data = await resumeSession(sessionId, body, { signal });
+      const data = await streamResume(sessionId, body, { signal, onEvent: handleProgressEvent });
+
+      if (data.status === 'awaiting_human_review') {
+        // The approved query failed when it ran, and the graph agent wrote a
+        // new one. It needs the same review before anything else runs.
+        const retried = data.generated_cypher || '';
+        setQueryResult(retried);
+        setEditableQuery(retried);
+        setOriginalQuery(retried);
+        setQueryGenerated(true);
+        setIsEditingQuery(false);
+        setPendingPlan(data.orchestration?.routing || pendingPlan);
+        setExpandedSections(prev => ({ ...prev, query: true }));
+        setError('The approved query failed when it ran, so the agent wrote a new one. Review it and run it again.');
+        return;
+      }
 
       setQueryGenerated(false);
       setPendingQuestion('');
+      setPendingPlan(null);
       setIsEditingQuery(false);
       applyChatResponse(data, pendingQuestion, lastSearchMode);
     } catch (err) {
@@ -821,33 +880,18 @@ function ChatLayout({
       }
     } finally {
       setIsLoading(false);
-      setCurrentStep('');
+      setProgress(null);
       setPendingUserQuestion('');
       abortControllerRef.current = null;
     }
   };
 
-  // Generate and run query in one shot — execution_mode: "generate_and_run".
-  // The agent runs to completion synchronously and returns a ChatResponse.
+  // Ask in one shot — execution_mode: "generate_and_run". The orchestrator
+  // streams its progress, then the merged answer.
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!question.trim() || isLoading) return;
-    if (!sessionId) {
-      setError('Chat session is not ready yet. Please wait a moment and try again.');
-      return;
-    }
-
-    if (!isSettingsValid()) {
-      setExpandedSections(prev => ({ ...prev, settings: true }));
-      setError('Please configure model settings first');
-      return;
-    }
-
-    if (!isSemanticSearchValid()) {
-      setExpandedSections(prev => ({ ...prev, vectorConfig: true }));
-      setError('Please configure vector search settings (category and embedding type)');
-      return;
-    }
+    if (!canAsk()) return;
 
     // Collapse settings and examples panels when submitting a question
     flushSync(() => {
@@ -860,12 +904,13 @@ function ChatLayout({
     setPendingUserQuestion(userQuestion); // Show user's question immediately
     setError(null);
     setIsLoading(true);
-    setCurrentStep('Running agent...');
+    setProgress(initialProgress());
 
     // Reset query editing state and history viewing state
     setQueryGenerated(false);
     setViewingHistoryIndex(null);
     setPendingQuestion('');
+    setPendingPlan(null);
     setLastSearchMode(searchMode);
     setLastUsage(null);
     setQueryResult('');
@@ -877,7 +922,7 @@ function ChatLayout({
 
     try {
       const body = buildRequestBody({ question: userQuestion, execution_mode: 'generate_and_run' });
-      const data = await runQuery(sessionId, body, { signal });
+      const data = await runQuery(sessionId, body, { signal, onEvent: handleProgressEvent });
       applyChatResponse(data, userQuestion, searchMode);
     } catch (err) {
       if (isCancelled(err)) {
@@ -889,7 +934,7 @@ function ChatLayout({
       }
     } finally {
       setIsLoading(false);
-      setCurrentStep('');
+      setProgress(null);
       setPendingUserQuestion('');
       abortControllerRef.current = null;
     }
@@ -1009,7 +1054,7 @@ function ChatLayout({
         CROssBAR-LLM
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 550 }}>
-        Ask questions about the biomedical knowledge graph. I'll generate Cypher queries and provide natural language answers.
+        Ask biomedical questions. An orchestrator routes each one to specialist agents — the CROssBARv2 knowledge graph and literature search — then merges their findings into one answer, resolving any conflicts.
       </Typography>
 
       {/* Features Grid */}
@@ -1032,10 +1077,10 @@ function ChatLayout({
           }}
         >
           <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.success.main, mb: 0.5 }}>
-            Natural Language
+            Multi-agent Answers
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Ask questions in plain English
+            Graph facts and literature, merged
           </Typography>
         </Paper>
         <Paper
@@ -1306,91 +1351,12 @@ function ChatLayout({
                 border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              <Box
-                sx={{
-                  '& p': {
-                    margin: 0,
-                    marginBottom: 1.5,
-                    lineHeight: 1.7,
-                    '&:last-child': { marginBottom: 0 }
-                  },
-                  '& strong': { fontWeight: 600 },
-                  '& em': { fontStyle: 'italic' },
-                  '& ul, & ol': {
-                    margin: 0,
-                    marginBottom: 1.5,
-                    paddingLeft: 2.5,
-                    '&:last-child': { marginBottom: 0 }
-                  },
-                  '& li': {
-                    marginBottom: 0.5,
-                    lineHeight: 1.6,
-                  },
-                  '& code': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontSize: '0.875em',
-                    fontFamily: 'monospace',
-                  },
-                  '& pre': {
-                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.05)',
-                    padding: 2,
-                    borderRadius: '8px',
-                    overflow: 'auto',
-                    marginBottom: 1.5,
-                    '& code': {
-                      backgroundColor: 'transparent',
-                      padding: 0,
-                    },
-                    '&:last-child': { marginBottom: 0 }
-                  },
-                  '& h1, & h2, & h3, & h4, & h5, & h6': {
-                    marginTop: 2,
-                    marginBottom: 1,
-                    fontWeight: 600,
-                    '&:first-of-type': { marginTop: 0 }
-                  },
-                  '& a': {
-                    color: theme.palette.primary.main,
-                    textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline' }
-                  },
-                  '& blockquote': {
-                    borderLeft: `3px solid ${theme.palette.primary.main}`,
-                    margin: 0,
-                    marginBottom: 1.5,
-                    paddingLeft: 2,
-                    color: 'text.secondary',
-                    '&:last-child': { marginBottom: 0 }
-                  },
-                  '& hr': {
-                    border: 'none',
-                    borderTop: `1px solid ${theme.palette.divider}`,
-                    margin: '16px 0',
-                  },
-                  '& table': {
-                    borderCollapse: 'collapse',
-                    width: '100%',
-                    marginBottom: 1.5,
-                    '&:last-child': { marginBottom: 0 }
-                  },
-                  '& th, & td': {
-                    border: `1px solid ${theme.palette.divider}`,
-                    padding: '8px 12px',
-                    textAlign: 'left',
-                  },
-                  '& th': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                    fontWeight: 600,
-                  },
-                }}
-              >
+              <Box sx={markdownSx(theme)}>
                 <ReactMarkdown>{turn.response}</ReactMarkdown>
               </Box>
             </Paper>
 
-            {renderLiterature(turn.literature)}
+            <AgentTrace orchestration={turn.orchestration} catalog={agentCatalog} question={turn.question} />
 
             {/* Follow-up Questions - only for latest */}
             {isLatest && turn.followUpQuestions && turn.followUpQuestions.length > 0 && (
@@ -1518,42 +1484,7 @@ function ChatLayout({
               border: `1px solid ${theme.palette.divider}`,
             }}
           >
-            {/* Step Progress Indicator */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CircularProgress
-                  size={32}
-                  thickness={3}
-                  sx={{
-                    color: currentStep.includes('Generating')
-                      ? theme.palette.info.main
-                      : theme.palette.success.main
-                  }}
-                />
-                <Box sx={{
-                  position: 'absolute',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {currentStep.includes('Generating') ? (
-                    <CodeIcon sx={{ fontSize: 14, color: theme.palette.info.main }} />
-                  ) : (
-                    <PlayArrowIcon sx={{ fontSize: 14, color: theme.palette.success.main }} />
-                  )}
-                </Box>
-              </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {currentStep}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {currentStep.includes('Generating')
-                    ? 'Translating your question to a database query...'
-                    : 'The agent is running the query and preparing your answer...'}
-                </Typography>
-              </Box>
-            </Box>
+            <OrchestrationProgress progress={progress || initialProgress()} catalog={agentCatalog} />
           </Paper>
         </Box>
       </Box>
@@ -1739,6 +1670,7 @@ function ChatLayout({
                   onClick={() => {
                     setQueryGenerated(false);
                     setPendingQuestion('');
+                    setPendingPlan(null);
                     setEditableQuery('');
                     setOriginalQuery('');
                   }}
@@ -1747,9 +1679,15 @@ function ChatLayout({
                   Dismiss
                 </Button>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: pendingFollowers.length ? 0.5 : 1.5 }}>
                 Question: "{pendingQuestion}"
               </Typography>
+              {pendingFollowers.length > 0 && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                  Once you run it, {joinNames(pendingFollowers.map((id) => agentName(id, agentCatalog)))}{' '}
+                  {pendingFollowers.length === 1 ? 'adds' : 'add'} literature evidence and the orchestrator merges the answers.
+                </Typography>
+              )}
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
                   variant="contained"
@@ -1888,10 +1826,14 @@ function ChatLayout({
                 </IconButton>
               ) : (
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
-                  <Tooltip title="Generate query only (you can edit before running)">
+                  <Tooltip title={isGraphAgentOn
+                    ? 'Generate the Cypher query only (you can edit it before running)'
+                    : 'Needs the Knowledge Graph agent — enable it in the Agents panel'}>
+                    <span>
                     <IconButton
                       onClick={handleGenerateOnly}
-                      disabled={!question.trim()}
+                      disabled={!question.trim() || !isGraphAgentOn}
+                      aria-label="Generate query only"
                       sx={{
                         backgroundColor: alpha(theme.palette.secondary.main, 0.1),
                         color: theme.palette.secondary.main,
@@ -1901,8 +1843,10 @@ function ChatLayout({
                     >
                       <CodeIcon />
                     </IconButton>
+                    </span>
                   </Tooltip>
-                  <Tooltip title="Generate and run query">
+                  <Tooltip title="Ask the agents">
+                    <span>
                     <IconButton
                       type="submit"
                       disabled={!question.trim()}
@@ -1915,6 +1859,7 @@ function ChatLayout({
                     >
                       <SendIcon />
                     </IconButton>
+                    </span>
                   </Tooltip>
                 </Box>
               )}
@@ -1996,7 +1941,7 @@ function ChatLayout({
 
           <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', textAlign: 'center' }}>
             <CodeIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} /> Generate only •
-            <SendIcon sx={{ fontSize: 12, verticalAlign: 'middle', mx: 0.5 }} /> Generate & Run •
+            <SendIcon sx={{ fontSize: 12, verticalAlign: 'middle', mx: 0.5 }} /> Ask the agents •
             Type @ for autocomplete
           </Typography>
         </Box>
@@ -2210,106 +2155,23 @@ function ChatLayout({
             </Collapse>
           </Paper>
 
-          {/* Literature Evidence Section */}
-          <Paper
-            elevation={0}
-            sx={{
-              mb: 2,
-              borderRadius: '16px',
-              border: `1px solid ${literatureTools.paperclip || literatureTools.pubtator3
-                ? theme.palette.info.main
-                : theme.palette.divider}`,
-              backgroundColor: literatureTools.paperclip || literatureTools.pubtator3
-                ? alpha(theme.palette.info.main, 0.025)
-                : 'background.paper',
-              overflow: 'hidden',
-            }}
-          >
+          {/* Agents Section */}
+          <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
             <SectionHeader
-              title="Literature Evidence"
-              icon={<AutoAwesomeIcon fontSize="small" color="info" />}
-              section="literature"
-              badge={(() => {
-                const enabledCount = Number(literatureTools.paperclip) + Number(literatureTools.pubtator3);
-                return enabledCount ? `${enabledCount} enabled` : 'Optional';
-              })()}
+              title="Agents"
+              icon={<AccountTreeIcon fontSize="small" color="primary" />}
+              section="agents"
+              badge={hasRunnableAgent ? `${enabledCount(runnableAgents)} of ${agentCatalog.length} on` : 'Required'}
             />
-            <Collapse in={expandedSections.literature}>
+            <Collapse in={expandedSections.agents}>
               <Box sx={{ p: 2, pt: 0 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                  Add publication evidence to the knowledge-graph answer. When both tools are enabled, they run in parallel.
-                </Typography>
-
-                <Box
-                  onClick={() => !isLoading && setLiteratureTools((current) => ({ ...current, paperclip: !current.paperclip }))}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 1.5,
-                    p: 1.5,
-                    mb: 1,
-                    borderRadius: '10px',
-                    border: `1px solid ${literatureTools.paperclip
-                      ? alpha(theme.palette.info.main, 0.7)
-                      : theme.palette.divider}`,
-                    backgroundColor: literatureTools.paperclip ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-                    cursor: isLoading ? 'default' : 'pointer',
-                    opacity: isLoading ? 0.65 : 1,
-                    '&:hover': isLoading ? {} : { backgroundColor: alpha(theme.palette.info.main, 0.07) },
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Paperclip</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Broad literature search with citable source links.
-                    </Typography>
-                  </Box>
-                  <Switch
-                    checked={literatureTools.paperclip}
-                    disabled={isLoading}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => setLiteratureTools((current) => ({ ...current, paperclip: e.target.checked }))}
-                    color="info"
-                    size="small"
-                    inputProps={{ 'aria-label': 'Enable Paperclip literature search' }}
-                  />
-                </Box>
-
-                <Box
-                  onClick={() => !isLoading && setLiteratureTools((current) => ({ ...current, pubtator3: !current.pubtator3 }))}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 1.5,
-                    p: 1.5,
-                    borderRadius: '10px',
-                    border: `1px solid ${literatureTools.pubtator3
-                      ? alpha(theme.palette.info.main, 0.7)
-                      : theme.palette.divider}`,
-                    backgroundColor: literatureTools.pubtator3 ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-                    cursor: isLoading ? 'default' : 'pointer',
-                    opacity: isLoading ? 0.65 : 1,
-                    '&:hover': isLoading ? {} : { backgroundColor: alpha(theme.palette.info.main, 0.07) },
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>PubTator3</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      NCBI entity- and relation-aware publication evidence.
-                    </Typography>
-                  </Box>
-                  <Switch
-                    checked={literatureTools.pubtator3}
-                    disabled={isLoading}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => setLiteratureTools((current) => ({ ...current, pubtator3: e.target.checked }))}
-                    color="info"
-                    size="small"
-                    inputProps={{ 'aria-label': 'Enable PubTator3 literature search' }}
-                  />
-                </Box>
+                <AgentToggleList
+                  catalog={agentCatalog}
+                  enabled={enabledAgents}
+                  onChange={(id, value) => setEnabledAgents((current) => ({ ...current, [id]: value }))}
+                  disabled={isLoading}
+                  lockedOn={semanticSearchEnabled ? ['knowledge_graph'] : []}
+                />
               </Box>
             </Collapse>
           </Paper>
@@ -2645,6 +2507,7 @@ function ChatLayout({
                 <Box sx={{ p: 2, pt: 0, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                   {renderUsageChips(lastUsage)}
                 </Box>
+                <AgentUsageBreakdown orchestration={lastOrchestration} catalog={agentCatalog} />
               </Collapse>
             </Paper>
           )}

@@ -38,6 +38,69 @@ from .logging_config import get_logger, log_execution_time
 logger = get_logger(__name__)
 
 
+# The sync graph node and the async preflights share these helpers so the
+# prompt, the metadata tag and the result shape exist in exactly one place. Only
+# the invoke/ainvoke call itself differs, which is irreducible while the graph
+# still supports `graph.invoke()`. They take an `LLMFactory` rather than an
+# agent so the orchestrator can gate a question without building a CypherAgent,
+# which connects to Neo4j, when the knowledge-graph agent is switched off.
+def relevance_request(llm_factory: LLMFactory, question: str):
+    prompt = ChatPromptTemplate.from_messages([
+            SystemMessagePromptTemplate.from_template(
+                BIOLOGICAL_RELEVANCE_VALIDATION_TEMPLATE
+            ),
+            HumanMessagePromptTemplate.from_template("{question}")
+        ])
+
+    logger.info(
+        "Starting biological relevance validation",
+        event_type="biological_relevance_validation_started",
+        component="cypher_agent.relevance_request",
+        question=question
+    )
+
+    return (
+        llm_factory.create_biological_relevance_validator_llm(),
+        prompt.format_messages(question=question),
+        {"metadata": {"node_name": "biological_relevance_validation"}},
+    )
+
+
+def relevance_result(verdict, question: str) -> dict[str, object]:
+    parsed = verdict["parsed"]
+
+    logger.info(
+        "Completed biological relevance validation",
+        event_type="biological_relevance_validation_completed",
+        component="cypher_agent.relevance_result",
+        question=question,
+        verdict=parsed.relevant,
+        reason=parsed.reason
+    )
+
+    return {
+        "biological_relevance": parsed.relevant,
+        "final_answer": (
+            "Your question is outside the biological/biomedical domain.\n"
+            f"Reason: {parsed.reason}"
+            if parsed.relevant is False
+            else None
+        ),
+    }
+
+
+async def avalidate_biological_relevance(
+    llm_factory: LLMFactory,
+    question: str,
+) -> dict[str, object]:
+    """Async relevance check. Seed the returned keys into the graph's initial
+    state and `biological_relevance_validation_node` reuses the verdict instead
+    of paying for it again."""
+    verdict_llm, messages, config = relevance_request(llm_factory, question)
+    verdict = await verdict_llm.ainvoke(messages, config=config)
+    return relevance_result(verdict, question)
+
+
 class CypherAttempt(TypedDict):
     attempt_number: int
     cypher_query: str
@@ -194,53 +257,12 @@ class CypherAgent:
         # when the list is still below the limit.
         return [RemoveMessage(id=REMOVE_ALL_MESSAGES), *combined_messages[-AgentConfig().keep_last_n_messages:]]
     
-    # The sync node and the async preflight below share these three helpers so
-    # the prompt, the metadata tag and the result shape exist in exactly one
-    # place. Only the invoke/ainvoke call itself differs, which is irreducible
-    # while the graph still supports `graph.invoke()`.
     def _relevance_request(self, question: str):
-        prompt = ChatPromptTemplate.from_messages([
-                SystemMessagePromptTemplate.from_template(
-                    BIOLOGICAL_RELEVANCE_VALIDATION_TEMPLATE
-                ),
-                HumanMessagePromptTemplate.from_template("{question}")
-            ])
-
-        logger.info(
-            "Starting biological relevance validation",
-            event_type="biological_relevance_validation_started",
-            component="CypherAgent._relevance_request",
-            question=question
-        )
-
-        return (
-            self.llm_factory.create_biological_relevance_validator_llm(),
-            prompt.format_messages(question=question),
-            {"metadata": {"node_name": "biological_relevance_validation"}},
-        )
+        return relevance_request(self.llm_factory, question)
 
     @staticmethod
     def _relevance_result(verdict, question: str) -> dict[str, object]:
-        parsed = verdict["parsed"]
-
-        logger.info(
-            "Completed biological relevance validation",
-            event_type="biological_relevance_validation_completed",
-            component="CypherAgent._relevance_result",
-            question=question,
-            verdict=parsed.relevant,
-            reason=parsed.reason
-        )
-
-        return {
-            "biological_relevance": parsed.relevant,
-            "final_answer": (
-                "Your question is outside the biological/biomedical domain.\n"
-                f"Reason: {parsed.reason}"
-                if parsed.relevant is False
-                else None
-            ),
-        }
+        return relevance_result(verdict, question)
 
     @log_execution_time(logger, component="CypherAgent.initialize_state")
     def biological_relevance_validation_node(self, state: CypherAgentState):
@@ -273,9 +295,7 @@ class CypherAgent:
         `biological_relevance_validation_node` will reuse the verdict instead of
         re-running it.
         """
-        verdict_llm, messages, config = self._relevance_request(question)
-        verdict = await verdict_llm.ainvoke(messages, config=config)
-        return self._relevance_result(verdict, question)
+        return await avalidate_biological_relevance(self.llm_factory, question)
 
     def route_after_biological_relevance_validation(self, state: CypherAgentState) -> Literal["entity_resolution", "generate_cypher", "end"]:
         if state["biological_relevance"] is False:
