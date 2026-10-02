@@ -1,0 +1,128 @@
+[
+  {
+    "label": "bioc-pmc, fixture article",
+    "url": "https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json/PMC5320931/unicode",
+    "status": 200,
+    "content_type": "application/json",
+    "bytes": 177061,
+    "summary": {
+      "n_documents": 1,
+      "n_passages": 222,
+      "passage_sections": {
+        "ABSTRACT": 4,
+        "DISCUSS": 14,
+        "FIG": 75,
+        "INTRO": 5,
+        "METHODS": 31,
+        "REF": 52,
+        "RESULTS": 27,
+        "SUPPL": 11,
+        "TABLE": 2,
+        "TITLE": 1
+      },
+      "total_text_chars": 76312,
+      "document_keys": [
+        "annotations",
+        "id",
+        "infons",
+        "passages",
+        "relations"
+      ]
+    },
+    "fixture": "pmc_fulltext_bioc-pmc_fixture_article.json"
+  },
+  {
+    "label": "bioc-pmc, numeric id",
+    "url": "https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json/5320931/unicode",
+    "status": 200,
+    "content_type": "text/html",
+    "bytes": 6148,
+    "body_head": "[Error] : No result can be found. <BR><HR><B> - https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful//[pmcoa|pubmed].cgi/[BioC_JSON|BioC_XML]/[PMIDs|PMCIDs]/[UNICODE|ASCII] </B><BR>&nbsp;&nbsp;&nbsp;&nbsp;Functions: Extracting pubmed abstracts or PMC full texts in BioC format.<BR>&nbsp;&nbsp;&nbsp;&"
+  },
+  {
+    "label": "bioc-pmc, second article",
+    "url": "https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json/PMC11263751/unicode",
+    "status": 200,
+    "content_type": "application/json",
+    "bytes": 126091,
+    "summary": {
+      "n_documents": 1,
+      "n_passages": 172,
+      "passage_sections": {
+        "ABSTRACT": 6,
+        "AUTH_CONT": 2,
+        "COMP_INT": 4,
+        "CONCL": 2,
+        "DISCUSS": 5,
+        "FIG": 8,
+        "INTRO": 7,
+        "METHODS": 40,
+        "REF": 61,
+        "RESULTS": 29,
+        "SUPPL": 3,
+        "TABLE": 4,
+        "TITLE": 1
+      },
+      "total_text_chars": 77466,
+      "document_keys": [
+        "annotations",
+        "bioctype",
+        "id",
+        "infons",
+        "passages",
+        "relations"
+      ]
+    },
+    "fixture": "pmc_fulltext_bioc-pmc_second_article.json"
+  },
+  {
+    "label": "bioc-pmc, third article",
+    "url": "https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json/PMC12075947/unicode",
+    "status": 200,
+    "content_type": "application/json",
+    "bytes": 216928,
+    "summary": {
+      "n_documents": 1,
+      "n_passages": 308,
+      "passage_sections": {
+        "ABSTRACT": 1,
+        "AUTH_CONT": 2,
+        "COMP_INT": 6,
+        "DISCUSS": 7,
+        "FIG": 5,
+        "INTRO": 89,
+        "REF": 195,
+        "TABLE": 2,
+        "TITLE": 1
+      },
+      "total_text_chars": 77400,
+      "document_keys": [
+        "annotations",
+        "bioctype",
+        "id",
+        "infons",
+        "passages",
+        "relations"
+      ]
+    },
+    "fixture": "pmc_fulltext_bioc-pmc_third_article.json"
+  },
+  {
+    "label": "bioc-pmc, invalid id",
+    "url": "https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json/PMC999999999/unicode",
+    "status": 200,
+    "content_type": "text/html",
+    "bytes": 6148,
+    "body_head": "[Error] : No result can be found. <BR><HR><B> - https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful//[pmcoa|pubmed].cgi/[BioC_JSON|BioC_XML]/[PMIDs|PMCIDs]/[UNICODE|ASCII] </B><BR>&nbsp;&nbsp;&nbsp;&nbsp;Functions: Extracting pubmed abstracts or PMC full texts in BioC format.<BR>&nbsp;&nbsp;&nbsp;&"
+  },
+  {
+    "label": "pubtator3, fixture article",
+    "url": "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/publications/export/biocjson?pmcids=PMC5320931&full=true",
+    "status": 400,
+    "content_type": "application/json",
+    "bytes": 35,
+    "summary": {
+      "n_documents": 0
+    }
+  }
+]

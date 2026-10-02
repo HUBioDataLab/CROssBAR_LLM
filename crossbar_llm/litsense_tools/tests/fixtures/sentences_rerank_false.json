@@ -1,0 +1,1363 @@
+[
+  {
+    "pmcid": "PMC7462436",
+    "pmid": 28767562,
+    "text": "Prior studies have shown discordant results on the impact of TP53 mutations on colorectal cancer prognosis and response to systemic therapy.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "79|17|disease|MESH:D015179",
+      "61|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC7462436",
+    "pmid": 28767562,
+    "text": "TP53 is the most frequently mutated gene in metastatic colorectal cancer, but previous studies on TP53 mutations and colorectal cancer prognosis have yielded conflicting results.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "117|17|disease|MESH:D015179",
+      "0|4|gene|7157",
+      "55|17|disease|MESH:D015179",
+      "98|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC9305859",
+    "pmid": 35875117,
+    "text": "Our study also showed the co-occurrence of BRCA1 and TP53 mutations in exposed patients, a condition already observed in germline BRCA1 mutation carriers and found in colorectal cancer tumors, in which co-occurrence of BRCA1 and TP53 mutations resulted in poorer prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "43|5|gene|672",
+      "79|8|species|9606",
+      "53|4|gene|7157",
+      "130|5|gene|672",
+      "167|24|disease|MESH:D015179",
+      "219|5|gene|672",
+      "229|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC8326529",
+    "pmid": 34349502,
+    "text": "Moreover, TP53 mutations represented an initial step in the progression from inflamed colonic epithelium to colorectal cancer, demonstrating the connection between TP53 and the prognosis of UC.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "10|4|gene|7157",
+      "164|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC3646399",
+    "pmid": 23662107,
+    "text": "In a recent systematic review of clinical studies investigating the effect of TP53 mutations on prognosis and therapy outcome in colorectal cancer, results of the reported studies were often found to be conflicting and heterogeneous.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "129|17|disease|MESH:D015179",
+      "78|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC11409552",
+    "pmid": 39289671,
+    "text": "Notably, KRAS and TP53 mutations are indicative of a bleak prognosis in colorectal cancer (CRC).",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "91|3|disease|MESH:D015179",
+      "18|4|gene|7157",
+      "72|17|disease|MESH:D015179",
+      "9|4|gene|3845"
+    ]
+  },
+  {
+    "pmcid": "PMC13045463",
+    "pmid": 41668275,
+    "text": "In colorectal cancer, higher ZNF205 expression correlated with better prognosis, an association more pronounced in TP53 mutation patients (Figure S3D-F).",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "129|8|species|9606",
+      "115|4|gene|7157",
+      "3|17|disease|MESH:D015179",
+      "29|6|gene|7755"
+    ]
+  },
+  {
+    "pmcid": "PMC9332822",
+    "pmid": 35892903,
+    "text": "In addition, the coexistence of RAS and TP53 mutations caused a moderately worse prognosis than either gene alone in patients with metastatic colorectal cancer (FOCUS trial).",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "40|4|gene|7157",
+      "142|17|disease|MESH:D015179",
+      "117|8|species|9606",
+      "131|10|disease|MESH:D000092182"
+    ]
+  },
+  {
+    "pmcid": "PMC8967869",
+    "pmid": 35354846,
+    "text": "LVI has been evaluated with either TP53 mutation or p53 expression in association with gastric, colorectal, bladder and breast cancer prognosis, but not PCa.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "52|3|gene|7157",
+      "87|46|disease|MESH:D013274",
+      "153|3|disease|MESH:D011471",
+      "0|3|disease|MESH:D009361",
+      "35|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10757131",
+    "pmid": 38063316,
+    "text": "The heterogeneous impact of targeted therapy on the prognosis of stage III/IV colorectal cancer patients with different subtypes of TP53 mutations",
+    "score": 1.0,
+    "section": "title",
+    "annotations": [
+      "132|4|gene|7157",
+      "65|30|disease|MESH:D015179",
+      "96|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC10136154",
+    "pmid": 37189770,
+    "text": "Moreover, the association of TP53 mutation with chemoresistance and poor prognosis has also been observed in lung, gastric, and colorectal cancers, as well as in hematological malignancies.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "29|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10590320",
+    "pmid": 37542550,
+    "text": "While TP53 mutations are frequently found in tumor sequencing, they currently do not carry therapeutic relevance and are often associated with poor prognosis in several tumors including breast cancer, Ewing sarcoma, or colorectal cancer (Andrikopoulou et al.; Huemer et al.; Tirode et al.; Hu et al.).",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "186|13|disease|MESH:D001943",
+      "201|13|disease|MESH:D012512",
+      "6|4|gene|7157",
+      "45|5|disease|MESH:D009369",
+      "169|6|disease|MESH:D009369",
+      "219|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC11573956",
+    "pmid": 39557714,
+    "text": "Studies indicate that in colorectal cancer, TP53 mutations are not only associated with tumor aggressiveness and poor prognosis but also contribute to resistance against common chemotherapeutic agents, as these drugs rely on TP53's intact function to be effective.Additionally, pathway analysis between high and low AGT expression groups indicated a significant enrichment of autophagy-related pathways in the high-expression group.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "25|17|disease|MESH:D015179",
+      "88|5|disease|MESH:D009369",
+      "44|4|gene|7157",
+      "316|3|gene|183",
+      "225|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC8106005",
+    "pmid": 33987408,
+    "text": "Between 65-90% of studies in the literature have reported that TP53 mutations are linked to poor prognosis in cancers such as breast, head and neck, bladder, colorectal, and hematological malignancies.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "110|15|disease|MESH:D009369",
+      "126|74|disease|None",
+      "63|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC9708572",
+    "pmid": 36056133,
+    "text": "Association of TP53 mutations with an adverse prognosis is commonly encountered in different cancer types, including colorectal and ampullary adenocarcinomas in the gastrointestinal tract.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "15|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC11827529",
+    "pmid": 39917985,
+    "text": "TP53 mutations are frequently found in colorectal cancer, and they are associated with worse prognosis and resistance to therapy.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "39|17|disease|MESH:D015179",
+      "0|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10469650",
+    "pmid": 37387515,
+    "text": "TP53 mutation was commonly seen in adenocarcinoma, such as colorectal cancer, lung adenocarcinoma and hepatocellular carcinoma, and this gene was associated with higher malignancy, and poor prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "59|17|disease|MESH:D015179",
+      "0|4|gene|7157",
+      "78|19|disease|MESH:D000077192",
+      "169|10|disease|MESH:D009369",
+      "35|14|disease|MESH:D000230",
+      "102|24|disease|MESH:D006528"
+    ]
+  },
+  {
+    "pmcid": "PMC6487790",
+    "pmid": 30496442,
+    "text": "Moreover, TP53 mutations have been associated with a poor prognosis in several types of cancers, including colorectal cancers.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "88|7|disease|MESH:D009369",
+      "107|18|disease|MESH:D015179",
+      "10|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC11263751",
+    "pmid": 39039912,
+    "text": "A poor clinical prognosis is associated with TP53 mutation, which is present in approximately half of all colorectal cancer cells.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "106|17|disease|MESH:D015179",
+      "45|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10758892",
+    "pmid": 38173453,
+    "text": "RAD21 amplification is shown to correlate with poor prognosis in breast, endometrial, KRAS-mutant colorectal, and hormone-resistant prostate cancers, while TP53 mutations are common in many advanced cancers.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "86|4|gene|3845",
+      "121|27|disease|MESH:D011471",
+      "156|4|gene|7157",
+      "190|8|disease|MESH:D020178",
+      "0|5|gene|5885",
+      "199|7|disease|MESH:D009369",
+      "98|15|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC10575813",
+    "pmid": 37831226,
+    "text": "TP53 mutations were reported to associate with poor prognosis in breast, colorectal, head and neck, and leukemia cancer.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "65|54|disease|MESH:D015179",
+      "0|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC12914013",
+    "pmid": 41580561,
+    "text": "For example, KRAS mutations are important in colorectal and pancreatic cancers because they promote uncontrolled cell growth, whereas TP53 mutations impair a vital tumour suppressor called the \"guardian of the genome,\" which leads to genomic instability, metastasis, and a poor prognosis.",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "45|33|disease|MESH:D015179",
+      "164|6|disease|MESH:D009369",
+      "13|4|gene|3845",
+      "255|10|disease|MESH:D009362",
+      "134|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 15930341,
+    "text": "PURPOSE: To correlate TP53 mutations with angiogenic status of the tumor and prognosis after liver surgery in patients with colorectal liver metastases and to correlate immunohistochemical staining of p53 protein with TP53 gene mutations.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "110|8|species|9606",
+      "67|5|disease|MESH:D009369",
+      "201|3|gene|7157",
+      "22|4|gene|7157",
+      "124|27|disease|MESH:D009362",
+      "218|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC3621660",
+    "pmid": 23551939,
+    "text": "In the past decades, several biomarkers such as microsatellite instability, Chromosome 18q allelic loss, TP53 mutation/overexpression, thymidylate synthase overexpression, Ki-67 overexpression, have been found to be associated with prognosis of colorectal cancer.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "135|20|gene|7298",
+      "245|17|disease|MESH:D015179",
+      "105|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC6960076",
+    "pmid": 31966910,
+    "text": "Another study define the colorectal cancer intrinsic subtypes (CRIS) distinguished by specific molecular, functional and pathogenic features; (1) CRIS-A: Mucinous subtype, glycolytic metabolism, with marked MSI, mutated BRAF or KRAS; (2) CRIS-B: Active TGF-beta signaling, epithelial-mesenchymal transition, bad prognosis; (3) CRIS-C: High EGFR signaling, and to EGFR inhibitors (i.e., cetuximab); (4) CRIS-D: High WNT signaling, IGF2 gene amplification/ overexpression; and (5) CRIS-E: Paneth-like phenotype and TP53-mutated genotype.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "253|8|gene|7040",
+      "430|4|gene|3481",
+      "363|4|gene|1956",
+      "513|4|gene|7157",
+      "228|4|gene|3845",
+      "340|4|gene|1956",
+      "386|9|chemical|MESH:D000068818",
+      "220|4|gene|673"
+    ]
+  },
+  {
+    "pmcid": "PMC6024750",
+    "pmid": 29652830,
+    "text": "Thus, developing a system that minimizes the disturbing effect of the stromal tumoral component, a classification was proposed that identifies five colorectal cancer intrinsic subtypes (CRIS), characterized by peculiar molecular, functional and phenotypic properties: (1) CRIS-A: mucinous, glycolytic, enriched for microsatellite instability or KRAS mutations; (2) CRIS-B: high TGF-beta signaling, epithelial-to-mesenchymal transition, associated with poor prognosis; (3) CRIS-C: high EGFR signaling and, consequently, sensitivity to EGFR inhibitors, TP53 mutations, high CIN; (4) CRIS-D: high WNT signaling, IGF2 overexpression and amplification, high CIN; (5) CRIS-E: Paneth cell-like phenotype, TP53 and KRAS mutations, high CIN.",
+    "score": 1.0,
+    "section": "CONCL",
+    "annotations": [
+      "572|3|disease|MESH:D043171",
+      "378|8|gene|7040",
+      "609|4|gene|3481",
+      "728|3|disease|MESH:D043171",
+      "551|4|gene|7157",
+      "148|17|disease|MESH:D015179",
+      "698|4|gene|7157",
+      "534|4|gene|1956",
+      "707|4|gene|3845",
+      "345|4|gene|3845",
+      "653|3|disease|MESH:D043171",
+      "485|4|gene|1956"
+    ]
+  },
+  {
+    "pmcid": "PMC4578312",
+    "pmid": 21804542,
+    "text": "In vivo, Pict1+/- mice were resistant to chemically induced skin tumors; T cell-specific Pict1-deficient mice showed p53-dependent T cell developmental arrest; and individuals with colorectal or esophageal tumors with low PICT1 expression and without TP53 mutation had a better prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "222|5|gene|68077",
+      "117|3|gene|22059",
+      "89|5|gene|68077",
+      "251|4|gene|22059",
+      "60|11|disease|MESH:D012878",
+      "181|31|disease|MESH:D015179",
+      "105|4|species|10090",
+      "18|4|species|10090",
+      "9|5|gene|68077"
+    ]
+  },
+  {
+    "pmcid": "PMC11813786",
+    "pmid": 39944824,
+    "text": "As the most common tumor suppressor gene, TP53 mutations or functional inactivation are associated with poor prognosis in pan-cancers, including colorectal tumor.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "19|5|disease|MESH:D009369",
+      "122|11|disease|MESH:D009369",
+      "42|4|gene|7157",
+      "145|16|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC10803271",
+    "pmid": 38200255,
+    "text": "Our results agree with previously reported prognostic associations for specific tumor types, for example, poor prognosis for KRAS mutants in colorectal cancer and non-small cell lung cancer or TP53 mutations in non-small cell lung cancer.",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "125|4|gene|3845",
+      "193|4|gene|7157",
+      "163|26|disease|MESH:D002289",
+      "211|26|disease|MESH:D002289",
+      "141|17|disease|MESH:D015179",
+      "80|5|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC7569448",
+    "pmid": 33102584,
+    "text": "In addition, TP53 mutations also had several strong links to poor prognosis across several cancers such as breast and colorectal.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "13|4|gene|7157",
+      "91|7|disease|MESH:D009369",
+      "107|21|disease|MESH:D061325"
+    ]
+  },
+  {
+    "pmcid": "PMC6088509",
+    "pmid": 30042065,
+    "text": "Within the MSI-negative colorectal cancer set (n=991), tumours with BRAF and TP53 mutations had a particularly poor prognosis (HR 3 08 [95% CI 1 88-5 03]; p=7 12 x 10-6; figure 3; appendix p 27).",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "68|4|gene|673",
+      "24|17|disease|MESH:D015179",
+      "55|7|disease|MESH:D009369",
+      "77|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC6895875",
+    "pmid": 31689990,
+    "text": "TP53 mutation can cause a range of changes in immune response, progression, and prognosis of colorectal cancer (CRC).",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "0|4|gene|7157",
+      "93|17|disease|MESH:D015179",
+      "112|3|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC11866214",
+    "pmid": 40092919,
+    "text": "TP53 mutations are also associated with poor prognosis in cancers such as breast cancer, colorectal cancer, and leukemia.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "89|17|disease|MESH:D015179",
+      "74|13|disease|MESH:D001943",
+      "0|4|gene|7157",
+      "112|8|disease|MESH:D007938",
+      "58|7|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC10717210",
+    "pmid": 38087345,
+    "text": "TP53 mutations, found in approximately 50% of colorectal cancer cases, are also associated with a poor prognosis.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "46|17|disease|MESH:D015179",
+      "0|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 34843402,
+    "text": "PURPOSE: To examine the association of gain-of-function (GOF) and non-gain-of-function (non-GOF) TP53 mutations with prognosis of metastatic right-sided (RCC) versus left-sided colorectal cancer (LCC).",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "97|4|gene|7157",
+      "154|3|disease|MESH:D002292",
+      "196|3|disease|MESH:D015179",
+      "177|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC5464912",
+    "pmid": 28430579,
+    "text": "Although the absence of a G13 mutation is usually associated with poor prognosis in pancreatic cancer, the presence of a G13 mutation was associated with significantly shorter OS than other KRAS mutations in our full cohort of patients with KRAS+/TP53+ mutations and in those with colorectal cancer.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "190|4|gene|3845",
+      "241|4|gene|3845",
+      "227|8|species|9606",
+      "84|17|disease|MESH:D010190",
+      "281|17|disease|MESH:D015179",
+      "247|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC9289210",
+    "pmid": 35860598,
+    "text": "Considering the synergistic contribution of RAS activation and the loss of p53 function in the malignant transformation of colorectal cancer cells, we also explored the effect of concomitant RAS and TP53 mutations on CRLM prognosis.",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "199|4|gene|7157",
+      "75|3|gene|7157",
+      "217|4|disease|None",
+      "123|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC6598553",
+    "pmid": 31321083,
+    "text": "Exploratory analyses of consensus molecular subtype-dependent associations of TP53 mutations with immunomodulation and prognosis in colorectal cancer.",
+    "score": 1.0,
+    "section": "title",
+    "annotations": [
+      "78|4|gene|7157",
+      "132|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC4652990",
+    "pmid": 26015395,
+    "text": "While the role of TP53 mutations in chemo-naive colorectal cancer patients is unclear, mutant TP53 is a predictor of better clinical outcomes in patients with chemotherapy-refractory metastatic colorectal cancer treated with cetuximab.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "66|8|species|9606",
+      "145|8|species|9606",
+      "194|17|disease|MESH:D015179",
+      "94|4|gene|7157",
+      "48|17|disease|MESH:D015179",
+      "225|9|chemical|MESH:D000068818",
+      "18|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC6487790",
+    "pmid": 30496442,
+    "text": "Moreover, these missense-type TP53 mutations are significantly and positively correlated with a poor survival in colorectal cancer patients, suggesting a role of gain-of-function by p53 mutation in malignant progression step.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "113|17|disease|MESH:D015179",
+      "30|4|gene|7157",
+      "182|3|gene|7157",
+      "131|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC7736992",
+    "pmid": 33344921,
+    "text": "Several associations including the discovery of Fusobacterium nucleatum within colorectal cancer (CRC), high abundance of Acidovorax temporans in lung cancers with TP53 mutations, and variations in the oral and gut microbiome of patients with melanoma undergoing PD-1 immunotherapy indicate a correlative role of the human microbiome with cancer.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "164|4|gene|7157",
+      "48|23|species|851",
+      "263|4|gene|9825",
+      "211|14|species|749906",
+      "243|8|disease|MESH:D008545",
+      "229|8|species|9606",
+      "146|12|disease|MESH:D008175",
+      "317|16|species|646099",
+      "79|17|disease|MESH:D015179",
+      "98|3|disease|MESH:D015179",
+      "339|6|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC7018097",
+    "pmid": 32012149,
+    "text": "Furthermore, the enrichment of TP53 R213* was not present POLE P286R mutant endometrial cancer, it is possible that selection also plays a role as TP53 mutations are more prevalent in colorectal cancers suggesting that there is stronger selective pressure for such mutations which may explain why the enrichment of the TP53 R213* mutation is only present in POLE P286R in colorectal cancer.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "63|5|mutation|tmVar:p|SUB|P|286|R",
+      "31|4|gene|7157",
+      "319|4|gene|7157",
+      "363|5|mutation|tmVar:p|SUB|P|286|R",
+      "147|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 15069679,
+    "text": "Our results suggest that GSTT1 and GSTP1 could play a role in the occurrence of KRAS2 and TP53 mutations in colorectal cancer and generate a hypothesis on the dietary factors that could be incriminated.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "35|5|gene|2950",
+      "80|5|gene|3845",
+      "25|5|gene|2952",
+      "90|4|gene|7157",
+      "108|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC5831679",
+    "pmid": 29651325,
+    "text": "Thus, given the role of local CES2 expression in the activation of irinotecan, direct measurement of CES2 expression and/or activity (rather than TP53 mutational status or p53 protein expression) may be an effective method to predict the efficacy of irinotecan in colorectal cancer.",
+    "score": 1.0,
+    "section": "CONCL",
+    "annotations": [
+      "250|10|chemical|MESH:D000077146",
+      "146|4|gene|7157",
+      "101|4|gene|8824",
+      "30|4|gene|8824",
+      "264|17|disease|MESH:D015179",
+      "67|10|chemical|MESH:D000077146",
+      "172|3|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC11727892",
+    "pmid": 39768914,
+    "text": "TP53 mutations are commonly observed across various stages and localizations within colorectal cancer, highlighting their significant role in tumor progression.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "0|4|gene|7157",
+      "84|17|disease|MESH:D015179",
+      "142|5|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC10113803",
+    "pmid": 33727167,
+    "text": "TP53 mutations are a common finding in colorectal adenocarcinoma and play a pivotal role in tumor initiation, promotion, and progression.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "92|5|disease|MESH:D009369",
+      "39|25|disease|MESH:D003110",
+      "0|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 22373952,
+    "text": "Particularly in colorectal cancer (CRC), it is believed that TP53 mutations play a role in the adenoma-carcinoma transition of tumors during pathological process.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "95|17|disease|MESH:D000230",
+      "61|4|gene|7157",
+      "16|17|disease|MESH:D015179",
+      "127|6|disease|MESH:D009369",
+      "35|3|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC6474280",
+    "pmid": 30894685,
+    "text": "Owing to the central role of p53 in genomic stability, TP53 is one of the most-commonly mutated genes in human cancers; the prevalence of TP53 mutations exceeds 40% in colorectal, head and neck, and oesophageal cancers (http://p53.iarc.fr/RefsHighlights.aspx).",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "105|5|species|9606",
+      "29|3|gene|7157",
+      "168|50|disease|MESH:D006258",
+      "111|7|disease|MESH:D009369",
+      "138|4|gene|7157",
+      "55|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC5348453",
+    "pmid": 28154273,
+    "text": "It is well known that TP53 mutation plays an important role in sporadic colorectal cancer.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "22|4|gene|7157",
+      "72|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC4431733",
+    "pmid": 25974029,
+    "text": "It has been reported that an increased incidence of TP53 mutations is associated with secondary lesions of colorectal tumors, suggesting that mutations in this gene may play an important role in the establishment of colorectal liver metastases.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "216|27|disease|MESH:D009362",
+      "52|4|gene|7157",
+      "107|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC6024750",
+    "pmid": 29652830,
+    "text": "This analysis provided evidence that mainly KRAS mutations and TP53 mutations were associated with colorectal cancer metastasis; some of the studies also suggest a role for SMAD4 and BRAF.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "99|28|disease|MESH:D015179",
+      "63|4|gene|7157",
+      "173|5|gene|4089",
+      "183|4|gene|673",
+      "44|4|gene|3845"
+    ]
+  },
+  {
+    "pmcid": "PMC12162862",
+    "pmid": 40329096,
+    "text": "Our study used mouse colorectal cancer organoids carrying KRAS, APC, and TP53 mutations, allowing for inducible EGFR deletion to investigate its role in KRAS mutant organoids.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "153|4|gene|3845",
+      "58|4|gene|3845",
+      "73|4|gene|7157",
+      "64|3|gene|324",
+      "112|4|gene|1956",
+      "15|5|species|10090",
+      "21|17|disease|MESH:D015179"
+    ]
+  },
+  {
+    "pmcid": "PMC7311751",
+    "pmid": 32625092,
+    "text": "Their pharmacogenomic role, already defined in colorectal cancer, is under investigation in LARC with promising results concerning specific somatic mutations in KRAS and TP53, as predictors of tumor response and prognosis.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "161|4|gene|3845",
+      "47|17|disease|MESH:D015179",
+      "92|4|disease|MESH:D012004",
+      "193|5|disease|MESH:D009369",
+      "170|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC7118433",
+    "pmid": 32214283,
+    "text": "Extensive efforts have been made to study the effects of TP53 mutation on cancer prognosis and therapeutic responses and the role of TP53 mutations in cancer diagnosis.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "74|6|disease|MESH:D009369",
+      "57|4|gene|7157",
+      "133|4|gene|7157",
+      "151|6|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC5669876",
+    "pmid": 29137250,
+    "text": "Other findings propose that the loss of transcriptional activity of LKB1 tumor suppressor protein, in the presence of mut p53, may promote tumor malignancy ensuing poor prognosis for lung carcinoma patients, thus suggesting a critical role of TP53 mutations in cancer development.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "183|14|disease|MESH:D008175",
+      "122|3|gene|7157",
+      "243|4|gene|7157",
+      "73|5|disease|MESH:D009369",
+      "68|4|gene|6794",
+      "139|16|disease|MESH:D009369",
+      "261|6|disease|MESH:D009369",
+      "198|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC7553957",
+    "pmid": 32684626,
+    "text": "Finally, whilst this study indicates a prognostic role of TP53 mutations in HNSCC, the influence of TP53 status in cancer prognosis more broadly is still controversial and large, and well-standardised studies are needed.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "76|5|disease|MESH:D000077195",
+      "115|6|disease|MESH:D009369",
+      "100|4|gene|7157",
+      "58|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 40002239,
+    "text": "This review investigates the role of TP53 mutations in prostate cancer progression, prognosis, and therapeutic development.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "55|15|disease|MESH:D011471",
+      "37|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10357439",
+    "pmid": 37484807,
+    "text": "Recent years, molecular subtypes were also found to play an important role in EC, for example, Tumor Protein 53 (TP53) mutations, accompanied by abnormal p53 expression (p53-abn) indicate the worst prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "78|2|disease|MESH:D016889",
+      "113|4|gene|7157",
+      "95|16|gene|7157",
+      "170|3|gene|7157",
+      "154|3|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC8051136",
+    "pmid": 33761356,
+    "text": "Although our data do not support a role for p53 in aneuploidy surveillance in organotypic cultures, there is strong evidence indicating that the loss of p53 is associated with chromosome instability and poor prognosis in the development of several cancers, and a majority of tumors show varied TP53 mutations.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "275|6|disease|MESH:D009369",
+      "248|7|disease|MESH:D009369",
+      "44|3|gene|397276",
+      "153|3|gene|397276",
+      "294|4|gene|7157",
+      "51|10|disease|MESH:D000782"
+    ]
+  },
+  {
+    "pmcid": "PMC9780475",
+    "pmid": 36568387,
+    "text": "This study aimed to explore the role of TP53 mutation in regulating the tumor microenvironment (TME), elucidate the effects of TP53 activity on BLCA prognosis and immunotherapy response.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "40|4|gene|7157",
+      "144|4|disease|MESH:D001749",
+      "72|5|disease|MESH:D009369",
+      "127|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC6061986",
+    "pmid": 30048458,
+    "text": "Simultaneous analysis of KRAS and TP53 mutations has an important role in determining the prognosis and appropriate treatment strategies for lung cancer patients.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "25|4|gene|3845",
+      "141|11|disease|MESH:D008175",
+      "153|8|species|9606",
+      "34|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC12373740",
+    "pmid": 40846754,
+    "text": "In conclusion, the aforementioned findings provide a comprehensive analysis of the complex molecular landscape of pancreatic cancer, with a particular focus on the critical roles of different KRAS mutation subtypes and TP53 mutations in patient prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "114|17|disease|MESH:D010190",
+      "219|4|gene|7157",
+      "192|4|gene|3845",
+      "237|7|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC3483014",
+    "pmid": 22822097,
+    "text": "This is supported by the fact that taking into account all the heterogeneity of breast cancer, whenever present, TP53 mutations are more frequent in high-grade, large-size, node-positive cases, thus possessing a prognosis-worsening, driving role (.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "80|13|disease|MESH:D001943",
+      "113|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC5320931",
+    "pmid": 27863244,
+    "text": "Consistent with the critical roles of TP53 and PTEN-PI3K-AKT alterations in GBM pathogenesis, GBM genomic and proteomic profiles from The Cancer Genome Atlas (TCGA) show significant correlation between poorer prognosis and higher levels of AKT activation in patients with TP53 mutations (Figure S1A).",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "240|3|gene|207",
+      "38|4|gene|7157",
+      "94|3|disease|MESH:D005909",
+      "272|4|gene|7157",
+      "47|4|gene|5728",
+      "138|6|disease|MESH:D009369",
+      "258|8|species|9606",
+      "57|3|gene|207",
+      "76|3|disease|MESH:D005909",
+      "52|4|gene|5295"
+    ]
+  },
+  {
+    "pmcid": "PMC12969231",
+    "pmid": 41808713,
+    "text": "While some reports suggest a favorable prognosis for early-onset NSCLC, the molecular drivers and immune contexture of early-onset LUSC:particularly the role of key tumor suppressors like TP53 and CDKN2A:remain unclear, with studies even reporting contradictory prognostic associations for TP53 mutations.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "197|6|gene|1029",
+      "165|5|disease|MESH:D009369",
+      "131|4|disease|MESH:D002294",
+      "188|4|gene|7157",
+      "290|4|gene|7157",
+      "65|5|disease|None"
+    ]
+  },
+  {
+    "pmcid": "PMC8447564",
+    "pmid": 34530752,
+    "text": "Given the tumor heterogeneity in the immune microenvironment of HNSC, we hypothesized that some immune-associated signatures influenced by TP53 mutations might play crucial roles in assessing prognosis and therapeutic responses and even guiding clinical treatment for HNSC.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "64|4|disease|MESH:D000077195",
+      "268|4|disease|MESH:D000077195",
+      "10|5|disease|MESH:D009369",
+      "139|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC6120847",
+    "pmid": 29526969,
+    "text": "Regarding prognostic factors, Tomizawa et al. reported that HER2 mutations were not associated with the prognosis of non-small-cell lung cancer patients, suggesting a negative prognostic role for the co-existence of a TP53 mutation.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "60|4|gene|2064",
+      "218|4|gene|7157",
+      "144|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC10589398",
+    "pmid": 37862939,
+    "text": "To clarify the role of GSDME in prognosis, analysis based on The Cancer Genome Atlas (TCGA) found that GSDME mRNA was higher in HCC (Supplementary Fig. 3A), especially in HCC with TP53 mutation (Supplementary Figure 3B).",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "103|5|gene|100522585",
+      "23|5|gene|100522585",
+      "128|3|disease|MESH:D006528",
+      "180|4|gene|7157",
+      "65|6|disease|MESH:D009369",
+      "171|3|disease|MESH:D006528"
+    ]
+  },
+  {
+    "pmcid": "PMC11634871",
+    "pmid": 39669558,
+    "text": "KOcAK et al. found that the prognosis of diagnosed breast cancer was poor in young women with a high copy number alteration and TP53 mutation level, have significantly worse clinical outcomes, further supporting the role of these mutations in poor prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "83|5|species|9606",
+      "51|13|disease|MESH:D001943",
+      "128|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC12537610",
+    "pmid": 41114835,
+    "text": "While definitive conclusions regarding the role of TP53 phosphorylation in CC progression remain elusive, ongoing research, including studies by Wang and Sun, has identified high TP53 expression in malignancies, with TP53 mutations associated with poor prognoses across various cancers.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "198|12|disease|MESH:D009369",
+      "75|2|disease|MESH:D015179",
+      "179|4|gene|7157",
+      "217|4|gene|7157",
+      "51|4|gene|7157",
+      "278|7|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC9453314",
+    "pmid": 36090993,
+    "text": "Much research points out that TP53 mutations play a negative role in anti-tumor immunity and immunotherapy response, which is related to the poor prognosis in cancer patients.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "30|4|gene|7157",
+      "74|5|disease|MESH:D009369",
+      "159|6|disease|MESH:D009369",
+      "166|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC5323125",
+    "pmid": 27626311,
+    "text": "Extensive efforts have been made to study TP53 mutation effect on prognosis, therapeutic response and its role in cancer diagnosis.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "42|4|gene|7157",
+      "114|6|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC8128305",
+    "pmid": 33780049,
+    "text": "Other researches observed that different molecular subtype breast cancer with TP53 mutation would have different clinical prognosis and identifying the new role of TP53 in the progression of breast cancer.",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "164|4|gene|7157",
+      "78|4|gene|7157",
+      "191|13|disease|MESH:D001943",
+      "59|13|disease|MESH:D001943"
+    ]
+  },
+  {
+    "pmcid": "PMC9707522",
+    "pmid": 36344844,
+    "text": "Because TP53 mutations correlate to poor prognosis after endocrine therapy, we sought to determine the role of this CoREST in regulating endocrine resistance in TP53 mutant breast cancers.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "116|6|gene|23186",
+      "161|4|gene|7157",
+      "8|4|gene|7157",
+      "137|9|disease|MESH:D004700",
+      "57|9|disease|MESH:D004700",
+      "173|14|disease|MESH:D001943"
+    ]
+  },
+  {
+    "pmcid": "PMC3925633",
+    "pmid": 24442106,
+    "text": "Review of historical data is controversial about the predictive or prognostic role of p53 in lung cancer, but more recent data from a meta-analysis reported that TP53 mutations are a marker of poor prognosis, which has been confirmed by retrospective immunohistochemical (IHC) analysis of samples from two independent clinical trials (CALGB 9633 and JBR.10) where p53-positive staining by IHC conferred inferior survival, with a HR of 2.3 and 1.89, respectively, and was also predictive of benefit from chemotherapy.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "162|4|gene|7157",
+      "86|3|gene|7157",
+      "93|11|disease|MESH:D008175",
+      "364|3|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10778112",
+    "pmid": 38201431,
+    "text": "The spectrum of p53 mutations (muTP53) is extremely broad, with approximately 350 alterations identified across malignancies, including deletions, missense mutations, nonsense mutations, frame shifts, etc., and until recently, studies investigating the role of TP53 mutations in the prognosis of PDAC have lumped all alterations together.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "16|3|gene|7157",
+      "112|12|disease|MESH:D009369",
+      "261|4|gene|7157",
+      "296|4|disease|MESH:D021441"
+    ]
+  },
+  {
+    "pmcid": "PMC12728520",
+    "pmid": 39238386,
+    "text": "TP53 mutations are known to play a role in cancer development and progression, and their presence may contribute to a poorer prognosis in OSCC patients.",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "138|4|disease|MESH:D000077195",
+      "143|8|species|9606",
+      "43|6|disease|MESH:D009369",
+      "0|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC12966887",
+    "pmid": 41799427,
+    "text": "Second, further research on molecular biomarkers (such as TP53 mutations and specific copy number gains) is required to validate their clinical value in the differential diagnosis of SC and benign sebaceous tumors, and to explore their potential role in guiding treatment selection and prognosis prediction.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "58|4|gene|7157",
+      "190|23|disease|MESH:C563610",
+      "183|2|disease|MESH:D012626"
+    ]
+  },
+  {
+    "pmcid": "PMC11672308",
+    "pmid": 39527463,
+    "text": "In this study, we successfully identified that glycosyltransferase MGAT4A was a potential biomarker for distinguishing poor prognostic EC subtype and characterized its tumor promoting role in EC development via reprogramming glucose metabolism, as evidenced below: 1) An unsupervised clustering analysis identified an 11-glycogene cluster, which was characterized with poor prognosis and enriched with TP53 mutation, using the public EC dataset TCGA-UCEC (n = 543).",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "225|7|chemical|MESH:D005947",
+      "168|5|disease|MESH:D009369",
+      "192|2|disease|MESH:D016889",
+      "402|4|gene|7157",
+      "434|2|disease|MESH:D016889",
+      "321|9|chemical|-",
+      "135|2|disease|MESH:D016889",
+      "67|6|gene|11320"
+    ]
+  },
+  {
+    "pmcid": "PMC12007182",
+    "pmid": 40249206,
+    "text": "Despite this, the traditionally poorer prognosis of early-onset cancer suggests that factors beyond TP53 mutations, such as genetic variants or sensitivity to drugs other than platinum-based drugs, may also play a role.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "176|8|chemical|MESH:D010984",
+      "64|6|disease|MESH:D009369",
+      "100|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC12393667",
+    "pmid": 40875911,
+    "text": "Given the critical role of TP53 mutation in prognosis and immune infiltration of multiple cancers, uncovering the relationship between TP53 mutations and the composition of the tumour microenvironment is of great significance.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "135|4|gene|7157",
+      "177|6|disease|MESH:D009369",
+      "90|7|disease|MESH:D009369",
+      "27|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC12518873",
+    "pmid": 41083578,
+    "text": "This mechanism indicates that TP53 mutations play a critical role in the invasive and metastatic progression of ICC, potentially exacerbating the malignant phenotype of tumors through interactions with other driver gene mutations (e.g.  KRAS), thereby influencing disease progression and prognosis.ESR1, as a key molecule associated with ICC recurrence, not only serves as an important marker for evaluating patient prognosis but also may act as a potential therapeutic target for ICC by regulating the JAK/STAT3 pathway.In summary, these five key genes elucidate the mechanisms underlying PFAS-specific induction of ICC from multiple dimensions, including cell adhesion, matrix remodeling, apoptosis regulation, genetic synergy, and signaling pathway inhibition.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "507|5|gene|6774",
+      "30|4|gene|7157",
+      "408|7|species|9606",
+      "237|4|gene|3845",
+      "338|3|disease|MESH:D018281",
+      "617|3|disease|MESH:D018281",
+      "112|3|disease|MESH:D018281",
+      "590|4|gene|5198",
+      "298|4|gene|2099",
+      "481|3|disease|MESH:D018281",
+      "169|6|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC12821971",
+    "pmid": 41408259,
+    "text": "TP53 mutation is among the most prevalent genetic alterations in non-small cell lung cancer (NSCLC); it plays critical roles in pathogenesis, prognosis, and clinical outcomes across its two major subtypes, lung adenocarcinoma (LUAD) and lung squamous cell carcinoma (LUSC).",
+    "score": 1.0,
+    "section": "METHODS",
+    "annotations": [
+      "93|5|disease|MESH:D002289",
+      "0|4|gene|7157",
+      "65|26|disease|MESH:D002289",
+      "206|19|disease|MESH:D000077192",
+      "227|4|disease|MESH:D000077192",
+      "237|28|disease|MESH:D002294",
+      "267|4|disease|MESH:D002294"
+    ]
+  },
+  {
+    "pmcid": "PMC7327681",
+    "pmid": 32412177,
+    "text": "There is no reliable research evidence to prove the relationship between TP53 mutation type and prognosis, and we need to further explore the mechanism which underlies the role of this tumor suppressor gene in carcinogenesis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "73|4|gene|7157",
+      "185|5|disease|MESH:D009369",
+      "210|14|disease|MESH:D063646"
+    ]
+  },
+  {
+    "pmcid": "PMC5518537",
+    "pmid": 28536310,
+    "text": "We further accessed the prognostic roles of individual STATs in other clinicopathological features, such as pathological grades, clinical stages, and TP53 mutation, and found that these genes indicate a favorable prognosis especially for late stage, poor differentiation, and TP53 mutated ovarian cancer patients.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "289|14|disease|MESH:D010051",
+      "276|4|gene|7157",
+      "150|4|gene|7157",
+      "304|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC12364763",
+    "pmid": 40591167,
+    "text": "The TP53 gene, encoding a tumor suppressor protein, plays a crucial role in prognosis, especially in many cancer patients with TP53 mutations.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "113|8|species|9606",
+      "26|5|disease|MESH:D009369",
+      "4|4|gene|7157",
+      "106|6|disease|MESH:D009369",
+      "127|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC11522420",
+    "pmid": 39472491,
+    "text": "Secondly, TP53 mutations are generally associated with drug resistance and poor prognosis in many cancers, so it is unexpected that TP53 mutations in AML seem to not play a role in determining clinical outcomes following treatment with decitabine.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "98|7|disease|MESH:D009369",
+      "236|10|chemical|MESH:D000077209",
+      "10|4|gene|7157",
+      "150|3|disease|MESH:D015470",
+      "132|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC8616128",
+    "pmid": 34830747,
+    "text": "Besides the cancer preventing role of TP53, its involvement in chemotherapy resistance has been described in many TP53-mutated tumors, causing dismal prognosis.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "127|6|disease|MESH:D009369",
+      "12|6|disease|MESH:D009369",
+      "114|4|gene|7157",
+      "38|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 40835511,
+    "text": "TP53 mutations, which are prevalent in patients with non-small cell lung cancer (NSCLC), play a crucial role in carcinogenesis, are associated with poor prognosis and significantly contribute to resistance against key therapeutic options, such as chemotherapy, epidermal growth factor receptor tyrosine kinase inhibitors, and immunotherapy.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "39|8|species|9606",
+      "0|4|gene|7157",
+      "112|14|disease|MESH:D063646",
+      "81|5|disease|MESH:D002289",
+      "53|26|disease|MESH:D002289"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 39531992,
+    "text": "The TP53 mutation is one of the most common gene mutations in non-small cell lung cancer (NSCLC) and plays a significant role in the occurrence, development, and prognosis of both lung adenocarcinoma (LUAD) and lung squamous cell carcinoma (LUSC).",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "211|28|disease|MESH:D002294",
+      "241|4|disease|MESH:D002294",
+      "62|26|disease|MESH:D002289",
+      "4|4|gene|7157",
+      "201|4|disease|MESH:D000077192",
+      "180|19|disease|MESH:D000077192",
+      "90|5|disease|MESH:D002289"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 39513104,
+    "text": "Conclusions: Our study suggests that the NDC80 complex components could serve as reliable biomarkers for cancer detection and prognosis in pan-cancer, in addition to uncovering their role as cancer-promoting genes involved in Th2 cell infiltration, immune checkpoint, cell growth, and TP53 mutation.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "191|6|disease|MESH:D009369",
+      "143|6|disease|MESH:D009369",
+      "105|6|disease|MESH:D009369",
+      "285|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC11129003",
+    "pmid": 38803860,
+    "text": "Additionally, upregulated BTG2 expression in mutated patients was observed which was correlated with poor prognosis, emphasizing the role of TP53 mutations in bladder cancer progression.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "159|14|disease|MESH:D001749",
+      "53|8|species|9606",
+      "141|4|gene|7157",
+      "26|4|gene|7832"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 31434450,
+    "text": "TP53 mutations play an important role in the process of follicular thyroid neoplasm, indicating more aggressive behavior and poor prognosis.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": [
+      "56|27|disease|MESH:D013964",
+      "0|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC9254880",
+    "pmid": 35812186,
+    "text": "And POLEhigh group has higher TP53 mutation rate than POLElow group, suggesting that TP53 expression level plays an important role in clinical treatment and tumor prognosis (Figure 5B).",
+    "score": 1.0,
+    "section": "RESULTS",
+    "annotations": [
+      "30|4|gene|7157",
+      "85|4|gene|7157",
+      "157|5|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC5196188",
+    "pmid": 28008906,
+    "text": "Consistent with this protumorigenic role, the high mRNA level of PHLDB3 is correlated with worse prognosis of gastric cancer patients, as well as less TP53 mutations (Supplementary Fig. 1; Fig. 3c,d).",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "151|4|gene|7157",
+      "65|6|gene|653583",
+      "110|14|disease|MESH:D013274",
+      "125|8|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC4815038",
+    "pmid": 26884599,
+    "text": "Although the frequency of TP53 mutations in hematological malignancies appears to be relatively low, it plays a major role in resistant and poor prognosis cases.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "44|26|disease|MESH:D019337",
+      "26|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10325716",
+    "pmid": 37427122,
+    "text": "A critical role of TP53 mutations was also observed by analyzing its impact in NSCLC EGFRex20ins mutated patients, where TP53 mutations was established as negative prognostic marker and also correlated to poor prognosis for EGFR ex20ins near-loop patients treated with second-/third-generation EGFR-TKIs, as well as copy number gain instability and higher tumor mutational burden (TMB).",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "19|4|gene|7157",
+      "247|8|species|9606",
+      "356|5|disease|MESH:D009369",
+      "105|8|species|9606",
+      "79|5|disease|MESH:D002289",
+      "294|4|gene|1956",
+      "121|4|gene|7157",
+      "224|4|gene|1956"
+    ]
+  },
+  {
+    "pmcid": "PMC12751038",
+    "pmid": 41230869,
+    "text": "This aberrant expression is often mutually exclusive with TP53 mutations and MDM2 amplification and is frequently associated with poor prognosis in cancer patients, highlighting its crucial role in tumorigenesis.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "77|4|gene|4193",
+      "148|6|disease|MESH:D009369",
+      "155|8|species|9606",
+      "58|4|gene|7157"
+    ]
+  },
+  {
+    "pmcid": "PMC10341156",
+    "pmid": 37444479,
+    "text": "Various genetic or molecular features have been identified that play a role in determining the treatment response and prognosis in gliomas, including IDH mutation, 1p/19q codeletion, O-6-methylguanine-DNA methyltransferase (MGMT) methylation, telomerase reverse transcriptase (TERT) promoter mutation, epidermal growth factor receptor (EGFR) amplification, and tumor protein TP53 mutation.",
+    "score": 1.0,
+    "section": "INTRO",
+    "annotations": [
+      "277|4|gene|7015",
+      "243|32|gene|7015",
+      "183|39|gene|4255",
+      "131|7|disease|MESH:D005910",
+      "302|32|gene|1956",
+      "361|5|disease|MESH:D009369",
+      "375|4|gene|7157",
+      "224|4|gene|4255",
+      "336|4|gene|1956",
+      "150|3|gene|3417"
+    ]
+  },
+  {
+    "pmcid": "PMC9015428",
+    "pmid": 35444692,
+    "text": "Second, our retrospective study and small sample size failed to obtain immunotherapy data for these patients; Finally, there is a lack of data on molecular indicators (such as MSI, TP53, and TMB, etc) associated with colorectal cancer prognosis and immunotherapy, so further improvement is needed.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "181|4|gene|7157",
+      "217|17|disease|MESH:D015179",
+      "100|8|species|9606"
+    ]
+  }
+]
