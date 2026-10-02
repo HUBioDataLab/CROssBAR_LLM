@@ -45,6 +45,7 @@ from pathlib import Path
 from typing import Any, TextIO
 
 from litsense.metrics import (
+    JUDGE_PROMPT_REVISION,
     Judge,
     JudgeVerdict,
     Kind,
@@ -252,6 +253,14 @@ def parse_args() -> argparse.Namespace:
         help="Provider-qualified model string for the LLM judge. Default: the model under "
         "test (the reference harness's way). Fix it across runs for a multi-model "
         "comparison, e.g. openai:google/gemini-2.5-flash.",
+    )
+    parser.add_argument(
+        "--judge-structured-output",
+        choices=("json_schema", "function_calling", "json_mode"),
+        default=None,
+        help="Structured-output method for the judge model (LangChain default when "
+        "omitted). meta-llama/llama-3.3-70b-instruct via OpenRouter needs "
+        "function_calling: its JSON-schema route produces runaway completions (2026-10-02).",
     )
     parser.add_argument(
         "--reasoning",
@@ -585,6 +594,10 @@ def run_meta(args: argparse.Namespace, settings: Settings, *, started: str) -> d
         "structured_output_method": settings.structured_output_method,
         "provider_order": settings.provider_order,
         "judge_model": judge_model_string(args, settings),
+        "judge_structured_output_method": (
+            args.judge_structured_output if args.judge else None
+        ),
+        "judge_prompt_revision": JUDGE_PROMPT_REVISION if args.judge else None,
         "answer_style": settings.answer_style,
         "max_articles": settings.max_articles,
         "question_offset": args.offset,
@@ -685,7 +698,9 @@ async def amain(args: argparse.Namespace) -> int:
     modes = ["abstracts", "full_text"] if args.mode == "both" else [args.mode]
     base_settings = Settings(**overrides)
     judge_model = judge_model_string(args, base_settings)
-    judge = build_judge(judge_model) if judge_model else None
+    judge = (
+        build_judge(judge_model, method=args.judge_structured_output) if judge_model else None
+    )
 
     label = args.run_name or ("dry-run" if args.dry_run else model_label(base_settings.model))
     run_dir = new_run_dir(label, root=args.runs_dir)
@@ -700,6 +715,8 @@ async def amain(args: argparse.Namespace) -> int:
         "structured_output_method": base_settings.structured_output_method,
         "provider_order": base_settings.provider_order,
         "judge_model": judge_model,
+        "judge_structured_output_method": args.judge_structured_output if judge else None,
+        "judge_prompt_revision": JUDGE_PROMPT_REVISION if judge else None,
         "grounding_modes": [GROUNDING_MODE_KEYS[m] for m in modes],
         "answer_style": args.answer_style,
         "max_articles": base_settings.max_articles,

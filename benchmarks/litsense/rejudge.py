@@ -28,7 +28,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from litsense.metrics import Judge, Kind, judge_messages
+from litsense.metrics import JUDGE_PROMPT_REVISION, Judge, Kind, judge_messages
 from litsense.report import (
     aggregate,
     load_results,
@@ -38,8 +38,20 @@ from litsense.report import (
 from litsense.run import DATASETS, build_judge
 from crossbar_llm.litsense_tools.models import TokenUsage
 
-#: One judge call may not hang the run: a slow provider becomes a recorded error.
-JUDGE_TIMEOUT_S = 120.0
+#: One judge call may not hang the run: a slow provider becomes a recorded error —
+#: after `JUDGE_ATTEMPTS` tries, because under load OpenRouter queues llama calls for
+#: minutes (28/200 timeouts at 120 s × 16 concurrent in the first pass).
+JUDGE_TIMEOUT_S = 180.0
+JUDGE_ATTEMPTS = 3
+
+
+def needs_judging(q: dict[str, Any], before: str | None, target: str) -> bool:
+    """Judge this record? Always when the judge changes; on a repeat pass only the
+    records whose verdict is a recorded error (resume / `--retry-errors`)."""
+    if before != target:
+        return True
+    verdict = q.get("llm_judge")
+    return isinstance(verdict, dict) and "error" in verdict
 
 
 def dataset_kind(name: str) -> Kind:
@@ -59,28 +71,33 @@ async def judge_question(
     """Replace one record's `llm_judge` / `judge_tokens`, keeping the previous verdict."""
     generated = q.get("generated_answer") or ""
     previous = q.get("llm_judge")
-    if previous is not None:
+    before = q.pop("_judge_model_before", None)
+    if previous is not None and before != judge_model and "error" not in previous:
         q.setdefault("previous_judges", []).append({
-            "judge_model": q.get("_judge_model_before"),
+            "judge_model": before,
             "llm_judge": previous,
             "judge_tokens": q.get("judge_tokens"),
         })
-    q.pop("_judge_model_before", None)
     if not generated:
         q["llm_judge"] = None
         q["judge_tokens"] = TokenUsage().model_dump()
         return
     async with sem:
-        try:
-            verdict, usage = await asyncio.wait_for(
-                judge(judge_messages(q["question"], generated, q["reference_answers"],
-                                     kind=kind)),
-                timeout=JUDGE_TIMEOUT_S,
-            )
-            q["llm_judge"] = verdict.model_dump()
-            q["judge_tokens"] = usage.model_dump()
-        except Exception as e:  # noqa: BLE001 — a failed grade is a recorded result
-            q["llm_judge"] = {"error": f"{type(e).__name__}: {e}"}
+        last_error = "no attempt"
+        for _attempt in range(JUDGE_ATTEMPTS):
+            try:
+                verdict, usage = await asyncio.wait_for(
+                    judge(judge_messages(q["question"], generated, q["reference_answers"],
+                                         kind=kind)),
+                    timeout=JUDGE_TIMEOUT_S,
+                )
+                q["llm_judge"] = verdict.model_dump()
+                q["judge_tokens"] = usage.model_dump()
+                break
+            except Exception as e:  # noqa: BLE001 — a failed grade is a recorded result
+                last_error = f"{type(e).__name__}: {e}"
+        else:
+            q["llm_judge"] = {"error": last_error}
             q["judge_tokens"] = TokenUsage().model_dump()
         progress["done"] += 1
         if progress["done"] % 25 == 0 or progress["done"] == progress["total"]:
@@ -89,25 +106,33 @@ async def judge_question(
 
 async def rejudge_file(
     path: Path, judge: Judge, judge_model: str, *, concurrency: int, limit: int | None,
-    force: bool,
+    force: bool, retry_errors: bool = False, structured_output_method: str | None = None,
 ) -> dict[str, int]:
     results = load_results(path)
     stats = {"judged": 0, "skipped": 0, "errors": 0}
     sem = asyncio.Semaphore(concurrency)
     for name, block in results.items():
         info = block.setdefault("run_info", {})
-        if info.get("judge_model") == judge_model and not force:
-            print(f"  {name}: already judged by {judge_model}, skipped (use --force)")
+        before = info.get("judge_model")
+        if before == judge_model and not force and not retry_errors:
+            print(f"  {name}: already judged by {judge_model}, skipped "
+                  "(--retry-errors redoes its judge errors, --force everything)")
             stats["skipped"] += 1
             continue
-        before = info.get("judge_model")
         kind = dataset_kind(name)
         t0 = time.perf_counter()
         tasks = []
         selected: list[dict[str, Any]] = []
         for mode_block in block["results_by_grounding_mode"].values():
             questions = mode_block["per_question"]
-            selected.extend(questions[:limit] if limit is not None else questions)
+            selected.extend(
+                q for q in (questions[:limit] if limit is not None else questions)
+                if force or needs_judging(q, before, judge_model)
+            )
+        if not selected:
+            print(f"  {name}: nothing to judge")
+            stats["skipped"] += 1
+            continue
         progress = {"done": 0, "total": len(selected)}
         print(f"  {name}: judging {len(selected)} answers …", flush=True)
         for q in selected:
@@ -130,11 +155,14 @@ async def rejudge_file(
                 f" ({errors} judge errors) — mean_judge {agg['mean_judge']}, "
                 f"informativeness {agg['mean_informativeness']}, clarity {agg['mean_clarity']}"
             )
-        info["judge_model"] = judge_model
-        info.setdefault("judge_history", []).append({
-            "judge_model": before,
-            "replaced_at": datetime.now().isoformat(timespec="seconds"),
-        })
+        if before != judge_model:
+            info["judge_model"] = judge_model
+            info.setdefault("judge_history", []).append({
+                "judge_model": before,
+                "replaced_at": datetime.now().isoformat(timespec="seconds"),
+            })
+        info["judge_structured_output_method"] = structured_output_method
+        info["judge_prompt_revision"] = JUDGE_PROMPT_REVISION
         stats["judged"] += len(tasks)
         print(f"  {name}: {len(tasks)} answers in {time.perf_counter() - t0:.0f}s")
     path.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -143,13 +171,14 @@ async def rejudge_file(
 
 async def rejudge_run(
     run_dir: Path, judge: Judge, judge_model: str, *, concurrency: int, limit: int | None,
-    force: bool,
+    force: bool, retry_errors: bool = False, structured_output_method: str | None = None,
 ) -> None:
     print(f"\n=== {run_dir.name} → judge {judge_model} ===")
     totals = {"judged": 0, "skipped": 0, "errors": 0}
     for path in run_files(run_dir):
         stats = await rejudge_file(
-            path, judge, judge_model, concurrency=concurrency, limit=limit, force=force
+            path, judge, judge_model, concurrency=concurrency, limit=limit, force=force,
+            retry_errors=retry_errors, structured_output_method=structured_output_method,
         )
         for k, v in stats.items():
             totals[k] += v
@@ -162,9 +191,11 @@ async def rejudge_run(
                 "replaced_at": datetime.now().isoformat(timespec="seconds"),
             })
             manifest["judge_model"] = judge_model
-            manifest_path.write_text(
-                json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
-            )
+        manifest["judge_structured_output_method"] = structured_output_method
+        manifest["judge_prompt_revision"] = JUDGE_PROMPT_REVISION
+        manifest_path.write_text(
+            json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
     print(f"  wrote {write_run_report(run_dir)}")
     print(f"  totals: {totals}")
 
@@ -177,13 +208,19 @@ def main(argv: list[str] | None = None) -> int:
                         "openai:meta-llama/llama-3.3-70b-instruct")
     parser.add_argument("--structured-output", default=None,
                         choices=("json_schema", "function_calling", "json_mode"),
-                        help="LangChain structured-output method for the judge model")
-    parser.add_argument("--concurrency", type=int, default=8,
+                        help="LangChain structured-output method for the judge model. "
+                        "llama-3.3-70b via OpenRouter needs function_calling: its "
+                        "JSON-schema route started producing runaway completions "
+                        "(2026-10-02)")
+    parser.add_argument("--concurrency", type=int, default=12,
                         help="parallel judge calls (the judge never touches NCBI)")
     parser.add_argument("--n", type=int, default=None,
                         help="only the first N questions per mode (smoke test)")
     parser.add_argument("--force", action="store_true",
-                        help="re-judge datasets already judged by this model")
+                        help="re-judge every answer, even those this model already judged")
+    parser.add_argument("--retry-errors", action="store_true",
+                        help="on datasets this model already judged, redo only the answers "
+                        "whose verdict is a recorded error (timeouts etc.)")
     args = parser.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -198,7 +235,8 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             await rejudge_run(
                 run_dir, judge, args.judge_model, concurrency=args.concurrency,
-                limit=args.n, force=args.force,
+                limit=args.n, force=args.force, retry_errors=args.retry_errors,
+                structured_output_method=args.structured_output,
             )
 
     asyncio.run(run_all())

@@ -89,7 +89,8 @@ def save_state(path: Path, state: dict[str, Any]) -> None:
 
 
 def run_command(
-    entry: dict[str, Any], args: argparse.Namespace, judge_model: str, runs_dir: Path
+    entry: dict[str, Any], args: argparse.Namespace, judge_model: str, runs_dir: Path,
+    judge_method: str | None = None,
 ) -> list[str]:
     cmd = [
         sys.executable, "-m", "litsense.run",
@@ -100,6 +101,8 @@ def run_command(
     ]
     if not args.no_judge:
         cmd += ["--judge", "--judge-model", judge_model]
+        if judge_method:
+            cmd += ["--judge-structured-output", judge_method]
     if entry.get("reasoning"):
         cmd += ["--reasoning", entry["reasoning"]]
     if entry.get("structured_output"):
@@ -135,6 +138,7 @@ def spawn(cmd: list[str], model: str, out_path: Path) -> int:
 def cmd_launch(args: argparse.Namespace) -> int:
     registry = load_registry()
     judge_model = args.judge_model or registry["judge_model"]
+    judge_method = args.judge_structured_output or registry.get("judge_structured_output")
     entries = registry["models"]
     if args.only:
         wanted = {label.strip() for label in args.only.split(",")}
@@ -153,6 +157,7 @@ def cmd_launch(args: argparse.Namespace) -> int:
         "matrix_dir": str(matrix_dir),
         "runs_dir": str(runs_dir),
         "judge_model": None if args.no_judge else judge_model,
+        "judge_structured_output": None if args.no_judge else judge_method,
         "mode": args.mode,
         "smoke": args.smoke,
         "dataset": "bioasq-factoid-100" if args.smoke else args.dataset,
@@ -161,7 +166,7 @@ def cmd_launch(args: argparse.Namespace) -> int:
     }
     path = STATE_DIR / f"{stamp}.json"
     for entry in entries:
-        cmd = run_command(entry, args, judge_model, runs_dir)
+        cmd = run_command(entry, args, judge_model, runs_dir, judge_method)
         out_path = STATE_DIR / f"{stamp}-{entry['label']}{args.label_suffix or ''}.out"
         launched_at = datetime.now().isoformat(timespec="seconds")
         pid = spawn(cmd, entry["model"], out_path)
@@ -458,6 +463,9 @@ def main(argv: list[str] | None = None) -> int:
                         "id, structured output and reasoning switch before spending")
     launch.add_argument("--judge-model", default=None,
                         help="override benchmarks/models.json's fixed judge")
+    launch.add_argument("--judge-structured-output", default=None,
+                        choices=("json_schema", "function_calling", "json_mode"),
+                        help="override benchmarks/models.json's judge_structured_output")
     launch.add_argument("--no-judge", action="store_true")
     launch.add_argument("--stagger", type=float, default=3.0,
                         help="seconds between process starts")

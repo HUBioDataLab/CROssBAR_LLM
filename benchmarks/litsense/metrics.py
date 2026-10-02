@@ -25,6 +25,12 @@ from crossbar_llm.litsense_tools.models import TokenUsage
 
 Kind = Literal["factoid", "list"]
 
+#: Bumped whenever the judge prompts or the verdict schema change; recorded in every
+#: re-judged result's `run_info.judge_prompt_revision` so verdicts are comparable only
+#: within a revision. 2026-10-02: explicit integer 0-5 scale in the list prompt and
+#: matched/missed items placed before the scores (llama-3.3-70b scored before matching).
+JUDGE_PROMPT_REVISION = "2026-10-02"
+
 #: One (role, content) message, matching `crossbar_llm.litsense_tools.prompts.Message`.
 Message = tuple[str, str]
 
@@ -108,17 +114,14 @@ def overlap_score(generated: str, reference: list[str], *, kind: Kind) -> Overla
 
 
 class JudgeVerdict(BaseModel):
-    """The judge's structured output — same fields as the reference harness."""
+    """The judge's structured output — same fields as the reference harness.
 
-    score: int = Field(
-        ge=0,
-        le=5,
-        description=(
-            "0 = completely wrong / irrelevant; 1-2 = mentions the topic but misses the "
-            "answer; 3 = partially correct, includes some of the reference; 4 = mostly "
-            "correct, paraphrased; 5 = correct and complete."
-        ),
-    )
+    Field order is deliberate: the judge enumerates matched/missed items before it
+    scores, so the scores follow from the match (smaller judges such as
+    llama-3.3-70b scored before matching when `score` came first and contradicted
+    their own rationale). The JSON keys are unchanged.
+    """
+
     matched_items: list[str] = Field(
         default_factory=list,
         description="Reference items the answer correctly mentions (paraphrases allowed).",
@@ -126,6 +129,15 @@ class JudgeVerdict(BaseModel):
     missed_items: list[str] = Field(
         default_factory=list,
         description="Reference items the answer fails to mention.",
+    )
+    score: int = Field(
+        ge=0,
+        le=5,
+        description=(
+            "Integer 0-5. 0 = completely wrong / irrelevant; 1-2 = mentions the topic but "
+            "misses the answer; 3 = partially correct, includes some of the reference; "
+            "4 = mostly correct, paraphrased; 5 = correct and complete."
+        ),
     )
     informativeness: int = Field(
         ge=0,
@@ -178,7 +190,13 @@ strings (e.g. "type 2 diabetes" matches "T2D", "T2DM", "type-2 diabetes").
 
 Also rate two QUALITY aspects independently of coverage: how informative/explanatory the
 answer is, and how clear its reasoning is. Low coverage may still be informative and clear;
-high coverage may still be a terse bare list."""
+high coverage may still be a terse bare list.
+
+Scoring scale — `score`, `informativeness` and `clarity` are each an INTEGER from 0 to 5,
+never a fraction and never a 0-1 proportion. `score` is coverage of the reference list:
+5 = every reference item covered (paraphrases count), 4 = most, 3 = about half, 2 = a
+few, 1 = a single item or only vaguely related content, 0 = nothing from the list.
+First list the matched and missed reference items, then score."""
 
 
 def judge_messages(
