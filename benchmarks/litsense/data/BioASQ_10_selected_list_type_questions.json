@@ -1,0 +1,2307 @@
+[
+    {
+        "id": "5324cf139b2d7acc7e00001f",
+        "body": "List the off-label use of SSRIs",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/22473248",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16310120",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22136212",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20235039",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15062207",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18330528",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18371047",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21176430",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22712761",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23093633",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15928960",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23425613",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18360636",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22760463",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21077473",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21601255",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16481094",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15291651",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15643101"
+        ],
+        "ideal_answer": [
+            "depression during childhood and adolescence\nPremature ejaculation (PE)\nerectile dysfunction\nInsomnia\npostprostatectomy established stress urinary incontinence.\nmood and anxiety disorders during pregnancy and breast feeding\nsymptoms of vasomotor dysregulation (hot flashes) associated with the menopausal transition and sex hormone deprivation\n..off-label uses include the treatment of bulimia, benzodiazepine/alcohol dependence, fibromyalgia, central nervous system degenerative diseases (behavioral disorders in dementia and other organic disorders), schizophrenia, chronic pain disease and diabetic neuropathy, sexual dysfunction."
+        ],
+        "exact_answer": [
+            "depression during childhood and adolescence",
+            "Premature ejaculation",
+            "PE",
+            "erectile dysfunction",
+            "Insomnia",
+            "postprostatectomy established stress urinary incontinence",
+            "SUI",
+            "mood and anxiety disorders during pregnancy and breast feeding",
+            "hot flashes",
+            "postmenopausal symptoms",
+            "bulimia",
+            "benzodiazepine/alcohol dependence",
+            "fibromyalgia",
+            "behavioral disorders in dementia",
+            "schizophrenia",
+            "chronic pain disease",
+            "diabetic neuropathy"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D045506",
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D056687"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 11,
+                "offsetInEndSection": 138,
+                "text": "The present analysis evaluates the prevalence and medication use in inpatients with depression during childhood and adolescence",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23425613"
+            },
+            {
+                "offsetInBeginSection": 979,
+                "offsetInEndSection": 1478,
+                "text": "Fluoxetine and mirtazapine were the most frequently prescribed substances. Sertraline, escitalopram, and citalopram were also prescribed. CONCLUSION: A reserved medical treatment can be observed in child and adolescence psychiatry. Off-label use seems to be nearly unavoidable due to the lack of newly authorized medicine. Moreover, the numerous prescriptions for fluoxetine, the only SSRI currently approved for this age group in Germany, lead to the question of possible unauthorized alternatives.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23425613"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 95,
+                "text": "Premature ejaculation (PE) is a common sexual dysfunction affecting 20% to 30% of men worldwide",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23093633"
+            },
+            {
+                "offsetInBeginSection": 329,
+                "offsetInEndSection": 654,
+                "text": "Treatment of PE typically involves pharmacotherapy, particularly when lifelong. Although there are numerous reports on the off-label use of selective serotonin reuptake inhibitors (SSRIs) and other compounds, only 2 treatments have been evaluated in randomized controlled phase 3 clinical trials: PSD502 and dapoxetine (SSRI)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23093633"
+            },
+            {
+                "offsetInBeginSection": 1,
+                "offsetInEndSection": 88,
+                "text": "Drug therapy of fibromyalgia syndrome. Systematic review, meta-analysis and guideline].",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22760463"
+            },
+            {
+                "offsetInBeginSection": 1526,
+                "offsetInEndSection": 1744,
+                "text": "Amitriptyline and-in case of comorbid depressive disorder or generalized anxiety disorder-duloxetine are recommended. Off-label use of duloxetine and pregabalin can be considered in case of no comorbid mental disorder.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22760463"
+            },
+            {
+                "offsetInBeginSection": 14,
+                "offsetInEndSection": 617,
+                "text": "Trazodone is an antidepressant belonging to the class of serotonin receptor antagonists and reuptake inhibitors. It is approved by the FDA for the treatment of depression. Insomnia is the most frequent reason for prescription of trazodone. It has also been proven useful in the treatment of anxiety disorders. Other off-label uses include the treatment of bulimia, benzodiazepine/alcohol dependence, fibromyalgia, central nervous system degenerative diseases (behavioral disorders in dementia and other organic disorders), schizophrenia, chronic pain disease and diabetic neuropathy, sexual dysfunction.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22712761"
+            },
+            {
+                "offsetInBeginSection": 85,
+                "offsetInEndSection": 405,
+                "text": "symptoms of vasomotor dysregulation (hot flashes) associated with the menopausal transition and sex hormone deprivation. Implication of changes in central neurotransmission in the pathogenesis of hot flashes has prompted the off-label use of serotonergic and γ-aminobutyric acid-ergic drugs as a therapeutic alternative,",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22473248"
+            },
+            {
+                "offsetInBeginSection": 701,
+                "offsetInEndSection": 1052,
+                "text": "Sertraline was the most prescribed antidepressant for the treatment of major depressive disorder, followed by fluvoxamine and tianeptine. Fluvoxamine was the most prescribed antidepressant for the treatment of anxiety disorders and mixed disorders of emotions and conduct. Off-label prescribing of antidepressants was found in 85.6% of young patients.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22136212"
+            },
+            {
+                "offsetInBeginSection": 1653,
+                "offsetInEndSection": 1786,
+                "text": "Our results suggest that duloxetine is a possible alternative treatment of postprostatectomy established stress urinary incontinence.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21601255"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 42,
+                "text": "Pharmacological treatment of fibromyalgia.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21176430"
+            },
+            {
+                "offsetInBeginSection": 664,
+                "offsetInEndSection": 838,
+                "text": "different classes of drugs with different mechanisms of action are used off-label, including tricyclic antidepressants (TCAs), selective serotonin reuptake inhibitors (SSRIs)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21176430"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 473,
+                "text": "Gynaecological cancer patients generally suffer from an earlier and more severe menopausal syndrome than the general female population. Hormone replacement therapy is often contraindicated and there are non-hormonal treatments that are proven to be more effective than placebo in randomized controlled trials, e.g., some antidepressants, gabapentine and clonidine. The main limits to the use of these drugs in controlling hot flashes are the off-label use for this purpose,",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21077473"
+            },
+            {
+                "offsetInBeginSection": 92,
+                "offsetInEndSection": 150,
+                "text": "ymptomatic therapy for patients with erectile dysfunction.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20235039"
+            },
+            {
+                "offsetInBeginSection": 940,
+                "offsetInEndSection": 1073,
+                "text": "a oral daily off label use therapy with selective serotonin re-uptake inhibitors (paroxetine, fluoxetine, sertraline) can be offered.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20235039"
+            },
+            {
+                "offsetInBeginSection": 1547,
+                "offsetInEndSection": 1668,
+                "text": "Without the Food and Drug Administration approval, dapoxetine, as well as other SSRIs in PE, is an off-label drug for PE.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18371047"
+            },
+            {
+                "offsetInBeginSection": 360,
+                "offsetInEndSection": 512,
+                "text": "the treatment of PE consists of primarily off-label use of oral selective serotonin reuptake inhibitors (SSRIs) via either on-demand or daily delivery. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18360636"
+            },
+            {
+                "offsetInBeginSection": 802,
+                "offsetInEndSection": 961,
+                "text": "The results of this off-label use show that Duloxetine is effective in men with SUI after prostate surgery even if standard pelvic floor exercises have failed.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18330528"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 138,
+                "text": "Preliminary results on the off-label use of duloxetine for the treatment of stress incontinence after radical prostatectomy or cystectomy.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16481094"
+            },
+            {
+                "offsetInBeginSection": 1536,
+                "offsetInEndSection": 1972,
+                "text": "the number of children and adolescents whose visits involved prescription of antidepressants, particularly SSRIs, has increased markedly through 2002. Although fluoxetine remained the most commonly prescribed, other SSRIs were increasingly prescribed through 2002. These trends raise concerns regarding the widespread off-label use of antidepressants lacking reliable evidence of safety and efficacy for use in children and adolescents.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16310120"
+            },
+            {
+                "offsetInBeginSection": 518,
+                "offsetInEndSection": 732,
+                "text": "Given the presumed efficacy of these new compounds and the off-label use of the current SSRIs, one might conclude that psychotherapy\\behavior therapy for rapid ejaculation is an obsolete and antiquated intervention",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15928960"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 87,
+                "text": "The use of selective serotonin reuptake inhibitors during pregnancy and breast-feeding:",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15643101"
+            },
+            {
+                "offsetInBeginSection": 171,
+                "offsetInEndSection": 618,
+                "text": "The use of selective serotonin reuptake inhibitors during pregnancy or lactation is, to date, not promoted because of lack of safety documentation. However, the off-label use of these drugs has been common for several years. In the treatment of mood and anxiety disorders during pregnancy, the serotonin reuptake inhibitors are often preferred over tricyclic antidepressants because of their relatively few adverse effects and safety in overdose. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15643101"
+            },
+            {
+                "offsetInBeginSection": 12,
+                "offsetInEndSection": 224,
+                "text": "The last few years have seen a remarkable rise in the off-label use of trazodone for inducing sleep in nondepressed patients, to a degree that it is prescribed for this purpose as commonly as the leading hypnotic",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15291651"
+            },
+            {
+                "offsetInBeginSection": 558,
+                "offsetInEndSection": 693,
+                "text": "Since the mid-1980s there has been a rapid rise in the off-label use of antidepressants, particularly trazodone, for treating insomnia.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15062207"
+            }
+        ],
+        "triples": [
+            {
+                "p": "http://data.linkedct.org/resource/linkedct/description",
+                "s": "http://data.linkedct.org/resource/intervention/55601",
+                "o": "Use within normal clinical practice"
+            },
+            {
+                "p": "http://www.w3.org/2000/01/rdf-schema#label",
+                "s": "http://data.linkedct.org/resource/intervention/55601",
+                "o": "Intervention #55601 (Drug:SSRIs)"
+            },
+            {
+                "p": "http://data.linkedct.org/resource/linkedct/intervention_name",
+                "s": "http://data.linkedct.org/resource/intervention/55601",
+                "o": "SSRIs"
+            }
+        ]
+    },
+    {
+        "id": "56f56a8609dd18d46b00000b",
+        "body": "Mutations in which gene and which protein are associated with Netherton syndrome?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/22377713",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17608759",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23407075",
+            "http://www.ncbi.nlm.nih.gov/pubmed/10835624",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19438860",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11841556",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16307658",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20877344",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17989726",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21251800",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11511292",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21255986",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15304086",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16225619",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24015757",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16796630"
+        ],
+        "ideal_answer": [
+            "NS is due to loss-of-function mutations in the SPINK5 gene and to the consequent lack of expression of its encoded protein LEKTI in the skin and all stratified epithelial tissues."
+        ],
+        "exact_answer": [
+            "SPINK5 gene",
+            "LEKTI protein"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2016/MB_cgi?field=uid&exact=Find+Exact+Term&term=D009154",
+            "http://www.nlm.nih.gov/cgi/mesh/2016/MB_cgi?field=uid&exact=Find+Exact+Term&term=D056770"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 323,
+                "offsetInEndSection": 502,
+                "text": "NS is due to loss-of-function mutations in the SPINK5 gene and to the consequent lack of expression of its encoded protein LEKTI in the skin and all stratified epithelial tissues.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23407075"
+            },
+            {
+                "offsetInBeginSection": 339,
+                "offsetInEndSection": 489,
+                "text": "Recently, we identified SPINK5, which encodes the serine protease inhibitor Kazal-type 5 protein (LEKTI), as the defective gene in Netherton syndrome.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11841556"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 321,
+                "text": "Netherton syndrome (NS) is a rare, life-threatening ichthyosiform syndrome caused by recessive loss-of-function mutations in SPINK5 gene encoding lymphoepithelial Kazal-type-related inhibitor (LEKTI), a serine protease inhibitor expressed in the most differentiated epidermal layers and crucial for skin barrier function.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22377713"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 173,
+                "text": "Netherton syndrome (NS) is a debilitating congenital skin disorder caused by mutations in the SPINK5 gene encoding the lymphoepithelial Kazal-type-related inhibitor (LEKTI).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20877344"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 178,
+                "text": "Loss-of-function mutations in the Kazal-type serine protease inhibitor, LEKTI, encoded by the SPINK5 gene cause the rare autosomal recessive skin disease Netherton syndrome (NS).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19438860"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 129,
+                "text": "SPINK5 and Netherton syndrome: novel mutations, demonstration of missing LEKTI, and differential expression of transglutaminases.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15304086"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 180,
+                "text": "Netherton's syndrome is a rare autosomal recessive disorder caused by mutations of the SPINK5 gene, which encodes the lymphoepithelial Kazal-type-related inhibitor (LEKTI) protein.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17608759"
+            },
+            {
+                "offsetInBeginSection": 321,
+                "offsetInEndSection": 462,
+                "text": "We observed microstructural changes and detected LEKTI activity and SPINK5 gene mutation in three Chinese patients with Netherton's syndrome.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17608759"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 241,
+                "text": "Several skin diseases and atopic disorders including Netherton syndrome and atopic dermatitis have been associated with mutations and deviations of expression of SPINK5, the gene encoding the human 15-domain serine proteinase inhibitor LEKTI",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16307658"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 177,
+                "text": "Loss-of-function mutations in the Kazal-type serine protease inhibitor, LEKTI, encoded by the SPINK5 gene cause the rare autosomal recessive skin disease Netherton syndrome (NS)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19438860"
+            },
+            {
+                "offsetInBeginSection": 153,
+                "offsetInEndSection": 309,
+                "text": "Mutations in the serine protease inhibitor Kazal type 5 (SPINK5) gene leading to lymphoepithelial Kazal-type-related inhibitor (LEKTI) deficiency cause NS. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24015757"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 341,
+                "text": " Netherton syndrome is a severe autosomal recessive skin disorder characterized by congenital erythroderma, a specific hair-shaft abnormality, and atopic manifestations with high IgE levels. Recently, we identified SPINK5, which encodes the serine protease inhibitor Kazal-type 5 protein (LEKTI), as the defective gene in Netherton syndrome.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11841556"
+            },
+            {
+                "offsetInBeginSection": 191,
+                "offsetInEndSection": 577,
+                "text": "Recently, we identified SPINK5, which encodes the serine protease inhibitor Kazal-type 5 protein (LEKTI), as the defective gene in Netherton syndrome. Here we describe the intron-exon organization of the gene and characterize the SPINK5 mutations in patients from 21 families of different geographic origin, using denaturing high performance liquid chromatography and direct sequencing.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11841556"
+            },
+            {
+                "offsetInBeginSection": 415,
+                "offsetInEndSection": 687,
+                "text": "Mutation of the SPINK5 gene has been identified as disease-causing in Netherton syndrome, but the pathophysiology still remains unclear. Almost all SPINK5 mutations result in the absence of the serine-protease inhibitor LEKTI protein in both keratinocytes and lymphocytes.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21255986"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 243,
+                "text": "Several skin diseases and atopic disorders including Netherton syndrome and atopic dermatitis have been associated with mutations and deviations of expression of SPINK5, the gene encoding the human 15-domain serine proteinase inhibitor LEKTI.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16307658"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 333,
+                "text": "Netherton&apos;s syndrome is a rare autosomal recessive disorder caused by mutations of the SPINK5 gene, which encodes the lymphoepithelial Kazal-type-related inhibitor (LEKTI) protein. We observed microstructural changes and detected LEKTI activity and SPINK5 gene mutation in three Chinese patients with Netherton&apos;s syndrome.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17608759"
+            },
+            {
+                "offsetInBeginSection": 324,
+                "offsetInEndSection": 799,
+                "text": "NS is due to loss-of-function mutations in the SPINK5 gene and to the consequent lack of expression of its encoded protein LEKTI in the skin and all stratified epithelial tissues. Following the identification of the NS causative gene and protein, specific diagnostic tools have been developed, thus breaking up the challenge of distinguishing NS from other congenital ichthyoses with overlapping features, and from severe, early-onset forms of atopic dermatitis or psoriasis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23407075"
+            },
+            {
+                "offsetInBeginSection": 191,
+                "offsetInEndSection": 341,
+                "text": "Recently, we identified SPINK5, which encodes the serine protease inhibitor Kazal-type 5 protein (LEKTI), as the defective gene in Netherton syndrome.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11841556"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5326c6fed6d3ac6a3400000c",
+        "body": "Which are the mains risk factors of metabolic syndrome?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/21448316",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24290837",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24227418",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24308220",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24320032",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24320038",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24269186",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24247648",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24277673",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24203651",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24152591",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24314947",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24287796",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24313546",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24326560",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24295929",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23093663",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18793503",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24309486",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24274871",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24327239",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18931101",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24314937",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24305580",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16855517",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24191289"
+        ],
+        "ideal_answer": [
+            "Metabolic syndrome is a disorder of energy utilization and storage, diagnosed by a co-occurrence of three out of five of the following medical conditions: abdominal (central) obesity, elevated blood pressure, elevated fasting plasma glucose, high serum triglycerides, and low high-density cholesterol (HDL) levels. Metabolic syndrome increases the risk of developing cardiovascular disease, particularly heart failure, and diabetes."
+        ],
+        "exact_answer": [
+            "Obesity",
+            "High blood pressure",
+            "Hypertension",
+            "High serum triglycerides",
+            "Low high-density cholesterol (HDL) levels",
+            "Diabetes type 2",
+            "Dyslipidaemia"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D024821",
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D008659",
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D008660"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 20,
+                "offsetInEndSection": 1204,
+                "text": "tigated the association between circulating levels of 60 and 70 kDa heat-shock proteins (HSP60 and 70) and cardiovascular risk factors in postmenopausal women with or without metabolic syndrome (MetS). This cross-sectional study included 311 Brazilian women (age ≥45 years with amenorrhea ≥12 months). Women showing three or more of the following diagnostic criteria were diagnosed with MetS: waist circumference (WC) ≥88 cm, blood pressure ≥130/85 mmHg, triglycerides ≥150 mg/dl, high-density lipoprotein (HDL) <50 mg/dl, and glucose ≥100 mg/dl. Clinical, anthropometric, and biochemical parameters were collected. HSP60, HSP70, antibodies to HSP60 and HSP70, and C-reactive protein (CRP) levels were measured in serum. Student's t test, Kruskal-Wallis test, chi-square test, and Pearson correlation were used for statistical analysis. Of the 311 women, 30.9 % (96/311) were diagnosed with MetS. These women were, on average, obese with abdominal fat deposition and had lower HDL values as well as higher triglycerides and glucose levels. Homeostasis model assessment-insulin resistant (HOMA-IR) test values in these women were compatible with insulin resistance (P < 0.05). CRP and ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24327239"
+            },
+            {
+                "offsetInBeginSection": 174,
+                "offsetInEndSection": 289,
+                "text": " is associated with an increased risk for cardiovascular disease (CVD) and type 2 diabetes mellitus (T2DM). Several",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24320038"
+            },
+            {
+                "offsetInBeginSection": 20,
+                "offsetInEndSection": 380,
+                "text": "alence of the metabolic syndrome (MetS), a cluster of cardiovascular risk factors associated with obesity and insulin resistance, is dramatically increasing in Western and developing countries. This disorder is not only associated with a higher risk of appearance of type 2 diabetes and cardiovascular events, but impacts on the liver in different ways. Nonalc",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24320032"
+            },
+            {
+                "offsetInBeginSection": 22,
+                "offsetInEndSection": 1148,
+                "text": "bolic syndrome (MS) components, such as dyslipidemia, prothrombotic status, and increased blood pressure, are risk factors for patients with renal disease. Visceral fat mass is closely related to the MS and atherosclerosis. We investigated the effects of body compositions and MS on anemia parameters and recombinant human erythropoietin (rHuEPO) requirements in maintenance hemodialysis patients. METHODS: Body composition (body mass index and bioimpedance analysis) and laboratory data were obtained from 110 dialysis patients. The MS was identified according to ATP-III criteria. Anemia parameters, hemoglobin (Hgb), albumin, C-reactive protein (CRP), calcium, phosphorus, parathormone levels, and rHuEPO requirements over the last 6 months were retrospectively analyzed. RESULTS: Patients with the MS seem to reach target Hgb levels more frequently (10-12 g/dL; 66.3% vs 84.8%; P = .03) without any difference in total intravenous iron therapy dosage. MS patients also required lower rHuEPO for reaching similar Hgb levels compared with patients without MS (2679.3 ± 1936.1 vs 3702.5 ± 2213.0 U/kg/6 mo; P = .02). There we",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24314937"
+            },
+            {
+                "offsetInBeginSection": 19,
+                "offsetInEndSection": 1871,
+                "text": "bolic syndrome (MetS) is typically diagnosed based on abnormalities in specific clustered clinical measures that are associated with increased risk for coronary heart disease (CHD) and Type 2 diabetes mellitus (T2DM). However, current MetS criteria result in racial/ethnic discrepancies. Our goals were to use confirmatory factor analysis (CFA) to delineate differential contributions to MetS by sub-group, and if contributions were discovered, develop sex and racial/ethnic-specific equations to calculate MetS severity. RESEARCH DESIGN AND METHODS: Using data on adults from the National Health and Nutrition Examination Survey 1999-2010, we performed a CFA of a single MetS factor that allowed differential loadings across groups, resulting in a sex and race/ethnicity-specific continuous MetS severity score. RESULTS: Loadings to the single MetS factor differed by sub-group for each MetS component (p<0.001), with lower factor loadings among non-Hispanic-blacks for triglycerides and among Hispanics for waist circumference. Systolic blood pressure exhibited low factor loadings among all groups. MetS severity scores were correlated with biomarkers of future disease (high-sensitivity C-reactive-protein, uric acid, insulin resistance). Non-Hispanic-black-males with diabetics had a low prevalence of MetS but high MetS severity scores that were not significantly different from other racial/ethnic groups. CONCLUSIONS: This analysis among adults uniquely demonstrated differences between sexes and racial/ethnic groups regarding contributions of traditional MetS components to an assumed single factor. The resulting equations provide a clinically-accessible and interpretable continuous measure of MetS for potential use in identifying adults at higher risk for MetS-related diseases and following changes within individuals over time. These eq",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24290837"
+            },
+            {
+                "offsetInBeginSection": 156,
+                "offsetInEndSection": 305,
+                "text": " study, we aim to examine the associations of obesity related loci with risk of metabolic syndrome (MetS) in a children population from China. A tota",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24269186"
+            },
+            {
+                "offsetInBeginSection": 27,
+                "offsetInEndSection": 199,
+                "text": "alence of obesity is on the increase, and consequently metabolic syndrome is also becoming a serious health problem in children and adolescents all over the world. This rev",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24247648"
+            },
+            {
+                "offsetInBeginSection": 17,
+                "offsetInEndSection": 333,
+                "text": "ciation between alopecia areata (AA), psoriasis, and other autoimmune diseases has been well reported in the literature, an association with metabolic syndrome has not been reported. We present two young women with the combination of severe psoriasis, androgen excess, metabolic syndrome, thyroiditis, and AA. Both w",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24326560"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "589dee3778275d0c4a000050",
+        "body": "What genes are drug targets for Fibrodysplasia Ossificans Progressiva (FOP)?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/15940369",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22011642",
+            "http://www.ncbi.nlm.nih.gov/pubmed/25136070",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17967130",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23646137",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26695699",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24047559",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11076054",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23599718",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15288357",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23229308",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19795179",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26621707",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19400542",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16080294",
+            "http://www.ncbi.nlm.nih.gov/pubmed/25413979",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16753021",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18830232",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24705252",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17477807",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18328989",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19929436",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22408438",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26058333",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22977237",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26896819",
+            "http://www.ncbi.nlm.nih.gov/pubmed/9042799",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26626181",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16831905",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26333933",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11140409",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22408652"
+        ],
+        "ideal_answer": [
+            " Recently, FOP has been associated with a specific mutation of ACVR1, the gene coding for a bone morphogenetic protein type I receptor. ",
+            "here, it is noted that if b cells are found to be the lymphocytes responsible for excess bmp-4 production in fop, use of rituximab, a monoclonal anti-cd20 antibody which effectively targets b cells, could be a less permanent and less risky treatment alternative for fop.",
+            "Inhibitors of ALK2(ACVR1) are used for the treatment of FOP. Current therapies for FOP are Dorsomorphin analogues which function as BMP inhibitor.  if B cells control excess BMP-4 production in FOP, use of Rituximab, a monoclonal which targets B cells, could be a treatment alternative for FOP."
+        ],
+        "exact_answer": [
+            "ALK2",
+            "BMP"
+        ],
+        "concepts": [
+            "http://www.disease-ontology.org/api/metadata/DOID:13374",
+            "https://www.nlm.nih.gov/cgi/mesh/2017/MB_cgi?field=uid&exact=Find+Exact+Term&term=D055415",
+            "https://www.nlm.nih.gov/cgi/mesh/2017/MB_cgi?field=uid&exact=Find+Exact+Term&term=D052005"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 294,
+                "offsetInEndSection": 430,
+                "text": " Recently, FOP has been associated with a specific mutation of ACVR1, the gene coding for a bone morphogenetic protein type I receptor. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18830232"
+            },
+            {
+                "offsetInBeginSection": 148,
+                "offsetInEndSection": 371,
+                "text": "Small molecule inhibitors of the bone morphogenetic protein (BMP) receptor kinase ALK2 (ACVR1) are needed urgently to treat the progressively debilitating musculoskeletal disease fibrodysplasia ossificans progressiva (FOP).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23646137"
+            },
+            {
+                "offsetInBeginSection": 372,
+                "offsetInEndSection": 484,
+                "text": "Dorsomorphin analogues, first identified in zebrafish, remain the only BMP inhibitor chemotype reported to date.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23646137"
+            },
+            {
+                "offsetInBeginSection": 485,
+                "offsetInEndSection": 733,
+                "text": "By screening an assay panel of 250 recombinant human kinases we identified a highly selective 2-aminopyridine-based inhibitor K02288 with in vitro activity against ALK2 at low nanomolar concentrations similar to the current lead compound LDN-193189",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23646137"
+            },
+            {
+                "offsetInBeginSection": 780,
+                "offsetInEndSection": 1050,
+                "text": "Here, it is noted that if B cells are found to be the lymphocytes responsible for excess BMP-4 production in FOP, use of Rituximab, a monoclonal anti-CD20 antibody which effectively targets B cells, could be a less permanent and less risky treatment alternative for FOP.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15288357"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 280,
+                "text": "A new mutation of the Noggin gene in a French Fybrodysplasia ossificans progressiva (FOP) family: Fibrodysplasia ossificans progressiva (FOP) is a very rare disease characterized by congenital malformation of the great toes and progressive heterotopic ossification of the muscles.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16080294"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 96,
+                "text": "Localization of the gene for fibrodysplasia ossificans progressiva (FOP) to chromosome 17q21-22.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11140409"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 97,
+                "text": "A new mutation of the noggin gene in a French Fibrodysplasia ossificans progressiva (FOP) family.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16080294"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 103,
+                "text": "Rarely occurring mutation of ACVR1 gene in Moroccan patient with fibrodysplasia ossificans progressiva.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19795179"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 279,
+                "text": "A new mutation of the Noggin gene in a French Fybrodysplasia ossificans progressiva (FOP) family: Fibrodysplasia ossificans progressiva (FOP) is a very rare disease characterized by congenital malformation of the great toes and progressive heterotopic ossification of the muscles",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16080294"
+            },
+            {
+                "offsetInBeginSection": 81,
+                "offsetInEndSection": 368,
+                "text": "Mutations in the ACVR1 gene are associated with Fibrodysplasia Ossificans Progressiva (FOP), a rare and extremely disabling disorder characterized by congenital malformation of the great toes and progressive heterotopic endochondral ossification in muscles and other non-skeletal tissues",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24047559"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 168,
+                "text": "Mutations of the noggin (NOG) and of the activin A type I receptor (ACVR1) genes in a series of twenty-seven French fibrodysplasia ossificans progressiva (FOP) patients",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19400542"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 106,
+                "text": "ACVR1, a therapeutic target of fibrodysplasia ossificans progressiva, is negatively regulated by miR-148a.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22408438"
+            },
+            {
+                "offsetInBeginSection": 1037,
+                "offsetInEndSection": 1140,
+                "text": "These mutations represent new targets for therapeutic intervention in this otherwise incurable disease.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24705252"
+            },
+            {
+                "offsetInBeginSection": 894,
+                "offsetInEndSection": 1041,
+                "text": "In this study, we examined downstream signaling targets to study the BMP-Smad and BMP-p38 mitogen-activated protein kinase (MAPK) pathways in FOP. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16753021"
+            },
+            {
+                "offsetInBeginSection": 93,
+                "offsetInEndSection": 382,
+                "text": "Mutations in the ACVR1 gene are associated with Fibrodysplasia Ossificans Progressiva (FOP), a rare and extremely disabling disorder characterized by congenital malformation of the great toes and progressive heterotopic endochondral ossification in muscles and other non-skeletal tissues. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24047559"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 122,
+                "text": "Linkage exclusion and mutational analysis of the noggin gene in patients with fibrodysplasia ossificans progressiva (FOP).",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11076054"
+            },
+            {
+                "offsetInBeginSection": 170,
+                "offsetInEndSection": 375,
+                "text": "Fibrodysplasia ossificans progressiva (FOP), a rare disorder characterized by progressive ossification of connective tissue, is caused by an activating mutation in Acvr1 (the gene that encodes ACVR1/ALK2).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/25413979"
+            },
+            {
+                "offsetInBeginSection": 185,
+                "offsetInEndSection": 488,
+                "text": "This gene encodes the type I bone morphogenic protein receptor ALK2, with the residues affected identical to those that, when mutated in the germline, give rise to the congenital malformation syndrome fibrodysplasia ossificans progressiva (FOP), resulting in the transformation of soft tissue into bone.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/25136070"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 107,
+                "text": "ACVR1, a therapeutic target of fibrodysplasia ossificans progressiva, is negatively regulated by miR-148a.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22408438"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 98,
+                "text": "A new mutation of the noggin gene in a French Fibrodysplasia ossificans progressiva (FOP) family.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16080294"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 63,
+                "text": "Neofunction of ACVR1 in fibrodysplasia ossificans progressiva.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26621707"
+            },
+            {
+                "offsetInBeginSection": 276,
+                "offsetInEndSection": 554,
+                "text": "The discovery of the FOP gene establishes a crucial milestone in understanding FOP, reveals a highly conserved target in the BMP signaling pathway for drug development and specifically stimulates therapeutic approaches for the development of inhibitors for ACVR1/ALK2 signaling.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23599718"
+            },
+            {
+                "offsetInBeginSection": 749,
+                "offsetInEndSection": 1069,
+                "text": "The discovery of the FOP gene establishes a critical milestone in understanding FOP, reveals a highly conserved druggable target in the TGF-beta/bone morphogenetic protein signaling pathway and compels therapeutic approaches for the development of small molecule signal transduction inhibitors for activin-like kinase-2.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17477807"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5a70d12899e2c3af26000001",
+        "body": "List symptoms of Heerfordt syndrome.",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/26885424",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12835855",
+            "http://www.ncbi.nlm.nih.gov/pubmed/2307892",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18454397",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15630597",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20184241",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21565911",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22565854",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12233082",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24082416",
+            "http://www.ncbi.nlm.nih.gov/pubmed/25685372",
+            "http://www.ncbi.nlm.nih.gov/pubmed/28079852",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17637529",
+            "http://www.ncbi.nlm.nih.gov/pubmed/27549672",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23917502",
+            "http://www.ncbi.nlm.nih.gov/pubmed/25087562",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23629431"
+        ],
+        "ideal_answer": [
+            "Heerfordt syndrome (also known as Heerfordt-Waldenström or uveoparotid fever)  is a rare presentation of sarcoidosis characterized by the presence of parotid gland enlargement, facial palsy, anterior uveitis, and fever."
+        ],
+        "exact_answer": [
+            "parotid gland enlargement",
+            "facial palsy",
+            "anterior uveitis",
+            "fever"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 1005,
+                "offsetInEndSection": 1066,
+                "text": "Case 3 showed Heerfordt syndrome with facial nerve paralysis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/28079852"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 123,
+                "text": "Heerfordt's syndrome is defined as a combination of facial palsy, parotid swelling, uveitis and fever in sarcoidosis cases.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/25685372"
+            },
+            {
+                "offsetInBeginSection": 172,
+                "offsetInEndSection": 346,
+                "text": "Heerfordt-Waldenström syndrome, a rare presentation of sarcoidosis, is characterized by the presence of parotid gland enlargement, facial palsy, anterior uveitis, and fever. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24082416"
+            },
+            {
+                "offsetInBeginSection": 1091,
+                "offsetInEndSection": 1181,
+                "text": "The patient was given a diagnosis of Heerfordt-Waldenström syndrome, or uveoparotid fever.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24082416"
+            },
+            {
+                "offsetInBeginSection": 174,
+                "offsetInEndSection": 538,
+                "text": "Physical examination revealed right facial paralysis, parotid gland swelling, high fever and poor general condition. Ophthalmoscopy revealed anterior and posterior uveitis including macular edema and chorioretinal infiltrates. Angiography revealed a dense pattern of hyperfluorescent lesions and these observations resulted in the diagnosis of Heerfordt syndrome. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22565854"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 129,
+                "text": "BACKGROUND: Heerfordt syndrome is rare and is characterized by fever, uveitis, parotid gland enlargement, and facial nerve palsy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 180,
+                "offsetInEndSection": 317,
+                "text": "Heerfordt's syndrome with uveitis, enlargement of the parotid glands and optional paralysis of the Nn. facialis is a form of sarcoidosis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15630597"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 162,
+                "text": "The Heerfordt syndrome is characterized by fever, uveitis, swelling of parotid gland and facial nerve palsy, and 53 cases have been reported in Japan until 2000. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12233082"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 161,
+                "text": "The Heerfordt syndrome is characterized by fever, uveitis, swelling of parotid gland and facial nerve palsy, and 53 cases have been reported in Japan until 2000.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12233082"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 142,
+                "text": "Heerfordt syndrome is an unusual manifestation of systemic sarcoidosis and is characterized by parotitis, uveitis, and facial nerve paralysis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2307892"
+            },
+            {
+                "offsetInBeginSection": 891,
+                "offsetInEndSection": 1029,
+                "text": "Heerfordt syndrome is a rare manifestation of neurosarcoidosis and has to be included in the differential diagnosis of facial nerve palsy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 117,
+                "text": "Heerfordt syndrome is rare and is characterized by fever, uveitis, parotid gland enlargement, and facial nerve palsy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 90,
+                "text": "Heerfordt syndrome with unilateral facial nerve palsy: a rare presentation of sarcoidosis.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 136,
+                "text": "<b>BACKGROUND</b>: Heerfordt syndrome is rare and is characterized by fever, uveitis, parotid gland enlargement, and facial nerve palsy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 137,
+                "offsetInEndSection": 449,
+                "text": "We hereby present a case of Heerfordt syndrome with unilateral facial nerve palsy as a presentation of sarcoidosis.<br><b>HISTORY AND SIGNS</b>: A 29-year-old male patient from Sri Lanka presented with eye redness OU, blurred vision OD, fever, headache, night sweat, fatigue, and weight loss (5 kg over 1 month).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 910,
+                "offsetInEndSection": 1135,
+                "text": "One year after onset of treatment, no recurrence was noted.<br><b>CONCLUSIONS</b>: Heerfordt syndrome is a rare manifestation of neurosarcoidosis and has to be included in the differential diagnosis of facial nerve palsy.<br>",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 130,
+                "text": "Heerfordt's syndrome (HS) consists in its complete form of uveitis, parotid or salivary gland enlargement and cranial nerve palsy.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21565911"
+            },
+            {
+                "offsetInBeginSection": 1161,
+                "offsetInEndSection": 1310,
+                "text": "However, the otolaryngologist may encounter Heerfordt's syndrome as this syndrome presents with facial nerve palsy and swelling of the parotid gland.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26885424"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 178,
+                "text": "Heerfordt's syndrome is a rare manifestation of sarcoidosis characterized by the presence of facial nerve palsy, parotid gland enlargement, anterior uveitis, and low grade fever.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26885424"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 180,
+                "text": "As a subtype of the clinical presentations associated with sarcoidosis, the combination of uveitis, parotid gland swelling, and facial nerve palsy is known as Heerfordt's syndrome.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23917502"
+            },
+            {
+                "offsetInBeginSection": 124,
+                "offsetInEndSection": 185,
+                "text": "Heerfordt's syndrome as a cause of facial palsy is very rare.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/25685372"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 174,
+                "text": "Heerfordt's syndrome is a rare manifestation of sarcoidosis and is defined as a combination of facial palsy, parotid swelling, and uveitis, associated with a low-grade fever.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27549672"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 66,
+                "text": "Heerfordt's Syndrome Presenting with Recurrent Facial Nerve Palsy:",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/25685372"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 128,
+                "text": "BACKGROUND Heerfordt syndrome is rare and is characterized by fever, uveitis, parotid gland enlargement, and facial nerve palsy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            },
+            {
+                "offsetInBeginSection": 129,
+                "offsetInEndSection": 244,
+                "text": "We hereby present a case of Heerfordt syndrome with unilateral facial nerve palsy as a presentation of sarcoidosis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18454397"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5c57041807647bbc4b000015",
+        "body": "What 2 biological processes are regulated by STAMP2 in adipocytes?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/29190878",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21849520",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22704678",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18381574",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23874564",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19289123",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17482547"
+        ],
+        "ideal_answer": [
+            "Inflammation, insulin resistance and metabolic response are regulated by STAMP2 in adipocytes.",
+            "six-transmembrane protein stamp2 as a critical modulator of this integrated response system of inflammation and metabolism"
+        ],
+        "exact_answer": [
+            "metabolic response",
+            "inflammation",
+            "insulin resistance"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 110,
+                "offsetInEndSection": 313,
+                "text": "Recently, we found that Stamp2 has a critical role in the integration of inflammatory and metabolic signals in adipose tissue where it is highly expressed and regulated by nutritional and metabolic cues.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23874564"
+            },
+            {
+                "offsetInBeginSection": 387,
+                "offsetInEndSection": 543,
+                "text": "we identified the six-transmembrane protein STAMP2 as a critical modulator of this integrated response system of inflammation and metabolism in adipocytes. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17482547"
+            },
+            {
+                "offsetInBeginSection": 9,
+                "offsetInEndSection": 135,
+                "text": "Six transmembrane protein of prostate 2 (STAMP2) is a counterregulator of adipose inflammation and insulin resistance in mice.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18381574"
+            },
+            {
+                "offsetInBeginSection": 201,
+                "offsetInEndSection": 404,
+                "text": "Recently, we found that Stamp2 has a critical role in the integration of inflammatory and metabolic signals in adipose tissue where it is highly expressed and regulated by nutritional and metabolic cues. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23874564"
+            },
+            {
+                "offsetInBeginSection": 1206,
+                "offsetInEndSection": 1321,
+                "text": "These results suggest that Stamp1 and Stamp2 play critical roles in adipogenesis, but through different mechanisms.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23874564"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 134,
+                "text": "CONTEXT\nSix transmembrane protein of prostate 2 (STAMP2) is a counterregulator of adipose inflammation and insulin resistance in mice.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18381574"
+            },
+            {
+                "offsetInBeginSection": 745,
+                "offsetInEndSection": 920,
+                "text": "These results suggest that STAMP2 is crucial for normal ASC conversion into adipocytes and their metabolic function, as well as their ability to facilitate PCa growth in vivo.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29190878"
+            },
+            {
+                "offsetInBeginSection": 121,
+                "offsetInEndSection": 309,
+                "text": "We report that Stamp2 is expressed in human and mouse macrophages, is regulated upon differentiation or activation, acts as an anti-inflammatory protein, and regulates foam cell formation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22704678"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 149,
+                "text": "CONTEXT Six-transmembrane protein of prostate 2 (STAMP2) is a counter-regulator of inflammation and insulin resistance according to findings in mice.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21849520"
+            },
+            {
+                "offsetInBeginSection": 782,
+                "offsetInEndSection": 976,
+                "text": "Taken together, TIARP/STAMP2 is highly upregulated in 3T3-L1 cells and hMSC-Ad by IL-1beta and might, therefore, modulate proinflammatory and insulin resistance-inducing effects of IL-1beta.<br>",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19289123"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 142,
+                "text": "<b>CONTEXT</b>: Six transmembrane protein of prostate 2 (STAMP2) is a counterregulator of adipose inflammation and insulin resistance in mice.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18381574"
+            },
+            {
+                "offsetInBeginSection": 143,
+                "offsetInEndSection": 987,
+                "text": "Our hypothesis was that STAMP2 could be involved in human obesity and insulin resistance.<br><b>OBJECTIVE</b>: The objective of the study was to elucidate the role of adipose STAMP2 expression in human obesity and insulin resistance.<br><b>DESIGN</b>: The design was to quantify STAMP2 in human abdominal sc and omental white adipose tissue (WAT), isolated adipocytes, and stroma and in vitro differentiated preadipocytes and relate levels of STAMP2 in sc WAT to clinical and adipocyte phenotypes involved in insulin resistance.<br><b>PARTICIPANTS</b>: Nonobese and obese women and men (n = 236) recruited from an obesity clinic or through local advertisement.<br><b>MAIN OUTCOME MEASUREMENT</b>: Clinical measures included body mass index, body fat, total adiponectin, and homeostasis model assessment as measure of overall insulin resistance.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18381574"
+            },
+            {
+                "offsetInBeginSection": 782,
+                "offsetInEndSection": 972,
+                "text": "Taken together, TIARP/STAMP2 is highly upregulated in 3T3-L1 cells and hMSC-Ad by IL-1beta and might, therefore, modulate proinflammatory and insulin resistance-inducing effects of IL-1beta.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19289123"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5e493a3e6d0a277941000002",
+        "body": "Which lncRNAS are regulated by SAM68?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/29137239"
+        ],
+        "ideal_answer": [
+            "Hotair, Mir155hg, as well as SR-lncRNA-1 and SR-lncRNA-2 are regulated by Sam68, and contained consensus Sam68 binding sites."
+        ],
+        "exact_answer": [
+            "Hotair",
+            "Mir155hg",
+            "SR-lncRNA-1",
+            "SR-lncRNA-2"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 451,
+                "offsetInEndSection": 1394,
+                "text": "As expected, downregulated genes were significantly associated with GO terms linked to cell migration, motility, and fat cell differentiation, while upregulated genes were mostly associated with GO terms linked to neurogenesis. Of the lncRNAs, we identified Hotair, Mir155hg, as well as two new lncRNAs (SR-lncRNA-1 and SR-lncRNA-2) that were regulated by Sam68, and contained consensus Sam68 binding sites. RNA stability assays showed that Sam68-deficiency decreased the half-life of Hotair, and increased the half-lives of Mir155hg and SR-lncRNA-2, while the stability of SR-lncRNA-1 was unaffected. Depletion of Hotair and SR-lncRNA-1 in wild type 3T3-L1 cells led to defects in adipogenesis, whereas depletion of SR-lncRNA-2 in Sam68-deficient 3T3-L1 cells partially rescued the adipogenesis defect observed in these cells. Collectively, our findings define a new role for Sam68 as a regulator of lncRNAs during adipogenic differentiation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29137239"
+            },
+            {
+                "offsetInBeginSection": 679,
+                "offsetInEndSection": 862,
+                "text": "Of the lncRNAs, we identified Hotair , Mir155hg , as well as two new lncRNAs ( SR-lncRNA-1 and SR-lncRNA-2 ) that were regulated by Sam68, and contained consensus Sam68 binding sites.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29137239"
+            },
+            {
+                "offsetInBeginSection": 679,
+                "offsetInEndSection": 859,
+                "text": "Of the lncRNAs, we identified Hotair, Mir155hg, as well as two new lncRNAs (SR-lncRNA-1 and SR-lncRNA-2) that were regulated by Sam68, and contained consensus Sam68 binding sites.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29137239"
+            },
+            {
+                "offsetInBeginSection": 679,
+                "offsetInEndSection": 858,
+                "text": "Of the lncRNAs, we identified Hotair, Mir155hg, as well as two new lncRNAs (SR-lncRNA-1 and SR-lncRNA-2) that were regulated by Sam68, and contained consensus Sam68 binding sites.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29137239"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5e4b52e36d0a27794100001b",
+        "body": "Which drugs are included in the drug LONSURF?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/28315543",
+            "http://www.ncbi.nlm.nih.gov/pubmed/31002008",
+            "http://www.ncbi.nlm.nih.gov/pubmed/29177842",
+            "http://www.ncbi.nlm.nih.gov/pubmed/28213365",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26609205",
+            "http://www.ncbi.nlm.nih.gov/pubmed/30445951",
+            "http://www.ncbi.nlm.nih.gov/pubmed/27431756",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26197742",
+            "http://www.ncbi.nlm.nih.gov/pubmed/30350179",
+            "http://www.ncbi.nlm.nih.gov/pubmed/31489588",
+            "http://www.ncbi.nlm.nih.gov/pubmed/27568360",
+            "http://www.ncbi.nlm.nih.gov/pubmed/28977993"
+        ],
+        "ideal_answer": [
+            "Lonsurf includes trifluridine and tipiracil. It is a novel oral anti-tumor agent combining an anti-neoplastic thymidine-based nucleoside analogue (trifluridine) with a thymidine phosphorylase inhibitor (tipiracil hydrochloride) presents a new treatment option for metastatic colorectal cancer patients refractory or intolerant to standard therapies."
+        ],
+        "exact_answer": [
+            "trifluridine",
+            "tipiracil"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 322,
+                "text": "The National Institute for Health and Care Excellence (NICE) invited Servier, the company manufacturing trifluridine and tipiracil (T/T; trade name: Lonsurf®), to submit evidence for the clinical and cost effectiveness of T/T compared with best supportive care (BSC) for metastatic colorectal cancer (third-line or later).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29177842"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 227,
+                "text": "PURPOSE: Trifluridine/tipiracil (FTD/TPI; TAS-102, Lonsurf®), a novel form of chemotherapy for metastatic colorectal cancer (mCRC), has shown clinical benefit in the global, phase III RECOURSE trial, regardless of patient age. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30350179"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 372,
+                "text": "BACKGROUND: Trifluridine/tipiracil (TAS-102, Lonsurf®), a novel oral anti-tumor agent combining an anti-neoplastic thymidine-based nucleoside analogue (trifluridine, FTD) with a thymidine phosphorylase inhibitor (tipiracil hydrochloride, TPI) presents a new treatment option for metastatic colorectal cancer (mCRC) patients refractory or intolerant to standard therapies. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30445951"
+            },
+            {
+                "offsetInBeginSection": 139,
+                "offsetInEndSection": 370,
+                "text": "These AEs may affect patient adherence, particularly with completely oral regimens, such as trifluridine/tipiracil (TAS-102, Lonsurf®), an antimetabolite agent for patients with mCRC refractory or intolerant to standard therapies. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/28315543"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 310,
+                "text": "The FDA approved TAS-102 (Lonsurf; Taiho Oncology, Inc.) for the treatment of patients with metastatic colorectal cancer (mCRC) who have been previously treated with fluoropyrimidine-, oxaliplatin-, and irinotecan-based chemotherapy; an anti-VEGF biological therapy; and if RAS wild type, an anti-EGFR therapy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/28213365"
+            },
+            {
+                "offsetInBeginSection": 547,
+                "offsetInEndSection": 816,
+                "text": "Here we show that tumoroid cultures from a CRC patient are highly sensitive to the thymidylate synthase inhibitor 5-fluorouracil (adrucil) but less sensitive to the combination of nucleoside analog trifluridine and thymidine phosphorylase inhibitor tipiracil (Lonsurf).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/28977993"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 208,
+                "text": "Trifluridine/tipiracil (Lonsurf(®)) is a novel, orally active, antimetabolite agent comprised of trifluridine, a thymidine-based nucleoside analogue, and tipiracil, a potent thymidine phosphorylase inhibitor.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27568360"
+            },
+            {
+                "offsetInBeginSection": 152,
+                "offsetInEndSection": 352,
+                "text": "TAS-102 (Lonsurf) is an oral fluoropyrimidine that is formed by the combination of 2 active drugs: trifluridine (a nucleoside analog) and tipiracil hydrochloride (a thymidine phosphorylase inhibitor).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27431756"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 206,
+                "text": "Trifluridine/tipiracil (Lonsurf __sup__ ® __end_sup__ ) is a fixed-dose combination tablet comprising trifluridine, an antineoplastic nucleoside analogue, and tipiracil, a thymidine phosphorylase inhibitor.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31489588"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 344,
+                "text": "The National Institute for Health and Care Excellence (NICE) invited Servier, the company manufacturing trifluridine and tipiracil (T/T; trade name: Lonsurf __sup__ ® __end_sup__ ), to submit evidence for the clinical and cost effectiveness of T/T compared with best supportive care (BSC) for metastatic colorectal cancer (third-line or later).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29177842"
+            },
+            {
+                "offsetInBeginSection": 599,
+                "offsetInEndSection": 868,
+                "text": "Here we show that tumoroid cultures from a CRC patient are highly sensitive to the thymidylate synthase inhibitor 5-fluorouracil (adrucil) but less sensitive to the combination of nucleoside analog trifluridine and thymidine phosphorylase inhibitor tipiracil (Lonsurf).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/28977993"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 186,
+                "text": "Trifluridine/tipiracil (Lonsurf ® ) is a fixed-dose combination tablet comprising trifluridine, an antineoplastic nucleoside analogue, and tipiracil, a thymidine phosphorylase inhibitor.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31489588"
+            },
+            {
+                "offsetInBeginSection": 1883,
+                "offsetInEndSection": 2107,
+                "text": "What is already known TAS 102 (Lonsurf) is an oral fixed dose combination of trifluridine (FTD) and tipiracil (TPI) indicated as salvage-line treatment in patients with therapy refractory metastatic colorectal cancer (mCRC).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31002008"
+            },
+            {
+                "offsetInBeginSection": 1993,
+                "offsetInEndSection": 2217,
+                "text": "What is already known TAS 102 (Lonsurf) is an oral fixed dose combination of trifluridine (FTD) and tipiracil (TPI) indicated as salvage-line treatment in patients with therapy refractory metastatic colorectal cancer (mCRC).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31002008"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 283,
+                "text": "Evolocumab (Repatha) for patients with hypercholesterolemia whose condition has not been controlled by statins and other therapies; trifluridine/tipiracil (Lonsurf) for metastatic colorectal cancer; and blood coagulation factor VIII (Nuwiq) for adults and children with hemophilia A.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26609205"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 222,
+                "text": "In May 2014 , tablets containing both trifluridine and tipiracil hydrochloride ( Lonsurf® tablets ) were launched in Japan ahead of other countries , for the treatment of advanced/relapsed unresectable colorectal cancer . ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26197742"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 372,
+                "text": "Trifluridine/tipiracil ( TAS-102 , Lonsurf®) , a novel oral anti-tumor agent combining an anti-neoplastic thymidine-based nucleoside analogue ( trifluridine , FTD ) with a thymidine phosphorylase inhibitor ( tipiracil hydrochloride , TPI ) presents a new treatment option for metastatic colorectal cancer ( mCRC ) patients refractory or intolerant to standard therapies . ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30445951"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 290,
+                "text": "Evolocumab ( Repatha ) for patients with hypercholesterolemia whose condition has not been controlled by statins and other therapies; trifluridine/tipiracil ( Lonsurf ) for metastatic colorectal cancer; and blood coagulation factor VIII ( Nuwiq ) for adults and children with hemophilia A .",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26609205"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 217,
+                "text": "Trifluridine/tipiracil ( Lonsurf(®) ) is a novel , orally active , antimetabolite agent comprised of trifluridine , a thymidine-based nucleoside analogue , and tipiracil , a potent thymidine phosphorylase inhibitor . ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27568360"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 331,
+                "text": "The National Institute for Health and Care Excellence ( NICE ) invited Servier , the company manufacturing trifluridine and tipiracil ( T/T; trade name: Lonsurf) , to submit evidence for the clinical and cost effectiveness of T/T compared with best supportive care ( BSC ) for metastatic colorectal cancer ( third-line or later) . ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29177842"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 190,
+                "text": "Trifluridine/tipiracil ( Lonsurf ) is a fixed-dose combination tablet comprising trifluridine , an antineoplastic nucleoside analogue , and tipiracil , a thymidine phosphorylase inhibitor . ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31489588"
+            },
+            {
+                "offsetInBeginSection": 154,
+                "offsetInEndSection": 361,
+                "text": "TAS-102 ( Lonsurf ) is an oral fluoropyrimidine that is formed by the combination of 2 active drugs: trifluridine ( a nucleoside analog ) and tipiracil hydrochloride ( a thymidine phosphorylase inhibitor) . ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27431756"
+            },
+            {
+                "offsetInBeginSection": 132,
+                "offsetInEndSection": 370,
+                "text": "These AEs may affect patient adherence , particularly with completely oral regimens , such as trifluridine/tipiracil ( TAS-102 , Lonsurf®) , an antimetabolite agent for patients with mCRC refractory or intolerant to standard therapies . .",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/28315543"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 225,
+                "text": "Trifluridine/tipiracil ( FTD/TPI; TAS-102 , Lonsurf®) , a novel form of chemotherapy for metastatic colorectal cancer ( mCRC) , has shown clinical benefit in the global , phase III RECOURSE trial , regardless of patient age. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30350179"
+            },
+            {
+                "offsetInBeginSection": 152,
+                "offsetInEndSection": 353,
+                "text": "TAS-102 (Lonsurf) is an oral fluoropyrimidine that is formed by the combination of 2 active drugs: trifluridine (a nucleoside analog) and tipiracil hydrochloride (a thymidine phosphorylase inhibitor).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27431756"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 371,
+                "text": "BACKGROUND\nTrifluridine/tipiracil (TAS-102, Lonsurf®), a novel oral anti-tumor agent combining an anti-neoplastic thymidine-based nucleoside analogue (trifluridine, FTD) with a thymidine phosphorylase inhibitor (tipiracil hydrochloride, TPI) presents a new treatment option for metastatic colorectal cancer (mCRC) patients refractory or intolerant to standard therapies.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30445951"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 217,
+                "text": "In May 2014, tablets containing both trifluridine and tipiracil hydrochloride (Lonsurf® tablets) were launched in Japan ahead of other countries, for the treatment of advanced/relapsed unresectable colorectal cancer.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26197742"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 216,
+                "text": "In May 2014, tablets containing both trifluridine and tipiracil hydrochloride (Lonsurf® tablets) were launched in Japan ahead of other countries, for the treatment of advanced/relapsed unresectable colorectal cancer.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26197742"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 371,
+                "text": "BACKGROUND: Trifluridine/tipiracil (TAS-102, Lonsurf®), a novel oral anti-tumor agent combining an anti-neoplastic thymidine-based nucleoside analogue (trifluridine, FTD) with a thymidine phosphorylase inhibitor (tipiracil hydrochloride, TPI) presents a new treatment option for metastatic colorectal cancer (mCRC) patients refractory or intolerant to standard therapies.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30445951"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 31,
+                "text": "Trifluridine/tipiracil (Lonsurf",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31489588"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 359,
+                "text": "Trifluridine/tipiracil (TAS-102, Lonsurf®), a novel oral anti-tumor agent combining an anti-neoplastic thymidine-based nucleoside analogue (trifluridine, FTD) with a thymidine phosphorylase inhibitor (tipiracil hydrochloride, TPI) presents a new treatment option for metastatic colorectal cancer (mCRC) patients refractory or intolerant to standard therapies.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30445951"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "6020b8811cb411341a000089",
+        "body": "Which cancers can be treated with Selpercatinib?",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/33150799",
+            "http://www.ncbi.nlm.nih.gov/pubmed/33007380",
+            "http://www.ncbi.nlm.nih.gov/pubmed/33272981",
+            "http://www.ncbi.nlm.nih.gov/pubmed/33161056",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32493697",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32557397",
+            "http://www.ncbi.nlm.nih.gov/pubmed/33082208",
+            "http://www.ncbi.nlm.nih.gov/pubmed/33239432",
+            "http://www.ncbi.nlm.nih.gov/pubmed/31988000",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32846061",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32846060",
+            "http://www.ncbi.nlm.nih.gov/pubmed/33169506"
+        ],
+        "ideal_answer": [
+            "Selpercatinib was recently approved by the US FDA for the treatment of RET fusion-positive non-small-cell lung cancer, RET fusion-positive thyroid cancer and RET-mutant medullary thyroid cancer."
+        ],
+        "exact_answer": [
+            "non-small-cell lung cancer",
+            "thyroid cancer",
+            "medullary thyroid cancer"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 227,
+                "text": "BACKGROUND: Selpercatinib (LOXO-292) and pralsetinib (BLU-667) are highly potent RET-selective protein tyrosine kinase inhibitors (TKIs) for treating advanced RET-altered thyroid cancers and non-small cell lung cancer (NSCLC). ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33161056"
+            },
+            {
+                "offsetInBeginSection": 192,
+                "offsetInEndSection": 443,
+                "text": "Based on results from the phase I/II LIBRETTO-001 trial, selpercatinib was recently approved by the US FDA for the treatment of RET fusion-positive non-small-cell lung cancer, RET fusion-positive thyroid cancer and RET-mutant medullary thyroid cancer.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32557397"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 154,
+                "text": "The FDA has greenlighted selpercatinib, the first targeted therapy for RET-altered non-small cell lung cancer (NSCLC) and certain types of thyroid cancer.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32493697"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 293,
+                "text": "INTRODUCTION: Novel rearranged in transfection (RET)-specific tyrosine kinase inhibitors (TKIs) such as selpercatinib (LOXO-292) have shown unprecedented efficacy in tumors positive for RET fusions or mutations, notably RET fusion-positive NSCLC and RET-mutated medullary thyroid cancer (MTC).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31988000"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 64,
+                "text": "Neoadjuvant selpercatinib for advanced medullary thyroid cancer.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33169506"
+            },
+            {
+                "offsetInBeginSection": 153,
+                "offsetInEndSection": 343,
+                "text": "Recently, highly potent next generation selective RET inhibitors have been clinically validated, and selpercatinib was recently Food and Drug Administration (FDA)-approved for advanced MTC. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33169506"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 139,
+                "text": "PURPOSE: Selpercatinib and pralsetinib induce deep and durable responses in advanced RET fusion-positive lung and thyroid cancer patients. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33272981"
+            },
+            {
+                "offsetInBeginSection": 124,
+                "offsetInEndSection": 402,
+                "text": "RET-selective inhibitors selpercatinib (LOXO-292) and pralsetinib (BLU-667) recently demonstrated favorable antitumor activity and safety profiles in advanced RET fusion-positive NSCLC, and both have received approval by the US Food and Drug Administration for this indication. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33007380"
+            },
+            {
+                "offsetInBeginSection": 1809,
+                "offsetInEndSection": 2027,
+                "text": "CONCLUSIONS: In this phase 1-2 trial, selpercatinib showed durable efficacy with mainly low-grade toxic effects in patients with medullary thyroid cancer with and without previous vandetanib or cabozantinib treatment. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32846061"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 156,
+                "text": "Overcoming MET-Dependent Resistance to Selective RET Inhibition in Patients with RET Fusion-Positive Lung Cancer by Combining Selpercatinib with Crizotinib.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33082208"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 226,
+                "text": "BACKGROUND: Selpercatinib (LOXO-292) and pralsetinib (BLU-667) are highly potent RET-selective protein tyrosine kinase inhibitors (TKIs) for treating advanced RET-altered thyroid cancers and non-small cell lung cancer (NSCLC).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33161056"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 617,
+                "text": "On May 8, 2020, the Food and Drug Administration granted accelerated approval to selpercatinib for 1) adult patients with metastatic RET fusion-positive non-small cell lung cancer (NSCLC), 2) adult and pediatric patients ≥12 years of age with advanced or metastatic RET-mutant medullary thyroid cancer (MTC) who require systemic therapy, and 3) adult and pediatric patients ≥12 years of age with advanced or metastatic RET fusion-positive thyroid cancer who require systemic therapy and who are radioactive iodine-refractory (if radioactive iodine is appropriate). Approval was granted based on the clinically importa",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33239432"
+            },
+            {
+                "offsetInBeginSection": 197,
+                "offsetInEndSection": 452,
+                "text": " on results from the phase I/II LIBRETTO-001 trial, selpercatinib was recently approved by the US FDA for the treatment of RET fusion-positive non-small-cell lung cancer, RET fusion-positive thyroid cancer and RET-mutant medullary thyroid cancer. This art",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32557397"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 275,
+                "text": "Selpercatinib, a novel, highly selective and potent, inhibitor of RET, demonstrated clinically meaningful antitumor activity with manageable toxicity in heavily pretreated and treatment-naive RET fusion-positive non-small-cell lung cancer patients in a Phase I/II clinical tr",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33150799"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 155,
+                "text": "The FDA has greenlighted selpercatinib, the first targeted therapy for RET-altered non-small cell lung cancer (NSCLC) and certain types of thyroid cancer. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32493697"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 223,
+                "text": "BACKGROUND: Selpercatinib (LOXO-292) and pralsetinib (BLU-667) are highly potent RET-selective protein tyrosine kinase inhibitors (TKIs) for treating advanced RET-altered thyroid cancers and non-small cell lung cancer (NSCL",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33161056"
+            },
+            {
+                "offsetInBeginSection": 116,
+                "offsetInEndSection": 400,
+                "text": "NSCLC). RET-selective inhibitors selpercatinib (LOXO-292) and pralsetinib (BLU-667) recently demonstrated favorable antitumor activity and safety profiles in advanced RET fusion-positive NSCLC, and both have received approval by the US Food and Drug Administration for this indication",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33007380"
+            },
+            {
+                "offsetInBeginSection": 275,
+                "offsetInEndSection": 608,
+                "text": "ial. LIBRETTO-431 (NCT04194944) is a randomized, global, multicenter, open-label, Phase III trial, evaluating selpercatinib versus carboplatin or cisplatin and pemetrexed chemotherapy with or without pembrolizumab in treatment-naive patients with locally advanced/metastatic RET fusion-positive nonsquamous non-small-cell lung cancer",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33150799"
+            },
+            {
+                "offsetInBeginSection": 182,
+                "offsetInEndSection": 357,
+                "text": "Selpercatinib is a highly selective RET kinase inhibitor that has recently been approved by the FDA in lung and thyroid cancers with activating RET gene fusions and mutations.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33082208"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 214,
+                "text": "BACKGROUND: Selpercatinib (LOXO-292) and pralsetinib (BLU-667) are highly potent RET-selective protein tyrosine kinase inhibitors (TKIs) for treating advanced RET-altered thyroid cancers and non-small cell lung can",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33161056"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 564,
+                "text": "On May 8, 2020, the Food and Drug Administration granted accelerated approval to selpercatinib for 1) adult patients with metastatic RET fusion-positive non-small cell lung cancer (NSCLC), 2) adult and pediatric patients ≥12 years of age with advanced or metastatic RET-mutant medullary thyroid cancer (MTC) who require systemic therapy, and 3) adult and pediatric patients ≥12 years of age with advanced or metastatic RET fusion-positive thyroid cancer who require systemic therapy and who are radioactive iodine-refractory (if radioactive iodine is appropriate).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33239432"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 279,
+                "text": "Selpercatinib, a novel, highly selective and potent, inhibitor of RET, demonstrated clinically meaningful antitumor activity with manageable toxicity in heavily pretreated and treatment-naive RET fusion-positive non-small-cell lung cancer patients in a Phase I/II clinical trial.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/33150799"
+            },
+            {
+                "offsetInBeginSection": 1743,
+                "offsetInEndSection": 2001,
+                "text": "CONCLUSIONS: Selpercatinib had durable efficacy, including intracranial activity, with mainly low-grade toxic effects in patients with RET fusion-positive NSCLC who had previously received platinum-based chemotherapy and those who were previously untreated. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32846060"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "65f03163dffffb9b6b000005",
+        "body": "Please list the selective endothelin A receptor antagonists",
+        "type": "list",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/34175819",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15838362",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12617928",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32197449",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15500395",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12193067",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12193066",
+            "http://www.ncbi.nlm.nih.gov/pubmed/9464847",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22332138",
+            "http://www.ncbi.nlm.nih.gov/pubmed/14555186",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18238950",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32249614",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7982465",
+            "http://www.ncbi.nlm.nih.gov/pubmed/37716952",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7473559",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7930556",
+            "http://www.ncbi.nlm.nih.gov/pubmed/31593221",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32942043",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7891325",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7813549",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20660536",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23674888",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15838329",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17163810",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26064237",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15194180",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15363992",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12437501",
+            "http://www.ncbi.nlm.nih.gov/pubmed/31004470",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7509976",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16219361",
+            "http://www.ncbi.nlm.nih.gov/pubmed/9761426",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26192308",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8282010",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8854203",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16292989",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24498134",
+            "http://www.ncbi.nlm.nih.gov/pubmed/35084435",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21184655",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16507220",
+            "http://www.ncbi.nlm.nih.gov/pubmed/37820676",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11922964",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22890981",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22205719",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32726116",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26196225",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32985601",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16544441",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19198697",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32472357",
+            "http://www.ncbi.nlm.nih.gov/pubmed/30579233"
+        ],
+        "ideal_answer": [
+            "The selective endothelin A receptor antagonists are:\n\n1. Clazosentan\n2. Bosentan\n3. Ambrisentan\n4. Sitaxentan",
+            "Sitaxsentan, ambrisentan, YM598, and atrasentan are examples of selective antagonists for the endothelin A receptor.",
+            "Ambrisentan, sitaxentan, zibotentan, and atrasentan are drugs that specifically target and block the endothelin A receptor.",
+            "The selective endothelin A receptor antagonists include ambrisentan and sitaxentan.",
+            "The selective endothelin A receptor antagonists are:\n\n* Clazosentan\n* Sitaxentan\n* Atrasentan\n* Ambrisentan\n* Zibotentan",
+            "The selective endothelin A receptor antagonists are:\n\n* Atrasentan (Xinlay(R))\n* Ambrisentan\n* Sitaxentan sodium (Thelin)\n* BQ-123 (cyclo(D-Trp-D-Asp-L-Pro-D-Val-L-Leu-), sodium salt)\n* Zibotentan\n* Clazosentan",
+            "Sitaxentan, ambrisentan, and zibotentan are selective endothelin A receptor antagonists.",
+            "The selective endothelin A receptor antagonists are ambrisentan, sitaxentan, atrasentan, zibotentan, and clazosentan.",
+            "The selective endothelin A (ETA) receptor antagonists mentioned in the provided passages are:\n\n1. Clazosentan\n2. Sitaxentan\n3. Atrasentan\n4. Ambrisentan\n5. Zibotentan",
+            "The class of elective endothelin A receptor antagonist drugs include sitaxsentan , zibotentan, atrasentan, clozosentan, ambrisentan and darusentan",
+            "The selective endothelin A receptor antagonists are:\n\n* Atrasentan (Xinlay(R))\n* Ambrisentan\n* Sitaxentan sodium (Thelin)\n* Zibotentan\n* Clazosentan",
+            "Selective endothelin A receptor antagonists include sitaxsentan, ambrisentan, YM598, atrasentan, bosentan, A-182086, A-192621, and ABT-627.",
+            "The selective endothelin A receptor antagonists are ambrisentan, clazosentan, and sitaxsentan.",
+            "Several drugs act as selective antagonists for the endothelin A receptor, including ambrisentan, sitaxentan, and zibotentan, which are used in various therapeutic applications.",
+            "The selective endothelin A receptor antagonists are sitaxsentan, ambrisentan, YM598, and atrasentan.",
+            "Selective endothelin A receptor antagonists (ERAs) include:\n\n* Sitaxentan (Thelin)\n* Ambrisentan\n* Atrasentan (Xinlay)\n* BQ-123\n* Sparsentan\n* Zibotentan\n* Avosentan\n* Edonentan\n* Aprocitentan\n* Clazosentan\n\nThese drugs are primarily used for treating pulmonary arterial hypertension, while some (like atrasentan) are experimental anti-cancer drugs. Selective ETB receptor antagonists, such as BQ-788 and A192621, are used in research but have not yet reached the clinical trial stage.",
+            "The selective endothelin A receptor antagonists are ambrisentan, sitaxentan, zibotentan, clazosentan, and atrasentan.",
+            "Ambrisentan, sitaxsentan, Atrasentan, and YM598 are selective endothelin A receptor antagonists.",
+            "Selective endothelin A receptor antagonists (ERAs) include sitaxentan, ambrisentan, atrasentan, BQ-123, sparsentan, zibotentan, avosentan, edonentan, aprocitentan, and clazosentan.",
+            "Ambrisentan, sitaxentan, clazosentan, zibotentan, and atrasentan are selective endothelin A receptor antagonists.",
+            "The selective endothelin A receptor antagonists are: sitaxentan, ambrisentan, atrasentan, BQ-123, sparsentan, zibotentan, avosentan, edonentan, aprocitentan, and clazosentan.",
+            "The selective endothelin A receptor antagonists are:\n1. Clazosentan\n2. Sitaxentan\n3. Atrasentan\n4. Ambrisentan\n5. Zibotentan"
+        ],
+        "exact_answer": [
+            "sitaxsentan",
+            "BQ-123",
+            "zibotentan",
+            "darusentan",
+            "atrasentan",
+            "clozosentan",
+            "ambrisentan",
+            "ABT-627",
+            "ABT-546",
+            "A-182086",
+            "A-192621",
+            "BQ-123",
+            "YM598",
+            "BMS-182874",
+            "FR139317",
+            "27-O-Caffeoyl myricerone (50-235) i",
+            "A-192621",
+            "D145065",
+            "BQ610",
+            "BQ788",
+            "Avosentan",
+            "endonentan"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 801,
+                "offsetInEndSection": 959,
+                "text": ". The selective ERA clazosentan has been shown to be effective in preventing cerebral vasospasm and delaying ischemic neurological deficits and new infarcts. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32197449"
+            },
+            {
+                "offsetInBeginSection": 761,
+                "offsetInEndSection": 828,
+                "text": "sitaxentan (selective ETA receptor antagonist; 30 or 100 mg/kg/day)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31593221"
+            },
+            {
+                "offsetInBeginSection": 357,
+                "offsetInEndSection": 617,
+                "text": "Selective antagonism of the endothelin-1 type A receptor (ETAR) by atrasentan treatment in combination with renin-angiotensin-aldosterone system inhibition with losartan has been shown to have the therapeutic benefit of lowering proteinuria in patients with DN",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32249614"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 122,
+                "text": "Ambrisentan, an endothelin receptor type A-selective antagonist, inhibits cancer cell migration, invasion, and metastasis.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32985601"
+            },
+            {
+                "offsetInBeginSection": 404,
+                "offsetInEndSection": 579,
+                "text": "Zibotentan is a potent, selective inhibitor of the ETA receptor. We have identified zibotentan as a potential disease-modifying therapy for patients with microvascular angina.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32942043"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 98,
+                "text": "Comparison of the protective effects of selective endothelin-a receptor antagonist, ambrisentan, a",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32726116"
+            },
+            {
+                "offsetInBeginSection": 58,
+                "offsetInEndSection": 119,
+                "text": "ambrisentan, a selective endothelin typeA receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32726116"
+            },
+            {
+                "offsetInBeginSection": 225,
+                "offsetInEndSection": 350,
+                "text": "Atrasentan is a selective endothelin receptor type A (ETA) antagonist initially studied for the potential treatment of cancer",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/37820676"
+            },
+            {
+                "offsetInBeginSection": 1641,
+                "offsetInEndSection": 1698,
+                "text": "The endothelin receptor antagonist atrasentan reduced IR.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/37716952"
+            },
+            {
+                "offsetInBeginSection": 883,
+                "offsetInEndSection": 998,
+                "text": "The selective endothelin receptor-A antagonists sitaxsentan and ambrisentan are currently undergoing investigation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15194180"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 195,
+                "text": "Evaluation of the endothelin receptor antagonists ambrisentan, bosentan, macitentan, and sitaxsentan as hepatobiliary transporter inhibitors and substrates in sandwich-cultured human hepatocytes.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24498134"
+            },
+            {
+                "offsetInBeginSection": 743,
+                "offsetInEndSection": 998,
+                "text": "In addition to its efficacy as sole therapy, bosentan may have a role as part of a combination of drugs such as a prostanoid or sildenafil. The selective endothelin receptor-A antagonists sitaxsentan and ambrisentan are currently undergoing investigation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15194180"
+            },
+            {
+                "offsetInBeginSection": 581,
+                "offsetInEndSection": 998,
+                "text": "Bosentan, a dual-receptor antagonist, is approved by the U.S. Food and Drug Administration for class III and IV patients with PAH, based on two phase III trials. In addition to its efficacy as sole therapy, bosentan may have a role as part of a combination of drugs such as a prostanoid or sildenafil. The selective endothelin receptor-A antagonists sitaxsentan and ambrisentan are currently undergoing investigation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15194180"
+            },
+            {
+                "offsetInBeginSection": 378,
+                "offsetInEndSection": 882,
+                "text": "Oral endothelin receptor antagonists (ERAs) have been shown to improve pulmonary hemodynamics, exercise capacity, functional status, and clinical outcome in several randomized placebo-controlled trials. Bosentan, a dual-receptor antagonist, is approved by the U.S. Food and Drug Administration for class III and IV patients with PAH, based on two phase III trials. In addition to its efficacy as sole therapy, bosentan may have a role as part of a combination of drugs such as a prostanoid or sildenafil.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15194180"
+            },
+            {
+                "offsetInBeginSection": 378,
+                "offsetInEndSection": 742,
+                "text": "Oral endothelin receptor antagonists (ERAs) have been shown to improve pulmonary hemodynamics, exercise capacity, functional status, and clinical outcome in several randomized placebo-controlled trials. Bosentan, a dual-receptor antagonist, is approved by the U.S. Food and Drug Administration for class III and IV patients with PAH, based on two phase III trials.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15194180"
+            },
+            {
+                "offsetInBeginSection": 122,
+                "offsetInEndSection": 742,
+                "text": "Laboratory and clinical investigations have clearly shown that endothelin (ET)-1 is overexpressed in several forms of pulmonary vascular disease and likely plays a significant pathogenetic role in the development and progression of pulmonary vasculopathy. Oral endothelin receptor antagonists (ERAs) have been shown to improve pulmonary hemodynamics, exercise capacity, functional status, and clinical outcome in several randomized placebo-controlled trials. Bosentan, a dual-receptor antagonist, is approved by the U.S. Food and Drug Administration for class III and IV patients with PAH, based on two phase III trials.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15194180"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 353,
+                "text": "OBJECTIVE: To provide an overview of the drug profile of the orally active, selective endothelin A receptor antagonist ambrisentan, and its efficacy and safety in the treatment of patients with pulmonary arterial hypertension (PAH).RESEARCH DESIGN AND METHODS: Medical literature on the use of ambrisentan in PAH was identified using MEDLINE and EMBASE.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26196225"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 117,
+                "text": "Pharmacology of endothelin receptor antagonists ABT-627, ABT-546, A-182086 and A-192621: ex vivo and in vivo studies.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12193067"
+            },
+            {
+                "offsetInBeginSection": 369,
+                "offsetInEndSection": 555,
+                "text": "One of these substances, bosentan, blocks both ET(A) and ET(B) receptors, whereas the two other compounds, sitaxsentan and ambrisentan, are more selective blockers of the ET(A) receptor.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18238950"
+            },
+            {
+                "offsetInBeginSection": 186,
+                "offsetInEndSection": 249,
+                "text": "Atrasentan is a novel and selective inhibitor of ET-1 and ET-A.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16507220"
+            },
+            {
+                "offsetInBeginSection": 4,
+                "offsetInEndSection": 128,
+                "text": "Atrasentan (Xinlay(R)) is an anti-cancer drug from a new class of agents called selective endothelin-A receptor antagonists.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16544441"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 191,
+                "text": "Ambrisentan is the second selective endothelin-A receptor antagonist to be licensed in Europe, and the first in the United States, for the management of pulmonary arterial hypertension (PAH).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19198697"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 126,
+                "text": "Ambrisentan is a highly selective endothelin-A receptor antagonist for the treatment of pulmonary arterial hypertension (PAH).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30579233"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 115,
+                "text": "Sitaxentan sodium (Thelin) is a once daily, orally bioavailable, highly selective endothelin A receptor antagonist.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22890981"
+            },
+            {
+                "offsetInBeginSection": 46,
+                "offsetInEndSection": 153,
+                "text": "BQ-123 (cyclo(D-Trp-D-Asp-L-Pro-D-Val-L-Leu-), sodium salt), a selective endothelin ETA receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7982465"
+            },
+            {
+                "offsetInBeginSection": 360,
+                "offsetInEndSection": 426,
+                "text": "Atrasentan (a selective endothelin-A receptor antagonist; 6 mg/kg)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15838362"
+            },
+            {
+                "offsetInBeginSection": 689,
+                "offsetInEndSection": 753,
+                "text": "Zibotentan or Atrasentan, two selective ETA receptor antagonists",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26064237"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 555,
+                "text": "Until recently, a role for endothelin-1 (ET-1) in the development and/or maintenance of hypertension has been based solely on indirect findings, e.g., elevated circulating levels of peptide. However, with the development of specific ET-1 receptor antagonists it is now possible to examine this relationship directly. The present study describes the hemodynamic effects of systemic infusions of BQ-123, a selective endothelin (ETA)-receptor antagonist, in conscious, freely moving spontaneously hypertensive (SHRs) and normotensive Wistar-Kyoto (WKY) rats.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7509976"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 161,
+                "text": "BACKGROUND: Endothelin A (ET-A) receptor antagonists including zibotentan and atrasentan, have been suggested as a treatment for castration-resistant prostate ca",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26192308"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 149,
+                "text": "Clazosentan is a selective endothelin A receptor antagonist in development for the prevention and treatment of vasospasm postsubarachnoid hemorrhage.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/31004470"
+            },
+            {
+                "offsetInBeginSection": 1209,
+                "offsetInEndSection": 1307,
+                "text": "In conclusion, YM598 is a potent and orally active selective endothelin ET(A) receptor antagonist.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/14555186"
+            },
+            {
+                "offsetInBeginSection": 490,
+                "offsetInEndSection": 777,
+                "text": "endothelin receptor antagonists has been introduced for treatment of patients with pulmonary arterial hypertension (PAH). Bosentan, a dual endothelin receptor antagonist as well as Sitaxsentan and Ambrisentan, selective blockers of the ETA receptor have proven effective in SSc-PAH. This",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21184655"
+            },
+            {
+                "offsetInBeginSection": 26,
+                "offsetInEndSection": 79,
+                "text": "YM598, a novel endothelin-A (ETA) receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15838329"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 73,
+                "text": "BMS-182874 is a selective, nonpeptide endothelin ETA receptor antagonist.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7891325"
+            },
+            {
+                "offsetInBeginSection": 1717,
+                "offsetInEndSection": 1803,
+                "text": "compound 8 (BQ-123) is a highly soluble, potent, and selective ETA receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7473559"
+            },
+            {
+                "offsetInBeginSection": 450,
+                "offsetInEndSection": 507,
+                "text": "the selective endothelin ETA receptor antagonist FR139317",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7813549"
+            },
+            {
+                "offsetInBeginSection": 70,
+                "offsetInEndSection": 128,
+                "text": "FR139317 as a selective endothelin ETA-receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8854203"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 147,
+                "text": "27-O-Caffeoyl myricerone (50-235) is a nonpeptide endothelin receptor antagonist which is highly selective for the endothelin ETA receptor subtype.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8282010"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 155,
+                "text": "Sitaxsentan, a highly selective endothelin-A (ET(A)) receptor antagonist (6500-fold more selective for ET(A) receptors than endothelin-B (ET(B)) receptors)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15500395"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 107,
+                "text": "Darusentan, a selective endothelin A receptor antagonist, for the oral treatment of resistant hypertension.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20660536"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 426,
+                "text": "The binding affinities of (E)-N-[6-methoxy-5-(2-methoxyphenoxy)[2,2'-bipyrimidin]-4-yl]-2-phenylethenesulfonamide monopotassium salt (YM598) for native human endothelin ETA and ETB receptors expressed in human coronary artery smooth muscle cells (CASMC) and a human melanoma cell line, SK-Mel-28, respectively, were examined, and the results compared with those for the endothelin receptor antagonists atrasentan and bosentan.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15363992"
+            },
+            {
+                "offsetInBeginSection": 1044,
+                "offsetInEndSection": 1168,
+                "text": "These responses were improved by Compound-E, but not by BQ-123 nor by bosentan, an ETAR and endothelin B receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/34175819"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 631,
+                "text": "OBJECTIVE: To investigate the role of endothelin-1 in the pathogenesis of hypertension directly by using the selective endothelin subtype A-receptor antagonist BQ-123.METHODS: The antihypertensive and hemodynamic effects of sustained BQ-123 administration were examined in conscious, unrestrained spontaneously hypertensive rats (SHR), normotensive Wistar-Kyoto (WKY) rats and renin hypertensive rats.RESULTS: Sustained infusions of BQ-123 (0.16-164 nmol/kg per min, intravenously, for 6 h) produced dose-dependent reductions in mean arterial pressure in SHR, the maximal reduction being obtained with a dose of 16 nmol/kg per min.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7930556"
+            },
+            {
+                "offsetInBeginSection": 491,
+                "offsetInEndSection": 759,
+                "text": "Preliminary data suggests that selective endothelin type A (ET(A)) receptor antagonists (BQ-123, sitaxsentan) may be more beneficial than the non-selective ET receptor antagonists in heart failure, especially when the failure is associated with pulmonary hypertension.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12437501"
+            },
+            {
+                "offsetInBeginSection": 290,
+                "offsetInEndSection": 440,
+                "text": "eptor antagonists on endothelin-1-induced increase in blood pressure. Atrasentan (a selective endothelin-A receptor antagonist; 6 mg/kg) and A-192621 ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15838362"
+            },
+            {
+                "offsetInBeginSection": 516,
+                "offsetInEndSection": 724,
+                "text": "The ET(A) plus ET(B) receptor antagonist, PD145065 (1 microM), and the selective ET(A) receptor antagonist, BQ610 (3 microM), completely relaxed the hypocapnic constriction, as determined in a cranial window.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11922964"
+            },
+            {
+                "offsetInBeginSection": 606,
+                "offsetInEndSection": 1091,
+                "text": "Stimulation by endothelin-1 ranging from 10(-11) to 10(-9) M time and dose dependently increased the production of prostaglandin E2 and the expression of cyclooxygenase 2 protein without changing that of cyclooxygenase 1 protein, an effect which was inhibited by dexamethasone, nonsteroidal anti-inflammatory drugs and the selective endothelin ET(B) receptor antagonist, BQ788 (N-cis-2,6-dimethylpiperidinocarbonyl-L-gamma-methyl-leucyl-D-L-me thoxycarbonyl-tryptophanyl-D-norleucine).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/9761426"
+            },
+            {
+                "offsetInBeginSection": 24,
+                "offsetInEndSection": 174,
+                "text": "gonists are commonly used in the treatment of pulmonary hypertension. Sitaxsentan, a selective endothelin A receptor blocker, induces a mild transamin",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22332138"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 411,
+                "text": "Modification of the structure of bosentan 1, the first marketed endothelin receptor antagonist (Tracleer), by introduction of a second sulfonamide function at the alkoxy side chain, led to bis-sulfonamides 2. This allowed to prepare dual ET(A)/ET(B) as well as ET(B) receptor selective antagonists, which could serve as tools to investigate the pharmacological consequences of selective ET(B) receptor blockade.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12617928"
+            },
+            {
+                "offsetInBeginSection": 617,
+                "offsetInEndSection": 1042,
+                "text": "The first dual ETA/ETB receptor blocker, bosentan, has already been approved by the Food and Drug Administration for the treatment of pulmonary arterial hypertension (PAH). Trials of endothelin receptor antagonists in heart failure have been completed with mixed results so far. Studies are ongoing on the effects of selective ETA antagonists or dual ETA/ETB antagonists in lung fibrosis, cancer, and subarachnoid hemorrhage.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16219361"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 308,
+                "text": "Sitaxsentan is an orally active, selective endothelin-A receptor antagonist that may benefit patients with pulmonary arterial hypertension by blocking the vasoconstrictive effects of endothelin-A receptors, while maintaining the vasodilator and endothelin-1 clearance functions of the endothelin-B receptors.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16292989"
+            },
+            {
+                "offsetInBeginSection": 84,
+                "offsetInEndSection": 258,
+                "text": "Sitaxsentan, a selective endothelin-A receptor antagonist, is an effective, safe and well-tolerated endothelin receptor antagonist for the treatment of PAH in adult patients.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17163810"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 106,
+                "text": "Pharmacology of endothelin receptor antagonists ABT-627, ABT-546, A-182086 and A-192621: in vitro studies.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12193066"
+            },
+            {
+                "offsetInBeginSection": 121,
+                "offsetInEndSection": 293,
+                "text": "resistance. Ambrisentan is an oral, propanoic acid based-endothelin receptor antagonist (ERA), selective for the endothelin type-A receptor, which is approved for the treat",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32472357"
+            },
+            {
+                "offsetInBeginSection": 167,
+                "offsetInEndSection": 314,
+                "text": "Ambrisentan is a selective endothelin type A receptor antagonist approved for the treatment of patients with PAH World Health Organization group 1.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23674888"
+            },
+            {
+                "offsetInBeginSection": 402,
+                "offsetInEndSection": 603,
+                "text": "Ambrisentan, a selective ET(A) receptor antagonist, is metabolized primarily by uridine 5'diphosphate glucuronosyltransferases (UGTs) 1A9S, 2B7S, and 1A3S and, to a lesser extent, by CYP3A and CYP2C19.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22205719"
+            },
+            {
+                "offsetInBeginSection": 880,
+                "offsetInEndSection": 925,
+                "text": "BQ-123, the selective ETA receptor antagonist",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/35084435"
+            },
+            {
+                "offsetInBeginSection": 647,
+                "offsetInEndSection": 691,
+                "text": "BQ 123 (a selective ETA receptor antagonist)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/9464847"
+            }
+        ],
+        "triples": null
+    }
+]

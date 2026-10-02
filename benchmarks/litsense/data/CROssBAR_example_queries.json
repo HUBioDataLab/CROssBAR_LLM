@@ -1,0 +1,118 @@
+[
+  {
+    "id": "crossbar-1",
+    "type": "list",
+    "body": "Which gene is related to psoriasis?",
+    "original": "Which Gene is related to psoriasis <Disease> ?",
+    "reference_note": "No curated ground truth. References are established psoriasis susceptibility genes compiled from the literature (PSORS1/HLA-C is the major locus; IL-23 axis and NF-kB regulators feature prominently). Provisional.",
+    "exact_answer": [
+      "HLA-C",
+      "HLA-Cw6",
+      "CARD14",
+      "IL23R",
+      "IL12B",
+      "IL23A",
+      "TNIP1",
+      "TNFAIP3",
+      "IL4",
+      "IL13",
+      "LCE3B",
+      "LCE3C",
+      "TRAF3IP2",
+      "IL36RN"
+    ]
+  },
+  {
+    "id": "crossbar-2",
+    "type": "list",
+    "body": "For proteins associated with amyotrophic lateral sclerosis, which orthologous proteins in Mus musculus (mouse) have experimentally validated functional annotations, and which conserved biological processes do they support?",
+    "original": "For proteins associated with amyotrophic lateral sclerosis <Disease>, which orthologous proteins in Mus musculus (Mouse) <Organism Taxon> have experimentally validated functional annotations, and which conserved biological processes do they support?",
+    "reference_note": "No curated ground truth. References list mouse orthologs of core ALS genes plus the conserved biological processes they participate in. Provisional; multi-hop KG question (likely declined by the literature agent).",
+    "exact_answer": [
+      "Sod1",
+      "Tardbp",
+      "Fus",
+      "C9orf72",
+      "Tbk1",
+      "Optn",
+      "Vcp",
+      "Ubqln2",
+      "RNA metabolism",
+      "protein homeostasis",
+      "autophagy",
+      "oxidative stress response",
+      "axonal transport",
+      "mitochondrial function"
+    ]
+  },
+  {
+    "id": "crossbar-3",
+    "type": "list",
+    "body": "What nodes are on the shortest path that connect MDM2 with the drug Sorafenib?",
+    "original": "What nodes are on the shortest path that connect MDM2 <Gene> with the drug Sorafenib <Drug> ?",
+    "reference_note": "No curated ground truth. This is a knowledge-graph shortest-path query with no literature answer; references are plausible path anchors (MDM2 regulates TP53; Sorafenib targets the RAF/VEGFR/PDGFR kinases). Highly provisional; expected to be declined as out_of_scope.",
+    "exact_answer": [
+      "MDM2",
+      "TP53",
+      "BRAF",
+      "RAF1",
+      "VEGFR2",
+      "PDGFRB",
+      "Sorafenib"
+    ]
+  },
+  {
+    "id": "crossbar-4",
+    "type": "list",
+    "body": "Which drugs target proteins associated with Alzheimer disease?",
+    "original": "Which drugs target proteins associated with Alzheimer disease <Disease> ?",
+    "reference_note": "No curated ground truth. References are approved Alzheimer drugs and the proteins they target (AChE/BChE inhibitors, NMDA-receptor antagonist, anti-amyloid-beta antibodies). Provisional; multi-hop KG question (likely declined).",
+    "exact_answer": [
+      "donepezil",
+      "rivastigmine",
+      "galantamine",
+      "tacrine",
+      "memantine",
+      "aducanumab",
+      "lecanemab",
+      "donanemab"
+    ]
+  },
+  {
+    "id": "crossbar-5",
+    "type": "list",
+    "body": "Which pathways are associated with both diabetes mellitus and T-cell non-Hodgkin lymphoma? Return only signaling pathways.",
+    "original": "Which pathways are associated with both diabetes mellitus <Disease> and T-cell non-Hodgkin lymphoma <Disease> ? Return only signaling pathways.",
+    "reference_note": "No curated ground truth. References are signaling pathways reported as dysregulated in both conditions. Provisional; multi-hop KG question (likely declined).",
+    "exact_answer": [
+      "PI3K/AKT/mTOR signaling",
+      "PI3K-AKT signaling pathway",
+      "mTOR signaling",
+      "NF-kB signaling",
+      "JAK-STAT signaling",
+      "MAPK signaling"
+    ]
+  },
+  {
+    "id": "crossbar-6",
+    "type": "list",
+    "body": "What are the common side effects of drugs targeting the protein EGFR?",
+    "original": "What are the common side effects of drugs targeting the protein of EGFR <Gene> ?",
+    "reference_note": "No curated ground truth. References are well-documented class side effects of EGFR inhibitors (gefitinib, erlotinib, cetuximab, afatinib, osimertinib). Provisional; multi-hop KG question (likely declined).",
+    "exact_answer": [
+      "acneiform rash",
+      "papulopustular rash",
+      "diarrhea",
+      "paronychia",
+      "xerosis",
+      "dry skin",
+      "pruritus",
+      "stomatitis",
+      "mucositis",
+      "alopecia",
+      "hypomagnesemia",
+      "interstitial lung disease",
+      "fatigue"
+    ]
+  }
+]

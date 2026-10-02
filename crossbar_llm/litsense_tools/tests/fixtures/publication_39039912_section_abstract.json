@@ -1,0 +1,1670 @@
+{
+  "_id": "39039912|None",
+  "id": "39039912",
+  "infons": {},
+  "passages": [
+    {
+      "infons": {
+        "journal": "Clin Transl Med;2024Jul; 14 (7) 1777. doi:10.1002/ctm2.1777",
+        "year": "2024",
+        "type": "title",
+        "authors": "Liu N, Jiang X, Zhang G, Long S, Li J, Jiang M, Jia G, Sun R, Zhang L, Zhang Y, ",
+        "article-id_pmc": "PMC11263751"
+      },
+      "offset": 0,
+      "text": "LncRNA CARMN m6A demethylation by ALKBH5 inhibits mutant p53-driven tumour progression through miR-5683/FGF2.",
+      "sentences": [],
+      "annotations": [
+        {
+          "id": "6",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 7,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "7",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 13,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "8",
+          "infons": {
+            "identifier": "54890",
+            "type": "Gene",
+            "ncbi_homologene": "9818",
+            "valid": true,
+            "normalized": [
+              54890
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 54890,
+            "biotype": "gene",
+            "name": "ALKBH5",
+            "accession": "@GENE_ALKBH5"
+          },
+          "text": "ALKBH5",
+          "locations": [
+            {
+              "offset": 34,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "9",
+          "infons": {
+            "identifier": "7157",
+            "type": "Gene",
+            "ncbi_homologene": "460",
+            "valid": true,
+            "normalized": [
+              7157
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7157,
+            "biotype": "gene",
+            "name": "TP53",
+            "accession": "@GENE_TP53"
+          },
+          "text": "p53",
+          "locations": [
+            {
+              "offset": 57,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "10",
+          "infons": {
+            "identifier": "100847034",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              100847034
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 100847034,
+            "biotype": "gene",
+            "name": "MIR5683",
+            "accession": "@GENE_MIR5683"
+          },
+          "text": "miR-5683",
+          "locations": [
+            {
+              "offset": 95,
+              "length": 8
+            }
+          ]
+        },
+        {
+          "id": "11",
+          "infons": {
+            "identifier": "2247",
+            "type": "Gene",
+            "ncbi_homologene": "1521",
+            "valid": true,
+            "normalized": [
+              2247
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 2247,
+            "biotype": "gene",
+            "name": "FGF2",
+            "accession": "@GENE_FGF2"
+          },
+          "text": "FGF2",
+          "locations": [
+            {
+              "offset": 104,
+              "length": 4
+            }
+          ]
+        }
+      ],
+      "relations": []
+    },
+    {
+      "infons": {
+        "type": "abstract"
+      },
+      "offset": 110,
+      "text": "N-methyladenosine (m6A) represents a prevalent RNA modification observed in colorectal cancer. Despite its abundance, the biological implications of m6A methylation on the lncRNA CARMN remain elusive in colorectal cancer, especially for mutant p53 gain-of-function. Here, we elucidate that CARMN exhibits diminished expression levels in colorectal cancer patients with mutant p53, attributed to its rich m6A methylation, which promotes cancer proliferation, invasion and metastasis in vitro and in vivo. Further investigation illustrates that ALKBH5 acts as a direct demethylase of CARMN, targeting 477 methylation sites, thereby preserving CARMN expression. However, the interaction of mutant p53 with the ALKBH5 promoter impedes its transcription, enhancing m6A methylation levels on CARMN. Subsequently, YTHDF2/YTHDF3 recognise and degrade m6A-modified CARMN. Concurrently, overexpressing CARMN significantly suppressed colorectal cancer progression in vitro and in vivo. Additionally, miR-5683 was identified as a direct downstream target of lncRNA CARMN, exerting an antitumour effect by cooperatively downregulating FGF2 expression. Our findings revealed the regulator and functional mechanism of CARMN in colorectal cancer with mutant p53, potentially offering insights into demethylation-based strategies for cancer diagnosis and therapy. The m6A methylation of CARMN that is prime for mutant p53 gain-of-function-induced malignant progression of colorectal cancer, identifying a promising approach for cancer therapy.",
+      "sentences": [],
+      "annotations": [
+        {
+          "id": "41",
+          "infons": {
+            "identifier": "MESH:C010223",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C010223"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C010223",
+            "biotype": "chemical",
+            "name": "N-methyladenosine",
+            "accession": "@CHEMICAL_N_methyladenosine"
+          },
+          "text": "N-methyladenosine",
+          "locations": [
+            {
+              "offset": 110,
+              "length": 17
+            }
+          ]
+        },
+        {
+          "id": "42",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 129,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "43",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 259,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "44",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 289,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "45",
+          "infons": {
+            "identifier": "7157",
+            "type": "Gene",
+            "ncbi_homologene": "460",
+            "valid": true,
+            "normalized": [
+              7157
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7157,
+            "biotype": "gene",
+            "name": "TP53",
+            "accession": "@GENE_TP53"
+          },
+          "text": "p53",
+          "locations": [
+            {
+              "offset": 354,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "46",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 400,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "47",
+          "infons": {
+            "identifier": "9606",
+            "type": "Species",
+            "valid": true,
+            "normalized": [
+              9606
+            ],
+            "database": "ncbi_taxonomy",
+            "normalized_id": 9606,
+            "biotype": "species",
+            "name": "9606",
+            "accession": null
+          },
+          "text": "patients",
+          "locations": [
+            {
+              "offset": 465,
+              "length": 8
+            }
+          ]
+        },
+        {
+          "id": "48",
+          "infons": {
+            "identifier": "7157",
+            "type": "Gene",
+            "ncbi_homologene": "460",
+            "valid": true,
+            "normalized": [
+              7157
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7157,
+            "biotype": "gene",
+            "name": "TP53",
+            "accession": "@GENE_TP53"
+          },
+          "text": "p53",
+          "locations": [
+            {
+              "offset": 486,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "49",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 514,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "50",
+          "infons": {
+            "identifier": "54890",
+            "type": "Gene",
+            "ncbi_homologene": "9818",
+            "valid": true,
+            "normalized": [
+              54890
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 54890,
+            "biotype": "gene",
+            "name": "ALKBH5",
+            "accession": "@GENE_ALKBH5"
+          },
+          "text": "ALKBH5",
+          "locations": [
+            {
+              "offset": 653,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "51",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 692,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "52",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 751,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "53",
+          "infons": {
+            "identifier": "7157",
+            "type": "Gene",
+            "ncbi_homologene": "460",
+            "valid": true,
+            "normalized": [
+              7157
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7157,
+            "biotype": "gene",
+            "name": "TP53",
+            "accession": "@GENE_TP53"
+          },
+          "text": "p53",
+          "locations": [
+            {
+              "offset": 804,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "54",
+          "infons": {
+            "identifier": "54890",
+            "type": "Gene",
+            "ncbi_homologene": "9818",
+            "valid": true,
+            "normalized": [
+              54890
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 54890,
+            "biotype": "gene",
+            "name": "ALKBH5",
+            "accession": "@GENE_ALKBH5"
+          },
+          "text": "ALKBH5",
+          "locations": [
+            {
+              "offset": 817,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "55",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 870,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "56",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 896,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "57",
+          "infons": {
+            "identifier": "51441",
+            "type": "Gene",
+            "ncbi_homologene": "32302",
+            "valid": true,
+            "normalized": [
+              51441
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 51441,
+            "biotype": "gene",
+            "name": "YTHDF2",
+            "accession": "@GENE_YTHDF2"
+          },
+          "text": "YTHDF2",
+          "locations": [
+            {
+              "offset": 917,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "58",
+          "infons": {
+            "identifier": "253943",
+            "type": "Gene",
+            "ncbi_homologene": "34991",
+            "valid": true,
+            "normalized": [
+              253943
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 253943,
+            "biotype": "gene",
+            "name": "YTHDF3",
+            "accession": "@GENE_YTHDF3"
+          },
+          "text": "YTHDF3",
+          "locations": [
+            {
+              "offset": 924,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "59",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 953,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "60",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 966,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "61",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 1002,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "62",
+          "infons": {
+            "identifier": "100847034",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              100847034
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 100847034,
+            "biotype": "gene",
+            "name": "MIR5683",
+            "accession": "@GENE_MIR5683"
+          },
+          "text": "miR-5683",
+          "locations": [
+            {
+              "offset": 1099,
+              "length": 8
+            }
+          ]
+        },
+        {
+          "id": "63",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 1163,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "64",
+          "infons": {
+            "identifier": "2247",
+            "type": "Gene",
+            "ncbi_homologene": "1521",
+            "valid": true,
+            "normalized": [
+              2247
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 2247,
+            "biotype": "gene",
+            "name": "FGF2",
+            "accession": "@GENE_FGF2"
+          },
+          "text": "FGF2",
+          "locations": [
+            {
+              "offset": 1232,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "65",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 1313,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "66",
+          "infons": {
+            "identifier": "7157",
+            "type": "Gene",
+            "ncbi_homologene": "460",
+            "valid": true,
+            "normalized": [
+              7157
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7157,
+            "biotype": "gene",
+            "name": "TP53",
+            "accession": "@GENE_TP53"
+          },
+          "text": "p53",
+          "locations": [
+            {
+              "offset": 1352,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "67",
+          "infons": {
+            "identifier": "MESH:C005955",
+            "type": "Chemical",
+            "valid": true,
+            "normalized": [
+              "C005955"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "C005955",
+            "biotype": "chemical",
+            "name": "6-methyladenine",
+            "accession": "@CHEMICAL_6_methyladenine"
+          },
+          "text": "m6A",
+          "locations": [
+            {
+              "offset": 1461,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "68",
+          "infons": {
+            "identifier": "728264",
+            "type": "Gene",
+            "valid": true,
+            "normalized": [
+              728264
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 728264,
+            "biotype": "gene",
+            "name": "CARMN",
+            "accession": "@GENE_CARMN"
+          },
+          "text": "CARMN",
+          "locations": [
+            {
+              "offset": 1480,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "69",
+          "infons": {
+            "identifier": "7157",
+            "type": "Gene",
+            "ncbi_homologene": "460",
+            "valid": true,
+            "normalized": [
+              7157
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7157,
+            "biotype": "gene",
+            "name": "TP53",
+            "accession": "@GENE_TP53"
+          },
+          "text": "p53",
+          "locations": [
+            {
+              "offset": 1511,
+              "length": 3
+            }
+          ]
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "relations": [
+    {
+      "id": "R1",
+      "infons": {
+        "score": "0.6368",
+        "role1": {
+          "identifier": "7157",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7157
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7157,
+          "biotype": "gene",
+          "name": "TP53",
+          "accession": "@GENE_TP53"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "0",
+          "role": "3,0"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "infons": {
+        "score": "0.9401",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "100847034",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            100847034
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 100847034,
+          "biotype": "gene",
+          "name": "MIR5683",
+          "accession": "@GENE_MIR5683"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "1",
+          "role": "1,4"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "infons": {
+        "score": "0.4311",
+        "role1": {
+          "identifier": "100847034",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            100847034
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 100847034,
+          "biotype": "gene",
+          "name": "MIR5683",
+          "accession": "@GENE_MIR5683"
+        },
+        "role2": {
+          "identifier": "54890",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            54890
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 54890,
+          "biotype": "gene",
+          "name": "ALKBH5",
+          "accession": "@GENE_ALKBH5"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "2",
+          "role": "4,2"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "infons": {
+        "score": "0.9673",
+        "role1": {
+          "identifier": "2247",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            2247
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 2247,
+          "biotype": "gene",
+          "name": "FGF2",
+          "accession": "@GENE_FGF2"
+        },
+        "role2": {
+          "identifier": "54890",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            54890
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 54890,
+          "biotype": "gene",
+          "name": "ALKBH5",
+          "accession": "@GENE_ALKBH5"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "3",
+          "role": "5,2"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "infons": {
+        "score": "0.9936",
+        "role1": {
+          "identifier": "100847034",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            100847034
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 100847034,
+          "biotype": "gene",
+          "name": "MIR5683",
+          "accession": "@GENE_MIR5683"
+        },
+        "role2": {
+          "identifier": "7157",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7157
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7157,
+          "biotype": "gene",
+          "name": "TP53",
+          "accession": "@GENE_TP53"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "4",
+          "role": "4,3"
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "infons": {
+        "score": "0.9982",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "7157",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7157
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7157,
+          "biotype": "gene",
+          "name": "TP53",
+          "accession": "@GENE_TP53"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "5",
+          "role": "1,3"
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "infons": {
+        "score": "0.9972",
+        "role1": {
+          "identifier": "54890",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            54890
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 54890,
+          "biotype": "gene",
+          "name": "ALKBH5",
+          "accession": "@GENE_ALKBH5"
+        },
+        "role2": {
+          "identifier": "7157",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7157
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7157,
+          "biotype": "gene",
+          "name": "TP53",
+          "accession": "@GENE_TP53"
+        },
+        "type": "Negative_Correlation"
+      },
+      "nodes": [
+        {
+          "refid": "6",
+          "role": "2,3"
+        }
+      ]
+    },
+    {
+      "id": "R8",
+      "infons": {
+        "score": "0.7698",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "2247",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            2247
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 2247,
+          "biotype": "gene",
+          "name": "FGF2",
+          "accession": "@GENE_FGF2"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "7",
+          "role": "1,5"
+        }
+      ]
+    },
+    {
+      "id": "R9",
+      "infons": {
+        "score": "0.6586",
+        "role1": {
+          "identifier": "2247",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            2247
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 2247,
+          "biotype": "gene",
+          "name": "FGF2",
+          "accession": "@GENE_FGF2"
+        },
+        "role2": {
+          "identifier": "7157",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7157
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7157,
+          "biotype": "gene",
+          "name": "TP53",
+          "accession": "@GENE_TP53"
+        },
+        "type": "Positive_Correlation"
+      },
+      "nodes": [
+        {
+          "refid": "8",
+          "role": "5,3"
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "infons": {
+        "score": "0.9992",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "253943",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            253943
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 253943,
+          "biotype": "gene",
+          "name": "YTHDF3",
+          "accession": "@GENE_YTHDF3"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "9",
+          "role": "24,23"
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "infons": {
+        "score": "0.7902",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "10",
+          "role": "1,0"
+        }
+      ]
+    },
+    {
+      "id": "R12",
+      "infons": {
+        "score": "0.9984",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "54890",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            54890
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 54890,
+          "biotype": "gene",
+          "name": "ALKBH5",
+          "accession": "@GENE_ALKBH5"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "11",
+          "role": "1,2"
+        }
+      ]
+    },
+    {
+      "id": "R13",
+      "infons": {
+        "score": "0.9983",
+        "role1": {
+          "identifier": "100847034",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            100847034
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 100847034,
+          "biotype": "gene",
+          "name": "MIR5683",
+          "accession": "@GENE_MIR5683"
+        },
+        "role2": {
+          "identifier": "2247",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            2247
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 2247,
+          "biotype": "gene",
+          "name": "FGF2",
+          "accession": "@GENE_FGF2"
+        },
+        "type": "Negative_Correlation"
+      },
+      "nodes": [
+        {
+          "refid": "12",
+          "role": "4,5"
+        }
+      ]
+    },
+    {
+      "id": "R14",
+      "infons": {
+        "score": "0.549",
+        "role1": {
+          "identifier": "2247",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            2247
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 2247,
+          "biotype": "gene",
+          "name": "FGF2",
+          "accession": "@GENE_FGF2"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Negative_Correlation"
+      },
+      "nodes": [
+        {
+          "refid": "13",
+          "role": "5,0"
+        }
+      ]
+    },
+    {
+      "id": "R15",
+      "infons": {
+        "score": "0.9875",
+        "role1": {
+          "identifier": "51441",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            51441
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 51441,
+          "biotype": "gene",
+          "name": "YTHDF2",
+          "accession": "@GENE_YTHDF2"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "14",
+          "role": "22,25"
+        }
+      ]
+    },
+    {
+      "id": "R16",
+      "infons": {
+        "score": "0.9363",
+        "role1": {
+          "identifier": "54890",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            54890
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 54890,
+          "biotype": "gene",
+          "name": "ALKBH5",
+          "accession": "@GENE_ALKBH5"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Negative_Correlation"
+      },
+      "nodes": [
+        {
+          "refid": "15",
+          "role": "2,0"
+        }
+      ]
+    },
+    {
+      "id": "R17",
+      "infons": {
+        "score": "0.8109",
+        "role1": {
+          "identifier": "100847034",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            100847034
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 100847034,
+          "biotype": "gene",
+          "name": "MIR5683",
+          "accession": "@GENE_MIR5683"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "16",
+          "role": "4,0"
+        }
+      ]
+    },
+    {
+      "id": "R18",
+      "infons": {
+        "score": "0.9994",
+        "role1": {
+          "identifier": "MESH:C005955",
+          "type": "Chemical",
+          "valid": true,
+          "normalized": [
+            "C005955"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "C005955",
+          "biotype": "chemical",
+          "name": "6-methyladenine",
+          "accession": "@CHEMICAL_6_methyladenine"
+        },
+        "role2": {
+          "identifier": "51441",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            51441
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 51441,
+          "biotype": "gene",
+          "name": "YTHDF2",
+          "accession": "@GENE_YTHDF2"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "17",
+          "role": "24,22"
+        }
+      ]
+    },
+    {
+      "id": "R19",
+      "infons": {
+        "score": "0.8503",
+        "role1": {
+          "identifier": "253943",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            253943
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 253943,
+          "biotype": "gene",
+          "name": "YTHDF3",
+          "accession": "@GENE_YTHDF3"
+        },
+        "role2": {
+          "identifier": "728264",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            728264
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 728264,
+          "biotype": "gene",
+          "name": "CARMN",
+          "accession": "@GENE_CARMN"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "18",
+          "role": "23,25"
+        }
+      ]
+    }
+  ],
+  "pmid": 39039912,
+  "pmcid": null,
+  "meta": {},
+  "date": "2024-07-01T00:00:00Z",
+  "journal": "Clin Transl Med",
+  "authors": [
+    "Liu N",
+    "Jiang X",
+    "Zhang G",
+    "Long S",
+    "Li J",
+    "Jiang M",
+    "Jia G",
+    "Sun R",
+    "Zhang L",
+    "Zhang Y"
+  ],
+  "relations_display": [
+    {
+      "name": "associate|@GENE_TP53|@GENE_CARMN"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_MIR5683"
+    },
+    {
+      "name": "associate|@GENE_MIR5683|@GENE_ALKBH5"
+    },
+    {
+      "name": "associate|@GENE_FGF2|@GENE_ALKBH5"
+    },
+    {
+      "name": "associate|@GENE_MIR5683|@GENE_TP53"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_TP53"
+    },
+    {
+      "name": "negative_correlate|@GENE_ALKBH5|@GENE_TP53"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_FGF2"
+    },
+    {
+      "name": "positive_correlate|@GENE_FGF2|@GENE_TP53"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_YTHDF3"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_CARMN"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_ALKBH5"
+    },
+    {
+      "name": "negative_correlate|@GENE_MIR5683|@GENE_FGF2"
+    },
+    {
+      "name": "negative_correlate|@GENE_FGF2|@GENE_CARMN"
+    },
+    {
+      "name": "associate|@GENE_YTHDF2|@GENE_CARMN"
+    },
+    {
+      "name": "negative_correlate|@GENE_ALKBH5|@GENE_CARMN"
+    },
+    {
+      "name": "associate|@GENE_MIR5683|@GENE_CARMN"
+    },
+    {
+      "name": "associate|@CHEMICAL_6_methyladenine|@GENE_YTHDF2"
+    },
+    {
+      "name": "associate|@GENE_YTHDF3|@GENE_CARMN"
+    }
+  ]
+}
