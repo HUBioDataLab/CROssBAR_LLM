@@ -150,16 +150,18 @@ class Settings(BaseModel):
         ),
     )
     pubtator3_max_concurrent_runs: int | None = Field(
-        default=20,
+        default=50,
         ge=1,
         description=(
             "PubTator3 runs allowed in flight at once in this process. This is "
             "NOT what protects NCBI — the client's rate limiter already holds "
-            "every request to NCBI's IP-wide 3 req/s. It bounds latency: a run "
-            "makes roughly 3-6 requests, so 20 concurrent runs queue for ~20-40s "
-            "on the limiter, well inside the per-tool timeout. Without a cap, "
-            "a large burst would make EVERY run slow enough to time out, "
-            "instead of serving most promptly and skipping the excess."
+            "every request to NCBI's IP-wide 3 req/s. It bounds latency. A run "
+            "makes 2.2 NCBI requests on average (measured over 245 benchmark "
+            "questions), so 50 concurrent runs queue for ~36 s on the limiter; "
+            "with the ~16-21 s a question spends on LLM calls, the slowest "
+            "finishes inside 60 s. Without a cap, a large burst would make "
+            "EVERY run slow enough to time out, instead of serving most "
+            "promptly and skipping the excess."
         ),
     )
     literature_admission_wait_seconds: float = Field(
@@ -228,6 +230,26 @@ class Settings(BaseModel):
             "the queue: a burst waits here instead of being sent to Paperclip "
             "and rejected. Sized to the 60 s response target; still bounded "
             "by `literature_tool_timeout_seconds` overall."
+        ),
+    )
+    paperclip_max_429_retries: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Retries for a Paperclip command rejected with 429. Paperclip "
+            "answers a full per-user search queue with 429 and Retry-After: 15 "
+            "(observed live), and its docs say to wait and retry; without a "
+            "retry, that user loses their whole Paperclip answer. 429s on "
+            "map/verify are never retried: they mean the daily cap is spent."
+        ),
+    )
+    paperclip_max_retry_wait_seconds: float = Field(
+        default=30.0,
+        gt=0,
+        description=(
+            "Longest Retry-After we will honour. If Paperclip asks for a longer "
+            "wait, the command fails at once instead of holding a user's "
+            "request open that long."
         ),
     )
     pubtator3_max_documents: int = Field(

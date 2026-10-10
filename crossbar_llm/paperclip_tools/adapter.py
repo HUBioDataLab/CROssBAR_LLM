@@ -36,7 +36,9 @@ queue: 10 concurrent searches succeeded, 15 drew 429 "Per-user search queue is
 full (6/6)" with Retry-After: 15. The REST pool defaults to 10, which keeps
 concurrent searches within that; excess commands queue for a connection rather
 than being sent. Pool exhaustion deliberately does NOT fall back to MCP, which
-Paperclip counts against the same account.
+Paperclip counts against the same account. A 429 on a short command is retried
+after its Retry-After, a bounded number of times (`_429_wait`); a 429 on
+`map`/`verify`, which share the daily cap, is final.
 
 CLI facts pinned against the live server:
 - `search -s <source> "<query>" -n <N>` — over MCP, the `-s` source flag is
@@ -51,11 +53,14 @@ CLI facts pinned against the live server:
 from __future__ import annotations
 
 import asyncio
+import email.utils
 import json
 import logging
 import os
+import random
 import re
 import weakref
+from datetime import datetime, timezone
 from typing import Literal, Protocol, runtime_checkable
 
 import httpx
@@ -82,6 +87,36 @@ DEFAULT_TIMEOUT_S = 60.0            # search/cat/head/ls — typically fast
 # reconnect — a path confirmed to fail auth server-side.
 SLOW_TIMEOUT_S = 480.0
 _SLOW_COMMANDS = frozenset({"map", "ask-image"})
+# Commands behind Paperclip's 100-a-day cap. A 429 on these means the day's
+# quota is spent, which no retry clears before midnight UTC.
+_DAILY_CAPPED_COMMANDS = frozenset({"map", "verify"})
+# Bounded retry for a 429 on everything else. Paperclip answers a full per-user
+# search queue with 429 + `Retry-After` (15 s, observed live) and its docs say
+# to wait and retry, so these are worth one or two patient attempts.
+DEFAULT_MAX_429_RETRIES = 2
+DEFAULT_MAX_RETRY_WAIT_S = 30.0
+_DEFAULT_BACKOFF_S = 2.0            # first wait when no Retry-After is sent
+_MAX_JITTER_S = 3.0
+# Indirection so tests can observe waits without sleeping or patching asyncio.
+_sleep = asyncio.sleep
+
+
+def _parse_retry_after(value: str | None) -> float | None:
+    """Seconds from a `Retry-After` header: delta-seconds or an HTTP date."""
+    if not value:
+        return None
+    value = value.strip()
+    try:
+        return max(0.0, float(value))
+    except ValueError:
+        pass
+    try:
+        when = email.utils.parsedate_to_datetime(value)
+    except (TypeError, ValueError):
+        return None
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    return max(0.0, (when - datetime.now(timezone.utc)).total_seconds())
 DEFAULT_SOURCE = "pmc"
 DEFAULT_CONTENT_MAX_LINES = 400    # cap full-text body pulled per paper
 
@@ -944,8 +979,15 @@ class PaperclipAdapter:
         disable_rest: bool | None = None,
         max_connections: int = ACCOUNT_MAX_SHORT_IN_FLIGHT,
         pool_timeout_s: float = 60.0,
+        max_429_retries: int = DEFAULT_MAX_429_RETRIES,
+        max_retry_wait_s: float = DEFAULT_MAX_RETRY_WAIT_S,
     ):
         self._timeout_s = timeout_s
+        # How a 429 is retried (see `_429_wait`). The wait happens after httpx
+        # has returned the connection to the pool, so a command sitting out a
+        # Retry-After does not hold one of the account's slots meanwhile.
+        self._max_429_retries = max_429_retries
+        self._max_retry_wait_s = max_retry_wait_s
         self._slow_timeout_s = slow_timeout_s
         # How long a call may queue for a free connection. Set separately from
         # the call timeouts because a bare float makes httpx apply ONE value
@@ -1076,8 +1118,65 @@ class PaperclipAdapter:
             write=call_timeout,
             pool=self._pool_timeout_s,
         )
+        attempt = 0
+        while True:
+            resp = await self._post_rest(verb, raw, key, timeout)
+            if resp.status_code != 429:
+                break
+            wait = self._429_wait(verb, resp, attempt)
+            if wait is None:
+                break
+            attempt += 1
+            _log.warning(
+                "paperclip %s: 429 (%s); retry %d/%d in %.1fs",
+                verb, resp.text[:120], attempt, self._max_429_retries, wait,
+            )
+            await _sleep(wait)
+        # 401 and a final 429 are account-level verdicts, not transport
+        # failures: MCP carries the same key against the same quota, so falling
+        # back to it can only burn time and produce a confusing retry storm.
+        # Raise the base error so `_execute` doesn't catch it and callers see
+        # the real reason (`map` is capped at 100/day, resetting midnight UTC).
+        if resp.status_code in (401, 429):
+            raise PaperclipError(f"HTTP {resp.status_code}: {resp.text[:200]}")
+        if resp.status_code != 200:
+            raise PaperclipRestUnavailable(f"HTTP {resp.status_code}: {resp.text[:200]}")
         try:
-            resp = await self._rest_client().post(
+            data = resp.json()
+        except ValueError as e:
+            raise PaperclipRestUnavailable(f"invalid JSON response: {e}") from e
+        if not isinstance(data, dict):
+            raise PaperclipRestUnavailable("REST response was not a JSON object.")
+        if isinstance(data.get("output"), str):
+            data["output"] = _strip_ansi(data["output"])
+        return data
+
+    def _429_wait(self, verb: str, resp, attempt: int) -> float | None:
+        """Seconds to wait before retrying a 429, or None when it is final.
+
+        Final when retries are spent, when the command sits behind the daily
+        cap (no retry clears that before midnight UTC), or when the server asks
+        for a longer wait than we will hold a user's request for. Otherwise wait
+        at least what `Retry-After` asks — never less — plus a little jitter, so
+        the requests rejected together do not all return together and fill the
+        queue again in the same instant.
+        """
+        if attempt >= self._max_429_retries:
+            return None
+        if verb in _DAILY_CAPPED_COMMANDS or "daily limit" in (resp.text or "").lower():
+            return None
+        headers = getattr(resp, "headers", None) or {}
+        wait = _parse_retry_after(headers.get("retry-after"))
+        if wait is None:
+            wait = _DEFAULT_BACKOFF_S * (2 ** attempt)
+        if wait > self._max_retry_wait_s:
+            return None
+        return wait + random.uniform(0.0, min(_MAX_JITTER_S, 0.2 * wait))
+
+    async def _post_rest(self, verb: str, raw: str, key: str, timeout) -> httpx.Response:
+        """One POST to the execute endpoint, with transport errors classified."""
+        try:
+            return await self._rest_client().post(
                 REST_URL,
                 json={"command": verb, "raw": raw},
                 headers={"X-API-Key": key},
@@ -1097,24 +1196,6 @@ class PaperclipAdapter:
             ) from e
         except Exception as e:  # network errors, timeouts
             raise PaperclipRestUnavailable(f"{type(e).__name__}: {e}") from e
-        # 401/429 are account-level verdicts, not transport failures: MCP
-        # carries the same key against the same quota, so falling back to it
-        # can only burn time and produce a confusing retry storm. Raise the
-        # base error so `_execute` doesn't catch it and callers see the real
-        # reason (`map` is capped at 100/day, resetting midnight UTC).
-        if resp.status_code in (401, 429):
-            raise PaperclipError(f"HTTP {resp.status_code}: {resp.text[:200]}")
-        if resp.status_code != 200:
-            raise PaperclipRestUnavailable(f"HTTP {resp.status_code}: {resp.text[:200]}")
-        try:
-            data = resp.json()
-        except ValueError as e:
-            raise PaperclipRestUnavailable(f"invalid JSON response: {e}") from e
-        if not isinstance(data, dict):
-            raise PaperclipRestUnavailable("REST response was not a JSON object.")
-        if isinstance(data.get("output"), str):
-            data["output"] = _strip_ansi(data["output"])
-        return data
 
     async def _execute(self, verb: str, raw: str) -> tuple[str, str | None]:
         """Try REST first, fall back to MCP on any REST failure. Returns

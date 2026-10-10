@@ -121,6 +121,8 @@ class LiteratureService:
                 disable_rest=getattr(env_settings, "paperclip_disable_rest", None),
                 max_connections=self.settings.paperclip_max_connections,
                 pool_timeout_s=self.settings.paperclip_pool_timeout_seconds,
+                max_429_retries=self.settings.paperclip_max_429_retries,
+                max_retry_wait_s=self.settings.paperclip_max_retry_wait_seconds,
             )
         return self.paperclip_adapter
 
