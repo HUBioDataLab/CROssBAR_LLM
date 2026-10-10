@@ -17,6 +17,7 @@ from crossbar_llm.paperclip_tools.llm import build_chat_model as build_paperclip
 from crossbar_llm.pubtator3_tools.agent import build_graph as build_pubtator3_graph
 from crossbar_llm.pubtator3_tools.llm import build_chat_model as build_pubtator3_model
 from crossbar_llm.pubtator3_tools.rate_limit import install_static_share_limiter
+from crossbar_llm.api.services.literature_fairness import FairShare, UserShareExhausted
 
 logger = get_logger(__name__)
 
@@ -24,9 +25,12 @@ logger = get_logger(__name__)
 class _AdmissionRejected(Exception):
     """This process had no capacity to start the tool within the wait window."""
 
-    def __init__(self, tool: str):
+    def __init__(self, tool: str, warning: str | None = None):
         super().__init__(f"{tool} was not admitted")
         self.tool = tool
+        # Set when the reason is specific to this user (their own share is
+        # full) rather than the server being at capacity.
+        self.warning = warning
 
 # Token counters shared with `UsageCounter`. `call_count` is deliberately NOT
 # here: the core agent's `aggregated_usage.totals` carries exactly these keys,
@@ -56,6 +60,9 @@ class LiteratureService:
         # each tool's users take capacity from the other's. Created lazily
         # because a Semaphore binds to the running loop.
         self._admission: dict[str, asyncio.Semaphore] = {}
+        # Per-user share inside each tool's capacity, so one user cannot take
+        # most of it (see `literature_fairness`).
+        self._fair_share = FairShare(settings)
         # Divide PubTator3's IP-wide budget across replicas. Configured once at
         # construction rather than per request: the limiter is process-global
         # state inside the client.
@@ -86,23 +93,33 @@ class LiteratureService:
         `literature_tool_timeout_seconds`). The run's timeout starts only once
         a slot is granted, so queueing never shortens a run's budget — a longer
         wait trades response time for more requests served, and nothing else.
+
+        Queueing is itself two steps under ONE deadline: first for the user's
+        own share of the tool, then for the tool's capacity. A user over their
+        share never holds a tool slot while they wait, so they cannot block
+        anyone else, and the two waits together never exceed the budget.
         """
-        slot = self._admission_slot(name)
-        if slot is not None:
-            try:
-                await asyncio.wait_for(
-                    slot.acquire(),
-                    timeout=self.settings.literature_admission_wait_seconds,
-                )
-            except asyncio.TimeoutError:
-                raise _AdmissionRejected(name) from None
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self.settings.literature_admission_wait_seconds
         try:
-            return await asyncio.wait_for(
-                runner(), timeout=self.settings.literature_tool_timeout_seconds
-            )
-        finally:
-            if slot is not None:
-                slot.release()
+            async with self._fair_share.hold(name, deadline):
+                slot = self._admission_slot(name)
+                if slot is not None:
+                    try:
+                        await asyncio.wait_for(
+                            slot.acquire(), timeout=max(0.0, deadline - loop.time())
+                        )
+                    except asyncio.TimeoutError:
+                        raise _AdmissionRejected(name) from None
+                try:
+                    return await asyncio.wait_for(
+                        runner(), timeout=self.settings.literature_tool_timeout_seconds
+                    )
+                finally:
+                    if slot is not None:
+                        slot.release()
+        except UserShareExhausted as exhausted:
+            raise _AdmissionRejected(name, warning=str(exhausted)) from None
 
     def _get_paperclip_adapter(self) -> PaperclipAdapter:
         # No await between the check and the assignment, so concurrent requests
@@ -355,7 +372,8 @@ class LiteratureService:
                 normalized[name] = LiteratureToolResult(
                     status="skipped",
                     warnings=[
-                        f"{name} was skipped: the server is at its capacity of "
+                        raw.warning
+                        or f"{name} was skipped: the server is at its capacity of "
                         f"{limit} concurrent {name} runs. Try again shortly."
                     ],
                 )

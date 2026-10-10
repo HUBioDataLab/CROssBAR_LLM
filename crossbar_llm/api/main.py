@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from slowapi import _rate_limit_exceeded_handler
@@ -15,6 +15,7 @@ from crossbar_llm.api.routers.resume import router as resume_router
 from crossbar_llm.api.routers.vector_search import router as vector_search_router
 from crossbar_llm.api.routers.models import router as models_router
 from crossbar_llm.api.core.deps import get_runtime_service
+from crossbar_llm.api.services.literature_fairness import bind_literature_user
 
 settings = Settings()
 
@@ -35,6 +36,9 @@ app = FastAPI(
     title=settings.app_name,
     debug=settings.debug,
     lifespan=lifespan,
+    # Attribute each request's literature runs to its user, for the per-user
+    # share of the literature tools. Runs for every route; never rejects one.
+    dependencies=[Depends(bind_literature_user)],
 )
 
 app.state.limiter = limiter

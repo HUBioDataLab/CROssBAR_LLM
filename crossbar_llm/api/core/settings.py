@@ -164,6 +164,27 @@ class Settings(BaseModel):
             "promptly and skipping the excess."
         ),
     )
+    # Each user's share of a tool's capacity. One run makes one Paperclip
+    # search at a time, so this also caps a user's share of Paperclip's
+    # per-user search queue. `None` disables the share for that tool.
+    paperclip_max_runs_per_user: int | None = Field(
+        default=3,
+        ge=1,
+        description=(
+            "Paperclip runs one user may have in flight at once. Without it, "
+            "one person firing several questions can occupy most of the "
+            "account's search capacity while everyone else waits. Users are "
+            "told by the browser cookie, falling back to the hashed client IP."
+        ),
+    )
+    pubtator3_max_runs_per_user: int | None = Field(
+        default=3,
+        ge=1,
+        description=(
+            "PubTator3 runs one user may have in flight at once, so one person "
+            "cannot take most of NCBI's 3 req/s from everyone else."
+        ),
+    )
     literature_admission_wait_seconds: float = Field(
         default=30.0,
         ge=0,
