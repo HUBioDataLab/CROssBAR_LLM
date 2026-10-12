@@ -33,9 +33,13 @@ short commands in flight, 8 long ones, 120 req/s, and 100 `map`/`verify` a
 day. Tested live against this REST endpoint (2026-09-22), metadata reads were
 not limited even at 30 at once, but searches share an undocumented per-user
 queue: 10 concurrent searches succeeded, 15 drew 429 "Per-user search queue is
-full (6/6)" with Retry-After: 15. Shared REST/MCP command permits default to
-10 short and 8 long commands; the REST pool also defaults to 10 connections.
-Excess commands wait locally rather than being sent. Pool exhaustion deliberately
+full (6/6)" with Retry-After: 15. REST and MCP therefore share three kinds of
+command permit: searches (10, the queue that actually rejects), reads such as
+`cat`/`head`/`ls` (30, tested live without rejection), and long commands such
+as `map` (8). Reads get their own permits so they never queue behind searches
+waiting in Paperclip's search queue. The REST pool is sized to fit every
+permit, so it never makes a permitted command wait. Excess commands wait
+locally rather than being sent. Pool exhaustion deliberately
 does NOT fall back to MCP, which Paperclip counts against the same account.
 A 429 on a short command is retried
 after its Retry-After, a bounded number of times (`_429_wait`); a 429 on
@@ -81,6 +85,12 @@ DISABLE_REST_ENV = "PAPERCLIP_DISABLE_REST"
 # 10 concurrent searches passed, 15 did not. See the module docstring.
 ACCOUNT_MAX_SHORT_IN_FLIGHT = 10
 ACCOUNT_MAX_LONG_IN_FLIGHT = 8
+# Reads (`cat`/`head`/`ls`: paper metadata and text) were not limited live even
+# at 30 at once, while searches were. Giving reads their own permits stops the
+# ~11 quick metadata reads per question from queueing behind searches that can
+# sit in Paperclip's search queue for 10 s or more.
+DEFAULT_MAX_READS_IN_FLIGHT = 30
+_READ_COMMANDS = frozenset({"cat", "head", "ls"})
 API_KEY_ENV = "PAPERCLIP_API_KEY"
 DEFAULT_TIMEOUT_S = 60.0            # search/cat/head/ls — typically fast
 # `map`/`ask-image` read full text server-side and can take minutes. 480s, not
@@ -101,6 +111,19 @@ _DEFAULT_BACKOFF_S = 2.0            # first wait when no Retry-After is sent
 _MAX_JITTER_S = 3.0
 # Indirection so tests can observe waits without sleeping or patching asyncio.
 _sleep = asyncio.sleep
+
+
+def _command_kind(command: str) -> str:
+    """Which permit a command draws: "long", "read" or "search".
+
+    Anything unrecognised counts as a search, the kind Paperclip limits most.
+    """
+    verb = command.split(maxsplit=1)[0] if command else ""
+    if verb in _SLOW_COMMANDS | _DAILY_CAPPED_COMMANDS | {"search-workflow"}:
+        return "long"
+    if verb in _READ_COMMANDS:
+        return "read"
+    return "search"
 
 
 def _parse_retry_after(value: str | None) -> float | None:
@@ -979,23 +1002,32 @@ class PaperclipAdapter:
         slow_timeout_s: float = SLOW_TIMEOUT_S,
         api_key: str | None = None,
         disable_rest: bool | None = None,
-        max_connections: int = ACCOUNT_MAX_SHORT_IN_FLIGHT,
+        max_connections: int | None = None,
         pool_timeout_s: float = 60.0,
         max_429_retries: int = DEFAULT_MAX_429_RETRIES,
         max_retry_wait_s: float = DEFAULT_MAX_RETRY_WAIT_S,
+        max_searches_in_flight: int = ACCOUNT_MAX_SHORT_IN_FLIGHT,
+        max_reads_in_flight: int = DEFAULT_MAX_READS_IN_FLIGHT,
     ):
         self._timeout_s = timeout_s
+        # Commands in flight per kind, shared by REST and MCP (see
+        # `_command_slot`). Searches carry Paperclip's binding limit; reads and
+        # long commands have their own so they never wait behind searches.
+        self._permit_limits = {
+            "search": max_searches_in_flight,
+            "read": max_reads_in_flight,
+            "long": ACCOUNT_MAX_LONG_IN_FLIGHT,
+        }
         # How a 429 is retried (see `_429_wait`). The wait happens after httpx
         # has returned the connection to the pool, so a command sitting out a
         # Retry-After does not hold one of the account's slots meanwhile.
         self._max_429_retries = max_429_retries
         self._max_retry_wait_s = max_retry_wait_s
         self._slow_timeout_s = slow_timeout_s
-        # How long a call may queue for a free connection. Set separately from
-        # the call timeouts because a bare float makes httpx apply ONE value
-        # to connect/read/write/pool alike. With the pool sized to Paperclip's
-        # per-account limit (below), this wait IS our queue for that limit, so
-        # it is long enough for a burst to drain rather than fail.
+        # How long a command may queue for its permit, and for a connection.
+        # Set separately from the call timeouts because a bare float makes httpx
+        # apply ONE value to connect/read/write/pool alike. Long enough for a
+        # burst to drain rather than fail.
         self._pool_timeout_s = pool_timeout_s
         # Explicit credentials beat the environment. Callers that load config
         # from a file (the API reads `.env` through pydantic-settings, which
@@ -1003,17 +1035,17 @@ class PaperclipAdapter:
         # mutating process-global state to get them here.
         self._api_key = api_key
         self._disable_rest = disable_rest
-        self._max_connections = max_connections
+        # By default the pool fits every permit at once, so the permits are the
+        # only limit and a permitted command never waits for a connection. A
+        # pool smaller than one kind's permits caps that kind instead.
+        self._max_connections = max_connections or sum(self._permit_limits.values())
         # One pooled HTTP client per event loop, per adapter. Per-loop because
         # an AsyncClient binds to the loop it was created on; per-adapter
         # because an adapter may be either request-scoped (`build_graph`
         # constructs one per run when none is injected) or process-wide (the
-        # API injects a single long-lived adapter). `max_connections` caps
-        # THIS adapter's commands in flight, one per connection under
-        # HTTP/1.1. It defaults to 10: Paperclip's documented per-account
-        # limit, and the level live testing showed keeps concurrent searches
-        # clear of the per-user search queue. Limits are per account, not per
-        # adapter: several adapters or replicas on one key must split it.
+        # API injects a single long-lived adapter). Paperclip's limits are per
+        # account, not per adapter: several adapters or replicas on one key
+        # must split the search permits between them.
         self._clients: "weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, httpx.AsyncClient]" = (
             weakref.WeakKeyDictionary()
         )
@@ -1029,15 +1061,11 @@ class PaperclipAdapter:
         slots = self._command_slots.get(loop)
         if slots is None:
             slots = self._command_slots[loop] = {}
-        verb = command.split(maxsplit=1)[0] if command else ""
-        long_commands = _SLOW_COMMANDS | _DAILY_CAPPED_COMMANDS | {"search-workflow"}
-        kind = "long" if verb in long_commands else "short"
+        kind = _command_kind(command)
         if kind not in slots:
-            limit = min(
-                self._max_connections,
-                ACCOUNT_MAX_LONG_IN_FLIGHT if kind == "long" else ACCOUNT_MAX_SHORT_IN_FLIGHT,
+            slots[kind] = asyncio.Semaphore(
+                min(self._max_connections, self._permit_limits[kind])
             )
-            slots[kind] = asyncio.Semaphore(limit)
         return slots[kind]
 
     async def _acquire_command_slot(self, command: str) -> asyncio.Semaphore:
@@ -1224,15 +1252,13 @@ class PaperclipAdapter:
             )
         except httpx.PoolTimeout as e:
             # Deliberately NOT PaperclipRestUnavailable, so `_execute` and
-            # `search` do not fall back to MCP. The pool is sized to Paperclip's
-            # per-account limit of commands in flight, and Paperclip counts MCP
-            # connections against that same account — so falling back would
-            # just send the overflow to Paperclip by another door and earn a
-            # 429 there. Waiting longer is the remedy: raise the pool timeout.
+            # `search` do not fall back to MCP. Paperclip counts MCP connections
+            # against the same account, so falling back would just send the
+            # overflow to Paperclip by another door and earn a 429 there.
+            # Waiting longer is the remedy: raise the pool timeout or size.
             raise PaperclipError(
                 f"no free Paperclip connection after {self._pool_timeout_s:g}s "
-                f"(max_connections={self._max_connections}, sized to the "
-                f"account's commands-in-flight limit); server is saturated"
+                f"(max_connections={self._max_connections}); server is saturated"
             ) from e
         except Exception as e:  # network errors, timeouts
             raise PaperclipRestUnavailable(f"{type(e).__name__}: {e}") from e

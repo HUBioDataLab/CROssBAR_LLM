@@ -12,9 +12,9 @@ latency. Tune for the *whole request* rather than upstream calls alone.
 | Active agent graphs per process | `paperclip_max_concurrent_runs=20` | `pubtator3_max_concurrent_runs=50` |
 | Additional runs waiting per process | `paperclip_max_pending_runs=40` | `pubtator3_max_pending_runs=50` |
 | Run slots per browser | `paperclip_max_runs_per_user=3` | `pubtator3_max_runs_per_user=3` |
-| Queue wait deadline | `literature_admission_wait_seconds=30` | same |
+| Queue wait deadline | `literature_admission_wait_seconds=60` | same |
 | Run deadline after admission | `literature_tool_timeout_seconds=180` | same |
-| Upstream calls in flight | Shared REST/MCP command permits and REST HTTP pool: `paperclip_max_connections=10` | HTTPX default pool |
+| Upstream calls in flight | Shared REST/MCP command permits: `paperclip_max_searches_in_flight=10`, `paperclip_max_reads_in_flight=30`, 8 long commands; REST pool fits all of them (`paperclip_max_connections` unset) | HTTPX default pool |
 | Upstream rate | Paperclip account limit and bounded 429 retries | local 3 requests/s limiter, divided by `pubtator3_replica_count` |
 
 The per-user share is acquired before the global run slot, so one browser
@@ -28,14 +28,26 @@ records queue wait time and outstanding runs; `literature_tool_not_admitted`
 records rejection. Watch their counts and latency percentiles before raising
 the caps.
 
-The Paperclip HTTP connection pool is a **second**, command-level queue. It
-reuses sockets and limits concurrent REST commands; it does not bound the
-number of agent graphs or HTTP requests waiting in the app. Paperclip's 429
-retry respects `Retry-After` and releases the connection while sleeping.
-Both transports share short-command (10) and long-command (8) permits,
-further reduced by `paperclip_max_connections` when configured lower. A 429
-backoff releases its permit before sleeping.
-PubTator3 also respects a bounded `Retry-After` on its single 429 retry.
+Paperclip command permits are a **second**, command-level queue; they do not
+bound the number of agent graphs or HTTP requests waiting in the app. REST and
+the MCP fallback share three kinds of permit. Searches (`search`, `sql`,
+`filter`, and any unrecognised command) get 10: live, 10 concurrent searches
+passed and 15 drew 429s from Paperclip's per-user search queue. Reads (`cat`,
+`head`, `ls`) get 30, the level tested live without rejection, so the ~11
+metadata reads per question never wait behind searches queued at Paperclip.
+Long commands (`map`, `verify`, `search-workflow`, `ask-image`) get 8. The
+REST connection pool is sized to fit every permit; setting
+`paperclip_max_connections` lower caps each kind to it as well. Paperclip's 429
+retry respects `Retry-After` and releases its permit and connection while
+sleeping. PubTator3 also respects a bounded `Retry-After` on its single 429
+retry.
+
+All runs in a Paperclip burst finish at about the same time (~40 s), so the
+queue wait must outlast one batch for queued users to be admitted. In a
+simulation with the real admission code and adapter against a modelled
+Paperclip, a burst of 60 questions got 28 answers with a 30 s wait and 52 with
+60 s. Sustained throughput is set by how fast Paperclip serves searches, not by
+these limits: about 40 questions a minute were all answered in that model.
 
 These values are `Settings` model defaults, not environment variables. Change
 them in `crossbar_llm/api/core/settings.py` (or add a deployment settings

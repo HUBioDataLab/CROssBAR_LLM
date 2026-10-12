@@ -183,6 +183,8 @@ async def test_paperclip_adapter_is_lazy_reused_and_closed(monkeypatch):
     # path, and would leak between tests and between tenants.
     assert created[0].kwargs["api_key"] == "paperclip-test-key"
     assert created[0].kwargs["disable_rest"] is True
+    assert created[0].kwargs["max_searches_in_flight"] == settings.paperclip_max_searches_in_flight
+    assert created[0].kwargs["max_reads_in_flight"] == settings.paperclip_max_reads_in_flight
     assert "PAPERCLIP_API_KEY" not in os.environ
     assert "PAPERCLIP_DISABLE_REST" not in os.environ
 

@@ -192,14 +192,17 @@ class Settings(BaseModel):
         ),
     )
     literature_admission_wait_seconds: float = Field(
-        default=30.0,
+        default=60.0,
         ge=0,
         description=(
             "How long a run may queue for an admission slot before it is "
             "reported as skipped. This wait happens BEFORE the per-tool timeout "
             "starts, so it never shortens a run's budget; what it costs is "
             "response time for the queued user. Long enough that a burst "
-            "queues briefly instead of being turned away."
+            "queues instead of being turned away: in a simulated burst of 60 "
+            "Paperclip questions, a 30 s wait answered 20 and 60 s answered "
+            "about 50, because a whole batch of runs finishes together in "
+            "roughly 40 s."
         ),
     )
     pubtator3_replica_count: int = Field(
@@ -233,19 +236,37 @@ class Settings(BaseModel):
             "`paperclip_max_documents`. Turn on only with headroom to spare."
         ),
     )
-    paperclip_max_connections: int = Field(
+    paperclip_max_searches_in_flight: int = Field(
         default=10,
         ge=1,
         description=(
-            "Connections in the shared Paperclip pool, and therefore the most "
-            "Paperclip commands this process runs at once. Paperclip documents "
-            "10 short commands in flight per account. Tested live on "
-            "2026-09-22: metadata reads were not limited even at 30 at once, "
-            "but searches share an undocumented per-user queue; 10 searches at "
+            "Most Paperclip searches (and sql/filter) this process has in "
+            "flight at once, over REST and MCP together. Tested live on "
+            "2026-09-22: searches share an undocumented per-user queue; 10 at "
             "once all succeeded, while 15 drew 429s ('search queue is full'). "
-            "So 10 is what keeps concurrent searches safe. The limits are per "
-            "account: with N replicas on one API key, set this to about 10 / N, "
-            "and leave headroom if benchmarks use the same key."
+            "The limit is per account: with N replicas on one API key, set this "
+            "to about 10 / N, and leave headroom if benchmarks use the same key."
+        ),
+    )
+    paperclip_max_reads_in_flight: int = Field(
+        default=30,
+        ge=1,
+        description=(
+            "Most Paperclip reads (cat/head/ls: paper metadata and text) in "
+            "flight at once. Reads have their own permits so they never queue "
+            "behind searches waiting in Paperclip's search queue. Tested live "
+            "on 2026-09-22: 30 reads at once all succeeded."
+        ),
+    )
+    paperclip_max_connections: int | None = Field(
+        default=None,
+        ge=1,
+        description=(
+            "Connections in the shared Paperclip HTTP pool. Unset, the pool "
+            "fits every command permit at once (searches + reads + 8 long "
+            "commands), so the permits are the only limit. Set lower only to "
+            "cap Paperclip connections overall; a value below a kind's permits "
+            "caps that kind too."
         ),
     )
     paperclip_pool_timeout_seconds: float = Field(
