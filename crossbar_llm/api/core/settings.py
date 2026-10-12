@@ -137,16 +137,12 @@ class Settings(BaseModel):
     # different things, and a single shared pool let one tool's users take
     # capacity from the other's for no benefit. `None` means no local limit.
     paperclip_max_concurrent_runs: int | None = Field(
-        default=None,
+        default=20,
         ge=1,
         description=(
-            "Paperclip runs allowed in flight at once in this process. No "
-            "run-level limit by default: the adapter's connection pool "
-            "(`paperclip_max_connections`) already caps Paperclip commands in "
-            "flight, and extra commands queue for a connection. Past that, "
-            "Paperclip's per-user search queue answers 429, which the adapter "
-            "does not retry yet. Set a number here if searches start being "
-            "rejected."
+            "Paperclip runs allowed in flight in this process. The HTTP "
+            "connection pool separately caps simultaneous upstream commands; "
+            "this limit bounds the number of active agent graphs and LLM calls."
         ),
     )
     pubtator3_max_concurrent_runs: int | None = Field(
@@ -163,6 +159,16 @@ class Settings(BaseModel):
             "EVERY run slow enough to time out, instead of serving most "
             "promptly and skipping the excess."
         ),
+    )
+    paperclip_max_pending_runs: int = Field(
+        default=40,
+        ge=0,
+        description="Maximum Paperclip runs waiting for admission in this process.",
+    )
+    pubtator3_max_pending_runs: int = Field(
+        default=50,
+        ge=0,
+        description="Maximum PubTator3 runs waiting for admission in this process.",
     )
     # Each user's share of a tool's capacity. One run makes one Paperclip
     # search at a time, so this also caps a user's share of Paperclip's
@@ -331,4 +337,3 @@ class Settings(BaseModel):
 
 
     
-

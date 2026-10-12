@@ -149,3 +149,81 @@ async def test_pool_size_is_configurable():
         assert pool._max_keepalive_connections == 2
     finally:
         await client.aclose()
+
+
+async def test_mcp_fallback_caps_commands_and_queues_the_rest(monkeypatch):
+    state = {"in_flight": 0, "peak": 0}
+
+    class FakeTool:
+        async def ainvoke(self, args):
+            state["in_flight"] += 1
+            state["peak"] = max(state["peak"], state["in_flight"])
+            await asyncio.sleep(0.01)
+            state["in_flight"] -= 1
+            return "ok"
+
+    async def fake_tool(**kwargs):
+        return FakeTool()
+
+    monkeypatch.setattr(adapter_module, "_paperclip_tool", fake_tool)
+    adapter = PaperclipAdapter(api_key="k", disable_rest=True, pool_timeout_s=2.0)
+    results = await asyncio.gather(*(adapter._run(f"cat /papers/{i}") for i in range(25)))
+    assert results == ["ok"] * 25
+    assert state["peak"] == ACCOUNT_MAX_SHORT_IN_FLIGHT
+
+
+async def test_mcp_map_uses_the_long_command_limit(monkeypatch):
+    entered = 0
+    release = asyncio.Event()
+
+    class FakeTool:
+        async def ainvoke(self, args):
+            nonlocal entered
+            entered += 1
+            await release.wait()
+            return "ok"
+
+    async def fake_tool(**kwargs):
+        return FakeTool()
+
+    monkeypatch.setattr(adapter_module, "_paperclip_tool", fake_tool)
+    adapter = PaperclipAdapter(api_key="k", disable_rest=True, pool_timeout_s=0.05)
+    active = [asyncio.create_task(adapter._run("map --from s_1 question")) for _ in range(8)]
+    try:
+        await asyncio.sleep(0.01)
+        assert entered == 8
+        # Bounded: if map were counted as a short command, this ninth call
+        # would get a permit and block on `release`, hanging the suite.
+        with pytest.raises(PaperclipError, match="no free Paperclip command slot"):
+            await asyncio.wait_for(adapter._run("map --from s_1 question"), timeout=1.0)
+    finally:
+        release.set()
+    await asyncio.gather(*active)
+
+
+async def test_rest_and_mcp_share_the_account_permit(monkeypatch):
+    entered = asyncio.Event()
+    release = asyncio.Event()
+
+    class FakeClient:
+        async def post(self, url, **kwargs):
+            entered.set()
+            await release.wait()
+            return httpx.Response(200, json={"output": "ok"}, request=httpx.Request("POST", url))
+
+    class FakeTool:
+        async def ainvoke(self, args):
+            raise AssertionError("MCP should wait while REST holds the only slot")
+
+    async def fake_tool(**kwargs):
+        return FakeTool()
+
+    adapter = PaperclipAdapter(api_key="k", max_connections=1, pool_timeout_s=0.03)
+    monkeypatch.setattr(adapter, "_rest_client", lambda: FakeClient())
+    monkeypatch.setattr(adapter_module, "_paperclip_tool", fake_tool)
+    rest = asyncio.create_task(adapter._run_rest("search", '"query"'))
+    await entered.wait()
+    with pytest.raises(PaperclipError, match="no free Paperclip command slot"):
+        await adapter._run("search -s pmc query")
+    release.set()
+    assert (await rest)["output"] == "ok"

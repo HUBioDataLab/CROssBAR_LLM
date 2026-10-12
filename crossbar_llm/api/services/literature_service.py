@@ -15,6 +15,7 @@ from crossbar_llm.paperclip_tools.adapter import PaperclipAdapter, PaperclipConf
 from crossbar_llm.paperclip_tools.agent import build_graph as build_paperclip_graph
 from crossbar_llm.paperclip_tools.llm import build_chat_model as build_paperclip_model
 from crossbar_llm.pubtator3_tools.agent import build_graph as build_pubtator3_graph
+from crossbar_llm.pubtator3_tools.client import aclose_client as close_pubtator3_client
 from crossbar_llm.pubtator3_tools.llm import build_chat_model as build_pubtator3_model
 from crossbar_llm.pubtator3_tools.rate_limit import install_static_share_limiter
 from crossbar_llm.api.services.literature_fairness import FairShare, UserShareExhausted
@@ -25,12 +26,19 @@ logger = get_logger(__name__)
 class _AdmissionRejected(Exception):
     """This process had no capacity to start the tool within the wait window."""
 
-    def __init__(self, tool: str, warning: str | None = None):
+    def __init__(
+        self,
+        tool: str,
+        warning: str | None = None,
+        *,
+        reason: str = "capacity_timeout",
+        waited_seconds: float = 0.0,
+    ):
         super().__init__(f"{tool} was not admitted")
         self.tool = tool
-        # Set when the reason is specific to this user (their own share is
-        # full) rather than the server being at capacity.
         self.warning = warning
+        self.reason = reason
+        self.waited_seconds = waited_seconds
 
 # Token counters shared with `UsageCounter`. `call_count` is deliberately NOT
 # here: the core agent's `aggregated_usage.totals` carries exactly these keys,
@@ -60,6 +68,9 @@ class LiteratureService:
         # each tool's users take capacity from the other's. Created lazily
         # because a Semaphore binds to the running loop.
         self._admission: dict[str, asyncio.Semaphore] = {}
+        # Active plus queued requests. The cap is concurrent + pending, so
+        # even a zero-length queue still admits work into idle slots.
+        self._outstanding: dict[str, int] = {}
         # Per-user share inside each tool's capacity, so one user cannot take
         # most of it (see `literature_fairness`).
         self._fair_share = FairShare(settings)
@@ -100,17 +111,42 @@ class LiteratureService:
         anyone else, and the two waits together never exceed the budget.
         """
         loop = asyncio.get_running_loop()
-        deadline = loop.time() + self.settings.literature_admission_wait_seconds
+        queued_at = loop.time()
+        deadline = queued_at + self.settings.literature_admission_wait_seconds
+        slot = self._admission_slot(name)
+        reserved = False
+        if slot is not None:
+            pending_limit = getattr(self.settings, f"{name}_max_pending_runs")
+            outstanding = self._outstanding.get(name, 0)
+            if outstanding >= self._admission_limit(name) + pending_limit:
+                raise _AdmissionRejected(
+                    name,
+                    warning=f"{name} was skipped: the server queue is full. Try again shortly.",
+                    reason="queue_full",
+                )
+            # No await between checking and reserving, so event-loop tasks
+            # cannot overbook the active plus waiting capacity.
+            self._outstanding[name] = outstanding + 1
+            reserved = True
         try:
             async with self._fair_share.hold(name, deadline):
-                slot = self._admission_slot(name)
                 if slot is not None:
                     try:
                         await asyncio.wait_for(
                             slot.acquire(), timeout=max(0.0, deadline - loop.time())
                         )
                     except asyncio.TimeoutError:
-                        raise _AdmissionRejected(name) from None
+                        raise _AdmissionRejected(
+                            name, waited_seconds=loop.time() - queued_at
+                        ) from None
+                    logger.info(
+                        "Literature run admitted",
+                        event_type="literature_run_admitted",
+                        component="LiteratureService._run_admitted",
+                        tool=name,
+                        queue_wait_seconds=loop.time() - queued_at,
+                        outstanding_runs=self._outstanding[name],
+                    )
                 try:
                     return await asyncio.wait_for(
                         runner(), timeout=self.settings.literature_tool_timeout_seconds
@@ -119,7 +155,15 @@ class LiteratureService:
                     if slot is not None:
                         slot.release()
         except UserShareExhausted as exhausted:
-            raise _AdmissionRejected(name, warning=str(exhausted)) from None
+            raise _AdmissionRejected(
+                name,
+                warning=str(exhausted),
+                reason="user_share",
+                waited_seconds=loop.time() - queued_at,
+            ) from None
+        finally:
+            if reserved:
+                self._outstanding[name] -= 1
 
     def _get_paperclip_adapter(self) -> PaperclipAdapter:
         # No await between the check and the assignment, so concurrent requests
@@ -147,6 +191,7 @@ class LiteratureService:
         if self.paperclip_adapter is not None:
             await self.paperclip_adapter.aclose()
             self.paperclip_adapter = None
+        await close_pubtator3_client()
 
     @staticmethod
     def _model_kwargs(
@@ -367,7 +412,8 @@ class LiteratureService:
                     component="LiteratureService.run",
                     tool=name,
                     max_concurrent=limit,
-                    waited_seconds=self.settings.literature_admission_wait_seconds,
+                    waited_seconds=raw.waited_seconds,
+                    reason=raw.reason,
                 )
                 normalized[name] = LiteratureToolResult(
                     status="skipped",

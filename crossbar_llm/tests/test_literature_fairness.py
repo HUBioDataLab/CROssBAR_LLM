@@ -330,3 +330,24 @@ async def test_a_cancelled_waiter_releases_nothing_it_never_held():
     release.set()
     await h
     assert limiter_.active_users() == 0
+
+
+@pytest.mark.asyncio
+async def test_a_user_cannot_fill_the_waiting_room():
+    limiter_ = PerUserLimiter()
+    release = asyncio.Event()
+
+    async def hold():
+        async with limiter_.hold("paperclip", "a", limit=1, timeout=2.0):
+            await release.wait()
+
+    active = asyncio.create_task(hold())
+    await asyncio.sleep(0)
+    queued = asyncio.create_task(hold())
+    await asyncio.sleep(0)
+    with pytest.raises(UserShareExhausted):
+        async with limiter_.hold("paperclip", "a", limit=1, timeout=2.0):
+            pass
+    release.set()
+    await asyncio.gather(active, queued)
+    assert limiter_.active_users() == 0

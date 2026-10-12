@@ -33,10 +33,11 @@ short commands in flight, 8 long ones, 120 req/s, and 100 `map`/`verify` a
 day. Tested live against this REST endpoint (2026-09-22), metadata reads were
 not limited even at 30 at once, but searches share an undocumented per-user
 queue: 10 concurrent searches succeeded, 15 drew 429 "Per-user search queue is
-full (6/6)" with Retry-After: 15. The REST pool defaults to 10, which keeps
-concurrent searches within that; excess commands queue for a connection rather
-than being sent. Pool exhaustion deliberately does NOT fall back to MCP, which
-Paperclip counts against the same account. A 429 on a short command is retried
+full (6/6)" with Retry-After: 15. Shared REST/MCP command permits default to
+10 short and 8 long commands; the REST pool also defaults to 10 connections.
+Excess commands wait locally rather than being sent. Pool exhaustion deliberately
+does NOT fall back to MCP, which Paperclip counts against the same account.
+A 429 on a short command is retried
 after its Retry-After, a bounded number of times (`_429_wait`); a 429 on
 `map`/`verify`, which share the daily cap, is final.
 
@@ -79,6 +80,7 @@ DISABLE_REST_ENV = "PAPERCLIP_DISABLE_REST"
 # Live (2026-09-22) the binding limit was the per-user search queue instead;
 # 10 concurrent searches passed, 15 did not. See the module docstring.
 ACCOUNT_MAX_SHORT_IN_FLIGHT = 10
+ACCOUNT_MAX_LONG_IN_FLIGHT = 8
 API_KEY_ENV = "PAPERCLIP_API_KEY"
 DEFAULT_TIMEOUT_S = 60.0            # search/cat/head/ls — typically fast
 # `map`/`ask-image` read full text server-side and can take minutes. 480s, not
@@ -1015,6 +1017,38 @@ class PaperclipAdapter:
         self._clients: "weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, httpx.AsyncClient]" = (
             weakref.WeakKeyDictionary()
         )
+        # Both transports spend the same account quota. Share these permits
+        # between REST attempts and MCP calls; the HTTP pool alone cannot
+        # protect the MCP fallback. The API uses one long-lived adapter.
+        self._command_slots: "weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, dict[str, asyncio.Semaphore]]" = (
+            weakref.WeakKeyDictionary()
+        )
+
+    def _command_slot(self, command: str) -> asyncio.Semaphore:
+        loop = asyncio.get_running_loop()
+        slots = self._command_slots.get(loop)
+        if slots is None:
+            slots = self._command_slots[loop] = {}
+        verb = command.split(maxsplit=1)[0] if command else ""
+        long_commands = _SLOW_COMMANDS | _DAILY_CAPPED_COMMANDS | {"search-workflow"}
+        kind = "long" if verb in long_commands else "short"
+        if kind not in slots:
+            limit = min(
+                self._max_connections,
+                ACCOUNT_MAX_LONG_IN_FLIGHT if kind == "long" else ACCOUNT_MAX_SHORT_IN_FLIGHT,
+            )
+            slots[kind] = asyncio.Semaphore(limit)
+        return slots[kind]
+
+    async def _acquire_command_slot(self, command: str) -> asyncio.Semaphore:
+        slot = self._command_slot(command)
+        try:
+            await asyncio.wait_for(slot.acquire(), timeout=self._pool_timeout_s)
+        except asyncio.TimeoutError:
+            raise PaperclipError(
+                f"no free Paperclip command slot after {self._pool_timeout_s:g}s"
+            ) from None
+        return slot
 
     def _rest_disabled(self) -> bool:
         """Whether the REST transport is turned off for this adapter.
@@ -1058,6 +1092,7 @@ class PaperclipAdapter:
             if not client.is_closed:
                 await client.aclose()
         self._clients.clear()
+        self._command_slots.clear()
 
     async def _run(self, command: str) -> str:
         """Invoke the `paperclip` tool with one command; return its text output.
@@ -1076,16 +1111,20 @@ class PaperclipAdapter:
         costs nothing on the common path, and avoids under-timing out a
         `map` call that happens to fall back to MCP.
         """
-        tool = await _paperclip_tool(
-            timeout_s=self._slow_timeout_s, api_key=self._api_key
-        )
+        slot = await self._acquire_command_slot(command)
         try:
-            out = await tool.ainvoke({"command": command})
-        except PaperclipError:
-            raise
-        except Exception as e:  # ToolException, transport errors, timeouts
-            raise PaperclipError(f"{type(e).__name__}: {e}") from e
-        return _strip_ansi(out if isinstance(out, str) else str(out))
+            tool = await _paperclip_tool(
+                timeout_s=self._slow_timeout_s, api_key=self._api_key
+            )
+            try:
+                out = await tool.ainvoke({"command": command})
+            except PaperclipError:
+                raise
+            except Exception as e:  # ToolException, transport errors, timeouts
+                raise PaperclipError(f"{type(e).__name__}: {e}") from e
+            return _strip_ansi(out if isinstance(out, str) else str(out))
+        finally:
+            slot.release()
 
     async def _run_rest(self, verb: str, raw: str) -> dict:
         """POST to the REST execute endpoint — see
@@ -1175,6 +1214,7 @@ class PaperclipAdapter:
 
     async def _post_rest(self, verb: str, raw: str, key: str, timeout) -> httpx.Response:
         """One POST to the execute endpoint, with transport errors classified."""
+        slot = await self._acquire_command_slot(verb)
         try:
             return await self._rest_client().post(
                 REST_URL,
@@ -1196,6 +1236,8 @@ class PaperclipAdapter:
             ) from e
         except Exception as e:  # network errors, timeouts
             raise PaperclipRestUnavailable(f"{type(e).__name__}: {e}") from e
+        finally:
+            slot.release()
 
     async def _execute(self, verb: str, raw: str) -> tuple[str, str | None]:
         """Try REST first, fall back to MCP on any REST failure. Returns

@@ -73,7 +73,7 @@ class UserShareExhausted(Exception):
         requests = "request" if limit == 1 else "requests"
         super().__init__(
             f"{tool} was skipped: you already have {limit} {tool} {requests} in "
-            "progress. Try again when one finishes."
+            "progress. Additional requests may be waiting. Try again when one finishes."
         )
         self.tool = tool
         self.limit = limit
@@ -107,6 +107,10 @@ class PerUserLimiter:
         share = self._shares.get(key)
         if share is None:
             share = self._shares[key] = _Share(asyncio.Semaphore(limit))
+        # Each user may have at most one waiting request per active slot.
+        # Otherwise one browser can fill the global waiting room by itself.
+        if share.holders >= 2 * limit:
+            raise UserShareExhausted(tool, limit)
         share.holders += 1
         acquired = False
         try:

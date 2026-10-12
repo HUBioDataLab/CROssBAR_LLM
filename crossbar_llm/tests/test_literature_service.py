@@ -8,7 +8,7 @@ from pydantic import SecretStr
 from crossbar_llm.agent_tools.callback_handler import UsageMetricsCallback
 from crossbar_llm.api.schemas.requests import DbSearchRequest, LiteratureToolsConfig
 from crossbar_llm.api.core.settings import Settings
-from crossbar_llm.api.services.literature_service import LiteratureService
+from crossbar_llm.api.services.literature_service import LiteratureService, _AdmissionRejected
 from crossbar_llm.paperclip_tools.adapter import PaperclipConfigError
 
 
@@ -483,3 +483,64 @@ async def test_saturation_reports_skipped_not_timed_out(monkeypatch):
     assert "capacity" in result["pubtator3"].warnings[0]
     release.set()
     await hog
+
+
+@pytest.mark.asyncio
+async def test_admission_queue_is_bounded_and_recovers_after_cancellation():
+    settings = _settings()
+    settings.pubtator3_max_concurrent_runs = 1
+    settings.pubtator3_max_pending_runs = 1
+    settings.literature_admission_wait_seconds = 5.0
+    service = LiteratureService(settings)
+    release = asyncio.Event()
+    started = asyncio.Event()
+
+    async def runner():
+        started.set()
+        await release.wait()
+        return {"final_answer": "answer"}
+
+    active = asyncio.create_task(service._run_admitted("pubtator3", runner))
+    await started.wait()
+    queued = asyncio.create_task(service._run_admitted("pubtator3", runner))
+    await asyncio.sleep(0)
+    assert service._outstanding["pubtator3"] == 2
+
+    with pytest.raises(_AdmissionRejected):
+        await service._run_admitted("pubtator3", runner)
+
+    queued.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await queued
+    assert service._outstanding["pubtator3"] == 1
+
+    replacement = asyncio.create_task(service._run_admitted("pubtator3", runner))
+    await asyncio.sleep(0)
+    release.set()
+    await asyncio.gather(active, replacement)
+    assert service._outstanding["pubtator3"] == 0
+
+
+@pytest.mark.asyncio
+async def test_zero_pending_still_allows_an_idle_run():
+    settings = _settings()
+    settings.pubtator3_max_concurrent_runs = 1
+    settings.pubtator3_max_pending_runs = 0
+    service = LiteratureService(settings)
+    release = asyncio.Event()
+    started = asyncio.Event()
+
+    async def runner():
+        started.set()
+        await release.wait()
+        return {"final_answer": "answer"}
+
+    active = asyncio.create_task(service._run_admitted("pubtator3", runner))
+    # Bounded: if the idle run were wrongly turned away, `started` would never
+    # be set, and an unbounded wait would hang the suite instead of failing.
+    await asyncio.wait_for(started.wait(), timeout=1.0)
+    with pytest.raises(_AdmissionRejected):
+        await service._run_admitted("pubtator3", runner)
+    release.set()
+    await active
+    assert service._outstanding["pubtator3"] == 0

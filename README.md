@@ -76,6 +76,9 @@ are enabled, they run concurrently after the biological-relevance check;
 Paperclip requires `PAPERCLIP_API_KEY`. Set `PAPERCLIP_DISABLE_REST=1` to force
 its MCP-only transport.
 
+For literature tool capacity limits, queue behavior, and multi-worker deployment,
+see [Literature tool capacity](docs/literature-scaling.md).
+
 ## Run the Backend API
 
 Start the FastAPI backend from the repository root:
