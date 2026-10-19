@@ -2,7 +2,7 @@
 
 The knowledge-graph agent is a fake LangGraph that streams the same
 (mode, payload) chunks the real one does; the literature agents, relevance
-gate, router and synthesizer are fakes recording what they were asked. What
+gate, question rewriter and synthesizer are fakes recording what they were asked. What
 runs for real is the orchestration itself: selection, concurrency, isolation,
 review deferral, resume and the response it builds.
 """
@@ -28,7 +28,6 @@ from crossbar_llm.api.services import orchestration_results as results
 from crossbar_llm.api.services.agent_service import AgentService
 from crossbar_llm.api.services.session_store import SessionStore
 from crossbar_llm.orchestrator.registry import AgentId
-from crossbar_llm.orchestrator.router import RoutingPlan
 from crossbar_llm.orchestrator.synthesizer import Contradiction, Synthesis
 
 BROWSER = "browser"
@@ -103,14 +102,13 @@ class _Literature:
 class _Harness:
     """An AgentService with fake agents, plus a record of what each was asked."""
 
-    def __init__(self, monkeypatch, *, graph=None, literature=None, plan=None,
-                 relevant=True, synthesis=None, unavailable=None):
+    def __init__(self, monkeypatch, *, graph=None, literature=None,
+                 relevant=True, synthesis=None, unavailable=None, rewrite=None):
         self.store = SessionStore(ttl_minutes=45, max_sessions_per_user=5)
         self.session_id = self.store.create_session(browser_id=BROWSER).session_id
         self.graph = graph or _FakeGraph()
         self.literature = literature or _Literature()
-        self.plan = plan
-        self.route_calls = []
+        self.rewrite_calls = []
         self.synthesis_calls = []
         self.kg_builds = 0
         self.events = []
@@ -130,24 +128,21 @@ class _Harness:
 
         monkeypatch.setattr(service, "_build_kg_graph", build_kg_graph)
 
+        async def inline_to_thread(function, *args, **kwargs):
+            return function(*args, **kwargs)
+
+        monkeypatch.setattr(agent_service_module.asyncio, "to_thread", inline_to_thread)
+
         async def relevance(llm_factory, question):
             if relevant:
                 return {"biological_relevance": True, "final_answer": None}
             return {"biological_relevance": False, "final_answer": "outside the domain"}
 
-        async def route(*, chat_model, question, enabled, history, required):
-            self.route_calls.append(
-                {"enabled": list(enabled), "history": list(history), "required": list(required)}
-            )
-            if self.plan is not None:
-                return self.plan
-            return RoutingPlan(
-                selected=tuple(enabled),
-                reasons={},
-                rationale="all of them",
-                standalone_question=f"standalone: {question}",
-                strategy="llm",
-            )
+        async def rewrite_question(*, chat_model, question, history):
+            self.rewrite_calls.append({"question": question, "history": list(history)})
+            if isinstance(rewrite, Exception):
+                return question, ("rewrite failed",)
+            return rewrite or f"standalone: {question}", ()
 
         async def synthesize(*, chat_model, question, reports):
             self.synthesis_calls.append((question, [report.agent for report in reports]))
@@ -165,7 +160,7 @@ class _Harness:
             )
 
         monkeypatch.setattr(agent_service_module, "avalidate_biological_relevance", relevance)
-        monkeypatch.setattr(agent_service_module, "route_question", route)
+        monkeypatch.setattr(agent_service_module, "rewrite_question", rewrite_question)
         monkeypatch.setattr(agent_service_module, "synthesize_reports", synthesize)
         monkeypatch.setattr(agent_service_module, "build_chat_model", lambda **kwargs: object())
         monkeypatch.setattr(
@@ -205,17 +200,6 @@ class _Harness:
 
     def event_names(self):
         return [name for name, _ in self.events]
-
-
-def _plan(*selected, standalone="standalone question"):
-    return RoutingPlan(
-        selected=tuple(selected),
-        reasons={agent: "useful" for agent in selected},
-        rationale="planned",
-        standalone_question=standalone,
-        strategy="llm",
-    )
-
 
 # ----------------------------------------------------------- the KG graph
 
@@ -312,6 +296,30 @@ def test_relevance_is_revalidated_for_each_question_in_a_session():
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "agents, expected",
+    [
+        (AgentsConfig(knowledge_graph=True, paperclip=False, pubtator3=False), [KG]),
+        (AgentsConfig(knowledge_graph=False, paperclip=True, pubtator3=False), [PAPERCLIP]),
+        (AgentsConfig(knowledge_graph=False, paperclip=False, pubtator3=True), [PUBTATOR3]),
+        (AgentsConfig(knowledge_graph=True, paperclip=True, pubtator3=False), [KG, PAPERCLIP]),
+        (AgentsConfig(knowledge_graph=True, paperclip=False, pubtator3=True), [KG, PUBTATOR3]),
+        (AgentsConfig(knowledge_graph=False, paperclip=True, pubtator3=True), [PAPERCLIP, PUBTATOR3]),
+        (AgentsConfig(), [KG, PAPERCLIP, PUBTATOR3]),
+    ],
+)
+async def test_user_selection_is_deterministic(monkeypatch, agents, expected):
+    harness = _Harness(monkeypatch)
+
+    response = await harness.ask(agents=agents)
+
+    assert response.orchestration.routing.selected == expected
+    assert response.orchestration.routing.strategy == "user_selected"
+    assert set(response.orchestration.agents) == set(expected)
+    assert harness.rewrite_calls == []
+
+
+@pytest.mark.asyncio
 async def test_out_of_domain_question_runs_no_agent(monkeypatch):
     harness = _Harness(monkeypatch, relevant=False)
 
@@ -327,14 +335,33 @@ async def test_out_of_domain_question_runs_no_agent(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_disabled_agents_are_never_offered_to_the_router(monkeypatch):
+async def test_out_of_domain_follow_up_is_rejected_before_rewriting(monkeypatch):
+    harness = _Harness(monkeypatch, relevant=False)
+    harness.store.record_turn(
+        harness.session_id,
+        BROWSER,
+        SimpleNamespace(question="What targets EGFR?", answer="Gefitinib."),
+        max_turns=3,
+    )
+
+    await harness.ask(
+        question="And its side effects?",
+        agents=AgentsConfig(knowledge_graph=False, paperclip=True, pubtator3=False),
+    )
+
+    assert harness.rewrite_calls == []
+
+
+@pytest.mark.asyncio
+async def test_every_enabled_available_agent_is_selected(monkeypatch):
     harness = _Harness(monkeypatch)
 
     response = await harness.ask(
         agents=AgentsConfig(knowledge_graph=True, paperclip=False, pubtator3=True)
     )
 
-    assert harness.route_calls[0]["enabled"] == [KG, PUBTATOR3]
+    assert response.orchestration.routing.selected == [KG, PUBTATOR3]
+    assert response.orchestration.routing.strategy == "user_selected"
     assert [name for name, _ in harness.literature.calls] == ["pubtator3"]
     assert response.orchestration.routing.skipped[PAPERCLIP] == results.DISABLED_REASON
     assert PAPERCLIP not in response.orchestration.agents
@@ -346,21 +373,8 @@ async def test_unavailable_agent_is_skipped_with_its_reason(monkeypatch):
 
     response = await harness.ask()
 
-    assert PAPERCLIP not in harness.route_calls[0]["enabled"]
+    assert response.orchestration.routing.selected == [KG, PUBTATOR3]
     assert response.orchestration.routing.skipped[PAPERCLIP] == "no API key"
-
-
-@pytest.mark.asyncio
-async def test_agents_the_router_left_out_are_reported_as_not_routed(monkeypatch):
-    harness = _Harness(monkeypatch, plan=_plan(PUBTATOR3))
-
-    response = await harness.ask()
-
-    assert harness.kg_builds == 0
-    assert [name for name, _ in harness.literature.calls] == ["pubtator3"]
-    routing = response.orchestration.routing
-    assert routing.skipped[KG] == results.NOT_ROUTED_REASON
-    assert routing.skipped[PAPERCLIP] == results.NOT_ROUTED_REASON
 
 
 @pytest.mark.asyncio
@@ -380,11 +394,11 @@ async def test_vector_search_requires_the_knowledge_graph_agent(monkeypatch):
         await harness.service.run_vector(harness.session_id, BROWSER, payload)
 
     assert raised.value.status_code == 400
-    assert harness.route_calls == []
+    assert harness.kg_builds == 0
 
 
 @pytest.mark.asyncio
-async def test_vector_search_forces_the_knowledge_graph_into_the_plan(monkeypatch):
+async def test_vector_search_rejects_literature_agents(monkeypatch):
     harness = _Harness(monkeypatch)
     payload = VectorSearchRequest(
         provider="openai",
@@ -395,9 +409,30 @@ async def test_vector_search_forces_the_knowledge_graph_into_the_plan(monkeypatc
     )
     monkeypatch.setattr(VectorSearchRequest, "vector_index", property(lambda self: "Esm2Embeddings"))
 
-    await harness.service.run_vector(harness.session_id, BROWSER, payload)
+    with pytest.raises(HTTPException) as raised:
+        await harness.service.run_vector(harness.session_id, BROWSER, payload)
 
-    assert harness.route_calls[0]["required"] == [KG]
+    assert raised.value.status_code == 400
+    assert harness.kg_builds == 0
+
+
+@pytest.mark.asyncio
+async def test_vector_search_runs_with_only_the_knowledge_graph(monkeypatch):
+    harness = _Harness(monkeypatch)
+    payload = VectorSearchRequest(
+        provider="openai",
+        model="gpt-4o-mini",
+        question="Find proteins similar to EGFR",
+        vector_category="Protein",
+        embedding_type="Esm2",
+        agents=AgentsConfig(knowledge_graph=True, paperclip=False, pubtator3=False),
+    )
+    monkeypatch.setattr(VectorSearchRequest, "vector_index", property(lambda self: "Esm2Embeddings"))
+
+    response = await harness.service.run_vector(harness.session_id, BROWSER, payload)
+
+    assert response.orchestration.routing.selected == [KG]
+    assert harness.literature.calls == []
 
 
 @pytest.mark.asyncio
@@ -441,14 +476,46 @@ async def test_routed_agents_run_concurrently(monkeypatch):
 async def test_literature_agents_get_the_standalone_question(monkeypatch):
     harness = _Harness(monkeypatch)
 
+    await harness.ask(question="What targets EGFR?")
+    harness.literature.calls.clear()
     await harness.ask(question="And what about its side effects?")
 
     assert {question for _, question in harness.literature.calls} == {
         "standalone: And what about its side effects?"
     }
     # The graph keeps its own conversation history, so it gets the original.
-    assert harness.graph.inputs[0]["question"] == "And what about its side effects?"
-    assert harness.graph.inputs[0]["biological_relevance"] is True
+    assert harness.graph.inputs[-1]["question"] == "And what about its side effects?"
+    assert harness.graph.inputs[-1]["biological_relevance"] is True
+
+
+@pytest.mark.asyncio
+async def test_kg_only_follow_up_does_not_call_the_rewriter(monkeypatch):
+    harness = _Harness(monkeypatch)
+    kg_only = AgentsConfig(
+        knowledge_graph=True, paperclip=False, pubtator3=False
+    )
+
+    await harness.ask(question="What targets EGFR?", agents=kg_only)
+    await harness.ask(question="And its side effects?", agents=kg_only)
+
+    assert harness.rewrite_calls == []
+
+
+@pytest.mark.asyncio
+async def test_rewrite_failure_keeps_selection_and_adds_warning(monkeypatch):
+    harness = _Harness(monkeypatch, rewrite=RuntimeError("model down"))
+    literature_only = AgentsConfig(
+        knowledge_graph=False, paperclip=True, pubtator3=False
+    )
+
+    await harness.ask(question="What targets EGFR?", agents=literature_only)
+    response = await harness.ask(
+        question="And its side effects?", agents=literature_only
+    )
+
+    assert response.orchestration.routing.selected == [PAPERCLIP]
+    assert harness.literature.calls[-1] == ("paperclip", "And its side effects?")
+    assert response.orchestration.warnings == ["rewrite failed"]
 
 
 @pytest.mark.asyncio
@@ -463,7 +530,7 @@ async def test_multiple_answers_are_synthesized_with_contradictions(monkeypatch)
     assert orchestration.answer_sources == [KG, PAPERCLIP, PUBTATOR3]
     assert orchestration.contradictions[0].agents == [KG, PAPERCLIP]
     assert harness.synthesis_calls == [
-        ("standalone: What is the role of EGFR in cancer?", [KG, PAPERCLIP, PUBTATOR3])
+        ("What is the role of EGFR in cancer?", [KG, PAPERCLIP, PUBTATOR3])
     ]
     # The graph's own outputs still drive the query panel and follow-ups.
     assert response.generated_cypher == "MATCH (g:Gene) RETURN g"
@@ -472,9 +539,11 @@ async def test_multiple_answers_are_synthesized_with_contradictions(monkeypatch)
 
 @pytest.mark.asyncio
 async def test_a_single_answer_passes_through_without_synthesis(monkeypatch):
-    harness = _Harness(monkeypatch, plan=_plan(KG))
+    harness = _Harness(monkeypatch)
 
-    response = await harness.ask()
+    response = await harness.ask(
+        agents=AgentsConfig(knowledge_graph=True, paperclip=False, pubtator3=False)
+    )
 
     assert response.final_answer == "graph answer"
     assert response.orchestration.synthesized is False
@@ -497,10 +566,11 @@ async def test_knowledge_graph_failure_is_isolated(monkeypatch):
     harness = _Harness(
         monkeypatch,
         graph=RuntimeError("neo4j exploded"),
-        plan=_plan(KG, PAPERCLIP),
     )
 
-    response = await harness.ask()
+    response = await harness.ask(
+        agents=AgentsConfig(knowledge_graph=True, paperclip=True, pubtator3=False)
+    )
 
     assert response.status == "completed"
     assert response.final_answer == "paperclip answer"
@@ -514,9 +584,11 @@ async def test_knowledge_graph_failure_is_isolated(monkeypatch):
 @pytest.mark.asyncio
 async def test_a_lone_knowledge_graph_failure_keeps_its_explanation(monkeypatch):
     failed = {**KG_DONE, "is_ok": False, "final_answer": "I couldn't build a query."}
-    harness = _Harness(monkeypatch, graph=_FakeGraph(failed), plan=_plan(KG))
+    harness = _Harness(monkeypatch, graph=_FakeGraph(failed))
 
-    response = await harness.ask()
+    response = await harness.ask(
+        agents=AgentsConfig(knowledge_graph=True, paperclip=False, pubtator3=False)
+    )
 
     assert response.status == "failed"
     assert response.final_answer == "I couldn't build a query."
@@ -527,10 +599,11 @@ async def test_no_answer_from_any_agent_says_so(monkeypatch):
     harness = _Harness(
         monkeypatch,
         literature=_Literature(failing={"paperclip", "pubtator3"}),
-        plan=_plan(PAPERCLIP, PUBTATOR3),
     )
 
-    response = await harness.ask()
+    response = await harness.ask(
+        agents=AgentsConfig(knowledge_graph=False, paperclip=True, pubtator3=True)
+    )
 
     assert response.status == "failed"
     assert response.final_answer == results.NO_ANSWER
@@ -575,9 +648,11 @@ async def test_cancelling_the_request_stops_every_agent(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_progress_events_tell_the_story_in_order(monkeypatch):
-    harness = _Harness(monkeypatch, plan=_plan(KG, PAPERCLIP))
+    harness = _Harness(monkeypatch)
 
-    await harness.ask()
+    await harness.ask(
+        agents=AgentsConfig(knowledge_graph=True, paperclip=True, pubtator3=False)
+    )
 
     names = harness.event_names()
     assert names[:2] == ["orchestration.started", "routing.completed"]
@@ -592,13 +667,13 @@ async def test_progress_events_tell_the_story_in_order(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_answered_turns_become_router_history(monkeypatch):
+async def test_answered_turns_become_rewriter_history(monkeypatch):
     harness = _Harness(monkeypatch)
 
     await harness.ask(question="What is the role of EGFR in cancer?")
     await harness.ask(question="And its side effects?")
 
-    history = harness.route_calls[1]["history"]
+    history = harness.rewrite_calls[0]["history"]
     assert [turn.question for turn in history] == ["What is the role of EGFR in cancer?"]
     assert history[0].answer == "merged answer"
 
@@ -628,8 +703,8 @@ async def test_generate_mode_defers_literature_until_approval(monkeypatch):
     assert resumed.status == "completed"
     assert resumed.final_answer == "merged answer"
     assert sorted(harness.literature.calls) == [
-        ("paperclip", "standalone: What is the role of EGFR in cancer?"),
-        ("pubtator3", "standalone: What is the role of EGFR in cancer?"),
+        ("paperclip", "What is the role of EGFR in cancer?"),
+        ("pubtator3", "What is the role of EGFR in cancer?"),
     ]
     assert harness.session.pending_resume is False
     assert harness.session.pending_plan is None
@@ -637,9 +712,12 @@ async def test_generate_mode_defers_literature_until_approval(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_generate_mode_without_the_graph_answers_immediately(monkeypatch):
-    harness = _Harness(monkeypatch, plan=_plan(PAPERCLIP))
+    harness = _Harness(monkeypatch)
 
-    response = await harness.ask(execution_mode="generate")
+    response = await harness.ask(
+        execution_mode="generate",
+        agents=AgentsConfig(knowledge_graph=False, paperclip=True, pubtator3=False),
+    )
 
     assert response.status == "completed"
     assert response.final_answer == "paperclip answer"
@@ -649,12 +727,17 @@ async def test_generate_mode_without_the_graph_answers_immediately(monkeypatch):
 @pytest.mark.asyncio
 async def test_generate_mode_graph_failure_still_runs_the_deferred_agents(monkeypatch):
     failed = {**KG_DONE, "is_ok": False, "final_answer": "no valid query"}
-    harness = _Harness(monkeypatch, graph=_FakeGraph(failed), plan=_plan(KG, PAPERCLIP))
+    harness = _Harness(monkeypatch, graph=_FakeGraph(failed))
 
-    response = await harness.ask(execution_mode="generate")
+    response = await harness.ask(
+        execution_mode="generate",
+        agents=AgentsConfig(knowledge_graph=True, paperclip=True, pubtator3=False),
+    )
 
     assert response.status == "completed"
-    assert harness.literature.calls == [("paperclip", "standalone question")]
+    assert harness.literature.calls == [
+        ("paperclip", "What is the role of EGFR in cancer?")
+    ]
 
 
 @pytest.mark.asyncio
@@ -721,7 +804,7 @@ def _callback(strict, records):
 def test_usage_is_broken_down_by_agent_and_orchestrator():
     run = SimpleNamespace(
         core_callback=_callback(True, {"biological_relevance_validation": 5, "generate_cypher": 100}),
-        aux_callback=_callback(False, {"orchestrator.router": 7, "paperclip.router": 11}),
+        aux_callback=_callback(False, {"orchestrator.rewriter": 7, "paperclip.router": 11}),
     )
 
     total = results.total_usage(run)["aggregated_usage"]["totals"]["total_tokens"]
@@ -733,7 +816,7 @@ def test_usage_is_broken_down_by_agent_and_orchestrator():
     assert set(kg["per_node_usage"]) == {"generate_cypher"}
     assert set(orchestrator["per_node_usage"]) == {
         "biological_relevance_validation",
-        "orchestrator.router",
+        "orchestrator.rewriter",
     }
     assert orchestrator["aggregated_usage"]["totals"]["total_tokens"] == 12
 

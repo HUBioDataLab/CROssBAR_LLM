@@ -1,14 +1,12 @@
-"""The orchestrator package on its own: routing, synthesis, and the helpers
+"""The orchestrator package on its own: rewriting, synthesis, and helpers
 the service builds on. LLMs are LangChain fake chat models, so the real prompt
 templates are formatted (a stray brace fails here) and the JSON fallback path
 runs for real."""
 import asyncio
-import json
 import os
 
 import pytest
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
-from langchain_core.runnables import RunnableLambda
 from pydantic import SecretStr
 
 from crossbar_llm.api.core.settings import Settings
@@ -19,8 +17,13 @@ from crossbar_llm.api.services.kg_runner import stream_kg_graph
 from crossbar_llm.api.services.session_store import SessionStore
 from crossbar_llm.orchestrator.llm import extract_json_object
 from crossbar_llm.orchestrator.registry import AgentId, resolve_agent
-from crossbar_llm.orchestrator.router import ConversationTurn, route_question
-from crossbar_llm.orchestrator.schemas import RoutingOutput, SynthesisOutput
+from crossbar_llm.orchestrator import router as router_module
+from crossbar_llm.orchestrator import synthesizer as synthesizer_module
+from crossbar_llm.orchestrator.router import ConversationTurn, _prompt, rewrite_question
+from crossbar_llm.orchestrator.schemas import (
+    QuestionRewriteOutput,
+    SynthesisOutput,
+)
 from crossbar_llm.orchestrator.synthesizer import (
     MAX_RECORD_ROWS,
     AgentReport,
@@ -30,36 +33,13 @@ from crossbar_llm.orchestrator.synthesizer import (
 )
 
 KG, PAPERCLIP, PUBTATOR3 = AgentId.KNOWLEDGE_GRAPH, AgentId.PAPERCLIP, AgentId.PUBTATOR3
-ALL = [KG, PAPERCLIP, PUBTATOR3]
 
 
 class _NeverCalled(FakeListChatModel):
     responses: list[str] = []
 
     def with_structured_output(self, schema, **kwargs):
-        raise AssertionError("the router called the LLM when it had nothing to decide")
-
-
-class _Structured(FakeListChatModel):
-    """Answers through provider structured output, recording the prompt."""
-
-    responses: list[str] = []
-    output: object = None
-    prompts: list = []
-
-    def with_structured_output(self, schema, **kwargs):
-        def answer(prompt_value):
-            self.prompts.append(prompt_value.to_string())
-            if isinstance(self.output, Exception):
-                raise self.output
-            return self.output
-
-        return RunnableLambda(answer)
-
-
-def _json_model(payload):
-    """No structured output, so the call takes the plain-JSON fallback."""
-    return FakeListChatModel(responses=[f"Sure! ```json\n{json.dumps(payload)}\n```"])
+        raise AssertionError("the rewriter called the LLM without conversation history")
 
 
 # ----------------------------------------------------------------- registry
@@ -74,140 +54,61 @@ def test_resolve_agent_accepts_ids_tags_and_names(reference, expected):
     assert resolve_agent(reference) is expected
 
 
-# ------------------------------------------------------------------- router
+# ----------------------------------------------------------------- rewriter
 
 
 @pytest.mark.asyncio
-async def test_single_enabled_agent_needs_no_llm_call():
-    plan = await route_question(
-        chat_model=_NeverCalled(), question="What is EGFR?", enabled=[PUBTATOR3]
+async def test_question_without_history_needs_no_rewrite_call():
+    question, warnings = await rewrite_question(
+        chat_model=_NeverCalled(), question="What is EGFR?", history=[]
     )
 
-    assert plan.selected == (PUBTATOR3,)
-    assert plan.strategy == "single_agent"
-    assert plan.standalone_question == "What is EGFR?"
+    assert question == "What is EGFR?"
+    assert warnings == ()
 
 
 @pytest.mark.asyncio
-async def test_lone_knowledge_graph_skips_the_rewrite_even_with_history():
-    # The graph agent keeps its own history, so there is nothing to rewrite for.
-    plan = await route_question(
+async def test_follow_up_gets_a_standalone_question(monkeypatch):
+    async def invoke(**kwargs):
+        return QuestionRewriteOutput(
+            standalone_question="What are the side effects of gefitinib?"
+        )
+
+    monkeypatch.setattr(router_module, "ainvoke_structured", invoke)
+
+    question, warnings = await rewrite_question(
         chat_model=_NeverCalled(),
         question="And its side effects?",
-        enabled=[KG],
         history=[ConversationTurn("What targets EGFR?", "Gefitinib.")],
     )
 
-    assert plan.strategy == "single_agent"
+    assert question == "What are the side effects of gefitinib?"
+    assert warnings == ()
 
 
-@pytest.mark.asyncio
-async def test_lone_literature_agent_with_history_gets_a_standalone_question():
-    model = _json_model(
-        {
-            "standalone_question": "What are the side effects of gefitinib?",
-            "agents": [{"agent": "paperclip", "reason": "literature"}],
-            "rationale": "one agent",
-        }
-    )
-
-    plan = await route_question(
-        chat_model=model,
+def test_rewriter_includes_history_in_the_prompt():
+    prompt = _prompt().format_prompt(
+        history="User: What targets EGFR?\nAssistant: Gefitinib.",
         question="And its side effects?",
-        enabled=[PAPERCLIP],
-        history=[ConversationTurn("What targets EGFR?", "Gefitinib.")],
     )
 
-    assert plan.strategy == "llm"
-    assert plan.standalone_question == "What are the side effects of gefitinib?"
+    assert "User: What targets EGFR?\nAssistant: Gefitinib." in prompt.to_string()
 
 
 @pytest.mark.asyncio
-async def test_router_never_selects_an_agent_outside_the_enabled_set():
-    model = _Structured(
-        output=RoutingOutput(
-            standalone_question="What is EGFR?",
-            agents=[
-                {"agent": "paperclip", "reason": "disabled, must be dropped"},
-                {"agent": "PubTator3", "reason": "tag instead of id"},
-                {"agent": "wikipedia", "reason": "not an agent at all"},
-            ],
-            rationale="mixed",
-        ),
-        prompts=[],
-    )
+async def test_rewrite_failure_uses_original_question_with_warning(monkeypatch):
+    async def invoke(**kwargs):
+        raise ValueError("not JSON")
 
-    plan = await route_question(
-        chat_model=model, question="What is EGFR?", enabled=[KG, PUBTATOR3]
-    )
-
-    assert plan.selected == (PUBTATOR3,)
-    assert plan.reasons == {PUBTATOR3: "tag instead of id"}
-    # Only the enabled agents' profiles reach the prompt.
-    assert "pubtator3 (PubTator3)" in model.prompts[0]
-    assert "paperclip (Paperclip)" not in model.prompts[0]
-
-
-@pytest.mark.asyncio
-async def test_required_agents_are_always_selected_first():
-    model = _Structured(
-        output=RoutingOutput(
-            standalone_question="q",
-            agents=[{"agent": "paperclip", "reason": "context"}],
-            rationale="r",
-        ),
-        prompts=[],
-    )
-
-    plan = await route_question(
-        chat_model=model, question="q", enabled=ALL, required=[KG]
-    )
-
-    assert plan.selected == (KG, PAPERCLIP)
-    assert "embedding similarity search" in model.prompts[0]
-
-
-@pytest.mark.asyncio
-async def test_routing_with_no_usable_agent_falls_back_to_every_enabled_one():
-    model = _Structured(
-        output=RoutingOutput(standalone_question="q", agents=[], rationale="none"),
-        prompts=[],
-    )
-
-    plan = await route_question(chat_model=model, question="q", enabled=ALL)
-
-    assert plan.selected == tuple(ALL)
-    assert plan.strategy == "fallback"
-    assert plan.warnings
-
-
-@pytest.mark.asyncio
-async def test_routing_failure_falls_back_instead_of_failing_the_request():
-    model = FakeListChatModel(responses=["I would rather not answer in JSON."])
-
-    plan = await route_question(chat_model=model, question="q", enabled=[KG, PAPERCLIP])
-
-    assert plan.selected == (KG, PAPERCLIP)
-    assert plan.strategy == "fallback"
-
-
-@pytest.mark.asyncio
-async def test_router_includes_history_in_the_prompt():
-    model = _Structured(
-        output=RoutingOutput(
-            standalone_question="q", agents=[{"agent": "kg", "reason": "r"}], rationale="r"
-        ),
-        prompts=[],
-    )
-
-    await route_question(
-        chat_model=model,
+    monkeypatch.setattr(router_module, "ainvoke_structured", invoke)
+    question, warnings = await rewrite_question(
+        chat_model=_NeverCalled(),
         question="And its side effects?",
-        enabled=ALL,
         history=[ConversationTurn("What targets EGFR?", "Gefitinib.")],
     )
 
-    assert "User: What targets EGFR?\nAssistant: Gefitinib." in model.prompts[0]
+    assert question == "And its side effects?"
+    assert warnings
 
 
 # -------------------------------------------------------------- synthesizer
@@ -224,7 +125,15 @@ def test_report_carries_tag_answer_records_and_sources():
         agent=PUBTATOR3,
         status="completed",
         answer="Gefitinib inhibits EGFR [1].",
-        citations=[{"title": "Gefitinib trial", "pmid": "123", "url": "https://p/123"}],
+        citations=[
+            {
+                "title": "Gefitinib trial",
+                "pmid": "123",
+                "pmcid": "PMC456",
+                "doi": "10.1/example",
+                "url": "https://p/123",
+            }
+        ],
     )
 
     kg_text, literature_text = format_report(report), format_report(literature)
@@ -232,23 +141,41 @@ def test_report_carries_tag_answer_records_and_sources():
     assert kg_text.startswith("### [KG] Knowledge Graph (status: completed)")
     assert f"first {MAX_RECORD_ROWS} of {MAX_RECORD_ROWS + 10}" in kg_text
     assert f'"row": {MAX_RECORD_ROWS}' not in kg_text
-    assert "[1] Gefitinib trial (PMID 123) https://p/123" in literature_text
+    assert (
+        "[1] Gefitinib trial | PMID:123 | PMCID:PMC456 | DOI:10.1/example "
+        "https://p/123"
+    ) in literature_text
+
+
+def test_report_exposes_doi_when_no_pubmed_identifier_is_available():
+    report = AgentReport(
+        agent=PAPERCLIP,
+        status="completed",
+        answer="A preprint reports the finding [1].",
+        citations=[{"title": "Preprint", "doi": "10.1/preprint"}],
+    )
+
+    assert "[1] Preprint | DOI:10.1/preprint" in format_report(report)
 
 
 @pytest.mark.asyncio
-async def test_synthesis_maps_contradiction_sources_to_agent_ids():
-    model = _json_model(
-        {
-            "answer": "Merged [KG] [PubTator3].",
-            "contradictions": [
-                {
-                    "topic": "EGFR in glioma",
-                    "agents": ["KG", "PubTator3", "a blog"],
-                    "resolution": "The graph has no record; the literature reports one.",
-                }
-            ],
-        }
-    )
+async def test_synthesis_maps_contradiction_sources_to_agent_ids(monkeypatch):
+    async def invoke(**kwargs):
+        return SynthesisOutput.model_validate(
+            {
+                "answer": "Merged [KG] [PubTator3].",
+                "contradictions": [
+                    {
+                        "topic": "EGFR in glioma",
+                        "agents": ["KG", "PubTator3", "a blog"],
+                        "resolution": "The graph has no record; the literature reports one.",
+                    }
+                ],
+            }
+        )
+
+    monkeypatch.setattr(synthesizer_module, "ainvoke_structured", invoke)
+    model = _NeverCalled()
 
     synthesis = await synthesize_reports(
         chat_model=model,
@@ -264,8 +191,12 @@ async def test_synthesis_maps_contradiction_sources_to_agent_ids():
 
 
 @pytest.mark.asyncio
-async def test_empty_synthesis_is_an_error_not_a_blank_answer():
-    model = _Structured(output=SynthesisOutput(answer="  "), prompts=[])
+async def test_empty_synthesis_is_an_error_not_a_blank_answer(monkeypatch):
+    async def invoke(**kwargs):
+        return SynthesisOutput(answer="  ")
+
+    monkeypatch.setattr(synthesizer_module, "ainvoke_structured", invoke)
+    model = _NeverCalled()
 
     with pytest.raises(ValueError):
         await synthesize_reports(
