@@ -1,24 +1,14 @@
-"""Prompts for the orchestrator's routing and synthesis calls.
+"""Prompts for the orchestrator's rewriting and synthesis calls.
 
 These are f-string templates for `ChatPromptTemplate`: literal braces in the
-JSON examples are doubled. Agent profiles, history and reports are passed as
-variables, so braces inside them need no escaping.
+JSON examples are doubled. History and reports are passed as variables, so
+braces inside them need no escaping.
 """
 
-ROUTER_SYSTEM_TEMPLATE = """
-You are the orchestrator of CROssBAR, a multi-agent biomedical question-answering system.
-Decide which specialist agents should work on the user's question.
+REWRITER_SYSTEM_TEMPLATE = """
+You rewrite follow-up questions for CROssBAR, a biomedical question-answering system.
 
-Available agents (you may select ONLY these ids):
-{agent_profiles}
-
-Rules:
-- Select every agent whose evidence would materially improve the answer, and skip agents that cannot contribute.
-- When a question benefits from both curated database facts and published evidence, select both kinds of agents.
-- Prefer fewer agents only when one clearly answers the question on its own.
-- Use agent ids exactly as listed above. Select at least one agent.
-{mode_rules}
-- standalone_question: rewrite the question so it can be understood without the conversation below,
+Rewrite the question so it can be understood without the conversation below,
   resolving pronouns and references to earlier turns. Keep entity names and any <Type> annotations
   exactly as written. If the question already stands alone, repeat it verbatim.
 
@@ -26,17 +16,11 @@ Conversation so far (oldest first):
 {history}
 """.strip()
 
-ROUTER_HUMAN_TEMPLATE = "Question: {question}"
+REWRITER_HUMAN_TEMPLATE = "Question: {question}"
 
-ROUTER_JSON_INSTRUCTION = (
+REWRITER_JSON_INSTRUCTION = (
     "Respond with only a JSON object of this shape and nothing else: "
-    '{{"standalone_question": "...", "agents": [{{"agent": "<id>", "reason": "..."}}], '
-    '"rationale": "..."}}'
-)
-
-VECTOR_MODE_RULE = (
-    "- This is an embedding similarity search, which only the knowledge_graph agent can run. "
-    "It is always selected; add other agents only if they help explain its results."
+    '{{"standalone_question": "..."}}'
 )
 
 
@@ -54,8 +38,14 @@ How to synthesize:
    for which relationships are recorded, but a missing record is NOT evidence that a relationship does
    not exist. Literature agents report findings from publications: more current and mechanistic, but a
    single study can be preliminary. Prefer claims supported by more than one independent agent.
-4. Attribute claims to their source inline with the tags {tags}. Keep citation numbers and PMIDs as
-   the reports give them, e.g. [PubTator3: PMID 12345678] or [Paperclip 2].
+4. Cite literature claims inline using the source's stable publication identifier. For each source,
+   use the first available identifier in this order: `[PMID:12345678]`, then `[PMCID:PMC1234567]`,
+   then `[DOI:10.1000/example]`. When several sources support one claim, put each identifier in the
+   same brackets separated by semicolons, for example `[PMID:12345678; DOI:10.1000/example]`.
+   Paperclip's numbered references are local lookup keys: replace `[Paperclip 2]` or bare `[2]`
+   with that source's PMID, PMCID, or DOI from its Sources list. Never invent or alter an identifier.
+   If a literature source has none of these identifiers, retain its agent tag and reference number,
+   for example `[Paperclip source 2]`. Continue to use `[KG]` for knowledge-graph claims.
 5. Use only information from the reports; do not add facts from your own knowledge. If no report
    answers part of the question, say so.
 6. Lead with the direct answer, then supporting detail. Use concise, well-structured Markdown.

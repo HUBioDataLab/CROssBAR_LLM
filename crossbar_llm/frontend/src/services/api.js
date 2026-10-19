@@ -36,7 +36,7 @@ export const getModels = async () => {
   return response.data;
 };
 
-/** GET /agents — the agents the orchestrator can route to, and which can run here. */
+/** GET /agents - the selectable agents and whether each can run here. */
 export const getAgents = async () => {
   const response = await instance.get('/agents');
   return response.data;

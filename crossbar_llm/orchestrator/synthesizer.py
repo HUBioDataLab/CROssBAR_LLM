@@ -61,9 +61,15 @@ def _citation_line(index: int, citation: dict[str, Any]) -> str:
         or citation.get("doc_id")
         or "Publication"
     )
-    pmid = f" (PMID {citation['pmid']})" if citation.get("pmid") else ""
+    identifiers = [
+        f"PMID:{citation['pmid']}" if citation.get("pmid") else None,
+        f"PMCID:{citation['pmcid']}" if citation.get("pmcid") else None,
+        f"DOI:{citation['doi']}" if citation.get("doi") else None,
+    ]
+    identifier_text = " | ".join(identifier for identifier in identifiers if identifier)
+    identifiers_suffix = f" | {identifier_text}" if identifier_text else ""
     url = f" {citation['url']}" if citation.get("url") else ""
-    return f"[{index}] {label}{pmid}{url}"
+    return f"[{index}] {label}{identifiers_suffix}{url}"
 
 
 def _truncate(text: str, limit: int) -> str:

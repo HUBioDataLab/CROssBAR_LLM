@@ -8,16 +8,16 @@ import AgentAvatar from './AgentAvatar';
  * Why a switch cannot be flipped right now, or null when it can.
  * Order matters: an unavailable agent says so even while a run is in progress.
  */
-const lockReason = ({ info, isOn, isLocked, isLastOn }) => {
+const lockReason = ({ info, isOn, isLockedOn, isLockedOff, isLastOn }) => {
   if (!info.available) return info.unavailable_reason || 'Not available on this server.';
-  if (isLocked) return 'Vector search runs on the Knowledge Graph agent, so it stays on.';
+  if (isLockedOn) return 'Vector search runs on the Knowledge Graph agent, so it stays on.';
+  if (isLockedOff) return 'Vector search supports only the Knowledge Graph agent.';
   if (isOn && isLastOn) return 'At least one agent must stay enabled.';
   return null;
 };
 
 /**
- * One switch per agent. Switching an agent off is a hard limit — the
- * orchestrator never routes to it; switching it on only makes it eligible.
+ * One switch per agent. Every enabled and available agent runs.
  *
  * @param {{
  *   catalog: Array<{ id: string, name: string, summary: string, available: boolean, unavailable_reason?: string }>,
@@ -25,26 +25,31 @@ const lockReason = ({ info, isOn, isLocked, isLastOn }) => {
  *   onChange: (id: string, value: boolean) => void,
  *   disabled?: boolean,
  *   lockedOn?: string[],
+ *   lockedOff?: string[],
  * }} props
  */
-function AgentToggleList({ catalog, enabled, onChange, disabled = false, lockedOn = [] }) {
+function AgentToggleList({ catalog, enabled, onChange, disabled = false, lockedOn = [], lockedOff = [] }) {
   const theme = useTheme();
-  const effective = effectiveAgents(enabled, catalog);
+  const effective = {
+    ...effectiveAgents(enabled, catalog),
+    ...Object.fromEntries(lockedOff.map((id) => [id, false])),
+    ...Object.fromEntries(lockedOn.map((id) => [id, true])),
+  };
   const onCount = enabledCount(effective);
   const agents = AGENT_ORDER.map((id) => catalog.find((agent) => agent.id === id)).filter(Boolean);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-        The orchestrator picks which enabled agents to ask for each question, runs them in parallel,
-        and merges their answers. Switched-off agents are never asked.
+        Every selected agent runs. Multiple agents run in parallel, and their answers are merged.
       </Typography>
 
       {agents.map((info) => {
         const meta = agentMeta(info.id);
-        const isLocked = lockedOn.includes(info.id);
-        const isOn = isLocked || effective[info.id];
-        const reason = lockReason({ info, isOn, isLocked, isLastOn: onCount <= 1 });
+        const isLockedOn = lockedOn.includes(info.id);
+        const isLockedOff = lockedOff.includes(info.id);
+        const isOn = Boolean(effective[info.id]);
+        const reason = lockReason({ info, isOn, isLockedOn, isLockedOff, isLastOn: onCount <= 1 });
         const canToggle = !disabled && !reason;
         const toggle = () => canToggle && onChange(info.id, !isOn);
 
@@ -72,7 +77,7 @@ function AgentToggleList({ catalog, enabled, onChange, disabled = false, lockedO
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{info.name}</Typography>
-                  {isLocked && <LockOutlinedIcon sx={{ fontSize: 14, color: 'text.secondary' }} />}
+                  {(isLockedOn || isLockedOff) && <LockOutlinedIcon sx={{ fontSize: 14, color: 'text.secondary' }} />}
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.4 }}>
                   {info.available ? info.summary : info.unavailable_reason || 'Not available on this server.'}
@@ -82,7 +87,7 @@ function AgentToggleList({ catalog, enabled, onChange, disabled = false, lockedO
                 checked={Boolean(isOn)}
                 disabled={!canToggle}
                 onClick={(event) => event.stopPropagation()}
-                onChange={(event) => onChange(info.id, event.target.checked)}
+                onChange={(event) => canToggle && onChange(info.id, event.target.checked)}
                 size="small"
                 sx={{
                   '& .MuiSwitch-switchBase.Mui-checked': { color: meta.color },

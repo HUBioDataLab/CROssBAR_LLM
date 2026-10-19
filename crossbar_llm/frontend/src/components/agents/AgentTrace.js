@@ -111,8 +111,8 @@ function Contradictions({ contradictions, catalog }) {
 }
 
 /**
- * How an answer was produced: which agents the orchestrator asked, how each
- * did, the conflicts it resolved between them, and every agent's own report.
+ * How an answer was produced: which selected agents ran, how each did, the
+ * conflicts resolved between them, and every agent's own report.
  *
  * @param {{ orchestration: Object|null, catalog: Array<Object>, question: string }} props
  */
@@ -191,7 +191,7 @@ function AgentTrace({ orchestration, catalog, question }) {
             <Box sx={{ px: 0.5 }}>
               {routing.rationale && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                  <strong>Routing:</strong> {routing.rationale}
+                  <strong>Selection:</strong> {routing.rationale}
                 </Typography>
               )}
               {rewrite && (

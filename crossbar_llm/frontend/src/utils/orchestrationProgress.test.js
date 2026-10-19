@@ -5,23 +5,22 @@ const run = (events, now = 1000) =>
   events.reduce((state, [event, data]) => reduceProgress(state, event, data, now), initialProgress(0));
 
 describe('reduceProgress', () => {
-  test('routing marks selected agents queued and the rest skipped with a reason', () => {
+  test('selection queues every selected agent and marks disabled agents skipped', () => {
     const state = run([
       ['orchestration.started', { enabled: ['knowledge_graph', 'paperclip', 'pubtator3'] }],
       [
         'routing.completed',
         {
           selected: ['knowledge_graph', 'pubtator3'],
-          reasons: { pubtator3: 'named entities' },
-          skipped: { paperclip: 'Not needed for this question.' },
+          skipped: { paperclip: 'Disabled in your agent settings.' },
         },
       ],
     ]);
 
     expect(state.phase).toBe('running');
     expect(state.agents.knowledge_graph.status).toBe('queued');
-    expect(state.agents.pubtator3.reason).toBe('named entities');
-    expect(state.agents.paperclip).toMatchObject({ status: 'skipped', reason: 'Not needed for this question.' });
+    expect(state.agents.pubtator3.status).toBe('queued');
+    expect(state.agents.paperclip).toMatchObject({ status: 'skipped', reason: 'Disabled in your agent settings.' });
   });
 
   test('an agent moves from running through its steps to completed', () => {

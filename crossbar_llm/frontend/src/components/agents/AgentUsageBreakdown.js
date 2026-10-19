@@ -26,7 +26,7 @@ function AgentUsageBreakdown({ orchestration, catalog }) {
   }));
   rows.push({
     key: 'orchestrator',
-    label: 'Orchestrator (routing & merging)',
+    label: 'Orchestrator (rewriting & merging)',
     icon: <AccountTreeIcon sx={{ fontSize: 20, color: theme.palette.primary.main }} />,
     color: theme.palette.primary.main,
     tokens: tokens(orchestration.usage),

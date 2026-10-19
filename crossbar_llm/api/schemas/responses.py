@@ -22,11 +22,11 @@ class AgentRunResult(BaseModel):
 
 class RoutingDecision(BaseModel):
     selected: list[AgentId] = Field(
-        description="Agents the orchestrator asked, in the order it chose them."
+        description="Runnable agents selected by the user, in execution order."
     )
     reasons: dict[AgentId, str] = Field(
         default_factory=dict,
-        description="Why each selected agent was asked, when the router said.",
+        description="Legacy per-agent selection reasons, retained for compatibility.",
     )
     skipped: dict[AgentId, str] = Field(
         default_factory=dict,
@@ -34,7 +34,7 @@ class RoutingDecision(BaseModel):
     )
     rationale: str = ""
     standalone_question: str | None = None
-    strategy: Literal["llm", "single_agent", "fallback"]
+    strategy: Literal["user_selected", "llm", "single_agent", "fallback"]
 
 
 class Contradiction(BaseModel):
@@ -61,7 +61,7 @@ class OrchestrationResult(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     usage: dict[str, Any] = Field(
         default_factory=dict,
-        description="The orchestrator's own LLM calls (relevance, routing, synthesis).",
+        description="The orchestrator's own LLM calls (relevance, rewriting, synthesis).",
     )
 
 

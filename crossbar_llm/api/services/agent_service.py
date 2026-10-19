@@ -1,10 +1,12 @@
-"""The orchestrator: route a question to specialist agents and merge their answers.
+"""The orchestrator: run selected specialist agents and merge their answers.
 
 One request runs in three stages:
 
-1. Plan. The biological-relevance gate and the router run concurrently. An
-   out-of-domain question stops here, before any agent spends anything.
-2. Run. The routed agents work concurrently, each isolated from the others: a
+1. Plan. The biological-relevance gate runs first. An out-of-domain question
+   stops here; otherwise every user-selected, available agent is scheduled.
+   Conversational questions are rewritten only when a literature agent needs
+   standalone context.
+2. Run. The selected agents work concurrently, each isolated from the others: a
    failing agent is reported as failed, it does not take the request down. In
    "generate" mode the knowledge-graph agent pauses for the user to review its
    Cypher, and the other routed agents wait for that approval (the plan is
@@ -76,9 +78,9 @@ from crossbar_llm.api.services.session_store import (
 from crossbar_llm.orchestrator.llm import build_chat_model
 from crossbar_llm.orchestrator.registry import AgentId
 from crossbar_llm.orchestrator.router import (
+    AgentPlan,
     ConversationTurn,
-    RoutingPlan,
-    route_question,
+    rewrite_question,
 )
 from crossbar_llm.orchestrator.synthesizer import (
     AgentReport,
@@ -154,15 +156,15 @@ class AgentService:
     def _validated_selection(
         self, payload: ModelConfigRequest, *, vector_search: bool
     ) -> AgentSelection:
-        selection = self._select_agents(payload)
-        if vector_search and AgentId.KNOWLEDGE_GRAPH not in selection.enabled:
+        if vector_search and payload.agents.enabled() != [AgentId.KNOWLEDGE_GRAPH]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
-                    "Vector search runs on the Knowledge Graph agent. Enable it "
-                    "to use vector search."
+                    "Vector search supports only the Knowledge Graph agent. "
+                    "Disable Paperclip and PubTator3 for this request."
                 ),
             )
+        selection = self._select_agents(payload)
         if not selection.enabled:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -363,19 +365,34 @@ class AgentService:
         *,
         question: str,
         selection: AgentSelection,
-        required: list[AgentId],
         history: list[ConversationTurn],
-    ) -> tuple[dict[str, Any], RoutingPlan]:
-        """Relevance and routing together: neither waits on the other."""
-        verdict, plan = await self._gather_or_cancel(
-            avalidate_biological_relevance(LLMFactory(run.llm_config), question),
-            route_question(
+    ) -> tuple[dict[str, Any], AgentPlan]:
+        """Validate relevance, then prepare the user-selected agent plan."""
+        verdict = await avalidate_biological_relevance(
+            LLMFactory(run.llm_config), question
+        )
+
+        standalone_question = question
+        warnings: tuple[str, ...] = ()
+        literature_selected = any(
+            agent_id != AgentId.KNOWLEDGE_GRAPH for agent_id in selection.enabled
+        )
+        if (
+            verdict.get("biological_relevance") is not False
+            and history
+            and literature_selected
+        ):
+            standalone_question, warnings = await rewrite_question(
                 chat_model=run.orchestrator_model,
                 question=question,
-                enabled=selection.enabled,
                 history=history,
-                required=required,
-            ),
+            )
+
+        plan = AgentPlan(
+            selected=tuple(selection.enabled),
+            rationale="All user-selected and available agents were consulted.",
+            standalone_question=standalone_question,
+            warnings=warnings,
         )
         return verdict, plan
 
@@ -431,7 +448,7 @@ class AgentService:
         *,
         question: str,
         search_mode: SearchMode,
-        plan: RoutingPlan,
+        plan: AgentPlan,
         routing: RoutingDecision,
         outcomes: dict[AgentId, AgentOutcome],
     ) -> ChatResponse:
@@ -464,7 +481,7 @@ class AgentService:
         )
 
     def _mark_pending(
-        self, run: RequestRun, kg: AgentOutcome | None, plan: RoutingPlan
+        self, run: RequestRun, kg: AgentOutcome | None, plan: AgentPlan
     ) -> bool:
         """Record whether the session now waits on a Cypher review."""
         pending = kg is not None and kg.pending
@@ -512,7 +529,6 @@ class AgentService:
             run,
             question=question,
             selection=selection,
-            required=[AgentId.KNOWLEDGE_GRAPH] if is_vector else [],
             history=self._history(session),
         )
 

@@ -30,14 +30,13 @@ from crossbar_llm.api.schemas.responses import (
 from crossbar_llm.api.services.orchestration_events import EventSink
 from crossbar_llm.api.services.session_store import ChatSessionContext
 from crossbar_llm.orchestrator.registry import AgentId
-from crossbar_llm.orchestrator.router import RoutingPlan
+from crossbar_llm.orchestrator.router import AgentPlan
 from crossbar_llm.orchestrator.synthesizer import AgentReport
 
 RELEVANCE_NODE = "biological_relevance_validation"
 ORCHESTRATOR_NODE_PREFIX = "orchestrator."
 
 DISABLED_REASON = "Disabled in your agent settings."
-NOT_ROUTED_REASON = "Not needed for this question."
 OUT_OF_DOMAIN_REASON = "The question is outside the biomedical domain."
 NO_ANSWER = (
     "None of the selected agents could answer this question. Try rephrasing "
@@ -127,15 +126,11 @@ def orchestrator_usage(run: RequestRun) -> dict[str, Any]:
 # ---------------------------------------------------------------- routing
 
 
-def routing_decision(plan: RoutingPlan, selection: AgentSelection) -> RoutingDecision:
-    skipped = dict(selection.skipped)
-    for agent_id in selection.enabled:
-        if agent_id not in plan.selected:
-            skipped[agent_id] = NOT_ROUTED_REASON
+def routing_decision(plan: AgentPlan, selection: AgentSelection) -> RoutingDecision:
     return RoutingDecision(
         selected=list(plan.selected),
         reasons=plan.reasons,
-        skipped=skipped,
+        skipped=dict(selection.skipped),
         rationale=plan.rationale,
         standalone_question=plan.standalone_question,
         strategy=plan.strategy,
@@ -159,9 +154,9 @@ def kg_state(outcomes: dict[AgentId, AgentOutcome]) -> dict[str, Any]:
 
 
 def answer_reports(
-    plan: RoutingPlan, outcomes: dict[AgentId, AgentOutcome]
+    plan: AgentPlan, outcomes: dict[AgentId, AgentOutcome]
 ) -> list[AgentReport]:
-    """The usable answers, in the order the router chose the agents."""
+    """The usable answers, in the user's selected-agent order."""
     results = agent_results(outcomes)
     records = kg_state(outcomes).get("execution_result")
     return [
@@ -196,7 +191,7 @@ def chat_response(
     *,
     question: str,
     search_mode: SearchMode,
-    plan: RoutingPlan,
+    plan: AgentPlan,
     routing: RoutingDecision,
     outcomes: dict[AgentId, AgentOutcome],
     reports: list[AgentReport],
@@ -230,7 +225,7 @@ def out_of_domain_response(
     *,
     question: str,
     search_mode: SearchMode,
-    plan: RoutingPlan,
+    plan: AgentPlan,
     selection: AgentSelection,
     verdict: dict[str, Any],
 ) -> ChatResponse:
@@ -299,19 +294,17 @@ def validate_resume(session: ChatSessionContext, payload: ResumeRequest) -> None
             )
 
 def resume_plan(
-    stored: RoutingPlan | None, selection: AgentSelection
-) -> tuple[RoutingPlan, AgentSelection]:
+    stored: AgentPlan | None, selection: AgentSelection
+) -> tuple[AgentPlan, AgentSelection]:
     """The paused question's plan, minus agents switched off since.
 
     The knowledge-graph agent always stays: resuming it is the request.
     """
     if stored is None:
-        stored = RoutingPlan(
+        stored = AgentPlan(
             selected=(AgentId.KNOWLEDGE_GRAPH,),
-            reasons={},
-            rationale="",
+            rationale="Selected by the user.",
             standalone_question="",
-            strategy="single_agent",
         )
     plan = dataclasses.replace(
         stored,

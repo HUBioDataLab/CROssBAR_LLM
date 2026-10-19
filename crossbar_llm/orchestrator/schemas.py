@@ -4,12 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
-class AgentRoute(BaseModel):
-    agent: str = Field(description="Id of a selected agent, exactly as listed.")
-    reason: str = Field(description="One sentence on what this agent contributes.")
-
-
-class RoutingOutput(BaseModel):
+class QuestionRewriteOutput(BaseModel):
     standalone_question: str = Field(
         description=(
             "The question rewritten to be understandable without the "
@@ -17,10 +12,6 @@ class RoutingOutput(BaseModel):
             "already stands alone."
         )
     )
-    agents: list[AgentRoute] = Field(
-        description="The agents that should work on the question."
-    )
-    rationale: str = Field(description="One or two sentences explaining the plan.")
 
 
 class ContradictionOutput(BaseModel):
@@ -42,8 +33,7 @@ class SynthesisOutput(BaseModel):
 
 
 __all__ = [
-    "AgentRoute",
     "ContradictionOutput",
-    "RoutingOutput",
+    "QuestionRewriteOutput",
     "SynthesisOutput",
 ]

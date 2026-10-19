@@ -10,11 +10,10 @@ from crossbar_llm.orchestrator.registry import AgentId
 
 
 class AgentsConfig(BaseModel):
-    """Which agents the orchestrator may route this request to.
+    """Which agents should run for this request.
 
-    Switching an agent off is a hard limit: the orchestrator never routes to
-    it. Switching it on only makes it eligible — the orchestrator still decides
-    per question whether it is worth asking.
+    Every enabled and available agent runs. Switching an agent off is a hard
+    limit: the orchestrator never runs it.
     """
 
     knowledge_graph: bool = Field(default=True)

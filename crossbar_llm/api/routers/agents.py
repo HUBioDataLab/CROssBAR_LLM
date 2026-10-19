@@ -14,7 +14,7 @@ settings = Settings()
 
 @router.get("", response_model=AgentCatalogResponse)
 async def list_agents() -> AgentCatalogResponse:
-    """The agents the orchestrator can route to, and whether each can run here.
+    """The selectable agents and whether each can run on this server.
 
     Deliberately independent of the runtime service: the UI needs this list
     to render its agent switches even while the knowledge graph is unreachable.

@@ -1,8 +1,8 @@
-"""The specialist agents the orchestrator can route a question to.
+"""The specialist agents users can select for a question.
 
-One entry per agent. The router reads `routing_profile` to decide who is worth
-asking, the synthesizer cites each agent by its `tag`, and the `/agents`
-endpoint serves `name`/`summary` to the UI — so adding an agent starts here.
+One entry per agent. The synthesizer cites each agent by its `tag`, and the
+`/agents` endpoint serves `name`/`summary` to the UI, so adding an agent starts
+here.
 """
 from __future__ import annotations
 
@@ -27,7 +27,6 @@ class AgentSpec:
     tag: str
     kind: AgentKind
     summary: str
-    routing_profile: str
     supports_vector_search: bool = False
 
 
@@ -38,16 +37,6 @@ AGENT_SPECS: dict[AgentId, AgentSpec] = {
         tag="KG",
         kind="knowledge_graph",
         summary="Generates Cypher over the CROssBARv2 biomedical knowledge graph.",
-        routing_profile=(
-            "Queries the curated CROssBARv2 knowledge graph (Neo4j) by writing "
-            "Cypher. Strong for structured facts recorded as relationships "
-            "between genes, proteins, drugs, compounds, diseases, pathways, "
-            "phenotypes, GO terms, protein domains, EC numbers and organisms: "
-            "listing or counting associated entities, multi-hop paths, shortest "
-            "paths, and embedding-based similarity search. Weak for mechanisms "
-            "explained in prose, recent findings, clinical outcomes, or anything "
-            "not stored as a graph edge."
-        ),
         supports_vector_search=True,
     ),
     AgentId.PAPERCLIP: AgentSpec(
@@ -56,13 +45,6 @@ AGENT_SPECS: dict[AgentId, AgentSpec] = {
         tag="Paperclip",
         kind="literature",
         summary="Broad literature search with citable source links.",
-        routing_profile=(
-            "Searches a broad corpus of biomedical publications and answers from "
-            "the retrieved papers, with citations. Strong for mechanisms, "
-            "experimental evidence, recent research, clinical context and "
-            "open-ended 'how' or 'why' questions. Weak for exhaustive "
-            "enumeration or graph-style traversals."
-        ),
     ),
     AgentId.PUBTATOR3: AgentSpec(
         id=AgentId.PUBTATOR3,
@@ -70,13 +52,6 @@ AGENT_SPECS: dict[AgentId, AgentSpec] = {
         tag="PubTator3",
         kind="literature",
         summary="NCBI entity- and relation-aware publication evidence.",
-        routing_profile=(
-            "Searches PubMed through NCBI PubTator3, which annotates genes, "
-            "diseases, chemicals, variants and species, and the relations "
-            "between them (treats, causes, interacts with, ...). Strong for "
-            "literature-backed relationships between specific named entities, "
-            "with PMIDs. Weak for questions that name no concrete entity."
-        ),
     ),
 }
 
@@ -92,7 +67,7 @@ _TAG_LOOKUP: dict[str, AgentId] = {
 
 
 def resolve_agent(reference: str) -> AgentId | None:
-    """Map an id, tag or display name the LLM wrote back to an agent id."""
+    """Map an agent id, source tag, or display name to its canonical id."""
     return _TAG_LOOKUP.get(reference.strip().strip("[]").lower())
 
 

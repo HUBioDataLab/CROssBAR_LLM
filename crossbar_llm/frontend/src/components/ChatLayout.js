@@ -151,7 +151,7 @@ function ChatLayout({
   const [reasoningEffort, setReasoningEffort] = useState('medium');
   const [enabledAgents, setEnabledAgents] = useState(loadEnabledAgents);
   const [agentCatalog, setAgentCatalog] = useState(FALLBACK_CATALOG);
-  const [pendingPlan, setPendingPlan] = useState(null); // routing of a question awaiting Cypher review
+  const [pendingPlan, setPendingPlan] = useState(null); // selection for a question awaiting Cypher review
   const [lastOrchestration, setLastOrchestration] = useState(null);
   const [copySnackbar, setCopySnackbar] = useState(false);
 
@@ -339,12 +339,12 @@ function ChatLayout({
     }
   }, [enabledAgents]);
 
-  // The user's switches go to the server as they are (it skips agents it cannot
-  // run and says why); vector search always runs on the graph agent.
-  const requestAgents = useMemo(() => ({
-    ...enabledAgents,
-    ...(semanticSearchEnabled ? { knowledge_graph: true } : {}),
-  }), [enabledAgents, semanticSearchEnabled]);
+  // Database search runs every selected agent. Vector search is KG-only.
+  const requestAgents = useMemo(() => (
+    semanticSearchEnabled
+      ? { knowledge_graph: true, paperclip: false, pubtator3: false }
+      : enabledAgents
+  ), [enabledAgents, semanticSearchEnabled]);
   // ...but only agents that can actually run count towards "something is on".
   const runnableAgents = useMemo(
     () => effectiveAgents(requestAgents, agentCatalog),
@@ -665,8 +665,8 @@ function ChatLayout({
 
     // An out-of-domain question was answered (with the reason); only a real
     // failure of every agent asked deserves the error banner.
-    const wasRouted = (orchestration?.routing?.selected || []).length > 0;
-    if (status === 'failed' && wasRouted) {
+    const hadSelection = (orchestration?.routing?.selected || []).length > 0;
+    if (status === 'failed' && hadSelection) {
       setError('None of the agents could answer this question. Try rephrasing it, selecting a different model, or enabling more agents.');
     }
 
@@ -734,10 +734,9 @@ function ChatLayout({
     return true;
   };
 
-  // Generate query only (without running) — execution_mode: "generate". When the
-  // orchestrator routes to the graph agent it pauses with the generated Cypher
-  // for review (the other agents wait for the approval); when it does not,
-  // there is nothing to review and the answer comes back straight away.
+  // Generate query only (without running) - execution_mode: "generate". When
+  // the graph agent is selected it pauses with the generated Cypher for review;
+  // the other selected agents wait for approval.
   const handleGenerateOnly = async (e) => {
     e?.preventDefault();
     if (!question.trim() || isLoading) return;
@@ -1054,7 +1053,7 @@ function ChatLayout({
         CROssBAR-LLM
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 550 }}>
-        Ask biomedical questions. An orchestrator routes each one to specialist agents — the CROssBARv2 knowledge graph and literature search — then merges their findings into one answer, resolving any conflicts.
+        Ask biomedical questions. Choose the CROssBARv2 knowledge graph, literature search agents, or both. Every selected agent runs, and their findings are merged into one answer with conflicts called out.
       </Typography>
 
       {/* Features Grid */}
@@ -2171,6 +2170,7 @@ function ChatLayout({
                   onChange={(id, value) => setEnabledAgents((current) => ({ ...current, [id]: value }))}
                   disabled={isLoading}
                   lockedOn={semanticSearchEnabled ? ['knowledge_graph'] : []}
+                  lockedOff={semanticSearchEnabled ? ['paperclip', 'pubtator3'] : []}
                 />
               </Box>
             </Collapse>
