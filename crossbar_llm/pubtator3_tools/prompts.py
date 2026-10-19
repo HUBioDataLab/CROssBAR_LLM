@@ -95,42 +95,17 @@ keyword_search
   resorting to out_of_scope.
 
 out_of_scope
-  PubTator3 / PubMed literature cannot help, OR the question requires
-  multi-step graph reasoning this literature agent must not attempt.
-  Reserve this for three cases:
+  PubTator3 / PubMed literature cannot help. Reserve this for two cases:
   - non-biomedical questions (math, news, weather, opinion, general
     knowledge),
   - pure graph-traversal OUTPUT requests where the user is asking
     for a path or structure that only lives in a knowledge graph
-    (e.g. "what nodes are on the shortest path between X and Y"),
-  - MULTI-HOP questions answerable only by CHAINING two or more
-    relations through an intermediate entity the user does NOT name
-    (e.g. "which genes interact with the targets of drug X" =
-    drug→target→interacting gene; "what drugs target proteins
-    associated with disease Y" = disease→protein→drug). These need a
-    knowledge graph to traverse, not single-paper literature evidence;
-    that is a different agent's job, so decline them here.
+    (e.g. "what nodes are on the shortest path between X and Y").
 
-  This agent answers only SINGLE-HOP questions. A question that names
-  both endpoints of one relation, or asks for the partners of ONE
-  relation on a named entity, is single-hop and stays IN scope — route
-  it to single_node / relation_known_pair / relation_partner_discovery /
-  keyword_search as usual. Only route to out_of_scope when answering
-  truly requires discovering an unnamed intermediate entity first and
-  then applying a second, different relation to it.
-
-  A question is multi-hop ONLY when the OUTPUT of a first relation
-  becomes the INPUT to a second, different relation on an entity the
-  user never names. It is NOT multi-hop just because it asks for two
-  things about ONE named entity. Asking for several attributes or
-  entity types of a single named anchor — "which gene AND which protein
-  are associated with disease X", "the causes and symptoms of X",
-  "the gene and the pathway of Y" — is SINGLE-HOP (all attributes hang
-  off the same anchor) and stays in scope; route it to keyword_search.
-  The word "and" joining two attributes of one entity does not make a
-  question multi-hop.
-  If a biomedical question is single-hop and a PubMed paper might
-  discuss it, prefer keyword_search over out_of_scope.
+  Biomedical questions remain in scope even when answering them may
+  involve several related entities or relations. If PubMed papers might
+  discuss the requested biomedical information, prefer keyword_search
+  over out_of_scope.
 
 
 # Field constraints
@@ -335,23 +310,16 @@ user is asking about).
 
   Q: "Mutations in which gene and which protein are associated with Netherton syndrome?"
      -> keyword_search; keyword_query="Netherton syndrome gene protein mutation"
-        (SINGLE-HOP despite the "and": the gene and the protein are both
-         attributes of the ONE named disease, not a chain through an
-         unnamed intermediate. In scope.)
+        (the literature may discuss both requested entity types)
 
   Q: "Which drugs target proteins associated with Alzheimer disease?"
-     -> out_of_scope
-        (multi-hop: disease→associated proteins→drugs targeting them.
-         Answering requires chaining two relations through intermediate
-         proteins the user never names — knowledge-graph traversal, not
-         single-paper literature evidence. Decline it.)
+     -> keyword_search; keyword_query="Alzheimer proteins targeted drugs"
+        (the literature may discuss the requested biomedical relationships)
 
   Q: "What genes are drug targets for Fibrodysplasia Ossificans Progressiva?"
      -> relation_partner_discovery; relation=interact; e2_type=Gene;
         mentions=[(Fibrodysplasia Ossificans Progressiva, disease)]
-        (single hop: the disease is named and we want the gene targets
-         directly associated with it — no unnamed intermediate to
-         traverse, so this stays in scope.)
+        (the disease is named and the requested partners are genes)
 
   Q: "What nodes are on the shortest path from MDM2 to Sorafenib?"
      -> out_of_scope

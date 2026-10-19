@@ -290,6 +290,7 @@ class Citation(BaseModel):
     year: int | None = None
     doi: str | None = None
     pmid: str | None = None
+    pmcid: str | None = None
     url: str = ""
 
 

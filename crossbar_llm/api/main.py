@@ -14,6 +14,7 @@ from crossbar_llm.api.routers.db_search import router as db_search_router
 from crossbar_llm.api.routers.resume import router as resume_router
 from crossbar_llm.api.routers.vector_search import router as vector_search_router
 from crossbar_llm.api.routers.models import router as models_router
+from crossbar_llm.api.routers.agents import router as agents_router
 from crossbar_llm.api.core.deps import get_runtime_service
 
 settings = Settings()
@@ -75,5 +76,9 @@ app.include_router(
 
 app.include_router(
     models_router
+)
+
+app.include_router(
+    agents_router
 )
 

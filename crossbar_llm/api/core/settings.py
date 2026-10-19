@@ -245,6 +245,30 @@ class Settings(BaseModel):
         ),
     )
 
+    # Orchestrator
+    orchestrator_history_turns: int = Field(
+        default=3,
+        ge=0,
+        description=(
+            "Previous question/answer turns the router sees, so it can rewrite "
+            "a follow-up into a standalone question for the literature agents."
+        ),
+    )
+    orchestrator_history_answer_chars: int = Field(
+        default=1200,
+        ge=100,
+        description="Characters of each previous answer kept in that history.",
+    )
+    sse_keepalive_seconds: float = Field(
+        default=15.0,
+        gt=0,
+        description=(
+            "Idle interval after which a streamed response sends a keep-alive "
+            "comment, so proxies do not close a connection that is waiting on "
+            "a slow agent."
+        ),
+    )
+
     # CORS
     allowed_origins: list[str] = Field(
         default=[
