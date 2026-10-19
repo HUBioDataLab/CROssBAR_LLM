@@ -179,10 +179,101 @@ def test_run_single_entity_tool_call_with_retry_returns_initial_success(mock_ent
         prompt=mocker.MagicMock(),
     )
 
-    assert result.tool_args == {"node_type": "Gene", "entity_name": "TP53"}
+    assert result.tool_args == {"node_type": "Gene", "entity_name": "TP/53"}
     assert result.correction_attempts == 0
     assert result.was_corrected is False
 
+def test_run_single_entity_tool_call_preserves_original_entity_name(
+    mock_entity_resolver,
+    mocker,
+):
+    entity_name = (
+        "({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]"
+        "amino}oxy)acetic acid"
+    )
+
+    search_result = ToolSearchResult(
+        entity_name=entity_name,
+        node_type="SmallMolecule",
+        candidates=[
+            ToolCandidate(
+                name=entity_name,
+                score=1.0,
+                rank=1,
+            )
+        ],
+    )
+
+    search_mock = mocker.patch.object(
+        mock_entity_resolver,
+        "run_entity_search",
+        return_value=search_result,
+    )
+    mocker.patch.object(
+        mock_entity_resolver,
+        "run_entity_llm_stage",
+    )
+
+    result = mock_entity_resolver.run_single_entity_tool_call_with_retry(
+        tool_call={
+            "id": "call-1",
+            "args": {
+                "node_type": "SmallMolecule",
+                "entity_name": entity_name,
+            },
+        },
+        question="Find the molecule.",
+        llm=mocker.MagicMock(),
+        prompt=mocker.MagicMock(),
+    )
+
+    search_mock.assert_called_once_with(
+        node_type="SmallMolecule",
+        entity_name=entity_name,
+    )
+
+    assert result.tool_args["entity_name"] == entity_name
+
+def test_run_single_entity_tool_call_does_not_retry_empty_search_result(
+    mock_entity_resolver,
+    mocker,
+):
+    empty_result = ToolSearchResult(
+        entity_name="UnknownEntity",
+        node_type="Gene",
+        candidates=[],
+    )
+
+    search_mock = mocker.patch.object(
+        mock_entity_resolver,
+        "run_entity_search",
+        return_value=empty_result,
+    )
+
+    repair_mock = mocker.patch.object(
+        mock_entity_resolver,
+        "run_entity_llm_stage",
+    )
+
+    result = mock_entity_resolver.run_single_entity_tool_call_with_retry(
+        tool_call={
+            "id": "call-1",
+            "args": {
+                "node_type": "Gene",
+                "entity_name": "UnknownEntity",
+            },
+        },
+        question="Find TP53",
+        llm=mocker.MagicMock(),
+        prompt=mocker.MagicMock(),
+    )
+
+    search_mock.assert_called_once()
+    repair_mock.assert_not_called()
+
+    assert result.tool_response == empty_result
+    assert result.correction_attempts == 0
+    assert result.was_corrected is False
 
 def test_run_single_entity_tool_call_with_retry_repairs_failed_lookup(mock_entity_resolver, mocker):
     initial_error = ToolErrorResult(

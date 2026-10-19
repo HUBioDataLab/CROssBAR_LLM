@@ -503,13 +503,22 @@ class Neo4jClient:
         return True
     
     @log_execution_time(logger, component="Neo4jClient.execute_query")
-    def execute_query(self, query: str, top_k: int = 10, disable_limit: bool = False) -> list[Any] | str:
+    def execute_query(
+        self,
+        query: str,
+        top_k: int = 10,
+        disable_limit: bool = False,
+        parameters: dict[str, Any] | None = None,
+    ) -> list[Any] | str:
         """
         Execute a Cypher query against the Neo4j database and return the results.
+
         Args:
             query: The Cypher query to be executed.
             top_k: The maximum number of results to return.
             disable_limit: Whether to disable the limit clause.
+            parameters: Optional parameters to pass safely to the Neo4j query.
+
         Returns:
             A list of dictionaries representing the query results, or an error message string.
         """
@@ -544,7 +553,10 @@ class Neo4jClient:
             default_access_mode=neo4j.READ_ACCESS,
             ) as session:
             try:
-                records = session.run(query)
+                if parameters is None:
+                    records = session.run(query)
+                else:
+                    records = session.run(query, parameters)
 
                 # Remove embedding attributes from the results that confuse LLMs
                 results = []
@@ -614,6 +626,19 @@ class Neo4jClient:
                 )
                 return f"An error occurred while executing the query: {str(e)}"
 
+    @staticmethod
+    def escape_lucene_query(search_term: str) -> str:
+        """
+        Escape characters that have special meaning in the Lucene query parser.
+
+        Entity names may legitimately contain characters such as parentheses,
+        brackets, braces, slashes, hyphens, or carets. They must be escaped
+        rather than removed so that the original entity text is preserved.
+        """
+        lucene_special_pattern = re.compile(
+            r'(&&|\|\||[+\-!(){}\[\]^"~*?:\\/])'
+        )
+        return lucene_special_pattern.sub(r'\\\1', search_term)
 
     @log_execution_time(logger, component="Neo4jClient.fulltext_search")
     def fulltext_search(self, node_label: str, search_term: str, top_k: int = 10, add_idx: bool = True) -> list[Any] | str:
@@ -632,13 +657,32 @@ class Neo4jClient:
             add_idx=add_idx
         )
         
+        index_name = self.fulltext_index_mappings.get_index_name_by_node_type(
+            node_label
+        )
+        property_name = self.fulltext_index_mappings.get_property_name_by_node_type(
+            node_label
+        )
+
+        escaped_search_term = self.escape_lucene_query(search_term)
+
         query = f"""
-        CALL db.index.fulltext.queryNodes("{self.fulltext_index_mappings.get_index_name_by_node_type(node_label)}", "{search_term}") YIELD node, score
-        RETURN node.{self.fulltext_index_mappings.get_property_name_by_node_type(node_label)} AS name, ROUND(score, 3) AS score
+        CALL db.index.fulltext.queryNodes($index_name, $search_term)
+        YIELD node, score
+        RETURN node.{property_name} AS name, ROUND(score, 3) AS score
         ORDER BY score DESC
         """
+
+        parameters = {
+            "index_name": index_name,
+            "search_term": escaped_search_term,
+        }
         if add_idx:
-            records = self.execute_query(query, top_k=top_k)
+            records = self.execute_query(
+                query,
+                top_k=top_k,
+                parameters=parameters,
+            )
             if not records or isinstance(records, str):
                 logger.warning(
                     "Fulltext search returned no records or an error",
@@ -656,7 +700,11 @@ class Neo4jClient:
 
             return result
         
-        execution_result = self.execute_query(query, top_k=top_k)
+        execution_result = self.execute_query(
+            query,
+            top_k=top_k,
+            parameters=parameters,
+        )
 
         logger.info(
             "Fulltext search completed successfully",

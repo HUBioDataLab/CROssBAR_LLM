@@ -301,21 +301,6 @@ class EntityResolver:
 
         conversation: list[BaseMessage] = list(prior_messages or [])
 
-        original_entity_name = final_tool_args["entity_name"]
-        for char in self.entity_resolver_config.replace_chars:
-            final_tool_args["entity_name"] = final_tool_args["entity_name"].replace(char, "")
-        
-        if original_entity_name != final_tool_args["entity_name"]:
-            logger.debug(
-                "Sanitized entity name for entity search tool call",
-                event_type="entity_name_sanitized",
-                component="EntityResolver.run_single_entity_tool_call_with_retry",
-                tool_call_id=tool_call_id,
-                original_entity_name=original_entity_name,
-                sanitized_entity_name=final_tool_args["entity_name"]
-            )
-
-        # Use sanitized args on the first call too
         tool_response = self.run_entity_search(**final_tool_args)
         conversation.append(
             ToolMessage(
@@ -336,9 +321,7 @@ class EntityResolver:
 
         for _ in range(self.entity_resolver_config.max_attempts):
             if isinstance(tool_response, ToolSearchResult):
-                # ------------------------
-                # What if ToolSearchResult is empty?
-                # ------------------------
+
                 was_corrected = True
                 corrected_entity_name = final_tool_args["entity_name"]
                 corrected_node_type = final_tool_args["node_type"]
@@ -354,7 +337,7 @@ class EntityResolver:
                     candidates=tool_response.candidates
                 )
                 break
-            
+
             logger.warning(
                 "Entity search failed, attempting error correction",
                 event_type="entity_search_tool_retry_attempt",
