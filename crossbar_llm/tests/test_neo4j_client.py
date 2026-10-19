@@ -192,6 +192,37 @@ def test_execute_query_limit_injection(mock_neo4j_client, mocker, mock_driver, q
     assert expected_fragment in mock_session.run.call_args.args[0]
     assert result == [{"name": "ProteinA"}]
 
+def test_execute_query_forwards_parameters(
+    mock_neo4j_client,
+    mocker,
+    mock_driver,
+):
+    fake_record = mocker.MagicMock()
+    fake_record.data.return_value = {"value": "test"}
+
+    mock_session = mocker.MagicMock()
+    mock_session.__enter__.return_value = mock_session
+    mock_session.__exit__.return_value = False
+    mock_session.run.return_value = [fake_record]
+
+    mock_driver.session.return_value = mock_session
+    mock_neo4j_client.driver = mock_driver
+
+    parameters = {"value": "test"}
+
+    result = mock_neo4j_client.execute_query(
+        "RETURN $value AS value",
+        top_k=1,
+        parameters=parameters,
+    )
+
+    executed_query = mock_session.run.call_args.args[0]
+    executed_parameters = mock_session.run.call_args.args[1]
+
+    assert executed_query == "RETURN $value AS value LIMIT 1"
+    assert executed_parameters == parameters
+    assert result == [{"value": "test"}]
+
 @pytest.mark.parametrize(
     ("error", "expected_prefix"),
     [
@@ -281,6 +312,59 @@ def test_fulltext_search_adds_rank(mock_neo4j_client, mocker):
         {"rank": 2, "name": "ProteinB", "score": 0.9},
     ]
 
+def test_fulltext_search_escapes_lucene_special_characters(
+    mock_neo4j_client,
+    mocker,
+):
+    mocked_execute_query = mocker.patch.object(
+        mock_neo4j_client,
+        "execute_query",
+        return_value=[
+            {"name": "Example molecule", "score": 1.0},
+        ],
+    )
+
+    search_term = (
+        "({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]"
+        "amino}oxy)acetic acid"
+    )
+
+    result = mock_neo4j_client.fulltext_search(
+        "SmallMolecule",
+        search_term,
+        top_k=10,
+        add_idx=True,
+    )
+
+    call = mocked_execute_query.call_args
+    query = call.args[0]
+    parameters = call.kwargs["parameters"]
+
+    assert "$index_name" in query
+    assert "$search_term" in query
+
+    # Raw entity text must not be interpolated into Cypher.
+    assert search_term not in query
+
+    escaped_term = parameters["search_term"]
+
+    # Lucene structural characters must be escaped, not deleted.
+    assert r"\(" in escaped_term
+    assert r"\)" in escaped_term
+    assert r"\{" in escaped_term
+    assert r"\}" in escaped_term
+    assert r"\[" in escaped_term
+    assert r"\]" in escaped_term
+
+    # The original chemical text should still be represented.
+    assert "biindol" in escaped_term
+    assert "ylidene" in escaped_term
+    assert "amino" in escaped_term
+
+    assert result == [
+        {"rank": 1, "name": "Example molecule", "score": 1.0},
+    ]
+
 def test_fulltext_search_without_rank_returns(mock_neo4j_client, mocker):
     raw_results = [{"name": "ProteinA", "score": 1.0}]
     mocked_execute_query = mocker.patch.object(
@@ -361,9 +445,22 @@ def test_fulltext_search_integration(neo4j_client_integration):
     
 
 @pytest.mark.integration
-def test_fulltext_search_error_passthrough_integration(neo4j_client_integration):
-    result = neo4j_client_integration.fulltext_search("OrganismTaxon", "Rotavirus A (strain RVA/Human/Venezuela/M37/1982/G1P2A[6]) (RV-A)", top_k=2, add_idx=False)
-    assert isinstance(result, str) and result.startswith("An error occurred while executing the query")
+def test_fulltext_search_handles_special_characters_integration(
+    neo4j_client_integration,
+):
+    result = neo4j_client_integration.fulltext_search(
+        "OrganismTaxon",
+        "Rotavirus A (strain RVA/Human/Venezuela/M37/1982/G1P2A[6]) (RV-A)",
+        top_k=2,
+        add_idx=False,
+    )
+
+    assert isinstance(result, list)
+    assert len(result) <= 2
+
+    for record in result:
+        assert "name" in record
+        assert "score" in record
 
 @pytest.mark.integration
 def test_fulltext_search_no_results_integration(neo4j_client_integration):

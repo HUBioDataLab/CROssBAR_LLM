@@ -422,6 +422,19 @@ async def test_get_meta_failure_recovers_metadata_from_hit():
     assert any("recovered from search hit" in w for w in out["warnings"])
 
 
+async def test_citation_carries_pmcid_from_document_metadata():
+    class PmcidAdapter(FakeAdapter):
+        async def get_meta(self, doc_id, *, source="pmc"):
+            return _meta(doc_id, pmc_id="PMC123456")
+
+    adapter = PmcidAdapter()
+    g = build_graph(router=_router(), synthesizer=_synth, adapter=adapter)
+
+    out = await g.ainvoke({"question": "topic"})
+
+    assert out["citations"][0].pmcid == "PMC123456"
+
+
 async def test_depth_refinement_refetches_with_full_text():
     adapter = FakeAdapter()
 

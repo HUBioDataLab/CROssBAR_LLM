@@ -1,4 +1,5 @@
 from typing import Optional, Union, Any
+from collections.abc import Callable
 from uuid import UUID
 from dataclasses import dataclass, field, asdict
 
@@ -317,6 +318,54 @@ class UsageMetricsCallback(BaseCallbackHandler):
             component="UsageMetricsCallback.reset",
             session_id=self.session_id,
         )
+
+
+# Token counters shared with `UsageCounter`. `call_count` is deliberately NOT
+# here: `aggregated_usage.totals` carries exactly these keys, and a sliced total
+# that quietly grew an extra field would be a different shape wearing the same
+# name.
+_USAGE_TOTAL_KEYS = (
+    "input_tokens",
+    "output_tokens",
+    "total_tokens",
+    "cache_read",
+    "cache_write",
+    "reasoning",
+)
+
+
+def usage_slice(
+    summary: dict[str, Any],
+    include: Callable[[str], bool],
+) -> dict[str, Any]:
+    """The share of a `get_summary()` result spent by the nodes `include` accepts.
+
+    Used to break one request's usage down per agent. The result is a part of
+    the request total, not an addition to it. Empty when no node matched.
+    """
+    per_node = {
+        name: record
+        for name, record in (summary.get("per_node_usage") or {}).items()
+        if include(name)
+    }
+    if not per_node:
+        return {}
+
+    totals = {
+        key: sum((record.get(key, 0) or 0) for record in per_node.values())
+        for key in _USAGE_TOTAL_KEYS
+    }
+    all_models = (summary.get("aggregated_usage") or {}).get("models_by_node") or {}
+    return {
+        "per_node_usage": per_node,
+        "call_count": sum(
+            (record.get("call_count", 0) or 0) for record in per_node.values()
+        ),
+        "aggregated_usage": {
+            "totals": totals,
+            "models_by_node": {name: all_models.get(name, []) for name in per_node},
+        },
+    }
 
 
 def merge_usage_summaries(*summaries: dict[str, Any]) -> dict[str, Any]:

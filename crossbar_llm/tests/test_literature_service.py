@@ -6,7 +6,7 @@ import pytest
 from pydantic import SecretStr
 
 from crossbar_llm.agent_tools.callback_handler import UsageMetricsCallback
-from crossbar_llm.api.schemas.requests import DbSearchRequest, LiteratureToolsConfig
+from crossbar_llm.api.schemas.requests import DbSearchRequest
 from crossbar_llm.api.core.settings import Settings
 from crossbar_llm.api.services.literature_service import LiteratureService, _AdmissionRejected
 from crossbar_llm.paperclip_tools.adapter import PaperclipConfigError
@@ -19,13 +19,12 @@ def _settings(timeout: float = 1.0) -> Settings:
     return Settings(literature_tool_timeout_seconds=timeout)
 
 
-def _payload(tools: LiteratureToolsConfig) -> DbSearchRequest:
+def _payload() -> DbSearchRequest:
     return DbSearchRequest(
         provider="openai",
         model="gpt-4o-mini",
         question="What is the role of EGFR in cancer?",
         execution_mode="generate_and_run",
-        literature_tools=tools,
     )
 
 
@@ -41,7 +40,7 @@ async def test_disabled_tools_are_not_run(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig()),
+        tools=[], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -70,7 +69,7 @@ async def test_enabled_tools_run_in_parallel(monkeypatch):
     task = asyncio.create_task(
         service.run(
             question="test",
-            payload=_payload(LiteratureToolsConfig(paperclip=True, pubtator3=True)),
+            tools=["paperclip", "pubtator3"], payload=_payload(),
             callback=UsageMetricsCallback("session", strict=False),
         )
     )
@@ -98,7 +97,7 @@ async def test_one_tool_failure_does_not_discard_the_other(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(paperclip=True, pubtator3=True)),
+        tools=["paperclip", "pubtator3"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -117,7 +116,7 @@ async def test_tool_timeout_is_reported_per_tool(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(paperclip=True)),
+        tools=["paperclip"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -140,7 +139,7 @@ async def test_malformed_tool_result_is_isolated(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(paperclip=True, pubtator3=True)),
+        tools=["paperclip", "pubtator3"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -209,7 +208,7 @@ async def test_missing_paperclip_credentials_fail_only_that_tool(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(paperclip=True, pubtator3=True)),
+        tools=["paperclip", "pubtator3"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -231,7 +230,7 @@ async def test_unexpected_failures_do_not_leak_upstream_detail(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(paperclip=True)),
+        tools=["paperclip"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -252,7 +251,7 @@ async def test_enabled_tool_without_a_question_is_reported_as_skipped(monkeypatc
 
     result = await service.run(
         question="   ",
-        payload=_payload(LiteratureToolsConfig(paperclip=True)),
+        tools=["paperclip"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -319,7 +318,7 @@ async def test_admission_limit_bounds_concurrent_runs_of_that_tool(monkeypatch):
         asyncio.create_task(
             service.run(
                 question="test",
-                payload=_payload(LiteratureToolsConfig(pubtator3=True)),
+                tools=["pubtator3"], payload=_payload(),
                 callback=UsageMetricsCallback("session", strict=False),
             )
         )
@@ -359,7 +358,7 @@ async def test_tools_do_not_share_admission_capacity(monkeypatch):
     hog = asyncio.create_task(
         service.run(
             question="test",
-            payload=_payload(LiteratureToolsConfig(pubtator3=True)),
+            tools=["pubtator3"], payload=_payload(),
             callback=UsageMetricsCallback("session", strict=False),
         )
     )
@@ -367,7 +366,7 @@ async def test_tools_do_not_share_admission_capacity(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(paperclip=True, pubtator3=True)),
+        tools=["paperclip", "pubtator3"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 
@@ -401,7 +400,7 @@ async def test_unlimited_tool_admits_every_run(monkeypatch):
         asyncio.create_task(
             service.run(
                 question="test",
-                payload=_payload(LiteratureToolsConfig(paperclip=True)),
+                tools=["paperclip"], payload=_payload(),
                 callback=UsageMetricsCallback("session", strict=False),
             )
         )
@@ -440,7 +439,7 @@ async def test_admission_wait_does_not_shorten_the_run_budget(monkeypatch):
         *(
             service.run(
                 question="test",
-                payload=_payload(LiteratureToolsConfig(pubtator3=True)),
+                tools=["pubtator3"], payload=_payload(),
                 callback=UsageMetricsCallback("session", strict=False),
             )
             for _ in range(2)
@@ -469,7 +468,7 @@ async def test_saturation_reports_skipped_not_timed_out(monkeypatch):
     hog = asyncio.create_task(
         service.run(
             question="test",
-            payload=_payload(LiteratureToolsConfig(pubtator3=True)),
+            tools=["pubtator3"], payload=_payload(),
             callback=UsageMetricsCallback("session", strict=False),
         )
     )
@@ -477,7 +476,7 @@ async def test_saturation_reports_skipped_not_timed_out(monkeypatch):
 
     result = await service.run(
         question="test",
-        payload=_payload(LiteratureToolsConfig(pubtator3=True)),
+        tools=["pubtator3"], payload=_payload(),
         callback=UsageMetricsCallback("session", strict=False),
     )
 

@@ -82,6 +82,67 @@ class QueryCorrector:
             component="QueryCorrector",
             schema_count=len(schemas)
         )
+
+    @staticmethod
+    def _protect_string_literals(query: str) -> tuple[str, dict[str, str]]:
+        """
+        Temporarily replace Cypher string literals with safe placeholders.
+
+        This prevents structural regexes from interpreting characters such as
+        (), [], and {} inside entity names as Cypher syntax.
+        """
+        literals: dict[str, str] = {}
+        result: list[str] = []
+
+        i = 0
+        literal_index = 0
+
+        while i < len(query):
+            char = query[i]
+
+            if char not in {"'", '"'}:
+                result.append(char)
+                i += 1
+                continue
+
+            quote = char
+            start = i
+            i += 1
+
+            while i < len(query):
+                if query[i] == "\\":
+                    # Preserve escaped characters inside the literal.
+                    i += 2
+                    continue
+
+                if query[i] == quote:
+                    i += 1
+                    break
+
+                i += 1
+
+            literal = query[start:i]
+
+            placeholder = (
+                f'{quote}__CROSSBAR_STRING_LITERAL_{literal_index}__{quote}'
+            )
+
+            literals[placeholder] = literal
+            result.append(placeholder)
+            literal_index += 1
+
+        return "".join(result), literals
+
+    @staticmethod
+    def _restore_string_literals(
+        query: str,
+        literals: dict[str, str],
+    ) -> str:
+        """Restore string literals previously replaced by placeholders."""
+        for placeholder, literal in literals.items():
+            query = query.replace(placeholder, literal)
+
+        return query
     
     def clean_node(self, node: str) -> str:
         """
@@ -100,7 +161,8 @@ class QueryCorrector:
         Args:
             query: cypher query
         """
-        nodes = re.findall(self.node_pattern, query)
+        protected_query, _ = self._protect_string_literals(query)
+        nodes = re.findall(self.node_pattern, protected_query)
         nodes = [self.clean_node(node) for node in nodes]
         res = {}
         for node in nodes:
@@ -126,16 +188,18 @@ class QueryCorrector:
         Args:
             query: cypher query
         """
+        protected_query, _ = self._protect_string_literals(query)
+
         paths = []
         idx = 0
-        while matched := self.path_pattern.findall(query[idx:]):
+        while matched := self.path_pattern.findall(protected_query[idx:]):
             matched = matched[0]
             matched = [
                 m for i, m in enumerate(matched) if i not in [1, len(matched) - 1]
             ]
             path = "".join(matched)
 
-            absolute_pos = query.find(path, idx)
+            absolute_pos = protected_query.find(path, idx)
             if absolute_pos == -1:
                 break
 
@@ -277,6 +341,8 @@ class QueryCorrector:
             query=query
         )
 
+        query, string_literals = self._protect_string_literals(query)
+
         node_variable_dict = self.detect_node_variables(query)
         paths = self.extract_paths(query)
         for path in paths:
@@ -377,7 +443,7 @@ class QueryCorrector:
                 
                 start_idx += len(match_dict["left_node"]) + len(match_dict["relation"]) + 2
         
-        return query
+        return self._restore_string_literals(query, string_literals)
     
     def __call__(self, query: str) -> str:
         """

@@ -408,6 +408,7 @@ async def assemble_context_node(
                 year=meta.pub_year,
                 doi=meta.doi,
                 pmid=meta.pmid,
+                pmcid=meta.pmc_id,
                 url=citation_url(hit.doc_id, hit_source, line_anchor=line_anchor),
             )
         )

@@ -135,6 +135,36 @@ def test_query_corrector_with_correct_query():
 
     assert query_corrector.correct_query(correct_query) == correct_query
 
+def test_query_corrector_ignores_parentheses_inside_string_literals():
+    edge_schema = [
+        "(:SmallMolecule)-[:Drug_targets_protein]->(:Protein)",
+    ]
+
+    str_schemas = build_str_schemas(edge_schema)
+    schemas = load_schemas(str_schemas)
+    query_corrector = QueryCorrector(schemas)
+
+    query = dedent(
+        """
+        MATCH (dr:SmallMolecule {name: "({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]amino}oxy)acetic acid"})
+        MATCH (dr)-[:Drug_targets_protein]->(p:Protein)
+        RETURN p
+        """
+    ).strip()
+
+    node_variables = query_corrector.detect_node_variables(query)
+
+    assert "dr" in node_variables
+    assert node_variables["dr"] == ["SmallMolecule"]
+    assert "p" in node_variables
+    assert node_variables["p"] == ["Protein"]
+
+    # Parentheses inside the chemical name are string contents,
+    # not Cypher node patterns.
+    assert "7H" not in node_variables
+
+    # A schema-valid query must not be rejected by QueryCorrector.
+    assert query_corrector.correct_query(query) == query
 
 def test_validate_query_returns_ok_true_when_all_validators_pass(mock_neo4j_cfg, mock_driver, mocker):
 
