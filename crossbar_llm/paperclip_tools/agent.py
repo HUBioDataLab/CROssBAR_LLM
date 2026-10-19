@@ -28,11 +28,15 @@ from langgraph.graph import END, StateGraph
 # Reuse PubTator3's provider-agnostic structured-output helper (function-calling
 # first, plain-JSON fallback) rather than re-deriving it.
 from crossbar_llm.paperclip_tools.structured_output import (
+    _ainvoke_structured_or_prose,
     _ainvoke_structured_with_json_fallback,
     _answer_text,
 )
+from crossbar_llm.paperclip_tools.answer_citations import (
+    resolve_answer_citations,
+    source_labels,
+)
 from crossbar_llm.paperclip_tools.nodes import (
-    _add_warning,
     assemble_context_node,
     filter_node,
     search_node,
@@ -42,6 +46,7 @@ from crossbar_llm.paperclip_tools.prompts import (
     PAPERCLIP_DEPTH_EVAL_SYSTEM_PROMPT,
     PAPERCLIP_ROUTER_SYSTEM_PROMPT,
     PAPERCLIP_SQL_SYNTHESIZE_SYSTEM_PROMPT,
+    PAPERCLIP_SYNTHESIZE_JSON_INSTRUCTION,
     PAPERCLIP_SYNTHESIZE_SYSTEM_PROMPT,
 )
 from crossbar_llm.paperclip_tools.schemas import (
@@ -50,6 +55,7 @@ from crossbar_llm.paperclip_tools.schemas import (
     PaperclipRouterDecision,
     PaperclipRouterFn,
     PaperclipState,
+    PaperclipSynthesis,
     PaperclipSynthesizerFn,
 )
 from crossbar_llm.paperclip_tools.adapter import (
@@ -66,30 +72,26 @@ async def _always_sufficient_evaluator(_state: PaperclipState) -> PaperclipDepth
 
 
 def _format_documents(state: PaperclipState) -> str:
-    """Render the assembled papers into the numbered evidence block the
-    synthesizer reads. Reference numbers align with `state['citations']`.
+    """Render the assembled papers into the evidence block the synthesizer reads.
 
-    Includes the citation URL explicitly: the synthesis prompt's mandatory
-    References format ends every entry with `— <url>`, so the model needs
-    the real value here rather than being left to guess or omit it — a real
-    gap this used to have (URL was in `state['citations']` but never
-    actually surfaced in the text the model reads)."""
+    Each paper is headed by the label the answer cites it by (see
+    `source_labels`), e.g. `[PMID:12345678]`, not by its position in the
+    search results, so the answer's citations do not depend on retrieval
+    order. URLs are left out: the answer no longer writes a reference list,
+    and the run's citations carry them."""
     docs = state.get("documents") or []
-    citations = {c.doc_id: c for c in (state.get("citations") or [])}
+    labels = source_labels(state.get("citations") or [])
     if not docs:
         return "(no papers found)"
     blocks: list[str] = []
     for doc in docs:
-        cit = citations.get(doc.doc_id)
-        ref = cit.ref_num if cit else "?"
-        url = cit.url if cit else ""
+        label = labels.get(doc.doc_id, f"Paperclip:{doc.doc_id}")
         meta = doc.meta
         header = (
-            f"[{ref}] {meta.title}\n"
+            f"[{label}] {meta.title}\n"
             f"    Authors: {meta.authors or 'n/a'}\n"
             f"    Journal: {meta.journal or 'n/a'} ({meta.pub_year or 'n/a'})  "
             f"doi:{meta.doi or 'n/a'}  pmid:{meta.pmid or 'n/a'}\n"
-            f"    URL: {url or 'n/a'}\n"
             f"    Abstract: {meta.abstract or '(no abstract)'}"
         )
         if doc.body:
@@ -322,10 +324,13 @@ def build_graph(
         )
 
     async def synthesize_node(state: PaperclipState) -> dict:
+        warnings = list(state.get("warnings", []))
+        sql = _is_sql_success(state)
+        cited = None
         if synthesizer is not None:
             answer = await synthesizer(state)
         else:
-            if _is_sql_success(state):
+            if sql:
                 evidence = _format_sql_result(state)
                 system_prompt = PAPERCLIP_SQL_SYNTHESIZE_SYSTEM_PROMPT
             else:
@@ -339,27 +344,56 @@ def build_graph(
                     "Write the final answer."
                 ),
             ])
-            chain = prompt | chat_model
-            msg = await chain.ainvoke(
-                {
-                    "question": state["question"],
-                    "evidence": evidence,
-                    "chat_history": state.get("chat_history", []),
-                },
-                config={"metadata": {"node_name": "paperclip.synthesize"}},
-            )
-            answer = _answer_text(msg)
+            values = {
+                "question": state["question"],
+                "evidence": evidence,
+                "chat_history": state.get("chat_history", []),
+            }
+            metadata = {"node_name": "paperclip.synthesize"}
+            if sql:
+                # An aggregate answer cites no papers, so it stays plain text.
+                msg = await (prompt | chat_model).ainvoke(values, config={"metadata": metadata})
+                answer = _answer_text(msg)
+            else:
+                parsed, prose, used_json_fallback = await _ainvoke_structured_or_prose(
+                    chat_model=chat_model,
+                    prompt=prompt,
+                    schema=PaperclipSynthesis,
+                    values=values,
+                    json_instruction=PAPERCLIP_SYNTHESIZE_JSON_INSTRUCTION,
+                    metadata=metadata,
+                )
+                if parsed is not None:
+                    answer, cited = parsed.answer, parsed.cited
+                    if used_json_fallback:
+                        warnings.append(
+                            "synthesize structured-output unavailable; used JSON fallback."
+                        )
+                else:
+                    answer = prose or ""
+                    warnings.append(
+                        "synthesize structured-output unavailable; citations were "
+                        "read from the answer text."
+                    )
         answer, degenerate_runs = _collapse_degenerate_runs(answer)
         if degenerate_runs:
-            return {
-                "final_answer": answer,
-                "warnings": _add_warning(
-                    state,
-                    f"synthesize: trimmed {degenerate_runs} degenerate character "
-                    "run(s) from the model's answer",
-                ),
-            }
-        return {"final_answer": answer}
+            warnings.append(
+                f"synthesize: trimmed {degenerate_runs} degenerate character "
+                "run(s) from the model's answer"
+            )
+        update: dict = {"final_answer": answer, "warnings": warnings}
+        if not sql:
+            # The answer cites papers inline; the reference list is built from
+            # those citations, never from a list the model writes into the text.
+            answer, citations, citation_warnings = resolve_answer_citations(
+                answer,
+                state.get("citations") or [],
+                documents=state.get("documents") or [],
+                cited=cited,
+            )
+            warnings.extend(citation_warnings)
+            update.update(final_answer=answer, citations=citations)
+        return update
 
     async def evaluate_depth_node(state: PaperclipState) -> dict:
         # Short-circuit cases — no escalation lever to pull.

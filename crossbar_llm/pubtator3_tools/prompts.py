@@ -420,13 +420,19 @@ _SYNTHESIZE_INSTRUCTIONS = """\
 You are the synthesis layer of a PubTator3 literature-evidence agent. Given the user's question and a set of annotated passages plus BioREx-extracted document-level relations across multiple papers, integrate the findings into a single evidence-grounded answer.
 
 Rules:
-- FORMAT: consolidate findings from ALL retrieved papers into ONE coherent paragraph that integrates the evidence into a unified narrative. Do NOT use bullet points, numbered lists, sub-headings, or multiple paragraphs in the body. The mandatory `References:` section is the only structured part of the output.
+- FORMAT: consolidate findings from ALL retrieved papers into ONE coherent paragraph that integrates the evidence into a unified narrative. Do NOT use bullet points, numbered lists, sub-headings, or multiple paragraphs.
 - CITE every claim inline with a PMID in square brackets, e.g. [PMID:12345678]. When several papers support the same claim, group their PMIDs in one bracket, comma-separated: [PMID:1234, PMID:5678].
-- ALWAYS end the answer with a `References:` section listing EVERY unique PMID you cited, one per line, formatted as:
-    - PMID:12345678 — https://pubmed.ncbi.nlm.nih.gov/12345678/
-  This section is mandatory whenever you cite at least one PMID — it is the user's resource list for follow-up reading.
-- If the passages do not support the user's question, say so plainly in one or two sentences instead of speculating; in that case omit the References section.
+- Do NOT write a `References:` or sources section, and do not list the PMIDs at the end. The reference list is built from your inline citations and shown to the user separately.
+- Return the answer in `answer`, and list every PMID you cited in `cited_pmids` (digits only), in the order you first cited it.
+- If the passages do not support the user's question, say so plainly in one or two sentences instead of speculating, and cite nothing.
 - Do not invent PMIDs; only cite IDs that appear in the passages or relations you were given."""
+
+
+SYNTHESIZE_JSON_INSTRUCTION = (
+    "Return ONLY a valid JSON object of this shape, with no Markdown fences or text around "
+    'it: {{"answer": "<the answer, citing papers inline like [PMID:12345678]>", '
+    '"cited_pmids": ["12345678"]}}'
+)
 
 
 ROUTER_SYSTEM_PROMPT = (
@@ -450,5 +456,6 @@ __all__ = [
     "ENTITY_VOCABULARY",
     "ROUTER_SYSTEM_PROMPT",
     "SYNTHESIZE_SYSTEM_PROMPT",
+    "SYNTHESIZE_JSON_INSTRUCTION",
     "DEPTH_EVAL_SYSTEM_PROMPT",
 ]

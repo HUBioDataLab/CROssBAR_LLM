@@ -8,6 +8,7 @@ fakes via the `build_graph(router=..., synthesizer=..., evaluator=...)` seams.
 from __future__ import annotations
 
 from crossbar_llm.paperclip_tools.agent import build_graph
+from crossbar_llm.paperclip_tools.answer_citations import source_labels
 from crossbar_llm.paperclip_tools.schemas import (
     PaperclipDepthEvaluation,
     PaperclipRouterDecision,
@@ -120,10 +121,10 @@ def _router(qtype="keyword_search", *, source="pmc", query="topic query",
 
 
 async def _synth(state):
-    refs = " ".join(f"[{c.ref_num}]" for c in state.get("citations", []))
-    return f"Answer citing {refs}. References: " + "; ".join(
-        f"[{c.ref_num}] {c.doc_id} doi:{c.doi}" for c in state.get("citations", [])
-    )
+    """Cites every retrieved paper by its label, as the synthesis prompt asks."""
+    labels = source_labels(state.get("citations", []))
+    cited = ", ".join(labels[c.doc_id] for c in state.get("citations", []))
+    return f"Answer citing [{cited}]."
 
 
 async def test_keyword_search_happy_path():
@@ -134,7 +135,7 @@ async def test_keyword_search_happy_path():
     assert [h.doc_id for h in out["hits"]] == ["PMC1", "PMC2"]
     assert [c.ref_num for c in out["citations"]] == [1, 2]
     assert out["citations"][0].url == "https://citations.gxl.ai/papers/PMC1"
-    assert "[1]" in out["final_answer"]
+    assert "[PMCID:PMC1, PMCID:PMC2]" in out["final_answer"]
     # No full text requested -> no content fetch.
     assert adapter.content_calls == []
 
@@ -577,7 +578,7 @@ async def test_sql_aggregate_falls_back_to_search_on_query_error():
     assert out["sql_error"] == 'PaperclipError: relation "documents" does not exist'
     # Fell through to the normal paper-citation path, not left empty.
     assert out["citations"]
-    assert "[1]" in out["final_answer"]
+    assert "[PMCID:PMC1" in out["final_answer"]
 
 
 async def test_sql_aggregate_with_no_query_falls_back_to_search():

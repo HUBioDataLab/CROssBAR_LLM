@@ -387,16 +387,29 @@ def _parse_document_relation(raw: dict, *, doc_pmid: int) -> DocumentRelation:
         score=_safe_float(infons.get("score")),
     )
 
+def _document_title(passages: list[dict]) -> str:
+    """The article's own title.
+
+    Full-text (PMC) exports mark it `section_type: TITLE` (type `front`), and
+    reuse `type: title` for back-matter headings such as "Author Contributions"
+    and "References", so the section type is checked first. Abstract-only
+    exports have no section types and mark the title `type: title`.
+    """
+    for p in passages:
+        if (p.get("infons") or {}).get("section_type") == "TITLE":
+            return p.get("text") or ""
+    for p in passages:
+        infons = p.get("infons") or {}
+        if infons.get("type") == "title" and not infons.get("section_type"):
+            return p.get("text") or ""
+    return ""
+
+
 def _parse_document(raw: dict) -> PubTator3Document:
     """One doc within the {'PubTator3': [...]} array."""
     pmid = int(raw["pmid"])
     pmcid = raw.get("pmcid")
-
-    title = ""
-    for p in raw.get("passages") or []:
-        if (p.get("infons") or {}).get("type") == "title":
-            title = p.get("text") or ""
-            break
+    title = _document_title(raw.get("passages") or [])
 
     passages = [
         p for p in (

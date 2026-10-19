@@ -194,6 +194,38 @@ def test_full_text_parser_uses_section_type_and_drops_boilerplate():
 # turned that into an empty result — one new relation type discarded all 352
 # partners of a query.
 
+def test_full_text_title_is_the_article_title_not_a_back_matter_heading():
+    """Shaped like a real PMC export (PMID 34884858): the article title is
+    `section_type: TITLE`, while back-matter headings reuse `type: title`.
+    Taking the first `type: title` passage named papers "Author Contributions"
+    or "References" in the citations shown to users."""
+    raw_doc = {
+        "pmid": "34884858",
+        "passages": [
+            {"infons": {"type": "front", "section_type": "TITLE"},
+             "text": "The Expression Pattern of Genes Related to Melanogenesis"},
+            {"infons": {"type": "abstract", "section_type": "ABSTRACT"}, "text": "..."},
+            {"infons": {"type": "title", "section_type": "AUTH_CONT"},
+             "text": "Author Contributions"},
+            {"infons": {"type": "title", "section_type": "REF"}, "text": "References"},
+        ],
+    }
+    assert _parse_document(raw_doc).title == (
+        "The Expression Pattern of Genes Related to Melanogenesis"
+    )
+
+
+def test_abstract_only_title_comes_from_the_title_passage():
+    raw_doc = {
+        "pmid": "42008507",
+        "passages": [
+            {"infons": {"type": "title"}, "text": "Immune-related hub genes in psoriasis"},
+            {"infons": {"type": "abstract"}, "text": "BACKGROUND: ..."},
+        ],
+    }
+    assert _parse_document(raw_doc).title == "Immune-related hub genes in psoriasis"
+
+
 def test_parse_items_skips_only_the_bad_record():
     from crossbar_llm.pubtator3_tools.client import SearchHit, _parse_items
 
