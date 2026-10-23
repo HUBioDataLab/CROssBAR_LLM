@@ -157,18 +157,21 @@ class LiteratureService:
         ]
 
     def _pubtator_citations(self, state: dict[str, Any]) -> list[dict[str, Any]]:
-        citations: list[dict[str, Any]] = []
-        seen_pmids: set[str] = set()
+        """The papers the answer cites, in the order it cites them.
+
+        `cited_pmids` is set by the agent's synthesis step. A result without it
+        (no synthesis ran) falls back to every retrieved document.
+        """
+        documents: dict[str, Any] = {}
         for document in state.get("documents") or []:
-            if len(citations) >= self.settings.literature_max_citations:
-                break
             pmid = getattr(document, "pmid", None)
-            if pmid is None:
-                continue
-            pmid = str(pmid)
-            if pmid in seen_pmids:
-                continue
-            seen_pmids.add(pmid)
+            if pmid is not None:
+                documents.setdefault(str(pmid), document)
+        cited = state.get("cited_pmids")
+        pmids = list(dict.fromkeys(str(p) for p in cited)) if cited is not None else list(documents)
+        citations: list[dict[str, Any]] = []
+        for pmid in pmids[: self.settings.literature_max_citations]:
+            document = documents.get(pmid)
             citations.append(
                 {
                     "pmid": pmid,

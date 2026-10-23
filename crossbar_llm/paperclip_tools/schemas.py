@@ -278,10 +278,45 @@ class PaperclipDepthEvaluation(BaseModel):
     rationale: str = Field("", description="One-sentence justification for the verdict.")
 
 
+class PaperclipCitedSource(BaseModel):
+    """One paper the synthesized answer cites."""
+    source: str = Field(
+        description=(
+            "The paper's label exactly as shown in the evidence, without brackets, "
+            "e.g. 'PMID:12345678', 'PMCID:PMC1234567' or 'DOI:10.1000/xyz'."
+        )
+    )
+    lines: str | None = Field(
+        None,
+        description=(
+            "Only when this paper's evidence is full text shown with `L<n>:` line "
+            "prefixes: the line(s) supporting your claims, e.g. 'L45', 'L45-L52' "
+            "or 'L45,120,210'. Null for abstracts and map extractions."
+        ),
+    )
+
+
+class PaperclipSynthesis(BaseModel):
+    """The synthesizer's output: the answer, and the papers it cites."""
+    answer: str = Field(
+        description=(
+            "The answer, citing papers inline by label in square brackets, e.g. "
+            "[PMID:12345678]. No references section."
+        )
+    )
+    cited: list[PaperclipCitedSource] = Field(
+        default_factory=list,
+        description="Every paper cited in `answer`, in the order first cited. Empty if none.",
+    )
+
+
 class Citation(BaseModel):
     """A resolved, citable reference threaded into the final answer. Every field
     that can ground provenance (doi/pmid/url) is carried so the top-level graph /
-    API can render a proper reference list."""
+    API can render a proper reference list.
+
+    After synthesis, `citations` holds only the papers the answer cites, in the
+    order it cites them; `ref_num` is that position, starting at 1."""
     ref_num: int
     doc_id: str
     title: str = ""
@@ -352,6 +387,8 @@ __all__ = [
     "PaperclipSourceChoice",
     "PaperclipRouterDecision",
     "PaperclipDepthEvaluation",
+    "PaperclipCitedSource",
+    "PaperclipSynthesis",
     "Citation",
     "PaperContext",
     "PaperclipState",

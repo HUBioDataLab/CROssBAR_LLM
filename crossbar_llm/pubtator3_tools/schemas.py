@@ -235,6 +235,23 @@ class DepthEvaluation(BaseModel):
     rationale: str = Field("", description="One-sentence justification for the verdict.")
 
 
+class PubTator3Synthesis(BaseModel):
+    """The synthesizer's output: the answer, and the PMIDs it cites."""
+    answer: str = Field(
+        description=(
+            "The answer, citing papers inline as [PMID:12345678]. "
+            "No references section."
+        )
+    )
+    cited_pmids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Every PMID cited in `answer`, digits only, in the order first cited. "
+            "Empty if none."
+        ),
+    )
+
+
 class PubTator3State(TypedDict, total=False):
     question: str
 
@@ -259,6 +276,9 @@ class PubTator3State(TypedDict, total=False):
     passages: list[Passage]
     document_relations: list[DocumentRelation]
     final_answer: str | None
+    # PMIDs the answer cites, in order of first citation: the run's reference
+    # list. Unset until synthesis runs.
+    cited_pmids: list[str]
 
     depth_sufficient: bool
     depth_missing: str | None
@@ -279,6 +299,7 @@ __all__ = [
     "EntityMention",
     "RouterDecision",
     "DepthEvaluation",
+    "PubTator3Synthesis",
     "PubTator3State",
     "RouterFn",
     "SynthesizerFn",

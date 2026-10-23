@@ -11,6 +11,7 @@ other changes.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, TypeVar
 
 from langchain_core.language_models import BaseChatModel
@@ -137,7 +138,60 @@ async def _ainvoke_structured_with_json_fallback(
         ) from json_error
 
 
+def _salvage_answer_field(text: str) -> str | None:
+    """The `answer` string from a JSON reply too broken to parse whole."""
+    match = re.search(r'"answer"\s*:\s*"((?:[^"\\]|\\.)*)"', text, re.DOTALL)
+    if match is None:
+        return None
+    try:
+        return json.loads(f'"{match.group(1)}"')
+    except json.JSONDecodeError:
+        return None
+
+
+async def _ainvoke_structured_or_prose(
+    *,
+    chat_model: BaseChatModel,
+    prompt: ChatPromptTemplate,
+    schema: type[StructuredModel],
+    values: dict[str, Any],
+    json_instruction: str,
+    metadata: dict[str, Any] | None = None,
+) -> tuple[StructuredModel | None, str | None, bool]:
+    """Structured output for a call whose main payload is prose, e.g. an answer.
+
+    Same two attempts as `_ainvoke_structured_with_json_fallback`, but when the
+    JSON retry comes back as plain prose, that prose is still a usable answer,
+    so it is returned instead of failing the run. Returns
+    `(parsed, None, used_json_fallback)` or `(None, prose, True)`. Only a failed
+    model call raises.
+    """
+    config = {"metadata": metadata} if metadata else None
+    try:
+        parsed = await (prompt | chat_model.with_structured_output(schema)).ainvoke(
+            values, config=config
+        )
+        if parsed is not None:
+            if not isinstance(parsed, schema):
+                parsed = schema.model_validate(parsed)
+            return parsed, None, False
+    except Exception:
+        pass
+
+    json_prompt = prompt + HumanMessagePromptTemplate.from_template(json_instruction)
+    msg = await (json_prompt | chat_model).ainvoke(values, config=config)
+    try:
+        data = _extract_json_object(_message_content_to_text(msg))
+        return schema.model_validate(data), None, True
+    except Exception:
+        prose = _answer_text(msg)
+        if prose.lstrip().startswith(("{", "```")):
+            prose = _salvage_answer_field(prose) or prose
+        return None, prose, True
+
+
 __all__ = [
+    "_ainvoke_structured_or_prose",
     "_ainvoke_structured_with_json_fallback",
     "_answer_text",
     "_extract_json_object",

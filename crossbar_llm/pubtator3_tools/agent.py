@@ -20,9 +20,10 @@ from langchain_core.prompts import (
 )
 from langgraph.graph import END, StateGraph
 
+from crossbar_llm.pubtator3_tools.answer_citations import resolve_answer_pmids
 from crossbar_llm.pubtator3_tools.structured_output import (
+    _ainvoke_structured_or_prose,
     _ainvoke_structured_with_json_fallback,
-    _answer_text,
     _extract_json_object,
     _message_content_to_text,
 )
@@ -37,6 +38,7 @@ from crossbar_llm.pubtator3_tools.nodes import (
 from crossbar_llm.pubtator3_tools.prompts import (
     DEPTH_EVAL_SYSTEM_PROMPT,
     ROUTER_SYSTEM_PROMPT,
+    SYNTHESIZE_JSON_INSTRUCTION,
     SYNTHESIZE_SYSTEM_PROMPT,
 )
 from crossbar_llm.pubtator3_tools.schemas import (
@@ -44,6 +46,7 @@ from crossbar_llm.pubtator3_tools.schemas import (
     EntityMention,
     EvaluatorFn,
     PubTator3State,
+    PubTator3Synthesis,
     QuestionType,
     RouterDecision,
     RouterFn,
@@ -209,6 +212,8 @@ def build_graph(
         return await export_node(state, max_documents=max_documents)
 
     async def synthesize_node(state: PubTator3State) -> dict:
+        warnings = list(state.get("warnings", []))
+        cited = None
         if synthesizer is not None:
             answer = await synthesizer(state)
         else:
@@ -273,18 +278,40 @@ def build_graph(
                     "Write the final answer."
                 ),
             ])
-            chain = prompt | chat_model
-            msg = await chain.ainvoke(
-                {
+            parsed, prose, used_json_fallback = await _ainvoke_structured_or_prose(
+                chat_model=chat_model,
+                prompt=prompt,
+                schema=PubTator3Synthesis,
+                values={
                     "question": state["question"],
                     "evidence": evidence,
                     "availability_note": availability_note,
                     "chat_history": state.get("chat_history", []),
                 },
-                config={"metadata": {"node_name": "pubtator3.synthesize"}},
+                json_instruction=SYNTHESIZE_JSON_INSTRUCTION,
+                metadata={"node_name": "pubtator3.synthesize"},
             )
-            answer = _answer_text(msg)
-        return {"final_answer": answer}
+            if parsed is not None:
+                answer, cited = parsed.answer, parsed.cited_pmids
+                if used_json_fallback:
+                    warnings.append(
+                        "synthesize structured-output unavailable; used JSON fallback."
+                    )
+            else:
+                answer = prose or ""
+                warnings.append(
+                    "synthesize structured-output unavailable; citations were "
+                    "read from the answer text."
+                )
+        # The answer cites PMIDs inline; the reference list is built from those
+        # citations, never from a list the model writes into the text.
+        evidence_pmids = [p.pmid for p in state.get("passages") or []]
+        evidence_pmids += [r.pmid for r in state.get("document_relations") or []]
+        answer, pmids, citation_warnings = resolve_answer_pmids(
+            answer, evidence_pmids, cited=cited
+        )
+        warnings.extend(citation_warnings)
+        return {"final_answer": answer, "cited_pmids": pmids, "warnings": warnings}
 
     async def evaluate_depth_node(state: PubTator3State) -> dict:
         # Short-circuit cases — no escalation lever to pull. Each path tags

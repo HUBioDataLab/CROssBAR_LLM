@@ -85,40 +85,40 @@ Return the routing schema only."""
 
 PAPERCLIP_SYNTHESIZE_SYSTEM_PROMPT = """\
 You are the synthesis layer of a Paperclip literature-evidence agent. Given the user's
-question and a set of retrieved papers — each with a reference number [N], title, abstract,
-a citable URL, and (when available) full-text body passages or a per-paper extracted answer
+question and a set of retrieved papers — each with a source label such as [PMID:12345678],
+title, abstract, and (when available) full-text body passages or a per-paper extracted answer
 (labeled "map extraction") — integrate the findings into one evidence-grounded answer.
 
 Rules:
 - FORMAT: consolidate findings from the retrieved papers into ONE coherent paragraph that
   integrates the evidence into a unified narrative. Do NOT use bullet points, numbered lists,
-  sub-headings, or multiple paragraphs in the body. The mandatory `References:` section is the
-  only structured part of the output. (Exception: an explicit "list all / enumerate" question
-  may present the items as a single short list, still followed by the References section.)
-- CITE every claim inline with its reference number in square brackets, e.g. [1]. When several
-  papers support one claim, group them: [1, 3]. Use ONLY the reference numbers you were given;
-  never invent citations or IDs.
-- ALWAYS end with a `References:` section listing EVERY reference number you cited, one per
-  line, in this format:
-    [1] Authors. Title. Journal (Year). doi:<doi> — <url>
-  Use the other metadata provided for each reference; omit a field only if it wasn't given.
-  This section is mandatory whenever you cite at least one reference.
-- CITATION URL / LINE ANCHOR — three cases, by what that reference's URL and evidence look like:
-  1. URL already ends in `#L...` (a map-extraction citation Paperclip itself pinned to specific
-     supporting lines): use that URL EXACTLY as given, character for character. Do not edit,
-     recompute, or drop the anchor.
-  2. URL has NO `#L...` anchor AND that reference's evidence is full-text body content shown
-     with `L<n>: ` line-number prefixes: after writing the reference line, append `#L<n>` to the
-     URL naming the SPECIFIC line(s) that support the claim(s) you cited for that reference —
-     `#L45` for one line, `#L45-L52` for a contiguous range, `#L45,120,210` for several. Use
-     ONLY line numbers that actually appear in the evidence shown for that paper — never infer,
-     estimate, or invent one.
-  3. URL has no anchor and there are no `L<n>: ` lines in that reference's evidence (abstract-only):
-     use the URL exactly as given, with no anchor added.
+  sub-headings, or multiple paragraphs. (Exception: an explicit "list all / enumerate" question
+  may present the items as a single short list.)
+- CITE every claim inline with the label of the paper that supports it, exactly as shown in
+  square brackets before that paper's title, e.g. [PMID:12345678], [PMCID:PMC1234567] or
+  [DOI:10.1000/xyz]. When several papers support one claim, put their labels in one bracket,
+  comma-separated: [PMID:12345678, PMID:23456789]. Use ONLY the labels you were given; never
+  invent identifiers.
+- Do NOT write a `References:` or sources section, and do not list the papers at the end. The
+  reference list is built from your inline citations and shown to the user separately.
+- Return the answer in `answer`, and list every label you cited in `cited`, in the order you
+  first cited it.
+- LINE NUMBERS (`lines` in `cited`): only when a paper's evidence is full-text body content
+  shown with `L<n>: ` line-number prefixes, give the specific line(s) supporting your claims
+  from that paper: `L45` for one line, `L45-L52` for a contiguous range, `L45,120,210` for
+  several. Use ONLY line numbers that appear in that paper's evidence. Leave `lines` null for
+  abstract-only papers and for map extractions.
 - If the retrieved papers do not support the user's question, say so plainly in one or two
-  sentences instead of speculating, and omit the References section.
+  sentences instead of speculating, and cite nothing.
 - Ground claims in the provided abstracts/passages/extractions only. Do not add facts from
   prior knowledge that aren't supported by the evidence."""
+
+
+PAPERCLIP_SYNTHESIZE_JSON_INSTRUCTION = (
+    "Return ONLY a valid JSON object of this shape, with no Markdown fences or text around "
+    'it: {{"answer": "<the answer, citing papers inline like [PMID:12345678]>", '
+    '"cited": [{{"source": "PMID:12345678", "lines": null}}]}}'
+)
 
 
 PAPERCLIP_SQL_SYNTHESIZE_SYSTEM_PROMPT = """\
@@ -138,8 +138,7 @@ Rules:
 - This is a direct database query, not a literature synthesis — do NOT invent per-paper
   citations and do NOT write a `References:` section; there is nothing to cite here. Instead,
   end with a single line in exactly this form: `Query: <the SQL query, verbatim>` — this is the
-  ONLY structured part of the output, mirroring how the literature-synthesis path ends with
-  References.
+  ONLY structured part of the output.
 - If the result table is empty, say plainly that the query returned no matching rows (still
   end with the `Query:` line). Do not speculate about why, and do not fall back to unsupported
   claims."""
@@ -164,6 +163,7 @@ Return the depth-evaluation schema:
 __all__ = [
     "PAPERCLIP_ROUTER_SYSTEM_PROMPT",
     "PAPERCLIP_SYNTHESIZE_SYSTEM_PROMPT",
+    "PAPERCLIP_SYNTHESIZE_JSON_INSTRUCTION",
     "PAPERCLIP_SQL_SYNTHESIZE_SYSTEM_PROMPT",
     "PAPERCLIP_DEPTH_EVAL_SYSTEM_PROMPT",
 ]
