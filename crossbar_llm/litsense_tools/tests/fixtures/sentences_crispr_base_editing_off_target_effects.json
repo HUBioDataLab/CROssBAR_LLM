@@ -1,0 +1,953 @@
+[
+  {
+    "pmcid": "PMC12075947",
+    "pmid": 40371346,
+    "text": "However, challenges such as EV specificity (For instance, CRISPR-based editing could optimize exosomal miRNA profiles to minimize off-target effects), pathological context dependency, and translational barriers (Current models often fail to replicate human-specific exosome heterogeneity) must be addressed.",
+    "score": 0.760604499578476,
+    "section": null,
+    "annotations": [
+      "251|5|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC4402539",
+    "pmid": 25800748,
+    "text": "So far, the levels of off-target effects in pooled screens using CRISPR-Cas9-based gene editing remains unclear, although results from the comparison of shRNA and CRISPR-Cas9 screens in the same screening model (for genes whose loss confer resistance to vemurafenib, a BRAF protein kinase inhibitor) in A375 melanoma cells support a low frequency of off-target effects in the CRISPR-Cas9 system.",
+    "score": 0.7583383113145828,
+    "section": null,
+    "annotations": [
+      "303|4|cellline|CVCL:0132",
+      "308|8|disease|MESH:D008545",
+      "254|11|chemical|MESH:D000077484",
+      "269|4|gene|673"
+    ]
+  },
+  {
+    "pmcid": "PMC11752874",
+    "pmid": 39845485,
+    "text": "Thus, CRISPR-based editing studies targeting key SBTs, AtSBT3.",
+    "score": 0.7547712790966034,
+    "section": null,
+    "annotations": [
+      "55|8|gene|840190"
+    ]
+  },
+  {
+    "pmcid": "PMC12094540",
+    "pmid": 39688547,
+    "text": "Recent advancements in CRISPR technology, such as base editing and prime editing, allow for even more precise single-base modifications, minimizing off-target effects (Klinkovskij et al., 2023).",
+    "score": 0.7516493666172027,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC10531628",
+    "pmid": 37762360,
+    "text": "LNPs appear to be a viable method of delivering genome editing technologies such as base editors to the liver, and, indeed, VERVE-101, a single-dose CRISPR base editing therapeutic targeting PCSK9 has recently begun phase 1 b study in patients with heterozygous familial hypercholesterolemia and cardiovascular disease (NCT05398029).",
+    "score": 0.7462188398838043,
+    "section": null,
+    "annotations": [
+      "296|22|disease|MESH:D002318",
+      "191|5|gene|255738",
+      "235|8|species|9606",
+      "124|9|chemical|-",
+      "262|29|disease|MESH:D006938"
+    ]
+  },
+  {
+    "pmcid": "PMC11277268",
+    "pmid": 39062879,
+    "text": "CRISPR/dCas9-based epigenetic editing technology has been widely used in mammals and plants due to its powerful editing and precise targeting ability combined with low off-target effects.",
+    "score": 0.7445298993587494,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8438121",
+    "pmid": 34531863,
+    "text": "The obvious next critical step toward the therapeutic modulation of a protein target identified with genetic approaches is the assessment of its druggability - that is, its susceptibility to be potentially modulated in its effects by drug-like small molecules (typically targeting hydrophobic pockets) or by so called \"biologicals\" (more commonly targeting extracellular domains such as those of receptor proteins or soluble molecules) or by new molecular approaches, such as those based on small interfering RNA, antisense oligonucleotides, mRNA delivery, gene editing with CRISPR-Cas9, and PROteolysis-TArgeting Chimaeras (PROTAC).",
+    "score": 0.7412810856103897,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11274897",
+    "pmid": 39062123,
+    "text": "To assess the specificity of the CRISPR base editing, off-target cleavage activity was investigated at potential sites selected by the web-based prediction tool CRISPOR (, accessed on 17 September 2023).",
+    "score": 0.7411124175786972,
+    "section": "RESULTS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC9633064",
+    "pmid": 36326816,
+    "text": "The CRISPR base editor, by binding its target sequences within or upstream of genes or transcripts, could interfere with transcription and translation and thereby elicit effects that are independent of the desired base edits.",
+    "score": 0.7372729361057281,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC6684841",
+    "pmid": 30836137,
+    "text": "While this restriction is common to all CRISPR-based tools, it is particularly important for BE, as effective editing occurs only in a small window at the 5 ' end of the protospacer (sgRNA target site) (Figure 1b).",
+    "score": 0.7367428231239319,
+    "section": "INTRO",
+    "annotations": [
+      "40|6|gene|70873",
+      "93|2|disease|MESH:D019292"
+    ]
+  },
+  {
+    "pmcid": "PMC8470190",
+    "pmid": 34576226,
+    "text": "CRISPR-nickase, according to Satomura A et al., has no restrictions on editable bases, and off-target effects were not found.",
+    "score": 0.7352934175729752,
+    "section": null,
+    "annotations": [
+      "0|6|gene|70873"
+    ]
+  },
+  {
+    "pmcid": "PMC10239531",
+    "pmid": 37284583,
+    "text": "Scaffold-based systems are effective methods for improving the efficiency of CRISPR/Cas9 targeting gene editing delivery systems.",
+    "score": 0.735073847770691,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC10775399",
+    "pmid": 38196579,
+    "text": "One of the major concerns with CRISPR-Cas9 based genome editing is off-target effects.",
+    "score": 0.733918269276619,
+    "section": "RESULTS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8178887",
+    "pmid": 34090531,
+    "text": "Last, but not least, genome editing technologies, particularly CRISPR, can be utilized through different ways and directions either to reveal and validate novel drug targets or to explore effects on drug activity, based on the genetic makeup.",
+    "score": 0.7337865650653839,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC7948211",
+    "pmid": 33718690,
+    "text": "For safe human translation, CRISPR-based gene editing must have no off-target effects in the genome.",
+    "score": 0.7329144543409347,
+    "section": "INTRO",
+    "annotations": [
+      "9|5|species|9606"
+    ]
+  },
+  {
+    "pmcid": "PMC9100877",
+    "pmid": 34463266,
+    "text": "Figure 5C shows that our CRISPR-based gene-specific microRNA antagonism approach preserves CFTR localization and function in HIV Tat treated NHBE ALI cultures demonstrating that CRISPR-based editing of the microRNA target sites in the CFTR 3'UTR does not affect CFTR trafficking and activity.",
+    "score": 0.7327288347482681,
+    "section": "RESULTS",
+    "annotations": [
+      "262|4|gene|281067",
+      "125|3|species|11676",
+      "235|4|gene|281067",
+      "91|4|gene|281067",
+      "141|4|cellline|CVCL:0287"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 42160034,
+    "text": "Traditional approaches including hybridization, mutagenesis, and CRISPR-based editing enable targeted modification of endogenous DNA, yet remain constrained by natural sequence diversity.",
+    "score": 0.7303179931640625,
+    "section": "abstract",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8336442",
+    "pmid": 34252965,
+    "text": "High-throughput wet-lab screening methods, including chemical liraries, pooled RNAi screening and CRISPR-based genome editing technology have been used to find SLs, but they are thwarted by varius barriers such as high cost, off-target effects, and batch effects.",
+    "score": 0.7282431691884994,
+    "section": "INTRO",
+    "annotations": [
+      "160|3|chemical|MESH:D012967"
+    ]
+  },
+  {
+    "pmcid": "PMC12734377",
+    "pmid": 41440982,
+    "text": "The research group aims to use future studies to focus on minimizing off-target effects of CRISPR-Cas9 base editing, by exploring alternative gene delivery approaches before advancing towards the clinical stage.",
+    "score": 0.7272172701358796,
+    "section": "CONCL",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8513455",
+    "pmid": 34693000,
+    "text": "In gene editing using the CRISPR/Cas9 system, off-target mutations have had serious adverse effects, although gene editing using a base editor that can minimize off-target effects, in which double-stranded DNA breaks are not included, has been reported in recent years and future advancements are expected.",
+    "score": 0.7269587588310241,
+    "section": "CONCL",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12491117",
+    "pmid": 41037193,
+    "text": "Off-target effects from CRISPR-based gene editing, risks of insertional mutagenesis from viral vectors, and immune-related toxicities all pose challenges for clinical approval.",
+    "score": 0.7269172745943069,
+    "section": "RESULTS",
+    "annotations": [
+      "123|10|disease|MESH:D064420"
+    ]
+  },
+  {
+    "pmcid": "PMC10036844",
+    "pmid": 36969373,
+    "text": "Such hesitation is obviously rooted in the current lack of methods for safe, targeted, and potent in vivo delivery, but also reflects some of the intrinsic challenges of conventional CRISPR/Cas9-based genome editing, including excess by-product formation (indels, translocations, and inversions), potential chromothripsis, and extensive off-target effects, which arise as a result of the Cas9-induced DNA double-stranded break (DSB).",
+    "score": 0.7251092022657394,
+    "section": "INTRO",
+    "annotations": [
+      "190|4|gene|None",
+      "388|4|gene|None",
+      "183|6|gene|None"
+    ]
+  },
+  {
+    "pmcid": "PMC7553077",
+    "pmid": 33117361,
+    "text": "However, both genome base editing and the nickase variant of the CRISPR system enable several genes to be targeted simultaneously without any adverse effects.",
+    "score": 0.7243613088130951,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11189492",
+    "pmid": 38890276,
+    "text": "However, for applications requiring the generation of multisite (>10) combinatorial genomic modifications with base-pair (bp)-level precision, conventional or modified CRISPR-based genome editing systems are inadequate due to inherent limitations, such as off-target effects, cytotoxicity, editing accuracy, and multiplexing ceiling.",
+    "score": 0.7230677163600921,
+    "section": "INTRO",
+    "annotations": [
+      "276|12|disease|MESH:D064420"
+    ]
+  },
+  {
+    "pmcid": "PMC13020330",
+    "pmid": 41709314,
+    "text": "In viral infection models, EVs loaded with clustered regularly interspaced short palindromic repeats (CRISPR) Cas9 systems carrying HPV or HBV specific guide RNAs have effectively targeted and cleaved viral DNA within infected host cells, reducing viral persistence and offering a foundation for gene-editing-based antiviral therapy.",
+    "score": 0.719218629002571,
+    "section": "METHODS",
+    "annotations": [
+      "139|3|species|None",
+      "3|15|disease|MESH:D014777",
+      "132|3|species|None"
+    ]
+  },
+  {
+    "pmcid": "PMC5198186",
+    "pmid": 28074097,
+    "text": "This can best be accomplished by combining the benefits of several precise genome-editing tools such as powerful molecular scissors, including zinc-finger nucleases (ZFNs), transcription activator-like effector nucleases (TALENs), RNA-guided endonucleases from the microbial clustered regularly interspaced short palindromic repeat-Cas9 (CRISPR-Cas9) nuclease systems, or bacterial artificial chromosome- (BAC-) based HR, enabling the target genes to be effectively inserted, deleted, or replaced in the genome as needed.",
+    "score": 0.7189580929279328,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC7939134",
+    "pmid": 33688634,
+    "text": "In trails employing CRISPR-based editing, off-targeting by sgRNAs and larger scale chromosomal alterations and losses must be assessed in the setting of clinical trials.",
+    "score": 0.7185424500703812,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11182599",
+    "pmid": 38386569,
+    "text": "CRISPR-based editing can target a single gene as well as multiple orthologous genes, such as the five BnaTFL1 gene copies; CRISPR/Cas9 gene editing technology has been used to generate different mutants such as bnac03.tfl1a, bnaa02.tfl1 and bnac03.tfl1/bnac09.tfl1 (Sriboon et al.,).",
+    "score": 0.7143313527107239,
+    "section": "DISCUSS",
+    "annotations": [
+      "260|4|gene|831683",
+      "248|4|gene|831683",
+      "232|4|gene|831683"
+    ]
+  },
+  {
+    "pmcid": "PMC6928934",
+    "pmid": 31771289,
+    "text": "New CRISPR-Cas9-based tools of gene editing with diminished off-targeting effects are evolving and seem to be more promising for the correction of individual mutations.",
+    "score": 0.7136840385198593,
+    "section": "abstract",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC6131778",
+    "pmid": 30200981,
+    "text": "Determining off-target effects from CRISPR/Cas9-based genome editing in a thorough and highly sensitive manner has been a great challenge in the field.",
+    "score": 0.7129469752311707,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8230432",
+    "pmid": 34200913,
+    "text": "Aptamers have been used to recruit DNA modifying enzymes for base editing, to improve the efficiency and reduce off-target effects of HDR-mediated gene editing, and to target labeled CRISPR-Cas complexes to specific subcellular locations to improve imaging techniques, demonstrating that small, ligand-binding RNA devices can be integrated into CRISPR-Cas systems for a variety of purposes.",
+    "score": 0.7129084104299546,
+    "section": null,
+    "annotations": [
+      "345|10|gene|None",
+      "183|10|gene|None"
+    ]
+  },
+  {
+    "pmcid": null,
+    "pmid": 41108914,
+    "text": "The review evaluates translational applications of genome and epigenome engineering, including CRISPR-based editing and targeted epigenetic modulation, as strategies for crop Fe biofortification.",
+    "score": 0.71052374958992,
+    "section": "abstract",
+    "annotations": [
+      "175|2|chemical|MESH:D007501"
+    ]
+  },
+  {
+    "pmcid": "PMC10524382",
+    "pmid": 37210864,
+    "text": "Most regulatory authorities are primarily concerned with the safety of the product, so the key concern with relation to CRISPR-based editing is off-target editing.",
+    "score": 0.7086134028434754,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC9100877",
+    "pmid": 34463266,
+    "text": "CRISPR-based editing of the miRNA target site preserves CFTR mRNA and function in airway epithelial cells",
+    "score": 0.7063262605667114,
+    "section": "abstract",
+    "annotations": [
+      "56|4|gene|281067"
+    ]
+  },
+  {
+    "pmcid": "PMC11626537",
+    "pmid": 39655309,
+    "text": "We have now conducted a more comprehensive analysis of on-target and off-target effects after liver-directed AAV-based CRISPR-Cas9-mediated gene editing and vector integrations using whole-genome sequencing (WGS) and shearing extension primer tag selection ligation-mediated PCR (S-EPTS/LM-PCR), respectively.",
+    "score": 0.7030607777833938,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12096755",
+    "pmid": 40405306,
+    "text": "Since its discovery, several improvements have improved CRISPR-Cas9 precision and versatility: high-fidelity Cas9 variants, like SpCas9-HF1, have been developed to reduce off-target effects; newer technologies, such as base editing and prime editing, allow single-nucleotide changes without introducing double-strand breaks, improving safety for therapeutic applications; and CRISPR interference (CRISPRi) and activation (CRISPRa) have been adapted for gene regulation instead of gene editing.",
+    "score": 0.7028112602233887,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12512572",
+    "pmid": 41068915,
+    "text": "The development of specific inhibitors, mimetics, or CRISPR-based editing systems targeting writer, reader, or eraser proteins offers a potential avenue for precision medicine.",
+    "score": 0.6984467512369156,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11182597",
+    "pmid": 38363049,
+    "text": "Additionally, the off-target effects are unavoidable in all CRISPR/Cas9- and CRISPR/Cas13-based editing systems.",
+    "score": 0.6980969840288163,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC9100877",
+    "pmid": 34463266,
+    "text": "CRISPR-based editing of the miRNA target sites in CFTR 3'UTR was used to determine rescue of CFTR mRNA and function in airway epithelial cell lines and in primary human bronchial epithelial cells exposed to TGF-beta and Tat.",
+    "score": 0.6971246707439422,
+    "section": "abstract",
+    "annotations": [
+      "93|4|gene|1080",
+      "207|8|gene|7040",
+      "163|5|species|9606",
+      "50|4|gene|1080"
+    ]
+  },
+  {
+    "pmcid": "PMC12728356",
+    "pmid": 41451409,
+    "text": "Technologies such as CRISPR-based genome editing are allowing scientists to edit individual amino acid transporters and prodrug-activating enzymes with greater precision than ever before, assisting in matching amino acid conjugates to their biological target more effectively.",
+    "score": 0.6952775627374649,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC9554708",
+    "pmid": 36246880,
+    "text": "Besides, epidrug-based epigenetic therapies could have more pronounced off-target effects than methods for targeted epigenome editing such as CRISPR/dCas9 methodology.",
+    "score": 0.6950442904233932,
+    "section": null,
+    "annotations": [
+      "142|6|gene|70873"
+    ]
+  },
+  {
+    "pmcid": "PMC6039237",
+    "pmid": 29867232,
+    "text": "Since CRISPR/Cas9-based gene editing can produce off-target effects, we used hepatic shFstAAV TBG infection to validate the benefit of reducing hepatic Fst mRNA in LDKO-mice (Supplemental Fig. 6a).",
+    "score": 0.6938480281829834,
+    "section": "RESULTS",
+    "annotations": [
+      "152|3|gene|14313",
+      "94|3|gene|331535",
+      "169|4|species|10090"
+    ]
+  },
+  {
+    "pmcid": "PMC10840115",
+    "pmid": 38317953,
+    "text": "In addition, CRISPR-Cas9-based engineered m6A \"editing\" and CRISPR-Cas13-based targeted RNA methylation systems have been employed to assess the effects and functional roles of individual m6A modifications.",
+    "score": 0.6938388931751251,
+    "section": "CONCL",
+    "annotations": [
+      "188|3|chemical|MESH:C005955",
+      "42|3|chemical|MESH:C005955"
+    ]
+  },
+  {
+    "pmcid": "PMC8235755",
+    "pmid": 34208669,
+    "text": "Off-target effects are a major limitation of current genome-editing methods based on the cleavage of a target gene using CRISPR/Cas9, as Cas9 often cuts the target DNA even without perfect RNA:DNA base pairing between the sgRNA and the DNA target.",
+    "score": 0.6934616738557816,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8020163",
+    "pmid": 33842017,
+    "text": "The most advantage is the specificity for CRISPR/Cas-based gene editing; it can be targeted on an individual gene without other side effects.",
+    "score": 0.6913147586584091,
+    "section": null,
+    "annotations": [
+      "49|3|gene|9564"
+    ]
+  },
+  {
+    "pmcid": "PMC10185539",
+    "pmid": 37188660,
+    "text": "In low-density lipoprotein receptor-deficient non-human primates administered a CRISPR base editing therapy targeting the ANGPTL3 gene, the introduction of an optimized GalNAc-based asialoglycoprotein receptor ligand to the nanoparticle surface increased liver editing from 5% to 61% with minimal editing in nontargeted tissues.",
+    "score": 0.6911663854122162,
+    "section": "abstract",
+    "annotations": [
+      "3|32|gene|3949",
+      "50|5|species|9606",
+      "169|6|chemical|-",
+      "122|7|gene|27329"
+    ]
+  },
+  {
+    "pmcid": "PMC11434219",
+    "pmid": 38943253,
+    "text": "Here, we created an effective nanocapsule-based CRISPR/Cas12a nanomedicine selectively targeting brain tumors for in vivo GBM therapy by utilizing Cas12a's multiplexed gene editing capabilities, which allow for combinatorial targeting via a single crRNA (84 nt).",
+    "score": 0.690784033536911,
+    "section": "INTRO",
+    "annotations": [
+      "147|6|chemical|-",
+      "122|3|disease|MESH:D005909",
+      "97|12|disease|MESH:D001932",
+      "55|6|chemical|-"
+    ]
+  },
+  {
+    "pmcid": "PMC7498335",
+    "pmid": 32687165,
+    "text": "Consequentially, this delay would reduce the efficiency of CRISPR/Cas9-based genome editing by reducing the frequency of modified cells, and the beneficial effect of removal of Cas9 from its target sequence via destabilization of Cas9 itself would be due to reducing this cell cycle delay.",
+    "score": 0.6907689183950424,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": null,
+    "pmid": 32597846,
+    "text": "Similar to other genome editing systems, CRISPR-Cas9-based methods also require efficient and effective transformation protocols as well as access to good quality sequence data for the design of the targeting RNA and DNA molecules.",
+    "score": 0.6899234592914582,
+    "section": "abstract",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11759621",
+    "pmid": 39843407,
+    "text": "In order to eliminate the off-target effects caused by CRISPR RNA-guided base editing, we constructed the nt5 complementation plasmid pSaR-nt5 to express the nt5 gene in S. aureus MT, allowing us to observe the gain-of-function resulting from nt5 gene complementation.",
+    "score": 0.6894442009925842,
+    "section": "RESULTS",
+    "annotations": [
+      "170|12|species|None"
+    ]
+  },
+  {
+    "pmcid": "PMC8225059",
+    "pmid": 34073848,
+    "text": "Some of the notable advances highlighted here include the development of transgene (DNA)-free genome plants, the availability of compatible nucleases, and the development of safe and effective CRISPR delivery vehicles for plant genome editing, multi-gene targeting and complex genome editing, base editing and prime editing to achieve more complex genetic engineering.",
+    "score": 0.6852004247903823,
+    "section": "abstract",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8525404",
+    "pmid": 34713226,
+    "text": "CRISPR-based genome editing generally has issues in off-target effects and mosaicism.",
+    "score": 0.6847044974565506,
+    "section": "CONCL",
+    "annotations": [
+      "0|6|gene|70873"
+    ]
+  },
+  {
+    "pmcid": "PMC12865601",
+    "pmid": 41640466,
+    "text": "Real-time visualization provides a deeper understanding of CRISPR-Cas9 interactions with DNA, its editing efficiency, and potential off-target effects, all of which are crucial for optimizing CRISPR-based genome editing and ensuring its safety in therapeutic applications.",
+    "score": 0.6831682151556016,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8815627",
+    "pmid": 34747296,
+    "text": "Along with this, emerging tools such as artificial miRNAs (amiRNAs) and clustered regularly interspaced short palindromic repeats (CRISPR) based genome editing for improvement of traits and better resilience to climate change have been made possible to avoid non-targeted effects.",
+    "score": 0.6817394810914993,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12123872",
+    "pmid": 40442660,
+    "text": "Clustered regularly interspaced short palindromic repeats (CRISPR)/CRISPR-associated protein 9 (Cas9)-mediated genome knockout and single-base editing were used to determine the effects of rs1950834 on the binding of transcriptional factors and the expression of the target gene LRFN5.",
+    "score": 0.6788962334394455,
+    "section": "abstract",
+    "annotations": [
+      "279|5|gene|145581",
+      "189|9|mutation|rs1950834"
+    ]
+  },
+  {
+    "pmcid": "PMC11234430",
+    "pmid": 38704691,
+    "text": "However, to avoid the dangers arising from gene editing in unwanted tissues, the long-term presence of CRISPR components in the body, and off-target effects on the genome, CRISPR/Cas9 therapeutics in clinical trials are all ex vivo-based therapies.",
+    "score": 0.6776426655054093,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12186667",
+    "pmid": 40538270,
+    "text": "He also introduced their recent retrospective clone isolation technology as a complementary idea to DNA event recording, discussed a cell barcoding system using CRISPR base editing and showed how a target barcoded clone can be isolated from a complex population.",
+    "score": 0.6760928690433502,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11286548",
+    "pmid": 39081515,
+    "text": "Over the past few years, as science and technology have advanced, the CRISPR-Cas system has evolved from a tool that could only delete or knock out large fragments of genes with high off-target effects into a gene editing system that can efficiently target knockouts, mutations, and deliver more accurate gene editing of specific bases.",
+    "score": 0.6732760375738144,
+    "section": "DISCUSS",
+    "annotations": [
+      "77|3|gene|9564"
+    ]
+  },
+  {
+    "pmcid": "PMC8099660",
+    "pmid": 33910123,
+    "text": "The CRISPR-based system was able to achieve highly specific editing at the targeted loci without clinical toxicity, and the edited T cells effectively targeted tumour cells.",
+    "score": 0.6730300986766815,
+    "section": null,
+    "annotations": [
+      "106|8|disease|MESH:D064420",
+      "160|6|disease|MESH:D009369"
+    ]
+  },
+  {
+    "pmcid": "PMC11976404",
+    "pmid": 40207041,
+    "text": "Coupled with genome editing technologies such as CRISPR/Cas, hiPSC-based models not only allow the creation of isogenic lines to study mutation-specific cardiac phenotypes, but also enable the targeted modulation of gene expression to explore the effects of genetic and epigenetic deficits at the cellular and molecular level.",
+    "score": 0.6730020344257355,
+    "section": "abstract",
+    "annotations": [
+      "153|18|disease|MESH:D006331"
+    ]
+  },
+  {
+    "pmcid": "PMC7465674",
+    "pmid": 32824283,
+    "text": "The use of protoplasts is currently increasing in CRISPR/Cas9-mediated genome editing studies because editing of a target gene via delivery of RNP complexes using protoplast-based technology has more potential to avoid off-target effects compared with Agrobacterium-mediated transformation.",
+    "score": 0.670024728178978,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11127455",
+    "pmid": 38790037,
+    "text": "CRISPR-based gene therapy can offer precise targeting and specific editing of disease-related gene sequences, potentially providing long-lasting treatment effects.",
+    "score": 0.6669834297895432,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12919670",
+    "pmid": 41726586,
+    "text": "Additionally, CRISPR-based gene editing and high-throughput screening of PAI-1 inhibitors could accelerate the development of targeted therapies, potentially combined with senolytics or senomorphics for synergistic effects.",
+    "score": 0.6659397315979004,
+    "section": "CONCL",
+    "annotations": [
+      "73|5|gene|396945"
+    ]
+  },
+  {
+    "pmcid": "PMC9802096",
+    "pmid": 36712324,
+    "text": "Considered together, these results suggest that metabolite-driven acetylation of Cas9 in host cells had inhibitory effects on Cas9 activity and the genome editing application of CRISPR in vivo: blocking the binding of dCas9 to target DNA and impeding its function as a transcriptional repressor or base editor; causing a decrease of Cas9 cleavage activity unable to cut gene.",
+    "score": 0.6652591735124588,
+    "section": "RESULTS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12381116",
+    "pmid": 40858858,
+    "text": "Allele-specific ASO or CRISPR-based editing strategies targeting the mutant huntingtin allele could be integrated within the same delivery system.",
+    "score": 0.6637463879585266,
+    "section": null,
+    "annotations": [
+      "76|10|gene|3064"
+    ]
+  },
+  {
+    "pmcid": "PMC12209235",
+    "pmid": 40600050,
+    "text": "Current epigenetic editing tools, such as those based on the CRISPR-Cas system, exhibit high specificity but still face challenges in completely eliminating off-target effects.",
+    "score": 0.663482791185379,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC10328906",
+    "pmid": 37286732,
+    "text": "A limitation of the CRISPR-dCas9-based epigenetic editing tool is the possible off-target effects due to undesired binding to other genomic regions.",
+    "score": 0.662411122918129,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12094540",
+    "pmid": 39688547,
+    "text": "Advanced CRISPR techniques like base editing and prime editing offer enhanced precision, allowing single-nucleotide changes without creating double-stranded breaks, which minimizes off-target effects and improves safety:an essential consideration for genetic therapies targeting the CNS.",
+    "score": 0.6616596978902817,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC9241923",
+    "pmid": 35608343,
+    "text": "Gene-editing tools, such as the CRISPR/Cas9 system and base editors, are applied in genetic engineering, but the controversial issue of off-target effects has affected the application of this system.",
+    "score": 0.6588199818134308,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12734377",
+    "pmid": 41440982,
+    "text": "Cell-based studies have shown that CRISPR-Cas9 editing can result in off-target effects, including unintended alterations at germline single-nucleotide variants (SNVs).",
+    "score": 0.65782417178154,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC9454589",
+    "pmid": 36078090,
+    "text": "Therefore, in the current regulatory process of CRISPR-based gene editing technology, compared with related research on transgenic regulation, it will weaken the aspects of off-target effects, efficiency and safety, and pay more attention to technical and ethical regulatory issues.",
+    "score": 0.6563889867067337,
+    "section": "RESULTS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8491098",
+    "pmid": 34551291,
+    "text": "The growth defects were unlikely caused by CRISPR-Cas9-mediated off-target editing, as we observed similar effects in ATF3-KO HCT116 cells previously engineered using a distinct, AAV (Adeno-associated virus)-based, precise genome-editing approach (; Figure 2F).",
+    "score": 0.6555883079767227,
+    "section": "RESULTS",
+    "annotations": [
+      "126|6|cellline|CVCL:0291",
+      "118|4|gene|11910",
+      "179|3|species|272636",
+      "184|22|species|272636"
+    ]
+  },
+  {
+    "pmcid": "PMC12594158",
+    "pmid": 40767382,
+    "text": "Verve Therapeutics are currently developing a CRISPr base-editing medication targeting ANGPLT3 (Verve-201) which, if proven to be safe and effective, might be a life-changing advance in the treatment of HoFH.",
+    "score": 0.6550015014410019,
+    "section": null,
+    "annotations": [
+      "203|4|disease|MESH:D000090542"
+    ]
+  },
+  {
+    "pmcid": "PMC10204547",
+    "pmid": 37218754,
+    "text": "They first injected adenoviral particles containing the CRISPR-base editing system (targeting proprotein convertase subtilisin/kexin type 9 (Pcsk9), which regulates low-density lipoprotein-receptor proteins) into the vitelline vein of wild-type murine fetuses at E16.",
+    "score": 0.6518215769529343,
+    "section": null,
+    "annotations": [
+      "165|32|gene|16835",
+      "141|5|gene|100102",
+      "94|45|gene|100102",
+      "245|6|species|10090"
+    ]
+  },
+  {
+    "pmcid": "PMC12094669",
+    "pmid": 40160040,
+    "text": "Verve Therapeutics' VERVE-201, on the other hand, is an investigational CRISPR base editing tool targeting the inactivation of the ANGPTL3 gene in liver cells via alteration of a single DNA base, thus turning off its production by the liver to reduce LDL-C and triglyceride levels.",
+    "score": 0.6476233345270157,
+    "section": null,
+    "annotations": [
+      "20|9|chemical|-",
+      "261|12|chemical|MESH:D014280",
+      "131|7|gene|27329"
+    ]
+  },
+  {
+    "pmcid": "PMC7336378",
+    "pmid": 32271968,
+    "text": "Regarding the first issue, several studies have demonstrated off-target effects of CRISPR-Cas9-based genome editing in biomedical and clinical applications (Ma et al., 2016; Saha et al., 2018; Zhang et al., 2015), and in functional studies of plant genome (Anderson et al., 2016; Li et al., 2018).",
+    "score": 0.6468721449375153,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11031736",
+    "pmid": 38646021,
+    "text": "A study in primates has demonstrated that a single infusion of a CRISPR base-editing therapeutic, targeting liver PCSK9, nearly ablated gene expression and effectively lowered.",
+    "score": 0.6467467975616455,
+    "section": null,
+    "annotations": [
+      "114|5|gene|255738"
+    ]
+  },
+  {
+    "pmcid": "PMC6182134",
+    "pmid": 29912461,
+    "text": "By establishing an episome-based CRISPR-Cas9 system for T. brucei, we have edited wild type cells without inserting selectable markers, inserted a GFP tag between an ORF and its 3'UTR, deleted both alleles of a gene in a single transfection, and performed precise editing of genes that exist in multicopy arrays, replacing histone H4K4 with H4R4 in the absence of detectable off-target effects.",
+    "score": 0.645319287776947,
+    "section": "abstract",
+    "annotations": [
+      "56|9|species|5691"
+    ]
+  },
+  {
+    "pmcid": "PMC4813155",
+    "pmid": 26927085,
+    "text": "Because CRISPR based gene editing is heritable, technically, one will have to introduce the genomic changes into host cells only a single time, and the physiological effect might last as long as the targeted cells are viable, or will be inherited to daughter cells in the case of dividing cells.",
+    "score": 0.6447633707523346,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": null,
+    "pmid": 36314243,
+    "text": "Efficacy and Safety of an Investigational Single-Course CRISPR Base-Editing Therapy Targeting PCSK9 in Nonhuman Primate and Mouse Models.",
+    "score": 0.6444927108287811,
+    "section": "title",
+    "annotations": [
+      "94|5|gene|100102",
+      "124|5|species|10090"
+    ]
+  },
+  {
+    "pmcid": "PMC9100877",
+    "pmid": 34463266,
+    "text": "CRISPR-based editing of miRNA target sites has two distinct advantages in that it works at the DNA levels requiring fewer administrations, and the ability of NHEJ recombination to create repair tracts almost 200 bp away from the target sites, allows flexibility in the selection of targets with more specificity to the 3' UTR of interest.",
+    "score": 0.6409641492366791,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC12094669",
+    "pmid": 40160040,
+    "text": "Base editing offers several advantages over traditional CRISPR-Cas9 editing, including higher precision and reduced risk of off-target effects.",
+    "score": 0.6361340844631195,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC11763404",
+    "pmid": 39851560,
+    "text": "A significant challenge in CRISPR-based editing is the minimization of off-target effects, which can compromise editing accuracy and introduce unintended mutations.",
+    "score": 0.6351526832580566,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": null,
+    "pmid": 40696172,
+    "text": "Additionally, we demonstrate that genetic variation affects sgRNA target sites, while the Jin668 genome assembly reduces the risk of off-target effects in CRISPR-based genome editing.",
+    "score": 0.6319254356622696,
+    "section": "abstract",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC6277972",
+    "pmid": 29779790,
+    "text": "Acr proteins have been shown to improve CRISPR/Cas9-based genome editing by limiting off-target effects, as well as converting a CRISPR-associated nuclease into a transcriptional repressor.",
+    "score": 0.6312461960315704,
+    "section": "INTRO",
+    "annotations": [
+      "40|6|gene|None",
+      "129|6|gene|None"
+    ]
+  },
+  {
+    "pmcid": "PMC9805293",
+    "pmid": 36606268,
+    "text": "CRISPR Cas9, Base and Prime editing, Programmable Addition via Site-specific Targeting Elements (PASTE), and other versions of gene editing are becoming cost effective and may cause the trajectory of these technologies to become mainstream services that the general public can access easily.",
+    "score": 0.625467079281807,
+    "section": "INTRO",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC10185539",
+    "pmid": 37188660,
+    "text": "Based on results in mouse studies suggesting that optimized GalNAc-LNPs have the potential to enable efficient delivery of a CRISPR base-editing medicine targeting ANGPTL3 via non-LDLR-dependent pathways, we next sought to further evaluate this in a cynomolgus monkey non-human primate (NHP) model.",
+    "score": 0.624834880232811,
+    "section": "RESULTS",
+    "annotations": [
+      "60|6|chemical|-",
+      "20|5|species|10090",
+      "272|5|species|9606",
+      "261|6|species|9527",
+      "164|7|gene|27329",
+      "180|4|gene|3949"
+    ]
+  },
+  {
+    "pmcid": "PMC10940834",
+    "pmid": 38142460,
+    "text": "Both ZFNs and TALENs can induce non-specific modifications causing off-target effects which makes them somewhat less attractive than more precise CRISPR-based gene editing.",
+    "score": 0.6242015039920807,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC8432139",
+    "pmid": 33657662,
+    "text": "A number of studies have shown advances of base editing in precise genome editing and low off-target effect compared to conventional CRISPR/Cas9.",
+    "score": 0.6185307830572129,
+    "section": "INTRO",
+    "annotations": [
+      "43|4|chemical|-"
+    ]
+  },
+  {
+    "pmcid": "PMC11772431",
+    "pmid": 39877364,
+    "text": "Both stability and durability of genetic modifications in macrophages is another hurdle that is associated with off-target effects which can be stabilized by using a CRISPR-based gene editing approach.",
+    "score": 0.6147840172052383,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC10190037",
+    "pmid": 37198545,
+    "text": "In the current study, we analyzed the effects of four commonly used promoters (CAG, EF1a core, CMV, and PGK) on the CRISPR-Cas12a system, including cleaving activity, targeting specificity, multiplex editing efficiency, gene activation level, and base editing ability, which provided the basic information about the impact of promoters for the CRISPR gene-editing toolkit.",
+    "score": 0.569876742362976,
+    "section": "INTRO",
+    "annotations": [
+      "84|4|gene|1917"
+    ]
+  },
+  {
+    "pmcid": "PMC11070693",
+    "pmid": 38711452,
+    "text": "In particular, causal discovery can guide biological research by predicting the causal effects of specific interventions, such as gene expression or gene silencing, which can then be probed by targeted siRNA, gene knock-out or CRISPR-based editing experiments.",
+    "score": 0.542045151591301,
+    "section": "DISCUSS",
+    "annotations": null
+  },
+  {
+    "pmcid": "PMC7129066",
+    "pmid": 32256147,
+    "text": "In studies using RNA-targeted gene editing methods based on CRISPR-Cas9, nontarget effects should be examined in depth.",
+    "score": 0.54078668653965,
+    "section": null,
+    "annotations": [
+      "67|4|gene|46806597"
+    ]
+  },
+  {
+    "pmcid": "PMC10605581",
+    "pmid": 37887310,
+    "text": "This methodology was selected for CRISPR base editing therapy targeting the ANGPTL3 gene in NHPs.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "76|7|gene|27329"
+    ]
+  },
+  {
+    "pmcid": "PMC12059681",
+    "pmid": 40288084,
+    "text": "Verve Therapeutics are developing 2 CRISPr base-editing medications targeting PCSK9 (Verve-101 and -102) and ANGPLT3 (Verve-201), the former already being in phase one clinical trials in FH heterozygotes.",
+    "score": 1.0,
+    "section": "CONCL",
+    "annotations": [
+      "187|2|disease|OMIM:143890",
+      "78|5|gene|255738"
+    ]
+  },
+  {
+    "pmcid": "PMC7400756",
+    "pmid": 32782573,
+    "text": "Although the CRISPR technology is known for its effectiveness and versatility, it has two major drawbacks: The inability to arbitrarily edit bases and its off-target effects.",
+    "score": 1.0,
+    "section": "METHODS",
+    "annotations": [
+      "13|6|gene|70873"
+    ]
+  },
+  {
+    "pmcid": "PMC12346671",
+    "pmid": 40801599,
+    "text": "While the design of the donor DNA and use of the IDLV-based delivery system profoundly reduce random integration and background expression of the knock-in reporter, this study does not address issues related to the off-target effect of CRISPR-Cas9 genome editing.",
+    "score": 1.0,
+    "section": "DISCUSS",
+    "annotations": [
+      "49|4|chemical|-"
+    ]
+  },
+  {
+    "pmcid": "PMC7050416",
+    "pmid": 31634456,
+    "text": "As in situ gene correction using genome editing technologies such as CRISPR/Cas9 or next generation viral vectors for gene therapy-based approaches mature, other monogenic disorders including Omen syndrome and chronic granulomatous disease will find value in humanized mice reconstituted with patient cells as a first step towards developing effective targeting vectors and good manufacturing practices prior to clinical application.",
+    "score": 1.0,
+    "section": null,
+    "annotations": [
+      "162|19|disease|MESH:D009358",
+      "293|7|species|9606",
+      "269|4|species|10090",
+      "210|29|disease|MESH:D006105",
+      "192|13|disease|MESH:D013577"
+    ]
+  },
+  {
+    "pmcid": "PMC10743214",
+    "pmid": 38136940,
+    "text": "The recent advancements of CRISPR/Cas9 gene-editing methodologies have made them more efficient (high specificity with minimal off-target effects), technically feasible, and promising to be included in DC-based vaccine manufacturing.",
+    "score": 1.0,
+    "section": null,
+    "annotations": null
+  },
+  {
+    "pmcid": null,
+    "pmid": 42299032,
+    "text": "A major goal of clinically oriented CRISPR-Cas9-based applications is safe and effective in vivo gene editing (knockout or correction) with precise targeting.",
+    "score": 1.0,
+    "section": "abstract",
+    "annotations": null
+  }
+]

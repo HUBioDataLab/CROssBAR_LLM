@@ -1,0 +1,586 @@
+{
+  "factoid-subset": {
+    "modes": [
+      "abstracts"
+    ],
+    "per_mode": {
+      "abstracts": {
+        "n": 100,
+        "n_completed": 98,
+        "hit_rate": 0.71,
+        "mean_recall": 0.71,
+        "mean_judge": 3.68,
+        "mean_informativeness": 4.33,
+        "mean_clarity": 4.99,
+        "total_tokens": 891805,
+        "mean_tokens": 8918.0,
+        "total_input_tokens": 780889,
+        "total_output_tokens": 110916,
+        "total_reasoning_tokens": 0,
+        "mean_input_tokens": 7808.9,
+        "mean_output_tokens": 1109.2,
+        "total_elapsed_s": 5566.3,
+        "mean_elapsed_s": 55.7,
+        "max_elapsed_s": 444.1,
+        "per_question": [
+          {
+            "question": "Which deiodinase is known to be present in liver?",
+            "reference": [
+              "Type 1 deiodinase",
+              "type 3 deiodinase"
+            ],
+            "generated": "Type 1 iodothyronine deiodinase (D1) is known to be present in the liver [1, 2, 5, 8], where it plays a crucial role in converting the prohormone thyroxine (T4) into the active tri-iodothyronine (T3) [2, 3, 6]. The liver expresses high levels of D1 [2, 5], and its activity is important for regulatin …[truncated]",
+            "error": null,
+            "elapsed_s": 78.0,
+            "router": {
+              "question_type": "keyword_search",
+              "rationale": "The question is asking for a specific type of enzyme present in a particular organ, which is a general biomedical literature question that can be answered by retrieving relevant papers.",
+              "mentions": [],
+              "relation": null,
+              "e2_type": null,
+              "keyword_query": null,
+              "full_text": false,
+              "source": null,
+              "search_query": "deiodinase in liver",
+              "sections": null
+            },
+            "resolve": {
+              "resolved": {},
+              "unresolved": []
+            },
+            "partner_discovery": {
+              "n_partners": 0,
+              "top_partners": []
+            },
+            "search": {
+              "queries_used": [
+                "[broad] deiodinase in liver"
+              ],
+              "n_pmids": 0,
+              "total_articles": 0,
+              "n_hits": 13,
+              "n_citations": 10
+            },
+            "export": {
+              "n_documents": 10,
+              "n_passages": 0,
+              "section_breakdown": {},
+              "n_with_body": 0
+            },
+            "evaluate": {
+              "depth_sufficient": true,
+              "depth_missing": null,
+              "depth_skip_reason": "abstracts_only enabled",
+              "refinement_attempted": false,
+              "sections_after": null,
+              "full_text_after": false
+            },
+            "router_extras": {
+              "sections": null
+            },
+            "warnings": [],
+            "overlap": {
+              "hit": true,
+              "recall": 1.0,
+              "matched": [
+                "Type 1 deiodinase",
+                "type 3 deiodinase"
+              ],
+              "missed": []
+            },
+            "judge": {
+              "score": 5,
+              "matched_items": [
+                "Type 1 deiodinase",
+                "type 3 deiodinase"
+              ],
+              "missed_items": [],
+              "informativeness": 5,
+              "clarity": 5,
+              "rationale": "The model answer is completely correct and provides a rich, well-contextualised explanation with relevant supporting details, including the role of Type 1 deiodinase in converting thyroxine to tri-iodothyronine and the presence of type 3 deiodinase in the liver, particularly in the context of metabolic dysfunction-associated fatty liver disease."
+            },
+            "tokens": {
+              "input": 9116,
+              "output": 1272,
+              "reasoning": 0,
+              "cache_read": 32,
+              "total": 10388
+            },
+            "mode": "abstracts"
+          }
+        ]
+      }
+    }
+  },
+  "disease-protein-drug": {
+    "modes": [
+      "abstracts"
+    ],
+    "per_mode": {
+      "abstracts": {
+        "n": 50,
+        "n_completed": 50,
+        "hit_rate": 0.14,
+        "mean_recall": 0.033,
+        "mean_judge": 0.38,
+        "mean_informativeness": 3.3,
+        "mean_clarity": 4.72,
+        "total_tokens": 465002,
+        "mean_tokens": 9300.0,
+        "total_input_tokens": 400180,
+        "total_output_tokens": 64822,
+        "total_reasoning_tokens": 0,
+        "mean_input_tokens": 8003.6,
+        "mean_output_tokens": 1296.4,
+        "total_elapsed_s": 2738.4,
+        "mean_elapsed_s": 54.8,
+        "max_elapsed_s": 293.4,
+        "per_question": [
+          {
+            "question": "Name all drugs that are associated with gene/protein that is related to disease Hartsfield-Bixler-Demyer syndrome.",
+            "reference": [
+              "Heparin",
+              "Sorafenib",
+              "Selpercatinib",
+              "Lenvatinib",
+              "Nintedanib",
+              "XL999",
+              "3-(3-methoxybenzyl)-1H-pyrrolo[2,3-b]pyridine",
+              "Regorafenib",
+              "Ponatinib",
+              "Fostamatinib",
+              "Erdafitinib",
+              "(E)-[4-(3,5-Difluorophenyl)-3H-pyrrolo[2,3-b]pyridin-3-ylidene](3-methoxyphenyl)methanol",
+              "Palifermin",
+              "3-[4-(1-formylpiperazin-4-yl)-benzylidenyl]-2-indolinone",
+              "3-[(3-(2-CARBOXYETHYL)-4-METHYLPYRROL-2-YL)METHYLENE]-2-INDOLINONE",
+              "Pemigatinib"
+            ],
+            "generated": "The provided papers do not support the user's question about drugs associated with the gene/protein related to Hartsfield-Bixler-Demyer syndrome, as none of the papers mention this specific syndrome in relation to drug treatments [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]. \n\nReferences:\n[1] Syed Ahmed Zaki, An …[truncated]",
+            "error": null,
+            "elapsed_s": 63.1,
+            "router": {
+              "question_type": "list_breadth",
+              "rationale": "The question asks for a list of drugs associated with a specific disease, which is a breadth question that can be answered by retrieving relevant papers from the general literature.",
+              "mentions": [],
+              "relation": null,
+              "e2_type": null,
+              "keyword_query": null,
+              "full_text": false,
+              "source": null,
+              "search_query": "Hartsfield-Bixler-Demyer syndrome associated drugs",
+              "sections": null
+            },
+            "resolve": {
+              "resolved": {},
+              "unresolved": []
+            },
+            "partner_discovery": {
+              "n_partners": 0,
+              "top_partners": []
+            },
+            "search": {
+              "queries_used": [
+                "[broad] Hartsfield-Bixler-Demyer syndrome associated drugs"
+              ],
+              "n_pmids": 0,
+              "total_articles": 0,
+              "n_hits": 25,
+              "n_citations": 10
+            },
+            "export": {
+              "n_documents": 10,
+              "n_passages": 0,
+              "section_breakdown": {},
+              "n_with_body": 0
+            },
+            "evaluate": {
+              "depth_sufficient": true,
+              "depth_missing": null,
+              "depth_skip_reason": "abstracts_only enabled",
+              "refinement_attempted": false,
+              "sections_after": null,
+              "full_text_after": false
+            },
+            "router_extras": {
+              "sections": null
+            },
+            "warnings": [],
+            "overlap": {
+              "hit": false,
+              "recall": 0.0,
+              "matched": [],
+              "missed": [
+                "Heparin",
+                "Sorafenib",
+                "Selpercatinib",
+                "Lenvatinib",
+                "Nintedanib",
+                "XL999",
+                "3-(3-methoxybenzyl)-1H-pyrrolo[2,3-b]pyridine",
+                "Regorafenib",
+                "Ponatinib",
+                "Fostamatinib",
+                "Erdafitinib",
+                "(E)-[4-(3,5-Difluorophenyl)-3H-pyrrolo[2,3-b]pyridin-3-ylidene](3-methoxyphenyl)methanol",
+                "Palifermin",
+                "3-[4-(1-formylpiperazin-4-yl)-benzylidenyl]-2-indolinone",
+                "3-[(3-(2-CARBOXYETHYL)-4-METHYLPYRROL-2-YL)METHYLENE]-2-INDOLINONE",
+                "Pemigatinib"
+              ]
+            },
+            "judge": {
+              "score": 0,
+              "matched_items": [],
+              "missed_items": [
+                "Heparin",
+                "Sorafenib",
+                "Selpercatinib",
+                "Lenvatinib",
+                "Nintedanib",
+                "XL999",
+                "3-(3-methoxybenzyl)-1H-pyrrolo[2,3-b]pyridine",
+                "Regorafenib",
+                "Ponatinib",
+                "Fostamatinib",
+                "Erdafitinib",
+                "(E)-[4-(3,5-Difluorophenyl)-3H-pyrrolo[2,3-b]pyridin-3-ylidene](3-methoxyphenyl)methanol",
+                "Palifermin",
+                "3-[4-(1-formylpiperazin-4-yl)-benzylidenyl]-2-indolinone",
+                "3-[(3-(2-CARBOXYETHYL)-4-METHYLPYRROL-2-YL)METHYLENE]-2-INDOLINONE",
+                "Pemigatinib"
+              ],
+              "informativeness": 0,
+              "clarity": 5,
+              "rationale": "The model answer does not provide any information about the drugs associated with the gene/protein related to Hartsfield-Bixler-Demyer syndrome, but it clearly states that the provided papers do not support the user's question."
+            },
+            "tokens": {
+              "input": 7939,
+              "output": 1199,
+              "reasoning": 0,
+              "cache_read": 96,
+              "total": 9138
+            },
+            "mode": "abstracts"
+          }
+        ]
+      }
+    }
+  },
+  "drug-protein-disease": {
+    "modes": [
+      "abstracts"
+    ],
+    "per_mode": {
+      "abstracts": {
+        "n": 50,
+        "n_completed": 50,
+        "hit_rate": 0.32,
+        "mean_recall": 0.026,
+        "mean_judge": 0.18,
+        "mean_informativeness": 2.52,
+        "mean_clarity": 4.84,
+        "total_tokens": 480194,
+        "mean_tokens": 9603.9,
+        "total_input_tokens": 401055,
+        "total_output_tokens": 79139,
+        "total_reasoning_tokens": 0,
+        "mean_input_tokens": 8021.1,
+        "mean_output_tokens": 1582.8,
+        "total_elapsed_s": 3870.3,
+        "mean_elapsed_s": 77.4,
+        "max_elapsed_s": 242.9,
+        "per_question": [
+          {
+            "question": "Name all diseases that are related to a gene/protein that is associated with drug ({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]amino}oxy)acetic acid.",
+            "reference": [
+              "glycogen storage disease"
+            ],
+            "generated": "The provided papers do not support the identification of diseases related to a gene/protein associated with the drug ({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]amino}oxy)acetic acid, as none of the papers mention this specific compound or its associated gene/protein in relation to any d …[truncated]",
+            "error": null,
+            "elapsed_s": 24.6,
+            "router": {
+              "question_type": "list_breadth",
+              "rationale": "The question asks for a list of diseases related to a specific gene/protein associated with a particular drug, which is a breadth question that requires a broad search across the literature.",
+              "mentions": [],
+              "relation": null,
+              "e2_type": null,
+              "keyword_query": null,
+              "full_text": false,
+              "source": "pmc",
+              "search_query": "diseases associated with ({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]amino}oxy)acetic acid",
+              "sections": null
+            },
+            "resolve": {
+              "resolved": {},
+              "unresolved": []
+            },
+            "partner_discovery": {
+              "n_partners": 0,
+              "top_partners": []
+            },
+            "search": {
+              "queries_used": [
+                "[pmc] diseases associated with ({[(3E)-2'-Oxo-2',7'-dihydro-2,3'-biindol-3(7H)-ylidene]amino}oxy)acetic acid"
+              ],
+              "n_pmids": 0,
+              "total_articles": 0,
+              "n_hits": 25,
+              "n_citations": 10
+            },
+            "export": {
+              "n_documents": 10,
+              "n_passages": 0,
+              "section_breakdown": {},
+              "n_with_body": 0
+            },
+            "evaluate": {
+              "depth_sufficient": true,
+              "depth_missing": null,
+              "depth_skip_reason": "abstracts_only enabled",
+              "refinement_attempted": false,
+              "sections_after": null,
+              "full_text_after": false
+            },
+            "router_extras": {
+              "sections": null
+            },
+            "warnings": [],
+            "overlap": {
+              "hit": false,
+              "recall": 0.0,
+              "matched": [],
+              "missed": [
+                "glycogen storage disease"
+              ]
+            },
+            "judge": {
+              "score": 0,
+              "matched_items": [],
+              "missed_items": [
+                "glycogen storage disease"
+              ],
+              "informativeness": 2,
+              "clarity": 5,
+              "rationale": "The model answer does not mention any diseases related to the gene/protein associated with the given drug, but it clearly explains the lack of information in the provided papers, resulting in a score of 0 for coverage, 2 for informativeness, and 5 for clarity."
+            },
+            "tokens": {
+              "input": 8053,
+              "output": 1548,
+              "reasoning": 0,
+              "cache_read": 4080,
+              "total": 9601
+            },
+            "mode": "abstracts"
+          }
+        ]
+      }
+    }
+  },
+  "protein-disease-drug": {
+    "modes": [
+      "abstracts"
+    ],
+    "per_mode": {
+      "abstracts": {
+        "n": 50,
+        "n_completed": 50,
+        "hit_rate": 0.02,
+        "mean_recall": 0.001,
+        "mean_judge": 0.08,
+        "mean_informativeness": 2.84,
+        "mean_clarity": 4.86,
+        "total_tokens": 461447,
+        "mean_tokens": 9228.9,
+        "total_input_tokens": 405470,
+        "total_output_tokens": 55977,
+        "total_reasoning_tokens": 0,
+        "mean_input_tokens": 8109.4,
+        "mean_output_tokens": 1119.5,
+        "total_elapsed_s": 3356.0,
+        "mean_elapsed_s": 67.1,
+        "max_elapsed_s": 169.7,
+        "per_question": [
+          {
+            "question": "Name all drugs that can treat a disease that is associated with gene/protein CCL3L1.",
+            "reference": [
+              "Doravirine",
+              "Tenofovir disoproxil",
+              "Ritonavir",
+              "Tenofovir alafenamide",
+              "Elvitegravir",
+              "Atazanavir",
+              "Ibalizumab",
+              "Enfuvirtide",
+              "Fosamprenavir",
+              "Lopinavir",
+              "Saquinavir",
+              "Nevirapine",
+              "Rilpivirine",
+              "Abacavir",
+              "Tipranavir",
+              "Stavudine",
+              "Cobicistat",
+              "Delavirdine",
+              "Efavirenz",
+              "Raltegravir",
+              "Etravirine",
+              "Lamivudine",
+              "Darunavir",
+              "Didanosine",
+              "Emtricitabine",
+              "Indinavir",
+              "Nelfinavir",
+              "Dolutegravir",
+              "Zalcitabine",
+              "Tenofovir",
+              "Zidovudine",
+              "Amprenavir",
+              "Bictegravir"
+            ],
+            "generated": "The disease associated with the gene/protein CCL3L1 is HIV-1 infection [2, 3, 8], and the drugs that can treat this disease include maraviroc, a CCR5 antagonist [1], and potentially other CCR5 antagonists and therapeutic monoclonal antibodies [1]. Additionally, CCL3L1 has been associated with suscep …[truncated]",
+            "error": null,
+            "elapsed_s": 169.7,
+            "router": {
+              "question_type": "list_breadth",
+              "rationale": "The question asks for a list of drugs that can treat a disease associated with a specific gene/protein, which is a breadth question that requires a broad search across the literature.",
+              "mentions": [],
+              "relation": null,
+              "e2_type": null,
+              "keyword_query": null,
+              "full_text": false,
+              "source": "pmc",
+              "search_query": "CCL3L1 associated disease drugs",
+              "sections": null
+            },
+            "resolve": {
+              "resolved": {},
+              "unresolved": []
+            },
+            "partner_discovery": {
+              "n_partners": 0,
+              "top_partners": []
+            },
+            "search": {
+              "queries_used": [
+                "[pmc] CCL3L1 associated disease drugs"
+              ],
+              "n_pmids": 0,
+              "total_articles": 0,
+              "n_hits": 25,
+              "n_citations": 10
+            },
+            "export": {
+              "n_documents": 10,
+              "n_passages": 0,
+              "section_breakdown": {},
+              "n_with_body": 0
+            },
+            "evaluate": {
+              "depth_sufficient": true,
+              "depth_missing": null,
+              "depth_skip_reason": "abstracts_only enabled",
+              "refinement_attempted": false,
+              "sections_after": null,
+              "full_text_after": false
+            },
+            "router_extras": {
+              "sections": null
+            },
+            "warnings": [],
+            "overlap": {
+              "hit": false,
+              "recall": 0.0,
+              "matched": [],
+              "missed": [
+                "Doravirine",
+                "Tenofovir disoproxil",
+                "Ritonavir",
+                "Tenofovir alafenamide",
+                "Elvitegravir",
+                "Atazanavir",
+                "Ibalizumab",
+                "Enfuvirtide",
+                "Fosamprenavir",
+                "Lopinavir",
+                "Saquinavir",
+                "Nevirapine",
+                "Rilpivirine",
+                "Abacavir",
+                "Tipranavir",
+                "Stavudine",
+                "Cobicistat",
+                "Delavirdine",
+                "Efavirenz",
+                "Raltegravir",
+                "Etravirine",
+                "Lamivudine",
+                "Darunavir",
+                "Didanosine",
+                "Emtricitabine",
+                "Indinavir",
+                "Nelfinavir",
+                "Dolutegravir",
+                "Zalcitabine",
+                "Tenofovir",
+                "Zidovudine",
+                "Amprenavir",
+                "Bictegravir"
+              ]
+            },
+            "judge": {
+              "score": 0,
+              "matched_items": [],
+              "missed_items": [
+                "Doravirine",
+                "Tenofovir disoproxil",
+                "Ritonavir",
+                "Tenofovir alafenamide",
+                "Elvitegravir",
+                "Atazanavir",
+                "Ibalizumab",
+                "Enfuvirtide",
+                "Fosamprenavir",
+                "Lopinavir",
+                "Saquinavir",
+                "Nevirapine",
+                "Rilpivirine",
+                "Abacavir",
+                "Tipranavir",
+                "Stavudine",
+                "Cobicistat",
+                "Delavirdine",
+                "Efavirenz",
+                "Raltegravir",
+                "Etravirine",
+                "Lamivudine",
+                "Darunavir",
+                "Didanosine",
+                "Emtricitabine",
+                "Indinavir",
+                "Nelfinavir",
+                "Dolutegravir",
+                "Zalcitabine",
+                "Tenofovir",
+                "Zidovudine",
+                "Amprenavir",
+                "Bictegravir"
+              ],
+              "informativeness": 4,
+              "clarity": 5,
+              "rationale": "The model answer does not mention any of the reference items, but it provides a clear and well-structured explanation of the disease associated with the gene/protein CCL3L1 and its potential treatment, resulting in a score of 0 for coverage, 4 for informativeness, and 5 for clarity."
+            },
+            "tokens": {
+              "input": 8939,
+              "output": 1277,
+              "reasoning": 0,
+              "cache_read": 32,
+              "total": 10216
+            },
+            "mode": "abstracts"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_id": "1|None",
+  "id": "1",
+  "infons": {},
+  "passages": [
+    {
+      "infons": {
+        "journal": "Biochem Med. 1975 Jun;13(2):117-26. doi: 10.1016/0006-2944(75)90147-7.",
+        "year": "1975",
+        "type": "title",
+        "authors": "Makar AB, McMartin KE, Palese M, Tephly TR"
+      },
+      "offset": 0,
+      "text": "Formate assay in body fluids: application in methanol poisoning.",
+      "sentences": [],
+      "annotations": [
+        {
+          "id": "1",
+          "infons": {
+            "identifier": "MESH:D011041",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D011041"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D011041",
+            "biotype": "disease",
+            "name": "Poisoning",
+            "accession": "@DISEASE_Poisoning"
+          },
+          "text": "methanol poisoning",
+          "locations": [
+            {
+              "offset": 45,
+              "length": 18
+            }
+          ]
+        }
+      ],
+      "relations": []
+    },
+    {
+      "infons": {
+        "type": "abstract"
+      },
+      "offset": 65,
+      "text": "",
+      "sentences": [],
+      "annotations": [],
+      "relations": []
+    }
+  ],
+  "relations": [],
+  "pmid": 1,
+  "pmcid": null,
+  "meta": {},
+  "date": "1975-06-01T00:00:00Z",
+  "journal": "Biochem Med",
+  "authors": [
+    "Makar AB",
+    "McMartin KE",
+    "Palese M",
+    "Tephly TR"
+  ],
+  "relations_display": []
+}

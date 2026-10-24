@@ -1,0 +1,965 @@
+{
+  "_id": "27863244|None",
+  "id": "27863244",
+  "infons": {},
+  "passages": [
+    {
+      "infons": {
+        "journal": "Cell. 2016 Nov 17;167(5):1281-1295.e18. doi: 10.1016/j.cell.2016.10.039.",
+        "year": "2016",
+        "article-id_pmc": "PMC5320931",
+        "type": "title",
+        "authors": "Hu B, Wang Q, Wang YA, Hua S, Sauve CG, Ong D, Lan ZD, Chang Q, Ho YW, Monasterio MM, Lu X, Zhong Y, Zhang J, Deng P, Tan Z, Wang G, Liao WT, Corley LJ, Yan H, Zhang J, You Y, Liu N, Cai L, Finocchiaro G, Phillips JJ, Berger MS, Spring DJ, Hu J, Sulman EP, Fuller GN, Chin L, Verhaak RGW, DePinho RA"
+      },
+      "offset": 0,
+      "text": "Epigenetic Activation of WNT5A Drives Glioblastoma Stem Cell Differentiation and Invasive Growth.",
+      "sentences": [],
+      "annotations": [
+        {
+          "id": "2",
+          "infons": {
+            "identifier": "7474",
+            "type": "Gene",
+            "ncbi_homologene": "20720",
+            "valid": true,
+            "normalized": [
+              7474
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7474,
+            "biotype": "gene",
+            "name": "WNT5A",
+            "accession": "@GENE_WNT5A"
+          },
+          "text": "WNT5A",
+          "locations": [
+            {
+              "offset": 25,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "infons": {
+            "identifier": "MESH:D005909",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005909"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005909",
+            "biotype": "disease",
+            "name": "Glioblastoma",
+            "accession": "@DISEASE_Glioblastoma"
+          },
+          "text": "Glioblastoma",
+          "locations": [
+            {
+              "offset": 38,
+              "length": 12
+            }
+          ]
+        }
+      ],
+      "relations": []
+    },
+    {
+      "infons": {
+        "type": "abstract"
+      },
+      "offset": 98,
+      "text": "Glioblastoma stem cells (GSCs) are implicated in tumor neovascularization, invasiveness, and therapeutic resistance. To illuminate mechanisms governing these hallmark features, we developed a de novo glioblastoma multiforme (GBM) model derived from immortalized human neural stem/progenitor cells (hNSCs) to enable precise system-level comparisons of pre-malignant and oncogene-induced malignant states of NSCs. Integrated transcriptomic and epigenomic analyses uncovered a PAX6/DLX5 transcriptional program driving WNT5A-mediated GSC differentiation into endothelial-like cells (GdECs). GdECs recruit existing endothelial cells to promote peritumoral satellite lesions, which serve as a niche supporting the growth of invasive glioma cells away from the primary tumor. Clinical data reveal higher WNT5A and GdECs expression in peritumoral and recurrent GBMs relative to matched intratumoral and primary GBMs, respectively, supporting WNT5A-mediated GSC differentiation and invasive growth in disease recurrence. Thus, the PAX6/DLX5-WNT5A axis governs the diffuse spread of glioma cells throughout the brain parenchyma, contributing to the lethality of GBM.",
+      "sentences": [],
+      "annotations": [
+        {
+          "id": "25",
+          "infons": {
+            "identifier": "MESH:D005909",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005909"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005909",
+            "biotype": "disease",
+            "name": "Glioblastoma",
+            "accession": "@DISEASE_Glioblastoma"
+          },
+          "text": "Glioblastoma",
+          "locations": [
+            {
+              "offset": 98,
+              "length": 12
+            }
+          ]
+        },
+        {
+          "id": "26",
+          "infons": {
+            "identifier": "MESH:D009369",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D009369"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D009369",
+            "biotype": "disease",
+            "name": "Neoplasms",
+            "accession": "@DISEASE_Neoplasms"
+          },
+          "text": "tumor",
+          "locations": [
+            {
+              "offset": 147,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "27",
+          "infons": {
+            "identifier": "MESH:D005909",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005909"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005909",
+            "biotype": "disease",
+            "name": "Glioblastoma",
+            "accession": "@DISEASE_Glioblastoma"
+          },
+          "text": "glioblastoma multiforme",
+          "locations": [
+            {
+              "offset": 298,
+              "length": 23
+            }
+          ]
+        },
+        {
+          "id": "28",
+          "infons": {
+            "identifier": "MESH:D005909",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005909"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005909",
+            "biotype": "disease",
+            "name": "Glioblastoma",
+            "accession": "@DISEASE_Glioblastoma"
+          },
+          "text": "GBM",
+          "locations": [
+            {
+              "offset": 323,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "29",
+          "infons": {
+            "identifier": "9606",
+            "type": "Species",
+            "valid": true,
+            "normalized": [
+              9606
+            ],
+            "database": "ncbi_taxonomy",
+            "normalized_id": 9606,
+            "biotype": "species",
+            "name": "9606",
+            "accession": null
+          },
+          "text": "human",
+          "locations": [
+            {
+              "offset": 360,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "30",
+          "infons": {
+            "identifier": "5080",
+            "type": "Gene",
+            "ncbi_homologene": "1212",
+            "valid": true,
+            "normalized": [
+              5080
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 5080,
+            "biotype": "gene",
+            "name": "PAX6",
+            "accession": "@GENE_PAX6"
+          },
+          "text": "PAX6",
+          "locations": [
+            {
+              "offset": 572,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "31",
+          "infons": {
+            "identifier": "1749",
+            "type": "Gene",
+            "ncbi_homologene": "3825",
+            "valid": true,
+            "normalized": [
+              1749
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 1749,
+            "biotype": "gene",
+            "name": "DLX5",
+            "accession": "@GENE_DLX5"
+          },
+          "text": "DLX5",
+          "locations": [
+            {
+              "offset": 577,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "32",
+          "infons": {
+            "identifier": "7474",
+            "type": "Gene",
+            "ncbi_homologene": "20720",
+            "valid": true,
+            "normalized": [
+              7474
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7474,
+            "biotype": "gene",
+            "name": "WNT5A",
+            "accession": "@GENE_WNT5A"
+          },
+          "text": "WNT5A",
+          "locations": [
+            {
+              "offset": 614,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "33",
+          "infons": {
+            "type": "Disease",
+            "valid": false,
+            "normalized_id": null,
+            "biotype": "disease"
+          },
+          "text": "GSC",
+          "locations": [
+            {
+              "offset": 629,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "34",
+          "infons": {
+            "identifier": "MESH:D005910",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005910"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005910",
+            "biotype": "disease",
+            "name": "Glioma",
+            "accession": "@DISEASE_Glioma"
+          },
+          "text": "glioma",
+          "locations": [
+            {
+              "offset": 826,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "35",
+          "infons": {
+            "identifier": "MESH:D009369",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D009369"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D009369",
+            "biotype": "disease",
+            "name": "Neoplasms",
+            "accession": "@DISEASE_Neoplasms"
+          },
+          "text": "tumor",
+          "locations": [
+            {
+              "offset": 861,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "36",
+          "infons": {
+            "identifier": "7474",
+            "type": "Gene",
+            "ncbi_homologene": "20720",
+            "valid": true,
+            "normalized": [
+              7474
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7474,
+            "biotype": "gene",
+            "name": "WNT5A",
+            "accession": "@GENE_WNT5A"
+          },
+          "text": "WNT5A",
+          "locations": [
+            {
+              "offset": 896,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "37",
+          "infons": {
+            "type": "Disease",
+            "valid": false,
+            "normalized_id": null,
+            "biotype": "disease"
+          },
+          "text": "GBMs",
+          "locations": [
+            {
+              "offset": 952,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "38",
+          "infons": {
+            "type": "Disease",
+            "valid": false,
+            "normalized_id": null,
+            "biotype": "disease"
+          },
+          "text": "GBMs",
+          "locations": [
+            {
+              "offset": 1002,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "39",
+          "infons": {
+            "identifier": "7474",
+            "type": "Gene",
+            "ncbi_homologene": "20720",
+            "valid": true,
+            "normalized": [
+              7474
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7474,
+            "biotype": "gene",
+            "name": "WNT5A",
+            "accession": "@GENE_WNT5A"
+          },
+          "text": "WNT5A",
+          "locations": [
+            {
+              "offset": 1033,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "40",
+          "infons": {
+            "type": "Disease",
+            "valid": false,
+            "normalized_id": null,
+            "biotype": "disease"
+          },
+          "text": "GSC",
+          "locations": [
+            {
+              "offset": 1048,
+              "length": 3
+            }
+          ]
+        },
+        {
+          "id": "41",
+          "infons": {
+            "identifier": "5080",
+            "type": "Gene",
+            "ncbi_homologene": "1212",
+            "valid": true,
+            "normalized": [
+              5080
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 5080,
+            "biotype": "gene",
+            "name": "PAX6",
+            "accession": "@GENE_PAX6"
+          },
+          "text": "PAX6",
+          "locations": [
+            {
+              "offset": 1121,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "42",
+          "infons": {
+            "identifier": "1749",
+            "type": "Gene",
+            "ncbi_homologene": "3825",
+            "valid": true,
+            "normalized": [
+              1749
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 1749,
+            "biotype": "gene",
+            "name": "DLX5",
+            "accession": "@GENE_DLX5"
+          },
+          "text": "DLX5",
+          "locations": [
+            {
+              "offset": 1126,
+              "length": 4
+            }
+          ]
+        },
+        {
+          "id": "43",
+          "infons": {
+            "identifier": "7474",
+            "type": "Gene",
+            "ncbi_homologene": "20720",
+            "valid": true,
+            "normalized": [
+              7474
+            ],
+            "database": "ncbi_gene",
+            "normalized_id": 7474,
+            "biotype": "gene",
+            "name": "WNT5A",
+            "accession": "@GENE_WNT5A"
+          },
+          "text": "WNT5A",
+          "locations": [
+            {
+              "offset": 1131,
+              "length": 5
+            }
+          ]
+        },
+        {
+          "id": "44",
+          "infons": {
+            "identifier": "MESH:D005910",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005910"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005910",
+            "biotype": "disease",
+            "name": "Glioma",
+            "accession": "@DISEASE_Glioma"
+          },
+          "text": "glioma",
+          "locations": [
+            {
+              "offset": 1172,
+              "length": 6
+            }
+          ]
+        },
+        {
+          "id": "45",
+          "infons": {
+            "identifier": "MESH:D005909",
+            "type": "Disease",
+            "valid": true,
+            "normalized": [
+              "D005909"
+            ],
+            "database": "ncbi_mesh",
+            "normalized_id": "D005909",
+            "biotype": "disease",
+            "name": "Glioblastoma",
+            "accession": "@DISEASE_Glioblastoma"
+          },
+          "text": "GBM",
+          "locations": [
+            {
+              "offset": 1251,
+              "length": 3
+            }
+          ]
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "relations": [
+    {
+      "id": "R1",
+      "infons": {
+        "score": "0.9993",
+        "role1": {
+          "identifier": "MESH:D005910",
+          "type": "Disease",
+          "valid": true,
+          "normalized": [
+            "D005910"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "D005910",
+          "biotype": "disease",
+          "name": "Glioma",
+          "accession": "@DISEASE_Glioma"
+        },
+        "role2": {
+          "identifier": "5080",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            5080
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 5080,
+          "biotype": "gene",
+          "name": "PAX6",
+          "accession": "@GENE_PAX6"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "0",
+          "role": "21,18"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "infons": {
+        "score": "0.9967",
+        "role1": {
+          "identifier": "MESH:D005909",
+          "type": "Disease",
+          "valid": true,
+          "normalized": [
+            "D005909"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "D005909",
+          "biotype": "disease",
+          "name": "Glioblastoma",
+          "accession": "@DISEASE_Glioblastoma"
+        },
+        "role2": {
+          "identifier": "5080",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            5080
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 5080,
+          "biotype": "gene",
+          "name": "PAX6",
+          "accession": "@GENE_PAX6"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "1",
+          "role": "22,18"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "infons": {
+        "score": "0.9991",
+        "role1": {
+          "identifier": "MESH:D005909",
+          "type": "Disease",
+          "valid": true,
+          "normalized": [
+            "D005909"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "D005909",
+          "biotype": "disease",
+          "name": "Glioblastoma",
+          "accession": "@DISEASE_Glioblastoma"
+        },
+        "role2": {
+          "identifier": "1749",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            1749
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 1749,
+          "biotype": "gene",
+          "name": "DLX5",
+          "accession": "@GENE_DLX5"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "2",
+          "role": "22,19"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "infons": {
+        "score": "0.9979",
+        "role1": {
+          "identifier": "1749",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            1749
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 1749,
+          "biotype": "gene",
+          "name": "DLX5",
+          "accession": "@GENE_DLX5"
+        },
+        "role2": {
+          "identifier": "7474",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7474
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7474,
+          "biotype": "gene",
+          "name": "WNT5A",
+          "accession": "@GENE_WNT5A"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "3",
+          "role": "8,9"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "infons": {
+        "score": "0.9977",
+        "role1": {
+          "identifier": "5080",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            5080
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 5080,
+          "biotype": "gene",
+          "name": "PAX6",
+          "accession": "@GENE_PAX6"
+        },
+        "role2": {
+          "identifier": "7474",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7474
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7474,
+          "biotype": "gene",
+          "name": "WNT5A",
+          "accession": "@GENE_WNT5A"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "4",
+          "role": "7,9"
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "infons": {
+        "score": "0.9956",
+        "role1": {
+          "identifier": "1749",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            1749
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 1749,
+          "biotype": "gene",
+          "name": "DLX5",
+          "accession": "@GENE_DLX5"
+        },
+        "role2": {
+          "identifier": "5080",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            5080
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 5080,
+          "biotype": "gene",
+          "name": "PAX6",
+          "accession": "@GENE_PAX6"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "5",
+          "role": "8,7"
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "infons": {
+        "score": "0.9996",
+        "role1": {
+          "identifier": "MESH:D005910",
+          "type": "Disease",
+          "valid": true,
+          "normalized": [
+            "D005910"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "D005910",
+          "biotype": "disease",
+          "name": "Glioma",
+          "accession": "@DISEASE_Glioma"
+        },
+        "role2": {
+          "identifier": "1749",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            1749
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 1749,
+          "biotype": "gene",
+          "name": "DLX5",
+          "accession": "@GENE_DLX5"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "6",
+          "role": "21,19"
+        }
+      ]
+    },
+    {
+      "id": "R8",
+      "infons": {
+        "score": "0.9949",
+        "role1": {
+          "identifier": "MESH:D005910",
+          "type": "Disease",
+          "valid": true,
+          "normalized": [
+            "D005910"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "D005910",
+          "biotype": "disease",
+          "name": "Glioma",
+          "accession": "@DISEASE_Glioma"
+        },
+        "role2": {
+          "identifier": "7474",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7474
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7474,
+          "biotype": "gene",
+          "name": "WNT5A",
+          "accession": "@GENE_WNT5A"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "7",
+          "role": "21,20"
+        }
+      ]
+    },
+    {
+      "id": "R9",
+      "infons": {
+        "score": "0.9997",
+        "role1": {
+          "identifier": "MESH:D005909",
+          "type": "Disease",
+          "valid": true,
+          "normalized": [
+            "D005909"
+          ],
+          "database": "ncbi_mesh",
+          "normalized_id": "D005909",
+          "biotype": "disease",
+          "name": "Glioblastoma",
+          "accession": "@DISEASE_Glioblastoma"
+        },
+        "role2": {
+          "identifier": "7474",
+          "type": "Gene",
+          "valid": true,
+          "normalized": [
+            7474
+          ],
+          "database": "ncbi_gene",
+          "normalized_id": 7474,
+          "biotype": "gene",
+          "name": "WNT5A",
+          "accession": "@GENE_WNT5A"
+        },
+        "type": "Association"
+      },
+      "nodes": [
+        {
+          "refid": "8",
+          "role": "1,0"
+        }
+      ]
+    }
+  ],
+  "pmid": 27863244,
+  "pmcid": null,
+  "meta": {},
+  "date": "2016-11-17T00:00:00Z",
+  "journal": "Cell",
+  "authors": [
+    "Hu B",
+    "Wang Q",
+    "Wang YA",
+    "Hua S",
+    "Sauvé CG",
+    "Ong D",
+    "Lan ZD",
+    "Chang Q",
+    "Ho YW",
+    "Monasterio MM",
+    "Lu X",
+    "Zhong Y",
+    "Zhang J",
+    "Deng P",
+    "Tan Z",
+    "Wang G",
+    "Liao WT",
+    "Corley LJ",
+    "Yan H",
+    "Zhang J",
+    "You Y",
+    "Liu N",
+    "Cai L",
+    "Finocchiaro G",
+    "Phillips JJ",
+    "Berger MS",
+    "Spring DJ",
+    "Hu J",
+    "Sulman EP",
+    "Fuller GN",
+    "Chin L",
+    "Verhaak RGW",
+    "DePinho RA"
+  ],
+  "relations_display": [
+    {
+      "name": "associate|@DISEASE_Glioma|@GENE_PAX6"
+    },
+    {
+      "name": "associate|@DISEASE_Glioblastoma|@GENE_PAX6"
+    },
+    {
+      "name": "associate|@DISEASE_Glioblastoma|@GENE_DLX5"
+    },
+    {
+      "name": "associate|@GENE_DLX5|@GENE_WNT5A"
+    },
+    {
+      "name": "associate|@GENE_PAX6|@GENE_WNT5A"
+    },
+    {
+      "name": "associate|@GENE_DLX5|@GENE_PAX6"
+    },
+    {
+      "name": "associate|@DISEASE_Glioma|@GENE_DLX5"
+    },
+    {
+      "name": "associate|@DISEASE_Glioma|@GENE_WNT5A"
+    },
+    {
+      "name": "associate|@DISEASE_Glioblastoma|@GENE_WNT5A"
+    }
+  ]
+}

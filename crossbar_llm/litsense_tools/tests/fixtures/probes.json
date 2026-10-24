@@ -1,0 +1,427 @@
+[
+  {
+    "label": "sentences: 'What is the role of TP53 mutations in colorectal cancer prognosis?'",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/api/sentences/?query=What+is+the+role+of+TP53+mutations+in+colorectal+cancer+prognosis%3F&rerank=true",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 8.91,
+    "bytes": 45370,
+    "shape": [
+      {
+        "score": "float",
+        "section": "str[7]",
+        "pmcid": "str[11]",
+        "pmid": "int",
+        "annotations": [
+          "str[27]",
+          "...(2 items)"
+        ],
+        "text": "str[130]"
+      },
+      "...(100 items)"
+    ],
+    "fixture": "sentences_what_is_the_role_of_tp53_mutations_in_colorectal_cancer_prog.json"
+  },
+  {
+    "label": "sentences: 'CRISPR base editing off-target effects'",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/api/sentences/?query=CRISPR+base+editing+off-target+effects&rerank=true",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 8.81,
+    "bytes": 37311,
+    "shape": [
+      {
+        "pmcid": "str[11]",
+        "pmid": "int",
+        "text": "str[307]",
+        "score": "float",
+        "section": "NoneType",
+        "annotations": [
+          "str[18]",
+          "...(1 items)"
+        ]
+      },
+      "...(100 items)"
+    ],
+    "fixture": "sentences_crispr_base_editing_off_target_effects.json"
+  },
+  {
+    "label": "sentences: 'zzzqx nonexistent biomedical concept wibble'",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/api/sentences/?query=zzzqx+nonexistent+biomedical+concept+wibble&rerank=true",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 6.42,
+    "bytes": 36084,
+    "shape": [
+      {
+        "score": "float",
+        "section": "str[7]",
+        "pmcid": "str[10]",
+        "pmid": "int",
+        "annotations": [
+          "str[26]",
+          "...(3 items)"
+        ],
+        "text": "str[268]"
+      },
+      "...(100 items)"
+    ],
+    "fixture": "sentences_zzzqx_nonexistent_biomedical_concept_wibble.json"
+  },
+  {
+    "label": "sentences: rerank=false",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/api/sentences/?query=What+is+the+role+of+TP53+mutations+in+colorectal+cancer+prognosis%3F&rerank=false",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 4.36,
+    "bytes": 43986,
+    "shape": [
+      {
+        "pmcid": "str[10]",
+        "pmid": "int",
+        "text": "str[140]",
+        "score": "float",
+        "section": "str[7]",
+        "annotations": [
+          "str[26]",
+          "...(2 items)"
+        ]
+      },
+      "...(100 items)"
+    ],
+    "fixture": "sentences_rerank_false.json"
+  },
+  {
+    "label": "publication 39039912 (no params)",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/39039912",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 0.49,
+    "bytes": 22083,
+    "shape": {
+      "_id": "str[13]",
+      "id": "str[8]",
+      "infons": {},
+      "passages": [
+        {
+          "infons": "dict[5 keys]",
+          "offset": "int",
+          "text": "str[109]",
+          "sentences": "list[empty]",
+          "annotations": [
+            "dict[4 keys]",
+            "...(6 items)"
+          ],
+          "relations": "list[empty]"
+        },
+        "...(2 items)"
+      ],
+      "relations": [
+        {
+          "id": "str[2]",
+          "infons": "dict[4 keys]",
+          "nodes": [
+            "dict[2 keys]",
+            "...(1 items)"
+          ]
+        },
+        "...(19 items)"
+      ],
+      "pmid": "int",
+      "pmcid": "NoneType",
+      "meta": {},
+      "date": "str[20]",
+      "journal": "str[15]",
+      "authors": [
+        "str[5]",
+        "...(10 items)"
+      ],
+      "relations_display": [
+        {
+          "name": "str[32]"
+        },
+        "...(19 items)"
+      ]
+    },
+    "fixture": "publication_39039912.json"
+  },
+  {
+    "label": "publication 27863244 (no params)",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/27863244",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 0.51,
+    "bytes": 13043,
+    "shape": {
+      "_id": "str[13]",
+      "id": "str[8]",
+      "infons": {},
+      "passages": [
+        {
+          "infons": "dict[5 keys]",
+          "offset": "int",
+          "text": "str[97]",
+          "sentences": "list[empty]",
+          "annotations": [
+            "dict[4 keys]",
+            "...(2 items)"
+          ],
+          "relations": "list[empty]"
+        },
+        "...(2 items)"
+      ],
+      "relations": [
+        {
+          "id": "str[2]",
+          "infons": "dict[4 keys]",
+          "nodes": [
+            "dict[2 keys]",
+            "...(1 items)"
+          ]
+        },
+        "...(9 items)"
+      ],
+      "pmid": "int",
+      "pmcid": "NoneType",
+      "meta": {},
+      "date": "str[20]",
+      "journal": "str[4]",
+      "authors": [
+        "str[4]",
+        "...(33 items)"
+      ],
+      "relations_display": [
+        {
+          "name": "str[36]"
+        },
+        "...(9 items)"
+      ]
+    },
+    "fixture": "publication_27863244.json"
+  },
+  {
+    "label": "publication 39039912 ?section=abstract",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/39039912?section=abstract",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 0.52,
+    "bytes": 22083,
+    "shape": {
+      "_id": "str[13]",
+      "id": "str[8]",
+      "infons": {},
+      "passages": [
+        {
+          "infons": "dict[5 keys]",
+          "offset": "int",
+          "text": "str[109]",
+          "sentences": "list[empty]",
+          "annotations": [
+            "dict[4 keys]",
+            "...(6 items)"
+          ],
+          "relations": "list[empty]"
+        },
+        "...(2 items)"
+      ],
+      "relations": [
+        {
+          "id": "str[2]",
+          "infons": "dict[4 keys]",
+          "nodes": [
+            "dict[2 keys]",
+            "...(1 items)"
+          ]
+        },
+        "...(19 items)"
+      ],
+      "pmid": "int",
+      "pmcid": "NoneType",
+      "meta": {},
+      "date": "str[20]",
+      "journal": "str[15]",
+      "authors": [
+        "str[5]",
+        "...(10 items)"
+      ],
+      "relations_display": [
+        {
+          "name": "str[32]"
+        },
+        "...(19 items)"
+      ]
+    },
+    "fixture": "publication_39039912_section_abstract.json"
+  },
+  {
+    "label": "publication 39039912 ?section=methods",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/39039912?section=methods",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 0.47,
+    "bytes": 22083,
+    "shape": {
+      "_id": "str[13]",
+      "id": "str[8]",
+      "infons": {},
+      "passages": [
+        {
+          "infons": "dict[5 keys]",
+          "offset": "int",
+          "text": "str[109]",
+          "sentences": "list[empty]",
+          "annotations": [
+            "dict[4 keys]",
+            "...(6 items)"
+          ],
+          "relations": "list[empty]"
+        },
+        "...(2 items)"
+      ],
+      "relations": [
+        {
+          "id": "str[2]",
+          "infons": "dict[4 keys]",
+          "nodes": [
+            "dict[2 keys]",
+            "...(1 items)"
+          ]
+        },
+        "...(19 items)"
+      ],
+      "pmid": "int",
+      "pmcid": "NoneType",
+      "meta": {},
+      "date": "str[20]",
+      "journal": "str[15]",
+      "authors": [
+        "str[5]",
+        "...(10 items)"
+      ],
+      "relations_display": [
+        {
+          "name": "str[32]"
+        },
+        "...(19 items)"
+      ]
+    },
+    "fixture": "publication_39039912_section_methods.json"
+  },
+  {
+    "label": "publication 39039912 ?section=not_a_real_section",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/39039912?section=not_a_real_section",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 0.48,
+    "bytes": 22083,
+    "shape": {
+      "_id": "str[13]",
+      "id": "str[8]",
+      "infons": {},
+      "passages": [
+        {
+          "infons": "dict[5 keys]",
+          "offset": "int",
+          "text": "str[109]",
+          "sentences": "list[empty]",
+          "annotations": [
+            "dict[4 keys]",
+            "...(6 items)"
+          ],
+          "relations": "list[empty]"
+        },
+        "...(2 items)"
+      ],
+      "relations": [
+        {
+          "id": "str[2]",
+          "infons": "dict[4 keys]",
+          "nodes": [
+            "dict[2 keys]",
+            "...(1 items)"
+          ]
+        },
+        "...(19 items)"
+      ],
+      "pmid": "int",
+      "pmcid": "NoneType",
+      "meta": {},
+      "date": "str[20]",
+      "journal": "str[15]",
+      "authors": [
+        "str[5]",
+        "...(10 items)"
+      ],
+      "relations_display": [
+        {
+          "name": "str[32]"
+        },
+        "...(19 items)"
+      ]
+    },
+    "fixture": "publication_39039912_section_not_a_real_section.json"
+  },
+  {
+    "label": "publication: pmid that does not resolve",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/999999999",
+    "status": 500,
+    "content_type": "application/json",
+    "elapsed_s": 0.47,
+    "bytes": 66,
+    "shape": {
+      "detail": "str[53]"
+    },
+    "fixture": "publication_unresolvable.json"
+  },
+  {
+    "label": "publication: non-numeric pmid",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/not-a-pmid",
+    "status": 404,
+    "content_type": "application/json",
+    "elapsed_s": 0.44,
+    "bytes": 44,
+    "shape": {
+      "detail": "str[30]"
+    },
+    "fixture": "publication_non_numeric.json"
+  },
+  {
+    "label": "publication 1 (likely no abstract)",
+    "url": "https://www.ncbi.nlm.nih.gov/research/litsense2-api/publication/1",
+    "status": 200,
+    "content_type": "application/json",
+    "elapsed_s": 0.5,
+    "bytes": 939,
+    "shape": {
+      "_id": "str[6]",
+      "id": "str[1]",
+      "infons": {},
+      "passages": [
+        {
+          "infons": "dict[4 keys]",
+          "offset": "int",
+          "text": "str[64]",
+          "sentences": "list[empty]",
+          "annotations": [
+            "dict[4 keys]",
+            "...(1 items)"
+          ],
+          "relations": "list[empty]"
+        },
+        "...(2 items)"
+      ],
+      "relations": "list[empty]",
+      "pmid": "int",
+      "pmcid": "NoneType",
+      "meta": {},
+      "date": "str[20]",
+      "journal": "str[11]",
+      "authors": [
+        "str[8]",
+        "...(4 items)"
+      ],
+      "relations_display": "list[empty]"
+    },
+    "fixture": "publication_1_no_abstract.json"
+  }
+]

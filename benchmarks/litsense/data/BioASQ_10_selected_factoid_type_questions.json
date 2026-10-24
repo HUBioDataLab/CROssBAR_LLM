@@ -1,0 +1,1713 @@
+[
+    {
+        "id": "5540fbce234c5a7c75000001",
+        "body": "Which autophagy pathway is trigered by the KFERQ motif of cytosolic proteins?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/15149326",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24477641",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23452232",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16209346",
+            "http://www.ncbi.nlm.nih.gov/pubmed/10938088",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12105396",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19433452",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23880665",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23070014",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24323530",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16782460",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23404999",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11262416"
+        ],
+        "ideal_answer": [
+            "Cytosolic proteins carrying the KFERQ motif (a specific lysosomal import consensus sequence) are directed to a selective form of lysosomal degradation, called chaperone-mediated autophagy (CMA), as chaperone protein Hsc73 and other chaperones are involved in this process."
+        ],
+        "exact_answer": [
+            "chaperone-mediated autophagy (CMA)"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2015/MB_cgi?field=uid&exact=Find+Exact+Term&term=D054730",
+            "http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0006914",
+            "http://www.nlm.nih.gov/cgi/mesh/2015/MB_cgi?field=uid&exact=Find+Exact+Term&term=D001343"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 304,
+                "offsetInEndSection": 428,
+                "text": "Chaperone-mediated autophagy (CMA) is a selective form of lysosomal degradation targeting proteins carrying the KFERQ motif.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23452232"
+            },
+            {
+                "offsetInBeginSection": 111,
+                "offsetInEndSection": 354,
+                "text": "The significance of the receptor glycoprotein lamp2a in the chaperone-mediated autophagy of cytosolic proteins with KFERQ motif has been described in details as well as the chaperone protein Hsc73 and other chaperones involved in this process.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16209346"
+            },
+            {
+                "offsetInBeginSection": 209,
+                "offsetInEndSection": 448,
+                "text": "We investigated chaperone-mediated autophagy, a lysosomal import pathway that depends on the 73-kDa heat shock cognate protein and allows the degradation of proteins containing a specific lysosomal import consensus sequence (KFERQ motif). ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11262416"
+            },
+            {
+                "offsetInBeginSection": 109,
+                "offsetInEndSection": 353,
+                "text": "The significance of the receptor glycoprotein lamp2a in the chaperone-mediated autophagy of cytosolic proteins with KFERQ motif has been described in details as well as the chaperone protein Hsc73 and other chaperones involved in this process.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16209346"
+            },
+            {
+                "offsetInBeginSection": 206,
+                "offsetInEndSection": 445,
+                "text": "We investigated chaperone-mediated autophagy, a lysosomal import pathway that depends on the 73-kDa heat shock cognate protein and allows the degradation of proteins containing a specific lysosomal import consensus sequence (KFERQ motif).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11262416"
+            },
+            {
+                "offsetInBeginSection": 295,
+                "offsetInEndSection": 420,
+                "text": "Chaperone-mediated autophagy (CMA) is a selective form of lysosomal degradation targeting proteins carrying the KFERQ motif.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23452232"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 137,
+                "text": "Chaperone-mediated autophagy (CMA) is a selective mechanism for the degradation of soluble cytosolic proteins bearing the sequence KFERQ.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23404999"
+            },
+            {
+                "offsetInBeginSection": 1085,
+                "offsetInEndSection": 1234,
+                "text": "The abundance of proteins containing that chaperone-mediated autophagy KFERQ signal motif increased 38% and individual KFERQ containing proteins [e.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15149326"
+            },
+            {
+                "offsetInBeginSection": 977,
+                "offsetInEndSection": 1175,
+                "text": "Furthermore, four annexins containing KFERQ-like sequences, annexins I, II, IV, and VI, are enriched in lysosomes with high chaperone-mediated autophagy activity as expected for substrate proteins.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/10938088"
+            },
+            {
+                "offsetInBeginSection": 739,
+                "offsetInEndSection": 861,
+                "text": "Using isolated lysosomes, only the annexins containing KFERQ-like sequences are degraded by chaperone mediated-autophagy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/10938088"
+            },
+            {
+                "offsetInBeginSection": 1157,
+                "offsetInEndSection": 1425,
+                "text": "Macroautophagy is followed by chaperone-mediated autophagy (CMA), in which Hsc70 (Heat shock cognate 70) selectively binds proteins with exposed KFERQ motifs and pushes them inside lysosomes through the LAMP-2A (Lysosome-associated membrane protein type 2A) receptor.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23070014"
+            },
+            {
+                "offsetInBeginSection": 1165,
+                "offsetInEndSection": 1432,
+                "text": "Macroautophagy is followed by chaperone-mediated autophagy (CMA), in which Hsc70 (Heat shock cognate 70) selectively binds proteins with exposed KFERQ motifs and pushes them inside lysosomes through the LAMP-2A (Lysosome-associated membrane protein type 2A) receptor.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23070014"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 143,
+                "text": "AIMS: Chaperone-mediated autophagy (CMA) is a selective mechanism for the degradation of soluble cytosolic proteins bearing the sequence KFERQ.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23404999"
+            },
+            {
+                "offsetInBeginSection": 209,
+                "offsetInEndSection": 447,
+                "text": "We investigated chaperone-mediated autophagy, a lysosomal import pathway that depends on the 73-kDa heat shock cognate protein and allows the degradation of proteins containing a specific lysosomal import consensus sequence (KFERQ motif).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11262416"
+            },
+            {
+                "offsetInBeginSection": 111,
+                "offsetInEndSection": 353,
+                "text": "The significance of the receptor glycoprotein lamp2a in the chaperone-mediated autophagy of cytosolic proteins with KFERQ motif has been described in details as well as the chaperone protein Hsc73 and other chaperones involved in this process",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16209346"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 136,
+                "text": "Chaperone-mediated autophagy (CMA) is a selective mechanism for the degradation of soluble cytosolic proteins bearing the sequence KFERQ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23404999"
+            },
+            {
+                "offsetInBeginSection": 767,
+                "offsetInEndSection": 946,
+                "text": "In cell culture, growth factors suppress the lysosomal pathway of chaperone-mediated autophagy leading to the accumulation of specific cytoplasmic proteins containing KFERQ motifs",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12105396"
+            },
+            {
+                "offsetInBeginSection": 209,
+                "offsetInEndSection": 446,
+                "text": "We investigated chaperone-mediated autophagy, a lysosomal import pathway that depends on the 73-kDa heat shock cognate protein and allows the degradation of proteins containing a specific lysosomal import consensus sequence (KFERQ motif)",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11262416"
+            },
+            {
+                "offsetInBeginSection": 1097,
+                "offsetInEndSection": 1346,
+                "text": "The abundance of proteins containing that chaperone-mediated autophagy KFERQ signal motif increased 38% and individual KFERQ containing proteins [e.g., M2 pyruvate kinase, glyceraldehyde-3-phosphate dehydrogenase (GAPDH) and pax2] were more abundant",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15149326"
+            },
+            {
+                "offsetInBeginSection": 1182,
+                "offsetInEndSection": 1303,
+                "text": "These results provide striking evidence for the importance of KFERQ motifs in substrates of chaperone-mediated autophagy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/10938088"
+            },
+            {
+                "offsetInBeginSection": 1165,
+                "offsetInEndSection": 1431,
+                "text": "Macroautophagy is followed by chaperone-mediated autophagy (CMA), in which Hsc70 (Heat shock cognate 70) selectively binds proteins with exposed KFERQ motifs and pushes them inside lysosomes through the LAMP-2A (Lysosome-associated membrane protein type 2A) receptor",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23070014"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "56e6ec49edfc094c1f000005",
+        "body": "Which is the target of the drug Denosumab?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/26504466",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26203221",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26508890",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26029270"
+        ],
+        "ideal_answer": [
+            "Denosumab (Dmab) is a fully human monoclonal antibody against the receptor activator of nuclear factor-κB ligand (RANKL)."
+        ],
+        "exact_answer": [
+            "receptor activator of nuclear factor-κB ligand",
+            "RANKL"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 156,
+                "text": "Denosumab is a human monoclonal antibody which specifically blocks receptor activator of nuclear factor κB ligand and is a very potent antiresorptive drug. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26029270"
+            },
+            {
+                "offsetInBeginSection": 560,
+                "offsetInEndSection": 606,
+                "text": "denosumab, a monoclonal antibody against RANKL",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26203221"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 140,
+                "text": "Denosumab is a human monoclonal antibody indicated for the treatment of osteoporosis in postmenopausal women with a high risk of fractures. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26504466"
+            },
+            {
+                "offsetInBeginSection": 466,
+                "offsetInEndSection": 776,
+                "text": "Denosumab (Dmab) is a fully human monoclonal antibody against the receptor activator of nuclear factor-κB ligand (RANKL), which, through the prevention of the RANKL/RANK interaction, inhibits osteoclast-mediated bone resorption and significantly reduces the risk of vertebral, nonvertebral, and hip fractures. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26508890"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "54f35ad864850a5854000004",
+        "body": "LY450139 is investigational name of which drug?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/19692615",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20350302",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22710916",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22018341",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23278303",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19527190",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22778845",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20634579"
+        ],
+        "ideal_answer": [
+            "LY450139 is investigational name of Semagacestat. It is a γ-secretase inhibitor developed for treatment for Alzheimer's disease. Chemical name of LY450139 is hydroxylvaleryl monobenzocaprolactam."
+        ],
+        "exact_answer": [
+            "semagacestat"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2015/MB_cgi?field=uid&exact=Find+Exact+Term&term=D015507"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 213,
+                "text": "The outcomes of the clinical trials of the γ-secretase inhibitor Semagacestat (LY-450139) and the γ-secretase modulator (GSM) Tarenflurbil were disappointing, but may not represent the end of the γ-secretase era. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22710916"
+            },
+            {
+                "offsetInBeginSection": 681,
+                "offsetInEndSection": 804,
+                "text": "A selective BACE inhibitor and the γ-secretase inhibitor LY450139 (semagacestat) were used to inhibit respective secretase.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22018341"
+            },
+            {
+                "offsetInBeginSection": -1,
+                "offsetInEndSection": 71,
+                "text": "ACS chemical neuroscience molecule spotlight on semagacestat (LY450139).",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22778845"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 173,
+                "text": "Semagacestat (LY450139) is a novel γ-secretase inhibitor currently in late-stage development by Eli Lilly and Company as a potential treatment for Alzheimer's disease (AD). ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22778845"
+            },
+            {
+                "offsetInBeginSection": 184,
+                "offsetInEndSection": 358,
+                "text": " The γ-secretase inhibitor LY450139 (semagacestat) lowers plasma Aβ(1-40) and Aβ(1-42) in a dose-dependent manner but has no clear effect on the CSF level of these isoforms. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20634579"
+            },
+            {
+                "offsetInBeginSection": 2,
+                "offsetInEndSection": 176,
+                "text": "TRODUCTION: LY450139 (semagacestat) inhibits gamma-secretase, a key enzyme for generation of amyloid beta (Abeta), the peptide deposited in plaques in Alzheimer disease (AD).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20350302"
+            },
+            {
+                "offsetInBeginSection": 553,
+                "offsetInEndSection": 801,
+                "text": "Two potent gamma-secretase inhibitors (GSIs), DAPT (N-[N-(3,5-difluorophenacetyl-L-alanyl)]-S-phenylglycine t-butyl ester) and LY450139 (hydroxylvaleryl monobenzocaprolactam), were found to reduce the density of dendritic spines in wild-type mice. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19692615"
+            },
+            {
+                "offsetInBeginSection": 2,
+                "offsetInEndSection": 121,
+                "text": "velopment of semagacestat (LY450139), a functional gamma-secretase inhibitor, for the treatment of Alzheimer's disease.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19527190"
+            },
+            {
+                "offsetInBeginSection": 269,
+                "offsetInEndSection": 391,
+                "text": "OBJECTIVE: This paper reviews the pharmacology and chemical efficacy of an A beta-lowering agent, semagacestat (LY450139).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19527190"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 72,
+                "text": "ACS chemical neuroscience molecule spotlight on semagacestat (LY450139).",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22778845"
+            },
+            {
+                "offsetInBeginSection": 653,
+                "offsetInEndSection": 777,
+                "text": " A selective BACE inhibitor and the γ-secretase inhibitor LY450139 (semagacestat) were used to inhibit respective secretase.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22018341"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "514a0a57d24251bc05000051",
+        "body": "Which drug should be used as an antidote in benzodiazepine overdose?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/1354979",
+            "http://www.ncbi.nlm.nih.gov/pubmed/7629986",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8438687",
+            "http://www.ncbi.nlm.nih.gov/pubmed/2893240",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11349753",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18175099",
+            "http://www.ncbi.nlm.nih.gov/pubmed/14620397",
+            "http://www.ncbi.nlm.nih.gov/pubmed/9306053",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8644960",
+            "http://www.ncbi.nlm.nih.gov/pubmed/1672103",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8239101",
+            "http://www.ncbi.nlm.nih.gov/pubmed/2113543",
+            "http://www.ncbi.nlm.nih.gov/pubmed/1996802",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8905360",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21785147",
+            "http://www.ncbi.nlm.nih.gov/pubmed/1286503",
+            "http://www.ncbi.nlm.nih.gov/pubmed/2575692",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19500521",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8605789",
+            "http://www.ncbi.nlm.nih.gov/pubmed/8306565",
+            "http://www.ncbi.nlm.nih.gov/pubmed/11383664",
+            "http://www.ncbi.nlm.nih.gov/pubmed/3132054",
+            "http://www.ncbi.nlm.nih.gov/pubmed/2231833",
+            "http://www.ncbi.nlm.nih.gov/pubmed/2899985"
+        ],
+        "ideal_answer": [
+            "Flumazenil should be used in all patients presenting with suspected benzodiazepine overdose. Flumazenil is a  potent benzodiazepine receptor antagonist that competitively blocks the central effects of benzodiazepines and reverses behavioral, neurologic, and electrophysiologic effects of benzodiazepine overdose. Clinical efficacy and safety of flumazenil in treatment of benzodiazepine overdose has been confirmed in a number of rigorous clinical trials. In addition, flumazenil is also useful to to reverse benzodiazepine induced sedation and to and to diagnose benzodiazepine overdose."
+        ],
+        "exact_answer": [
+            "flumazenil"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2012/MB_cgi?field=uid&exact=Find+Exact+Term&term=D062787",
+            "http://www.nlm.nih.gov/cgi/mesh/2012/MB_cgi?field=uid&exact=Find+Exact+Term&term=D001569",
+            "http://www.nlm.nih.gov/cgi/mesh/2012/MB_cgi?field=uid&exact=Find+Exact+Term&term=D000931"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 11,
+                "offsetInEndSection": 250,
+                "text": "Benzodiazepine (BZD) overdose (OD) continues to cause significant morbidity and mortality in the UK. Flumazenil is an effective antidote but there is a risk of seizures, particularly in those who have co-ingested tricyclic antidepressants.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21785147"
+            },
+            {
+                "offsetInBeginSection": 530,
+                "offsetInEndSection": 698,
+                "text": "Flumazenil was administered to 80 patients in 4504 BZD-related enquiries, 68 of whom did not have ventilatory failure or had recognised contraindications to flumazenil.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21785147"
+            },
+            {
+                "offsetInBeginSection": 1366,
+                "offsetInEndSection": 1436,
+                "text": "Flumazenil is used infrequently in the management of BZD OD in the UK.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21785147"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 152,
+                "text": "Flumazenil is a benzodiazepine antagonist. It is widely used as an antidote in comatose patients suspected of having ingested a benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19500521"
+            },
+            {
+                "offsetInBeginSection": 2100,
+                "offsetInEndSection": 2227,
+                "text": "Flumazenil is very useful in reversing benzodiazepine-induced sedation as well as to diagnose or treat benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18175099"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 225,
+                "text": "Flumazenil is indicated for reversal of sedation from benzodiazepines administered during therapeutic or diagnostic procedures and during induction or maintenance of general anesthesia, as well as for benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/14620397"
+            },
+            {
+                "offsetInBeginSection": 766,
+                "offsetInEndSection": 990,
+                "text": "When measures are required to ensure adequate recovery of a patient's respiratory function and mental awareness, such as in patients with benzodiazepine toxicity, consideration of continuous-infusion flumazenil is warranted.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/14620397"
+            },
+            {
+                "offsetInBeginSection": 439,
+                "offsetInEndSection": 695,
+                "text": "Flumazenil is a potent benzodiazepine antagonist that competitively blocks the central effects of benzodiazepines. It can reverse the sedative effects of benzodiazepines occurring after diagnostic or therapeutic procedures or after benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11349753"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 139,
+                "text": "A 54-y-old man ingested 2 g of bulk laboratory diazepam and was treated with activated charcoal, enhanced diuresis and flumazenil infusion.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/11383664"
+            },
+            {
+                "offsetInBeginSection": 200,
+                "offsetInEndSection": 390,
+                "text": "Flumazenil is a specific and competitive antagonist at the central benzodiazepine receptor, reversing all effects of benzodiazepine agonists without tranquillising or anticonvulsant actions.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/9306053"
+            },
+            {
+                "offsetInBeginSection": 391,
+                "offsetInEndSection": 676,
+                "text": "Incremental intravenous bolus injections of flumazenil 0.1 to 0.3 mg are the most effective and well tolerated in the diagnosis and treatment of pure benzodiazepine overdose; additional boluses or an infusion (0.3 to 0.5 mg/h) can be given to prevent patients from relapsing into coma.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/9306053"
+            },
+            {
+                "offsetInBeginSection": 12,
+                "offsetInEndSection": 277,
+                "text": "Flumazenil is a competitive benzodiazepine antagonist that acts to reverse their sedative and hypnotic effects. It is indicated in the management of benzodiazepine overdose, but its role in the routine reversal of endoscopic conscious sedation has not been defined.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8905360"
+            },
+            {
+                "offsetInBeginSection": 11,
+                "offsetInEndSection": 119,
+                "text": "To develop clinical rules for the safe and effective use of flumazenil in suspected benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8644960"
+            },
+            {
+                "offsetInBeginSection": 438,
+                "offsetInEndSection": 637,
+                "text": "Unconscious patients (n = 110) suspected of benzodiazepine overdose, graded 2 to 4 on the Matthew and Lawson coma scale, were treated with flumazenil, the specific benzodiazepine receptor antagonist.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8605789"
+            },
+            {
+                "offsetInBeginSection": 1685,
+                "offsetInEndSection": 2084,
+                "text": "Fourteen of 17 double-blind, flumazenil-treated patients woke after a mean of 0.8 +/- 0.3 (SD) mg vs. one of 14 placebo patients (p < .001). Seventy-five percent of the aggregated controlled and uncontrolled patients awoke from coma scores of 3.1 +/- 0.6 to 0.4 +/- 0.5 (p < .01) after the injection of 0.7 +/- 0.3 mg of flumazenil. These patients had high benzodiazepine serum blood concentrations.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8605789"
+            },
+            {
+                "offsetInBeginSection": 3379,
+                "offsetInEndSection": 3459,
+                "text": "Flumazenil is effective in preventing recurrence of benzodiazepine-induced coma.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8605789"
+            },
+            {
+                "offsetInBeginSection": 1430,
+                "offsetInEndSection": 1550,
+                "text": "Flumazenil is best left for reversal of therapeutic conscious sedation and rare select cases of benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/7629986"
+            },
+            {
+                "offsetInBeginSection": 161,
+                "offsetInEndSection": 353,
+                "text": "Flumazenil interacts at the central benzodiazepine receptor to antagonize or reverse the behavioral, neurologic, and electrophysiologic effects of benzodiazepine agonists and inverse agonists.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8306565"
+            },
+            {
+                "offsetInBeginSection": 613,
+                "offsetInEndSection": 862,
+                "text": "It improves the level of consciousness in patients with benzodiazepine overdose; however, resedation may occur within one to two hours after administration, so repeated doses or a continuous infusion may be required to maintain therapeutic efficacy.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8306565"
+            },
+            {
+                "offsetInBeginSection": 1841,
+                "offsetInEndSection": 2069,
+                "text": "Flumazenil has been shown to reverse sedation caused by intoxication with benzodiazepines alone or benzodiazepines in combination with other agents, but it should not be used when cyclic antidepressant intoxication is suspected.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8306565"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 131,
+                "text": "Flumazenil, a specific benzodiazepine antagonist, was evaluated as adjunctive therapy in the management of benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1286503"
+            },
+            {
+                "offsetInBeginSection": 831,
+                "offsetInEndSection": 971,
+                "text": "The mean CGIS score at 10 minutes for benzodiazepine-positive patients treated with flumazenil was 1.95 versus 3.58 for those given placebo.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1286503"
+            },
+            {
+                "offsetInBeginSection": 1346,
+                "offsetInEndSection": 1539,
+                "text": "Among the benzodiazepine-positive patients, 9 (53%) of 17 patients from the flumazenil group responded to the additional flumazenil, and 58 (81%) of patients previously given placebo responded.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1286503"
+            },
+            {
+                "offsetInBeginSection": 2286,
+                "offsetInEndSection": 2454,
+                "text": "The results of this study confirm published reports of the efficacy of flumazenil in reversing benzodiazepine-induced sedation in patients with benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1286503"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 269,
+                "text": "Flumazenil, a specific benzodiazepine antagonist, is useful in reversing the sedation and respiratory depression that often occur when benzodiazepines are administered to patients undergoing anesthesia or when patients have taken an intentional benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8438687"
+            },
+            {
+                "offsetInBeginSection": 2414,
+                "offsetInEndSection": 2508,
+                "text": "Flumazenil rapidly and effectively reverses the clinical signs and symptoms of a BDZ overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8239101"
+            },
+            {
+                "offsetInBeginSection": 146,
+                "offsetInEndSection": 288,
+                "text": "Flumazenil is a benzodiazepine antagonist that is highly effective in reversing the central nervous system effects of benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1354979"
+            },
+            {
+                "offsetInBeginSection": 645,
+                "offsetInEndSection": 827,
+                "text": "In the setting of isolated benzodiazepine overdose, flumazenil is capable of completely reversing coma within one to two minutes, with this effect lasting between one and five hours.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1996802"
+            },
+            {
+                "offsetInBeginSection": 319,
+                "offsetInEndSection": 682,
+                "text": "Fifteen comatous patients with suspected sedatives/hypnotics overdose were included in this study and flumazenil 0.25 mg per dose was administrated intravenously. The average score of Glasgow Coma Scale increased from 7.13 +/- 2.92 to 10.93 +/- 3.67 after one dose of flumazenil. Clear consciousness was restored after multiple doses of flumazenil administration.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1672103"
+            },
+            {
+                "offsetInBeginSection": 908,
+                "offsetInEndSection": 1048,
+                "text": "We concluded that flumazenil is an excellent antidote for benzodiazepine overdose and valuable for differentiating the patients in comatose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/1672103"
+            },
+            {
+                "offsetInBeginSection": 1176,
+                "offsetInEndSection": 1307,
+                "text": "Patients with benzodiazepine overdose who received 5 mg flumazenil regained consciousness about 1-2 min after the end of injection.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2231833"
+            },
+            {
+                "offsetInBeginSection": 1383,
+                "offsetInEndSection": 1485,
+                "text": "We conclude that flumazenil is an effective and safe drug in the treatment of benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2113543"
+            },
+            {
+                "offsetInBeginSection": 235,
+                "offsetInEndSection": 380,
+                "text": "Flumazenil is the first benzodiazepine antagonist which can be used in humans and is a well established for treatment of benzodiazepine overdose.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2575692"
+            },
+            {
+                "offsetInBeginSection": 420,
+                "offsetInEndSection": 631,
+                "text": "Flumazenil, a 1,4-imidazobenzodiazepine, is a highly effective, specific benzodiazepine antagonist which is indicated for use when the effect of a benzodiazepine must be attenuated or terminated at short notice.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2893240"
+            },
+            {
+                "offsetInBeginSection": 2200,
+                "offsetInEndSection": 2509,
+                "text": "Thus, flumazenil provides a safe and effective means of attenuating or reversing the CNS-depressant effects of benzodiazepines whenever indicated, e.g. following benzodiazepine-induced general anaesthesia, conscious sedation, or after benzodiazepine overdose, either alone or in combination with other agents.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2893240"
+            },
+            {
+                "offsetInBeginSection": 3524,
+                "offsetInEndSection": 3676,
+                "text": "Flumazenil is safe when administered cautiously, even in patients with coma caused by a mixed overdose of benzodiazepine plus tricyclic antidepressants.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8605789"
+            },
+            {
+                "offsetInBeginSection": 1222,
+                "offsetInEndSection": 1648,
+                "text": "The mean +/- SD CGIS score at ten minutes for BDZ-positive patients was 1.41 +/- 0.72 for patients who received flumazenil and 3.41 +/- 0.91 for the placebo group (P < .01). There was no difference in the mean CGIS score between the flumazenil (3.25 +/- 1.15) and placebo (3.75 +/- 0.69) groups in BDZ-negative patients. The GCS and NAS were also significantly better in patients who were BDZ-positive and received flumazenil.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/8239101"
+            },
+            {
+                "offsetInBeginSection": 145,
+                "offsetInEndSection": 665,
+                "text": "In 23 patients admitted to the Intensive Care Unit with coma due to overdose with benzodiazepines or other sedatives, flumazenil i.v. (up to 2 mg or placebo) was given. In 13 patients given flumazenil the Glasgow Coma Scale (GCS) increased significantly from 4.9 to 7.8 (p less than 0.05). Six of these 13 patients, including mainly benzodiazepine mono-intoxications, needed only one series of injections (up to 1.0 mg flumazenil); the GCS increased thereby from 4.5 to 10.7 within a maximum of 5 min (p less than 0.01).",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2113543"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 416,
+                "text": "The efficacy and safety of flumazenil were assessed in comparison to placebo in a double-blind randomised study of 31 adults intoxicated with benzodiazepines. The criteria of efficacy were the degree of sedation, and orientation in time and space. Patients who received flumazenil awoke within minutes but central depression returned partly one hour later, which reflects the short elimination half-life of the drug.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/3132054"
+            },
+            {
+                "offsetInBeginSection": 417,
+                "offsetInEndSection": 615,
+                "text": "Side effects were few and the results indicate that flumazenil is effective in the primary management of benzodiazepine overdose and in states where benzodiazepines have been taken with other drugs.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/3132054"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 222,
+                "text": "Flumazenil (Ro 15-1788) proved to be a very efficacious competitive antagonist of benzodiazepines that reliably counteracts their pharmacological actions within 1-2 min as could be demonstrated in clinical and EEG studies.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2899985"
+            },
+            {
+                "offsetInBeginSection": 1243,
+                "offsetInEndSection": 1411,
+                "text": "In intensive care medicine, the antagonist may be used in the treatment of benzodiazepine overdose as well as in the differential diagnosis of a coma of unknown origin.",
+                "beginSection": "sections.0",
+                "endSection": "sections.0",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/2899985"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "530cf4c54a5037880c000008",
+        "body": "What is the name of Bruton's tyrosine kinase inhibitor that can be used for treatment of chronic lymphocytic leukemia?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/23617253",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24085367",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24157582",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22960555",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24009233",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23619564",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22300471",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23617325",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23782158",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23359016",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24311722",
+            "http://www.ncbi.nlm.nih.gov/pubmed/22830347",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23656200"
+        ],
+        "ideal_answer": [
+            "Ibrutinib is the covalent inhibitor of Bruton's tyrosine kinase that can be used for treatment of chronic lymphocytic leukemia (CLL). Ibrutinib has shown highly encouraging results in phase I/II trials in patients with treatment-naive, relapsed and refractory CLL even in the presence of high risk disease or poor prognostic markers. Ibrutinib demonstrated that Bruton's tyrosine kinase inhibition sensitizes CLL cells to apoptosis and alters their migratory behavior. Ibrutinib has excellent activity in other B cell malignancies, including in particular mantle cell lymphoma and Waldenstrom macroglobulinemia."
+        ],
+        "exact_answer": [
+            "Ibrutinib"
+        ],
+        "concepts": [
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D007945",
+            "http://www.uniprot.org/uniprot/BTK_CHICK",
+            "http://www.uniprot.org/uniprot/IBTK_HUMAN",
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D013812",
+            "http://www.uniprot.org/uniprot/IBTK_XENLA",
+            "http://www.uniprot.org/uniprot/BTK_HUMAN",
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D011505",
+            "http://www.uniprot.org/uniprot/IBTK_MOUSE",
+            "http://www.nlm.nih.gov/cgi/mesh/2014/MB_cgi?field=uid&exact=Find+Exact+Term&term=D015451",
+            "http://www.uniprot.org/uniprot/BTK_MOUSE",
+            "http://www.disease-ontology.org/api/metadata/DOID:1040",
+            "http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0030292"
+        ],
+        "snippets": [
+            {
+                "offsetInBeginSection": 187,
+                "offsetInEndSection": 620,
+                "text": "Bruton's tyrosine kinase (BTK) shows constitutive activity in CLL and is the target of irreversible inhibition by ibrutinib, an orally bioavailable kinase inhibitor that has shown outstanding activity in CLL. Early clinical results in CLL with other reversible and irreversible BTK inhibitors have been less promising, however, raising the question of whether BTK kinase activity is an important target of ibrutinib and also in CLL. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24311722"
+            },
+            {
+                "offsetInBeginSection": 876,
+                "offsetInEndSection": 1152,
+                "text": "Inhibition of BTK kinase activity through either targeted genetic inactivation or ibrutinib in the TCL1 mouse significantly delays the development of CLL, demonstrating that BTK is a critical kinase for CLL development and expansion and thus an important target of ibrutinib. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24311722"
+            },
+            {
+                "offsetInBeginSection": 292,
+                "offsetInEndSection": 473,
+                "text": "Ibrutinib, an inhibitor of Bruton's tyrosine kinase is showing impressive responses in heavily pre-treated high-risk CLL, whether alone or in combination with MoAbs or chemotherapy.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24157582"
+            },
+            {
+                "offsetInBeginSection": 931,
+                "offsetInEndSection": 1113,
+                "text": "Ibrutinib acts by inhibiting the Bruton's tyrosine kinase (BTK) while idelalisib represents a first-in-class specific inhibitor of the phosphoinositol-3 kinase (PI3K) delta isoform. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24085367"
+            },
+            {
+                "offsetInBeginSection": 1096,
+                "offsetInEndSection": 1261,
+                "text": "Furthermore, we demonstrate that the Bruton's tyrosine kinase inhibitor ibrutinib or the PI3K inhibitor idelalisib block B-cell receptor induced activation of LCP1. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24009233"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 70,
+                "text": "Targeting BTK with ibrutinib in relapsed chronic lymphocytic leukemia.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23782158"
+            },
+            {
+                "offsetInBeginSection": 319,
+                "offsetInEndSection": 625,
+                "text": "We conducted a phase 1b-2 multicenter study to assess the safety, efficacy, pharmacokinetics, and pharmacodynamics of ibrutinib (PCI-32765), a first-in-class, oral covalent inhibitor of BTK designed for treatment of B-cell cancers, in patients with relapsed or refractory CLL or small lymphocytic lymphoma.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23782158"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 315,
+                "text": "Recent clinical data suggest remarkable activity of ibrutinib, the first-in-class covalent inhibitor of Bruton's tyrosine kinase (BTK), in chronic lymphocytic leukemia (CLL), as well as excellent activity in other B cell malignancies, including in particular mantle cell lymphoma and Waldenstrom macroglobulinemia. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23656200"
+            },
+            {
+                "offsetInBeginSection": 890,
+                "offsetInEndSection": 997,
+                "text": "Next, we used this model to study ibrutinib, a Bruton's tyrosine kinase inhibitor in clinical development. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23619564"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 127,
+                "text": "Ibrutinib: a novel Bruton's tyrosine kinase inhibitor with outstanding responses in patients with chronic lymphocytic leukemia.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23617325"
+            },
+            {
+                "offsetInBeginSection": 368,
+                "offsetInEndSection": 607,
+                "text": "Ibrutinib, a Bruton's tyrosine kinase inhibitor, has shown highly encouraging results in phase I/II trials in patients with treatment-naive, relapsed and refractory CLL even in the presence of high risk disease or poor prognostic markers. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23617325"
+            },
+            {
+                "offsetInBeginSection": 869,
+                "offsetInEndSection": 1078,
+                "text": "The compounds that are currently investigated in patients with CLL include ibrutinib -inhibitor of Btk, fostamatinib-inhibitor of Syk and idelalisib (GS-1101) -a specific isoform of the PI3K (PI3K) inhibitor. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23617253"
+            },
+            {
+                "offsetInBeginSection": 354,
+                "offsetInEndSection": 600,
+                "text": "Ibrutinib (PCI-32765), demonstrated that Btk inhibition sensitizes CLL cells to apoptosis and alters their migratory behavior, these studies however did not address whether Btk-mediated signaling is involved in the process of CLL leukemogenesis. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23359016"
+            },
+            {
+                "offsetInBeginSection": 1087,
+                "offsetInEndSection": 1315,
+                "text": "Small molecule inhibitors of BCR signaling kinases, Bruton's tyrosine kinase (Btk) inhibitor ibrutinib and the phosphoinositide 3'-kinase delta (PI3Kδ) inhibitor GS-1101, are currently transforming the landscape of CLL therapy. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22960555"
+            },
+            {
+                "offsetInBeginSection": 708,
+                "offsetInEndSection": 938,
+                "text": "More recently, several KIs have been developed to target the proximal B-cell receptor (BCR) signaling pathway including spleen tyrosine kinase inhibitor (Fostamatinib) and Bruton's tyrosine kinase inhibitors (Ibrutinib, AVL-263). ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/22830347"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5c5f56501a4c55d80b00002a",
+        "body": "What is the combined effect of Nfat and miR-25?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/24161931"
+        ],
+        "ideal_answer": [
+            "Increased calcineurin/Nfat signalling and decreased miR-25 expression integrate to re-express the basic helix-loop-helix (bHLH) transcription factor dHAND (also known as Hand2) in the diseased human and mouse myocardium."
+        ],
+        "exact_answer": [
+            "Re-express the basic helix-loop-helix (bHLH) transcription factor dHAND (also known as Hand2) in the diseased human and mouse myocardium."
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 88,
+                "text": "Nfat and miR-25 cooperate to reactivate the transcription factor Hand2 in heart failure.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24161931"
+            },
+            {
+                "offsetInBeginSection": 185,
+                "offsetInEndSection": 425,
+                "text": "Here we report that increased calcineurin/Nfat signalling and decreased miR-25 expression integrate to re-express the basic helix-loop-helix (bHLH) transcription factor dHAND (also known as Hand2) in the diseased human and mouse myocardium.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24161931"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5d38663da1e1595105000001",
+        "body": "Which domain of the MOZ/MYST3 protein complex associates with histone H3?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/24150941",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19922872"
+        ],
+        "ideal_answer": [
+            "The double PHD finger domain of MOZ/MYST3 induces a-helical structure of the histone H3 tail",
+            "The double PHD finger domain of MOZ/MYST3 induces a-helical structure of the histone H3 tail to facilitate acetylation and methylation sampling and modification In addition to sampling H3 and H4 modification status, we show that the DPF cooperates with the MYST domain to promote H3K9 and H3K14 acetylation, although not if H3K4 is trimethylated",
+            "MOZ/MYST3 complex associates with histone H3 with high affinity and specificity. Both proteins share a PHD finger domain.",
+            "The double PHD finger domain of MOZ/MYST3 induces a-helical structure of the histone H3 tail to facilitate acetylation and methylation sampling and modification.",
+            "In conclusion, our data show that Moz regulates H3K9 acetylation at Hox gene loci and that RA can act independently of Moz to establish specific Hox gene expression boundaries. The double PHD finger domain of MOZ/MYST3 induces a-helical structure of the histone H3 tail to facilitate acetylation and methylation sampling and modification",
+            "MOZ/MYST3 complex associates with histone H3 with PHD finger domain.",
+            "ere we report novel insights into histone H3 tail structure in complex with the double PHD finger (DPF) of the lysine acetyltransferase MOZ/MYST3/KAT6A.",
+            "ere we report novel insights into histone H3 tail structure in complex with the double PHD finger (DPF) of the lysine acetyltransferase MOZ/MYST3/KAT6A. In addition to sampling H3 and H4 modification status, we show that the DPF cooperates with the MYST domain to promote H3K9 and H3K14 acetylation, although not if H3K4 is trimethylated",
+            "In conclusion, our data show that Moz regulates H3K9 acetylation at Hox gene loci and that RA can act independently of Moz to establish specific Hox gene expression boundaries. The double PHD finger domain of MOZ/MYST3 induces a-helical structure of the histone H3 tail to facilitate acetylation and methylation sampling and modification ere we report novel insights into histone H3 tail structure in complex with the double PHD finger (DPF) of the lysine acetyltransferase MOZ/MYST3/KAT6A."
+        ],
+        "exact_answer": [
+            "the double PHD finger domain"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 844,
+                "offsetInEndSection": 1020,
+                "text": "In conclusion, our data show that Moz regulates H3K9 acetylation at Hox gene loci and that RA can act independently of Moz to establish specific Hox gene expression boundaries.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19922872"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 160,
+                "text": "The double PHD finger domain of MOZ/MYST3 induces α-helical structure of the histone H3 tail to facilitate acetylation and methylation sampling and modification",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24150941"
+            },
+            {
+                "offsetInBeginSection": 130,
+                "offsetInEndSection": 467,
+                "text": "ere we report novel insights into histone H3 tail structure in complex with the double PHD finger (DPF) of the lysine acetyltransferase MOZ/MYST3/KAT6A. In addition to sampling H3 and H4 modification status, we show that the DPF cooperates with the MYST domain to promote H3K9 and H3K14 acetylation, although not if H3K4 is trimethylated",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24150941"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5c74266a7c78d694710000a2",
+        "body": "Which biological process takes place in nuclear speckles?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/12923522",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12826600",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12002677",
+            "http://www.ncbi.nlm.nih.gov/pubmed/29496966",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23934081",
+            "http://www.ncbi.nlm.nih.gov/pubmed/27239700",
+            "http://www.ncbi.nlm.nih.gov/pubmed/30032211",
+            "http://www.ncbi.nlm.nih.gov/pubmed/29773831",
+            "http://www.ncbi.nlm.nih.gov/pubmed/30194269"
+        ],
+        "ideal_answer": [
+            "Speckles are subnuclear structures that are enriched in pre-messenger RNA splicing factors and are located in the interchromatin regions of the nucleoplasm of mammalian cells. They serve as splicing factor storage sites and play important roles in regulation of pre-mRNA splicing."
+        ],
+        "exact_answer": [
+            "mRNA processing",
+            "mRNA splicing"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 188,
+                "offsetInEndSection": 295,
+                "text": "Here we demonstrate that mRNAs containing ALREX-promoting elements are trafficked through nuclear speckles.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23934081"
+            },
+            {
+                "offsetInBeginSection": 734,
+                "offsetInEndSection": 893,
+                "text": "Finally, we demonstrate that mRNAs lacking a poly(A)-tail are not efficiently exported by the ALREX pathway and show enhanced association with nuclear speckles",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23934081"
+            },
+            {
+                "offsetInBeginSection": 138,
+                "offsetInEndSection": 521,
+                "text": " In a previous study (Melcák et al., 2001), it has been shown that the pre-spliceosomal assembly on microinjected splicing-competent precursor mRNA takes place in the speckles, and it has been suggested that the targeting of RNA into speckes consists of two interdependent steps, namely the diffusion process, followed by the energy-dependent translocation of RNA into the speckles. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12002677"
+            },
+            {
+                "offsetInBeginSection": 250,
+                "offsetInEndSection": 445,
+                "text": "Nuclear speckles, a unique nuclear subcompartment, accumulate a family of proteins, namely, serine- and arginine-rich (SR) proteins. They play important roles in regulation of pre-mRNA splicing. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12826600"
+            },
+            {
+                "offsetInBeginSection": 233,
+                "offsetInEndSection": 332,
+                "text": " Here we show that C3G localizes to SC35-positive nuclear speckles and regulates splicing activity.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29496966"
+            },
+            {
+                "offsetInBeginSection": 1247,
+                "offsetInEndSection": 1385,
+                "text": "Our results identify C3G and Rap1 as novel components of nuclear speckles and a role for C3G in regulating cellular RNA splicing activity.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29496966"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 90,
+                "text": "DNAJC17 is localized in nuclear speckles and interacts with splicing machinery components.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29773831"
+            },
+            {
+                "offsetInBeginSection": 470,
+                "offsetInEndSection": 552,
+                "text": "These results suggest that exosomal mRNA degradation mostly occurs outside of NSs.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30032211"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 62,
+                "text": "Nuclear speckles (NSs) serve as splicing factor storage sites.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30194269"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 175,
+                "text": "Speckles are subnuclear structures that are enriched in pre-messenger RNA splicing factors and are located in the interchromatin regions of the nucleoplasm of mammalian cells.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12923522"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "6057bf0694d57fd879000031",
+        "body": "What promotes amyloid-peptide beta 42 (Aβ42) accumulation in neuroblastoma cells?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/27476701"
+        ],
+        "ideal_answer": [
+            "The apolipoprotein (apo) E4 isoform is the strongest risk factor for late-onset Alzheimer's disease (AD). ApoE4 is more susceptible to proteolysis than apoE2 and apoE3 isoforms and carboxyl-terminal truncated apoE4 forms have been found in AD patients' brain. A specific apoE4 fragment, apoE4-165, promotes amyloid-peptide beta 42 (Aβ42) accumulation in human neuroblastoma SK-N-SH cells and increased intracellular reactive oxygen species formation, two events considered to occur early in AD pathogenesis.",
+            "The amyloid-peptide beta 42 (Aβ42) accumulates in neuroblastoma cells due to a protein called apoE4-165, which is an apolipoprotein (APOE4). This protein is the most common protein responsible for late-onset Alzheimer disease."
+        ],
+        "exact_answer": [
+            "apoE4-165"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 798,
+                "text": "The apolipoprotein (apo) E4 isoform is the strongest risk factor for late-onset Alzheimer's disease (AD). ApoE4 is more susceptible to proteolysis than apoE2 and apoE3 isoforms and carboxyl-terminal truncated apoE4 forms have been found in AD patients' brain. We have previously shown that a specific apoE4 fragment, apoE4-165, promotes amyloid-peptide beta 42 (Aβ42) accumulation in human neuroblastoma SK-N-SH cells and increased intracellular reactive oxygen species formation, two events considered to occur early in AD pathogenesis. Here, we show that these effects are allele-dependent and absolutely require the apoE4 background. Furthermore, the exact length of the fragment is critical since longer or shorter length carboxyl-terminal truncated apoE4 forms do not elicit the same effects. ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27476701"
+            },
+            {
+                "offsetInBeginSection": 260,
+                "offsetInEndSection": 537,
+                "text": "We have previously shown that a specific apoE4 fragment, apoE4-165, promotes amyloid-peptide beta 42 (Aβ42) accumulation in human neuroblastoma SK-N-SH cells and increased intracellular reactive oxygen species formation, two events considered to occur early in AD pathogenesis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27476701"
+            },
+            {
+                "offsetInBeginSection": 266,
+                "offsetInEndSection": 547,
+                "text": "e previously shown that a specific apoE4 fragment, apoE4-165, promotes amyloid-peptide beta 42 (Aβ42) accumulation in human neuroblastoma SK-N-SH cells and increased intracellular reactive oxygen species formation, two events considered to occur early in AD pathogenesis. Here, we ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27476701"
+            },
+            {
+                "offsetInBeginSection": 991,
+                "offsetInEndSection": 1237,
+                "text": " to other allelic backgrounds, apoE4-165 is structurally distinct and less thermodynamically stable suggesting that the combination of a well-folded structure with structural plasticity is a unique characteristic of this fragment. Overall, our fi",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/27476701"
+            }
+        ],
+        "triples": null
+    },
+    {
+        "id": "5fe3131fa43ad3127800004a",
+        "body": "Which cytokine molecule activates SMADs?",
+        "type": "factoid",
+        "documents": [
+            "http://www.ncbi.nlm.nih.gov/pubmed/29973939",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15225217",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21975932",
+            "http://www.ncbi.nlm.nih.gov/pubmed/16998902",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12957874",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23347175",
+            "http://www.ncbi.nlm.nih.gov/pubmed/29558695",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17182123",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32235336",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19838011",
+            "http://www.ncbi.nlm.nih.gov/pubmed/14500551",
+            "http://www.ncbi.nlm.nih.gov/pubmed/30152848",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23727390",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20656683",
+            "http://www.ncbi.nlm.nih.gov/pubmed/10974035",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15647278",
+            "http://www.ncbi.nlm.nih.gov/pubmed/29892481",
+            "http://www.ncbi.nlm.nih.gov/pubmed/29710466",
+            "http://www.ncbi.nlm.nih.gov/pubmed/32334267",
+            "http://www.ncbi.nlm.nih.gov/pubmed/23741316",
+            "http://www.ncbi.nlm.nih.gov/pubmed/10611754",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15184872",
+            "http://www.ncbi.nlm.nih.gov/pubmed/12297674",
+            "http://www.ncbi.nlm.nih.gov/pubmed/26956486",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19352540",
+            "http://www.ncbi.nlm.nih.gov/pubmed/17513865",
+            "http://www.ncbi.nlm.nih.gov/pubmed/20603212",
+            "http://www.ncbi.nlm.nih.gov/pubmed/24129565",
+            "http://www.ncbi.nlm.nih.gov/pubmed/19030025",
+            "http://www.ncbi.nlm.nih.gov/pubmed/18322180",
+            "http://www.ncbi.nlm.nih.gov/pubmed/15192102",
+            "http://www.ncbi.nlm.nih.gov/pubmed/21095583"
+        ],
+        "ideal_answer": [
+            "SMADs are activated by Transforming growth factor beta (TGF beta)",
+            "smads are activated by transforming growth factor-β (tgf-β).",
+            "SMADs are activated by Transforming growth factor beta (TGF-β)",
+            "TGF-β1 effects appear to be mediated through the canonical Smad pathway.",
+            "SMADs are activated by Transforming growth factor beta (TGF beta).",
+            "In an NEC animal model, oral administration of the isoform TGF-β1 activated the downstream effector Smad2 in intestine and significantly reduced NEC incidence Transcription factor specificity protein 1 modulates TGFβ1/Smad signaling to negatively regulate SIGIRR expression by human M1 macrophages stimulated with substance P.",
+            "The protein expression of TGF‑β1/mothers against decapentaplegic homolog (Smad) and phosphoinositide 3‑kinase (PI3K)/protein kinase B (AKT) signaling pathways was evaluated by western blotting regulates the ERK/MAPK pathway independent of the SMAD pathway",
+            "Activated SMADs are phosphorylated by TGF-β superfamily type I receptors at two serine residues at an S-M/V-S motif at their extreme C-terminus. Once phosphorylated, activated R-SMADs form complexes with SMAD4, which accumulate in the nucleus where they activate or repress transcription."
+        ],
+        "exact_answer": [
+            "TGFbeta",
+            "TGFβ"
+        ],
+        "concepts": null,
+        "snippets": [
+            {
+                "offsetInBeginSection": 421,
+                "offsetInEndSection": 579,
+                "text": "In an NEC animal model, oral administration of the isoform TGF-β1 activated the downstream effector Smad2 in intestine and significantly reduced NEC incidence",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24129565"
+            },
+            {
+                "offsetInBeginSection": 160,
+                "offsetInEndSection": 433,
+                "text": "The TGF-β signaling pathway outcome relies on the control of the spatial and temporal expression of >500 genes, which depend on the functions of the Smad protein along with those of diverse modulators of this signaling pathway, such as transcriptional factors and cofactors",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29892481"
+            },
+            {
+                "offsetInBeginSection": 829,
+                "offsetInEndSection": 967,
+                "text": "he TGF-β/Smad pathway and coregulators Ski and SnoN clearly regulate each other through several positive and negative feedback mechanisms.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29892481"
+            },
+            {
+                "offsetInBeginSection": 1413,
+                "offsetInEndSection": 1517,
+                "text": "These effects of PFD were mediated by the inhibition of the TGF‑β1/Smad and PI3K/AKT signaling pathways.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30152848"
+            },
+            {
+                "offsetInBeginSection": 802,
+                "offsetInEndSection": 994,
+                "text": "The protein expression of TGF‑β1/mothers against decapentaplegic homolog (Smad) and phosphoinositide 3‑kinase (PI3K)/protein kinase B (AKT) signaling pathways was evaluated by western blotting",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/30152848"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 167,
+                "text": "Transcription factor specificity protein 1 modulates TGFβ1/Smad signaling to negatively regulate SIGIRR expression by human M1 macrophages stimulated with substance P.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29558695"
+            },
+            {
+                "offsetInBeginSection": 1363,
+                "offsetInEndSection": 1493,
+                "text": "Importantly, this effect of Sp1 siRNA on TGFβ1 and SIGIRR was blunted by siRNA for Smad2, Smad3, or Smad4, but not by TAK-1 siRNA.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29558695"
+            },
+            {
+                "offsetInBeginSection": 1943,
+                "offsetInEndSection": 2065,
+                "text": "Sp1 modulates TGFβ1/Smad signaling and negatively regulates SIGIRR protein production by macrophages after SP stimulation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29558695"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 68,
+                "text": "TGF-? regulates the ERK/MAPK pathway independent of the SMAD pathway",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29710466"
+            },
+            {
+                "offsetInBeginSection": 488,
+                "offsetInEndSection": 775,
+                "text": "We found that EGFR-mediated ID3 expression was regulated by Smad5, which was directly phosphorylated by AKT. Furthermore, ID3 alone imparted GSC features to primary astrocytes derived from Ink4a/Arf-deficient mouse, and EGFR-ID3-IL-6 signaling axis gave rise to tumor cell heterogeneity.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21975932"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 229,
+                "text": "Oral administration of transforming growth factor-β1 (TGF-β1) protects the immature gut from injury via Smad protein-dependent suppression of epithelial nuclear factor κB (NF-κB) signaling and proinflammatory cytokine production.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24129565"
+            },
+            {
+                "offsetInBeginSection": 1235,
+                "offsetInEndSection": 1306,
+                "text": "TGF-β1 effects appear to be mediated through the canonical Smad pathway",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/24129565"
+            },
+            {
+                "offsetInBeginSection": 330,
+                "offsetInEndSection": 535,
+                "text": "Numerous studies have shown that TGF-β is the most important cytokine in the development of pulmonary fibrosis and plays a role through its downstream signaling molecule TGF-binding receptor Smads protein.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32334267"
+            },
+            {
+                "offsetInBeginSection": 184,
+                "offsetInEndSection": 369,
+                "text": "TGF-beta, a pleiotropic cytokine, regulates numerous genes involved in pancreatic carcinogenesis via activation of the Smads proteins and MUC4 promoter is rich in Smad-binding elements.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15184872"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 145,
+                "text": "Cytokines of the transforming growth factor-beta (TGF-beta) superfamily transduce their signals by activating receptor-regulated Smads (R-Smads).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12297674"
+            },
+            {
+                "offsetInBeginSection": 1174,
+                "offsetInEndSection": 1435,
+                "text": "Altogether, these results indicate that upregulation of MUC4 by TGF-beta is restricted to well-differentiated pancreatic cancer cells, and point out a novel mechanism for TGF-beta as a key molecule in targeting MUC4 overexpression in pancreatic adenocarcinomas.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15184872"
+            },
+            {
+                "offsetInBeginSection": 431,
+                "offsetInEndSection": 570,
+                "text": "TGFβ signaling activates receptor SMADs, SMAD2 and SMAD3, which associate with a variety of nuclear factors to regulate gene transcription.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20656683"
+            },
+            {
+                "offsetInBeginSection": 163,
+                "offsetInEndSection": 368,
+                "text": "We demonstrate that exogenous TGF-beta(1) can inhibit the expression of the proinflammatory adhesion molecule, E-selectin, in vascular endothelium exposed to inflammatory stimuli both in vitro and in vivo.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/10974035"
+            },
+            {
+                "offsetInBeginSection": 193,
+                "offsetInEndSection": 297,
+                "text": "Conversely, in conjunction with the inflammatory cytokine IL-6, TGFβ promotes Th17 cell differentiation.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20656683"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 58,
+                "text": "TGFβ is the quintessential cytokine of T cell homeostasis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20656683"
+            },
+            {
+                "offsetInBeginSection": 604,
+                "offsetInEndSection": 750,
+                "text": "Inhibitory Smads, including Smad6 and Smad7, are key regulators of TGF-beta/bone morphogenetic protein (BMP) signaling by negative feedback loops.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19352540"
+            },
+            {
+                "offsetInBeginSection": 641,
+                "offsetInEndSection": 965,
+                "text": ", we have studied the immediate responses provoked by TGF-beta in major signaling pathways, and we have found that it induces a rapid activation of the SMAD pathway, i.e., phosphorylation and nuclear translocation of SMAD2, followed by dephosphorylation, most probably due to degradation by the proteasome. However, similar ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15225217"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 229,
+                "text": "Transforming growth factor-beta (TGF-beta) is a multifunctional cytokine that induces growth arrest, tissue fibrosis, and epithelial-mesenchymal transition (EMT) through activation of Smad and non-Smad signaling pathways. EMT is ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19838011"
+            },
+            {
+                "offsetInBeginSection": 209,
+                "offsetInEndSection": 431,
+                "text": " well-understood classical TGF-beta signaling pathway, TGF-beta activates Smad signalling via its two cell surface receptors such as TbetaRII and ALK5/TbetaRI, leading to Smad-mediated transcriptional regulation. In additi",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19352540"
+            },
+            {
+                "offsetInBeginSection": 172,
+                "offsetInEndSection": 411,
+                "text": "he role of transforming growth factor-beta (TGF-beta) as a key molecule in the development and progression of hepatic fibrosis via the activation of hepatic stellate cells, among other fibroblast populations, is without controversy. We her",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17513865"
+            },
+            {
+                "offsetInBeginSection": 1144,
+                "offsetInEndSection": 1492,
+                "text": "n, we show that: 1) TGF-beta receptor Type II is predominantly located on basolateral membrane and receptor stimulation activates Smad pathway; 2) TGF-beta1 down-regulates IL-6-induced tyrosine phoshorylation of STAT1 and STAT3 and ICAM-1 expression; and 3) Smad2 is required for the down-regulation of IL-6 signaling by TGF-beta. Collectively, our",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/14500551"
+            },
+            {
+                "offsetInBeginSection": 493,
+                "offsetInEndSection": 755,
+                "text": " with an increase in TGF-beta in Alzheimer's disease, we found significant increases in phospho-Smad2, a major downstream signaling molecule of TGF-beta, in hippocampal neurons of Alzheimer's disease compared with age-matched control patients. However, in contra",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/16998902"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 263,
+                "text": "In the past three years, a novel signal transduction pathway downstream of the transforming growth factor-beta (TGF-beta) superfamily receptor serine-threonine kinases has been shown to be mediated by a family of latent transcription factors called 'Smads'. These",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/10611754"
+            },
+            {
+                "offsetInBeginSection": 373,
+                "offsetInEndSection": 629,
+                "text": "monstrate that the antiinflammatory cytokine transforming growth factor-beta1 (TGF-beta1), which also permanently activates its canonical signalling pathway through SMAD proteins in BPH-1 cells, modifies the effects of IL-6 on cell proliferation. Important",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/20603212"
+            },
+            {
+                "offsetInBeginSection": 130,
+                "offsetInEndSection": 508,
+                "text": "h transforming growth factor-beta (TGF-beta), the most potent fibrogenic cytokine for HSCs, which classically activates Smad signaling, and p38 MAPK signaling have been shown to influence collagen gene expression; however, the relative contribution and mechanisms that these two signaling pathways have in regulating collagen gene expression have not been investigated. The aim ",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15647278"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 170,
+                "text": "Design, synthesis and discovery of 2(1H)-quinolone derivatives for the treatment of pulmonary fibrosis through inhibition of TGF-β/smad dependent and independent pathway.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32334267"
+            },
+            {
+                "offsetInBeginSection": 893,
+                "offsetInEndSection": 1091,
+                "text": "Further mechanism studies indicated that 20f reduced the expression of fibrogenic phenotypic protein α-SMA and collagen Ⅰ by inhibiting the TGF-β/Smad dependent pathways and ERK1/2 and p38 pathways.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32334267"
+            },
+            {
+                "offsetInBeginSection": 656,
+                "offsetInEndSection": 892,
+                "text": "Of these compounds, 20f was identified as the most active one and could inhibit TGF-β-induced collagen deposition of NRK-49F cells and mouse fibroblasts migration with comparable activity and lower cytotoxicity than nintedanib in vitro.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32334267"
+            },
+            {
+                "offsetInBeginSection": 409,
+                "offsetInEndSection": 709,
+                "text": "One such a molecule is transforming growth factor-β1 (TGF-β1), a cytokine produced by many inflammatory and non-inflammatory cells and targeting virtually all the intestinal mucosal cell types, with the down-stream effect of activating intracellular Smad2/3 proteins and suppressing immune reactions.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29973939"
+            },
+            {
+                "offsetInBeginSection": 710,
+                "offsetInEndSection": 854,
+                "text": "In patients with inflammatory bowel diseases (IBD), there is defective TGF-β1/Smad signaling due to high Smad7, an inhibitor of TGF-β1 activity.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29973939"
+            },
+            {
+                "offsetInBeginSection": 1341,
+                "offsetInEndSection": 1434,
+                "text": "We here review the role of TGF-β1 and Smad7 in intestinal immunity, inflammation, and cancer.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29973939"
+            },
+            {
+                "offsetInBeginSection": 855,
+                "offsetInEndSection": 1040,
+                "text": "Indeed, knockdown of Smad7 with a specific antisense oligonucleotide restores endogenous TGF-β1 activity, thereby inhibiting inflammatory pathways in patients with IBD and colitic mice.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/29973939"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 175,
+                "text": "Transforming growth factor-β1 (TGF-β1) regulates cell junction restructuring via Smad-mediated repression and clathrin-mediated endocytosis of nectin-like molecule 2 (Necl-2).",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 1537,
+                "offsetInEndSection": 1734,
+                "text": "Taken together, TGF-β1 is a potent cytokine that provides an effective mechanism in controlling Necl-2 expression in the testis via Smad-dependent gene repression and clathrin-mediated endocytosis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 1257,
+                "offsetInEndSection": 1397,
+                "text": "Mutational studies coupled with knockdown experiments have shown that TGF-β1-induced Necl-2 repression requires activation of Smad proteins.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 1171,
+                "offsetInEndSection": 1256,
+                "text": "In addition, TGF-β1 reduces Necl-2 mRNA via down-regulating Necl-2 promoter activity.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 1398,
+                "offsetInEndSection": 1536,
+                "text": "EMSA and ChIP assays further confirmed that TGF-β1 promotes the binding of Smad proteins onto MyoD and CCAATa motifs in vitro and in vivo.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 690,
+                "offsetInEndSection": 816,
+                "text": "We have demonstrated that TGF-β1 reduces Necl-2 mRNA and protein levels at both transcriptional and post-translational levels.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 817,
+                "offsetInEndSection": 952,
+                "text": "Using inhibitor and clathrin shRNA, we have revealed that TGF-β1 induces Necl-2 protein degradation via clathrin-dependent endocytosis.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 953,
+                "offsetInEndSection": 1063,
+                "text": "Endocytosis assays further confirmed that TGF-β1 accelerates the internalization of Necl-2 protein to cytosol.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 1064,
+                "offsetInEndSection": 1170,
+                "text": "Immunofluorescence staining also revealed that TGF-β1 effectively removes Necl-2 from cell-cell interface.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23741316"
+            },
+            {
+                "offsetInBeginSection": 1176,
+                "offsetInEndSection": 1301,
+                "text": "TGF-beta-mediated Smad transcriptional activity was severely inhibited in SOCS1-deficient cells in the presence of IFN-gamma.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18322180"
+            },
+            {
+                "offsetInBeginSection": 1302,
+                "offsetInEndSection": 1450,
+                "text": "Such impairment of TGF-beta functions were not observed in SOCS3-overexpressed cells, indicating that suppression of Smads was independent of SOCS3.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18322180"
+            },
+            {
+                "offsetInBeginSection": 639,
+                "offsetInEndSection": 863,
+                "text": "plus TGF-beta enhanced retinoic acid receptor-related orphan receptor (ROR)-gammat expression and suppressed IFN-gamma production in wild-type T cells, whereas these effects were severely impaired in SOCS1-deficient T cells.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/18322180"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 176,
+                "text": "Activins belong to the transforming growth factor (TGF)-β family of multifunctional cytokines and signal via the activin receptors ALK4 or ALK7 to activate the SMAD2/3 pathway.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32235336"
+            },
+            {
+                "offsetInBeginSection": 101,
+                "offsetInEndSection": 275,
+                "text": "TGFbeta binding to serine/threonine kinase receptors on the plasma membrane activates Smad molecules and additional signaling proteins that together regulate gene expression.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/19030025"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 107,
+                "text": "Activins as Dual Specificity TGF-β Family Molecules: SMAD-Activation via Activin- and BMP-Type 1 Receptors.",
+                "beginSection": "title",
+                "endSection": "title",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/32235336"
+            },
+            {
+                "offsetInBeginSection": 146,
+                "offsetInEndSection": 264,
+                "text": "Distinct R-Smads or combinations of R-Smads are activated by TGF-beta, activin, or bone morphogenetic proteins (BMPs).",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12297674"
+            },
+            {
+                "offsetInBeginSection": 115,
+                "offsetInEndSection": 209,
+                "text": "TGF-β signals through receptors to activate Smad proteins, which translocate into the nucleus.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23727390"
+            },
+            {
+                "offsetInBeginSection": 0,
+                "offsetInEndSection": 117,
+                "text": "TGF-beta (Transforming Growth Factor-beta) cytokines employ Smad proteins as the intracellular mediator of signaling.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17182123"
+            },
+            {
+                "offsetInBeginSection": 197,
+                "offsetInEndSection": 336,
+                "text": "Canonical TGF-β signaling results in the activation of Smad proteins, which are transcription factors that regulate target gene expression.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/26956486"
+            },
+            {
+                "offsetInBeginSection": 963,
+                "offsetInEndSection": 1286,
+                "text": "Upon activation, the TGF-beta type I receptor phosphorylates Smad2 and Smad3, which then form complexes with Smad4 and accumulate in the nucleus to regulate transcription of a variety of genes that encode crucial determinants of cell fate, such as cell cycle components, differentiation factors and cell adhesion molecules.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12957874"
+            },
+            {
+                "offsetInBeginSection": 475,
+                "offsetInEndSection": 747,
+                "text": "In endothelial cells, TGF-beta binds to two distinct type I receptor serine-threonine kinases, ALK-5 and ALK-1; the latter activates the same R-Smads that are activated by BMP and induces synthesis of Id (inhibitor of differentiation or inhibitor of DNA binding) proteins.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/12297674"
+            },
+            {
+                "offsetInBeginSection": 457,
+                "offsetInEndSection": 698,
+                "text": "To maintain intestinal integrity, the epithelial cells, myeloid cells and lymphocytes that inhabit the gut secrete TGF-β, which acts in both paracrine and autocrine fashions to activate its signal transducers, the SMAD transcription factors.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/23347175"
+            },
+            {
+                "offsetInBeginSection": 177,
+                "offsetInEndSection": 386,
+                "text": "Activation of TGF-β receptors leads to phosphorylation of Smad2 and Smad3, which oligomerize with Smad4 and accumulate in the nucleus where they recognize gene regulatory regions and orchestrate transcription.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/21095583"
+            },
+            {
+                "offsetInBeginSection": 118,
+                "offsetInEndSection": 267,
+                "text": "Upon TGF-beta stimulation, the cytoplasmic Smads become phosphorylated and consequently accumulate in the nucleus to regulate target gene expression.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/17182123"
+            },
+            {
+                "offsetInBeginSection": 1640,
+                "offsetInEndSection": 1897,
+                "text": "In summary, our data show that S1P trans-activates the TGF-beta receptor and triggers activation of Smads followed by activation of connective tissue growth factor gene transcription and inhibition of IL-1beta-induced expression of iNOS, sPLA(2), and MMP-9.",
+                "beginSection": "abstract",
+                "endSection": "abstract",
+                "document": "http://www.ncbi.nlm.nih.gov/pubmed/15192102"
+            }
+        ],
+        "triples": null
+    }
+]

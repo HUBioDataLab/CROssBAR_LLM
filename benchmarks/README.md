@@ -185,3 +185,19 @@ uv run python ...
 ```
 
 The benchmark environment is separate from the main app environment. This is intentional.
+
+## LitSense harness (`litsense/`)
+
+Benchmark harness of the LitSense literature tool (`crossbar_llm/litsense_tools`):
+`run.py` (questions → agent → scores → one folder per run), `metrics.py` (overlap +
+LLM judge), `report.py` (results contract + Markdown reports + cross-run comparison),
+`rejudge.py` (re-score existing runs with another judge), `models.json` (the model
+matrix), `data/` (the question sets), `scripts/` (parallel matrix launcher, answer CSV
+export, chunk merger). Run from this directory:
+
+```bash
+LITSENSE_MODEL=openai:google/gemini-2.5-flash uv run python -m litsense.run --dataset all --mode both --judge
+uv run pytest litsense/tests
+```
+
+Key glossary: `litsense/RESULTS-SCHEMA.md`; details: `litsense/README.md`.
