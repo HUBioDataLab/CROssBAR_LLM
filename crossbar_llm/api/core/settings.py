@@ -137,40 +137,72 @@ class Settings(BaseModel):
     # different things, and a single shared pool let one tool's users take
     # capacity from the other's for no benefit. `None` means no local limit.
     paperclip_max_concurrent_runs: int | None = Field(
-        default=None,
+        default=20,
         ge=1,
         description=(
-            "Paperclip runs allowed in flight at once in this process. No "
-            "run-level limit by default: the adapter's connection pool "
-            "(`paperclip_max_connections`) already caps Paperclip commands in "
-            "flight, and extra commands queue for a connection. Past that, "
-            "Paperclip's per-user search queue answers 429, which the adapter "
-            "does not retry yet. Set a number here if searches start being "
-            "rejected."
+            "Paperclip runs allowed in flight in this process. The HTTP "
+            "connection pool separately caps simultaneous upstream commands; "
+            "this limit bounds the number of active agent graphs and LLM calls."
         ),
     )
     pubtator3_max_concurrent_runs: int | None = Field(
-        default=20,
+        default=50,
         ge=1,
         description=(
             "PubTator3 runs allowed in flight at once in this process. This is "
             "NOT what protects NCBI — the client's rate limiter already holds "
-            "every request to NCBI's IP-wide 3 req/s. It bounds latency: a run "
-            "makes roughly 3-6 requests, so 20 concurrent runs queue for ~20-40s "
-            "on the limiter, well inside the per-tool timeout. Without a cap, "
-            "a large burst would make EVERY run slow enough to time out, "
-            "instead of serving most promptly and skipping the excess."
+            "every request to NCBI's IP-wide 3 req/s. It bounds latency. A run "
+            "makes 2.2 NCBI requests on average (measured over 245 benchmark "
+            "questions), so 50 concurrent runs queue for ~36 s on the limiter; "
+            "with the ~16-21 s a question spends on LLM calls, the slowest "
+            "finishes inside 60 s. Without a cap, a large burst would make "
+            "EVERY run slow enough to time out, instead of serving most "
+            "promptly and skipping the excess."
+        ),
+    )
+    paperclip_max_pending_runs: int = Field(
+        default=40,
+        ge=0,
+        description="Maximum Paperclip runs waiting for admission in this process.",
+    )
+    pubtator3_max_pending_runs: int = Field(
+        default=50,
+        ge=0,
+        description="Maximum PubTator3 runs waiting for admission in this process.",
+    )
+    # Each user's share of a tool's capacity. One run makes one Paperclip
+    # search at a time, so this also caps a user's share of Paperclip's
+    # per-user search queue. `None` disables the share for that tool.
+    paperclip_max_runs_per_user: int | None = Field(
+        default=3,
+        ge=1,
+        description=(
+            "Paperclip runs one user may have in flight at once. Without it, "
+            "one person firing several questions can occupy most of the "
+            "account's search capacity while everyone else waits. Users are "
+            "told by the browser cookie, falling back to the hashed client IP."
+        ),
+    )
+    pubtator3_max_runs_per_user: int | None = Field(
+        default=3,
+        ge=1,
+        description=(
+            "PubTator3 runs one user may have in flight at once, so one person "
+            "cannot take most of NCBI's 3 req/s from everyone else."
         ),
     )
     literature_admission_wait_seconds: float = Field(
-        default=30.0,
+        default=60.0,
         ge=0,
         description=(
             "How long a run may queue for an admission slot before it is "
             "reported as skipped. This wait happens BEFORE the per-tool timeout "
             "starts, so it never shortens a run's budget; what it costs is "
             "response time for the queued user. Long enough that a burst "
-            "queues briefly instead of being turned away."
+            "queues instead of being turned away: in a simulated burst of 60 "
+            "Paperclip questions, a 30 s wait answered 20 and 60 s answered "
+            "about 50, because a whole batch of runs finishes together in "
+            "roughly 40 s."
         ),
     )
     pubtator3_replica_count: int = Field(
@@ -204,19 +236,37 @@ class Settings(BaseModel):
             "`paperclip_max_documents`. Turn on only with headroom to spare."
         ),
     )
-    paperclip_max_connections: int = Field(
+    paperclip_max_searches_in_flight: int = Field(
         default=10,
         ge=1,
         description=(
-            "Connections in the shared Paperclip pool, and therefore the most "
-            "Paperclip commands this process runs at once. Paperclip documents "
-            "10 short commands in flight per account. Tested live on "
-            "2026-09-22: metadata reads were not limited even at 30 at once, "
-            "but searches share an undocumented per-user queue; 10 searches at "
+            "Most Paperclip searches (and sql/filter) this process has in "
+            "flight at once, over REST and MCP together. Tested live on "
+            "2026-09-22: searches share an undocumented per-user queue; 10 at "
             "once all succeeded, while 15 drew 429s ('search queue is full'). "
-            "So 10 is what keeps concurrent searches safe. The limits are per "
-            "account: with N replicas on one API key, set this to about 10 / N, "
-            "and leave headroom if benchmarks use the same key."
+            "The limit is per account: with N replicas on one API key, set this "
+            "to about 10 / N, and leave headroom if benchmarks use the same key."
+        ),
+    )
+    paperclip_max_reads_in_flight: int = Field(
+        default=30,
+        ge=1,
+        description=(
+            "Most Paperclip reads (cat/head/ls: paper metadata and text) in "
+            "flight at once. Reads have their own permits so they never queue "
+            "behind searches waiting in Paperclip's search queue. Tested live "
+            "on 2026-09-22: 30 reads at once all succeeded."
+        ),
+    )
+    paperclip_max_connections: int | None = Field(
+        default=None,
+        ge=1,
+        description=(
+            "Connections in the shared Paperclip HTTP pool. Unset, the pool "
+            "fits every command permit at once (searches + reads + 8 long "
+            "commands), so the permits are the only limit. Set lower only to "
+            "cap Paperclip connections overall; a value below a kind's permits "
+            "caps that kind too."
         ),
     )
     paperclip_pool_timeout_seconds: float = Field(
@@ -228,6 +278,26 @@ class Settings(BaseModel):
             "the queue: a burst waits here instead of being sent to Paperclip "
             "and rejected. Sized to the 60 s response target; still bounded "
             "by `literature_tool_timeout_seconds` overall."
+        ),
+    )
+    paperclip_max_429_retries: int = Field(
+        default=2,
+        ge=0,
+        description=(
+            "Retries for a Paperclip command rejected with 429. Paperclip "
+            "answers a full per-user search queue with 429 and Retry-After: 15 "
+            "(observed live), and its docs say to wait and retry; without a "
+            "retry, that user loses their whole Paperclip answer. 429s on "
+            "map/verify are never retried: they mean the daily cap is spent."
+        ),
+    )
+    paperclip_max_retry_wait_seconds: float = Field(
+        default=30.0,
+        gt=0,
+        description=(
+            "Longest Retry-After we will honour. If Paperclip asks for a longer "
+            "wait, the command fails at once instead of holding a user's "
+            "request open that long."
         ),
     )
     pubtator3_max_documents: int = Field(
@@ -312,4 +382,3 @@ class Settings(BaseModel):
 
 
     
-

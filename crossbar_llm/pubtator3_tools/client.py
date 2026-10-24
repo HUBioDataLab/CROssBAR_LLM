@@ -14,6 +14,8 @@ import logging
 import weakref
 from aiolimiter import AsyncLimiter
 import re
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 
 _log = logging.getLogger(__name__)
 
@@ -25,6 +27,8 @@ RATE_LIMIT_PER_SECOND = 3          # PubTator3 IP-wide policy
 RATE_LIMIT_TIME_PERIOD_S = 1
 EXPORT_PMID_BATCH = 100            # /publications/export/biocjson cap per call
 RETRY_429_BACKOFF_S = 2.0          # backoff before the single retry attempt
+MAX_RETRY_AFTER_S = 30.0
+_sleep = asyncio.sleep
 
 # HTTP statuses we treat as transient (worth one retry). 429 = rate limit;
 # 502/503/504 = upstream gateway / availability glitches NCBI hits intermittently.
@@ -205,6 +209,13 @@ def _client() -> httpx.AsyncClient:
         _clients_by_loop[loop] = cli
     return cli
 
+
+async def aclose_client() -> None:
+    """Close the current event loop's pooled client on application shutdown."""
+    cli = _clients_by_loop.pop(asyncio.get_running_loop(), None)
+    if cli is not None and not cli.is_closed:
+        await cli.aclose()
+
 # Swappable limiter backend. The default below is correct for ONE process; the
 # 3 req/s ceiling is NCBI's IP-wide policy, so several replicas behind one
 # egress IP each enforcing it independently means NCBI sees 3 x replicas. Point
@@ -263,7 +274,16 @@ async def _request(method: str, path: str, *, params: dict | None = None) -> htt
         response is not None and response.status_code in TRANSIENT_STATUSES
     )
     if needs_retry:
-        await asyncio.sleep(RETRY_429_BACKOFF_S)
+        delay = RETRY_429_BACKOFF_S
+        if response is not None and response.status_code == 429:
+            retry_after = _retry_after_seconds(response.headers.get("Retry-After"))
+            if retry_after is not None:
+                # An upstream pause longer than the request budget is not
+                # recoverable inside this synchronous user-facing call.
+                if retry_after > MAX_RETRY_AFTER_S:
+                    response.raise_for_status()
+                delay = max(delay, retry_after)
+        await _sleep(delay)
         response, error = await _attempt()
 
     if error is not None:
@@ -271,6 +291,23 @@ async def _request(method: str, path: str, *, params: dict | None = None) -> htt
     assert response is not None  # one of (response, error) is always set
     response.raise_for_status()
     return response
+
+
+def _retry_after_seconds(value: str | None) -> float | None:
+    """Parse HTTP Retry-After as delta seconds or an HTTP date."""
+    if not value:
+        return None
+    try:
+        return max(0.0, float(value.strip()))
+    except ValueError:
+        pass
+    try:
+        when = parsedate_to_datetime(value)
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        return max(0.0, (when - datetime.now(timezone.utc)).total_seconds())
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 async def autocomplete(query: str, *, concept: str | None = None, limit: int = 5) -> list[EntityCandidate]:
