@@ -61,6 +61,7 @@ OpenRouter:
     - minimax/minimax-m2.5
     - google/gemma-4-26b-a4b-it
     - z-ai/glm-5.2
+    - meta-llama/llama-3.3-70b-instruct
 
 Ollama:
   models:
