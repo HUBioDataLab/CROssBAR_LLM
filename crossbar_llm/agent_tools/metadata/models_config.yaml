@@ -62,6 +62,7 @@ OpenRouter:
     - google/gemma-4-26b-a4b-it
     - z-ai/glm-5.2
     - meta-llama/llama-3.3-70b-instruct
+    - anthropic/claude-haiku-4.5
 
 Ollama:
   models:
