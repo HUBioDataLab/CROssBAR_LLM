@@ -1072,7 +1072,10 @@ class CypherAgent:
                 no_valid_schema_path_flag=True
             )
             return {
+                "current_cypher": "NO_VALID_SCHEMA_PATH",
                 "no_valid_schema_path": True,
+                "retry_count": state.get("retry_count", 0) + 1,
+                "cypher_source": "error_correction",
                 "final_answer": (
                     "I could not answer this question from the knowledge graph because "
                     "no valid schema path exists for the requested relation or node."

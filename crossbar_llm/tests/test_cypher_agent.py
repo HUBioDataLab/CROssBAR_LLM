@@ -5,6 +5,7 @@ import numpy as np
 from copy import deepcopy
 from types import SimpleNamespace
 from textwrap import dedent
+from unittest.mock import MagicMock
 
 from langchain_core.messages import AIMessage, HumanMessage, RemoveMessage
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
@@ -690,7 +691,48 @@ def test_error_correction_node_returns_corrected_cypher(mock_cypher_agent, base_
         "current_cypher": "MATCH (g:Gene) RETURN g",
         "retry_count": 1,
         "cypher_source": "error_correction",
+        "no_valid_schema_path": False,
     }
+
+
+def test_error_correction_no_valid_path_keeps_state_consistent():
+    agent = CypherAgent.__new__(CypherAgent)
+    agent.graph_schema = {
+        "nodes": [],
+        "node_properties": [],
+        "edge_properties": [],
+        "edges": [],
+    }
+    agent.cypher_llm = MagicMock()
+    agent.cypher_llm.invoke.return_value = {
+        "parsed": SimpleNamespace(cypher_query="NO_VALID_SCHEMA_PATH")
+    }
+    previous_query = "MATCH (organism:OrganismTaxon) RETURN organism.id"
+    state = {
+        "question": "Which individuals have this organism?",
+        "current_cypher": previous_query,
+        "retry_count": 0,
+        "cypher_attempts": [
+            make_attempt(
+                cypher_query=previous_query,
+                is_valid=True,
+                execution_ok=False,
+                execution_error="Query returned no results.",
+            )
+        ],
+        "vector_index": None,
+        "no_valid_schema_path": False,
+    }
+
+    update = agent.error_correction_node(state)
+    merged_state = {**state, **update}
+
+    assert update["current_cypher"] == "NO_VALID_SCHEMA_PATH"
+    assert update["no_valid_schema_path"] is True
+    assert update["retry_count"] == 1
+    assert update["cypher_source"] == "error_correction"
+    assert agent.validate_cypher_node(merged_state) == {"is_ok": False}
+    assert agent.route_after_validate(merged_state) == "fail"
 
 
 def test_generate_answer_node_raises_without_execution_result(mock_cypher_agent, base_state):
