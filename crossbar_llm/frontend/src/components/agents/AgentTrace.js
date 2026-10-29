@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { Alert, Box, Button, Chip, Collapse, Paper, Typography, alpha, useTheme } from '@mui/material';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -8,6 +7,7 @@ import AgentAvatar from './AgentAvatar';
 import { AGENT_ORDER, agentMeta, agentName } from './agentMeta';
 import { formatSeconds, statusColor, statusMeta } from './agentStatus';
 import { markdownSx } from '../../utils/markdownStyles';
+import CitationMarkdown from '../CitationMarkdown';
 
 const citationLabel = (citation) => citation.title || citation.pmid || citation.doc_id || 'Publication';
 
@@ -63,7 +63,7 @@ function AgentReport({ agentId, result, reason, catalog }) {
       )}
       {result.answer && (
         <Box sx={{ ...markdownSx(theme), fontSize: '0.9rem' }}>
-          <ReactMarkdown>{result.answer}</ReactMarkdown>
+          <CitationMarkdown>{result.answer}</CitationMarkdown>
         </Box>
       )}
       {result.warnings?.length > 0 && (

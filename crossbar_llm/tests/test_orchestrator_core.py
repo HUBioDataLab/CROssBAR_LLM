@@ -12,6 +12,7 @@ from pydantic import SecretStr
 from crossbar_llm.api.core.settings import Settings
 from crossbar_llm.api.routers.streaming import stream_orchestration
 from crossbar_llm.api.schemas.responses import ChatResponse
+from crossbar_llm.api.schemas.requests import DbSearchRequest
 from crossbar_llm.api.services.agent_catalog import unavailable_reasons
 from crossbar_llm.api.services.kg_runner import stream_kg_graph
 from crossbar_llm.api.services.session_store import SessionStore
@@ -355,3 +356,30 @@ def test_paperclip_is_available_when_a_key_is_configured_either_way(monkeypatch)
     monkeypatch.setattr(settings.env_settings, "paperclip_api_key", None)
     monkeypatch.setitem(os.environ, "PAPERCLIP_API_KEY", "key")
     assert PAPERCLIP not in unavailable_reasons(settings)
+
+
+def test_production_requires_the_users_own_paperclip_key(monkeypatch):
+    settings = Settings()
+    monkeypatch.setattr(settings.env_settings, "app_env", "production")
+    monkeypatch.setattr(settings.env_settings, "paperclip_api_key", SecretStr("server-key"))
+    assert PAPERCLIP in unavailable_reasons(settings)
+
+    payload = DbSearchRequest(
+        provider="openai",
+        model="gpt-4o-mini",
+        question="What is EGFR?",
+        execution_mode="generate_and_run",
+        paperclip_api_key="user-key",
+    )
+    assert PAPERCLIP not in unavailable_reasons(settings, payload)
+
+
+def test_blank_paperclip_key_counts_as_none():
+    payload = DbSearchRequest(
+        provider="openai",
+        model="gpt-4o-mini",
+        question="What is EGFR?",
+        execution_mode="generate_and_run",
+        paperclip_api_key="   ",
+    )
+    assert payload.paperclip_api_key is None

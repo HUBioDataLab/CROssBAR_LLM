@@ -53,3 +53,26 @@ test('vector mode locks KG on and literature agents off without changing saved c
     pubtator3: true,
   });
 });
+
+test('an agent needing the user key shows a key field that reports changes', () => {
+  const onUserKeyChange = jest.fn();
+  const keyCatalog = catalog.map((agent) => (
+    agent.id === 'paperclip'
+      ? { ...agent, available: false, requires_user_key: true, unavailable_reason: 'Enter your Paperclip API key to use this agent.' }
+      : agent
+  ));
+  render(
+    <AgentToggleList
+      catalog={keyCatalog}
+      enabled={allEnabled}
+      onChange={jest.fn()}
+      userKeys={{ paperclip: '' }}
+      onUserKeyChange={onUserKeyChange}
+    />,
+  );
+
+  fireEvent.change(screen.getByLabelText('Paperclip API key'), { target: { value: 'pk-123' } });
+
+  expect(onUserKeyChange).toHaveBeenCalledWith('paperclip', 'pk-123');
+  expect(screen.queryByLabelText('Knowledge Graph API key')).toBeNull();
+});

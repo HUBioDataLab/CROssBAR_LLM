@@ -164,7 +164,8 @@ class _Harness:
         monkeypatch.setattr(agent_service_module, "synthesize_reports", synthesize)
         monkeypatch.setattr(agent_service_module, "build_chat_model", lambda **kwargs: object())
         monkeypatch.setattr(
-            agent_service_module, "unavailable_reasons", lambda settings: dict(unavailable or {})
+            agent_service_module, "unavailable_reasons",
+            lambda settings, payload=None: dict(unavailable or {}),
         )
         monkeypatch.setattr(agent_service_module, "LLMFactory", lambda config: object())
 

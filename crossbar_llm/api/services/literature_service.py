@@ -10,9 +10,17 @@ from crossbar_llm.agent_tools.callback_handler import UsageMetricsCallback, usag
 from crossbar_llm.agent_tools.config import ReasoningConfig
 from crossbar_llm.agent_tools.logging_config import get_logger
 from crossbar_llm.api.core.settings import Settings
+from crossbar_llm.api.services.agent_catalog import (
+    server_paperclip_key,
+    user_paperclip_key,
+)
 from crossbar_llm.api.schemas.requests import ModelConfigRequest
 from crossbar_llm.api.schemas.responses import AgentRunResult
-from crossbar_llm.paperclip_tools.adapter import PaperclipAdapter, PaperclipConfigError
+from crossbar_llm.paperclip_tools.adapter import (
+    PaperclipAdapter,
+    PaperclipConfigError,
+    PaperclipError,
+)
 from crossbar_llm.paperclip_tools.agent import build_graph as build_paperclip_graph
 from crossbar_llm.paperclip_tools.llm import build_chat_model as build_paperclip_model
 from crossbar_llm.pubtator3_tools.agent import build_graph as build_pubtator3_graph
@@ -91,23 +99,35 @@ class LiteratureService:
             if slot is not None:
                 slot.release()
 
+    def _new_paperclip_adapter(
+        self, api_key: str, *, allow_mcp_fallback: bool
+    ) -> PaperclipAdapter:
+        env_settings = getattr(self.settings, "env_settings", None)
+        return PaperclipAdapter(
+            # Passed in rather than exported to `os.environ`: settings come
+            # from a .env that pydantic-settings reads privately, and a
+            # service has no business mutating process-global state to
+            # smuggle them into a library.
+            api_key=api_key,
+            disable_rest=getattr(env_settings, "paperclip_disable_rest", None),
+            max_connections=self.settings.paperclip_max_connections,
+            pool_timeout_s=self.settings.paperclip_pool_timeout_seconds,
+            allow_mcp_fallback=allow_mcp_fallback,
+        )
+
     def _get_paperclip_adapter(self) -> PaperclipAdapter:
+        """The long-lived adapter that runs on the server's own key."""
         # No await between the check and the assignment, so concurrent requests
         # on the event loop cannot race into building two adapters here.
         if self.paperclip_adapter is None:
-            env_settings = getattr(self.settings, "env_settings", None)
-            configured_key = getattr(env_settings, "paperclip_api_key", None)
-            self.paperclip_adapter = PaperclipAdapter(
-                # Passed in rather than exported to `os.environ`: settings come
-                # from a .env that pydantic-settings reads privately, and a
-                # service has no business mutating process-global state to
-                # smuggle them into a library.
-                api_key=(
-                    configured_key.get_secret_value() if configured_key else None
-                ),
-                disable_rest=getattr(env_settings, "paperclip_disable_rest", None),
-                max_connections=self.settings.paperclip_max_connections,
-                pool_timeout_s=self.settings.paperclip_pool_timeout_seconds,
+            server_key = server_paperclip_key(self.settings)
+            if server_key is None:
+                raise PaperclipConfigError(
+                    "no Paperclip API key was provided. Enter your key in the "
+                    "Agents panel (create one at https://paperclip.gxl.ai)."
+                )
+            self.paperclip_adapter = self._new_paperclip_adapter(
+                server_key, allow_mcp_fallback=True
             )
         return self.paperclip_adapter
 
@@ -189,15 +209,28 @@ class LiteratureService:
         payload: ModelConfigRequest,
         callback: UsageMetricsCallback,
     ) -> dict[str, Any]:
+        user_key = user_paperclip_key(payload)
+        # A user's key gets an adapter of its own for this request, closed
+        # afterwards, so no pooled client or cached tool outlives the request
+        # holding someone else's credentials.
+        adapter = (
+            self._new_paperclip_adapter(user_key, allow_mcp_fallback=False)
+            if user_key is not None
+            else self._get_paperclip_adapter()
+        )
         model = build_paperclip_model(**self._model_kwargs(payload, callback))
         graph = build_paperclip_graph(
             chat_model=model,
-            adapter=self._get_paperclip_adapter(),
+            adapter=adapter,
             max_documents=self.settings.paperclip_max_documents,
             abstracts_only=self.settings.paperclip_abstracts_only,
             use_map=self.settings.paperclip_use_map,
         )
-        return await graph.ainvoke({"question": question, "warnings": []})
+        try:
+            return await graph.ainvoke({"question": question, "warnings": []})
+        finally:
+            if user_key is not None:
+                await adapter.aclose()
 
     async def _run_pubtator3(
         self,
@@ -226,6 +259,8 @@ class LiteratureService:
         """
         if isinstance(error, PaperclipConfigError):
             return f"{name} is not configured: {error}"
+        if isinstance(error, PaperclipError) and str(error).startswith("HTTP 401"):
+            return f"{name} rejected the API key (HTTP 401). Check the key and try again."
         return (
             f"{name} failed with {type(error).__name__}. "
             "See the server logs for details."

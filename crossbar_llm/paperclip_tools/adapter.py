@@ -944,6 +944,7 @@ class PaperclipAdapter:
         disable_rest: bool | None = None,
         max_connections: int = ACCOUNT_MAX_SHORT_IN_FLIGHT,
         pool_timeout_s: float = 60.0,
+        allow_mcp_fallback: bool = True,
     ):
         self._timeout_s = timeout_s
         self._slow_timeout_s = slow_timeout_s
@@ -959,6 +960,11 @@ class PaperclipAdapter:
         # mutating process-global state to get them here.
         self._api_key = api_key
         self._disable_rest = disable_rest
+        # The MCP tool is cached once per event loop, bound to whichever key
+        # created it. That suits one server-wide key, but a per-user key must
+        # never reach it: the cache would hand that user's credentials to the
+        # next caller. Adapters holding a user's key turn the fallback off.
+        self._allow_mcp_fallback = allow_mcp_fallback
         self._max_connections = max_connections
         # One pooled HTTP client per event loop, per adapter. Per-loop because
         # an AsyncClient binds to the loop it was created on; per-adapter
@@ -1034,6 +1040,11 @@ class PaperclipAdapter:
         costs nothing on the common path, and avoids under-timing out a
         `map` call that happens to fall back to MCP.
         """
+        if not self._allow_mcp_fallback:
+            raise PaperclipError(
+                "Paperclip's REST endpoint is unavailable and the MCP fallback "
+                "is off for this adapter."
+            )
         tool = await _paperclip_tool(
             timeout_s=self._slow_timeout_s, api_key=self._api_key
         )

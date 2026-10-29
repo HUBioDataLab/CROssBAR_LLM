@@ -1,6 +1,6 @@
 from typing_extensions import Self
 from typing import Literal
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, SecretStr, model_validator, field_validator
 
 from fastapi import Form
 
@@ -37,6 +37,16 @@ class ModelConfigRequest(BaseModel):
     reasoning_enabled: bool = Field(default=False)
     reasoning_effort: Literal["low", "medium", "high"] | None = None
     agents: AgentsConfig = Field(default_factory=AgentsConfig)
+    # The user's own Paperclip key. Required in production, where the server
+    # does not spend its own; never logged or stored, used for this request only.
+    paperclip_api_key: SecretStr | None = Field(default=None, max_length=512)
+
+    @field_validator("paperclip_api_key", mode="before")
+    @classmethod
+    def blank_key_is_unset(cls, value):
+        if isinstance(value, str):
+            return value.strip() or None
+        return value
 
     @model_validator(mode="after")
     def validate_reasoning(self) -> Self:

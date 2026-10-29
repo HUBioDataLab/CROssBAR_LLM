@@ -141,7 +141,7 @@ class AgentService:
             self.session_store.release(session_id, browser_id)
 
     def _select_agents(self, payload: ModelConfigRequest) -> AgentSelection:
-        unavailable = unavailable_reasons(self.settings)
+        unavailable = unavailable_reasons(self.settings, payload)
         enabled: list[AgentId] = []
         skipped: dict[AgentId, str] = {}
         for agent_id in AgentId:

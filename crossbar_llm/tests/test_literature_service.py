@@ -9,7 +9,7 @@ from crossbar_llm.agent_tools.callback_handler import UsageMetricsCallback
 from crossbar_llm.api.schemas.requests import DbSearchRequest
 from crossbar_llm.api.core.settings import Settings
 from crossbar_llm.api.services.literature_service import LiteratureService
-from crossbar_llm.paperclip_tools.adapter import PaperclipConfigError
+from crossbar_llm.paperclip_tools.adapter import PaperclipConfigError, PaperclipError
 
 
 def _settings(timeout: float = 1.0) -> Settings:
@@ -166,6 +166,7 @@ async def test_paperclip_adapter_is_lazy_reused_and_closed(monkeypatch):
     )
     settings = _settings()
     settings.env_settings = SimpleNamespace(
+        app_env="development",
         paperclip_api_key=SecretStr("paperclip-test-key"),
         paperclip_disable_rest=True,
     )
@@ -188,6 +189,80 @@ async def test_paperclip_adapter_is_lazy_reused_and_closed(monkeypatch):
     await service.aclose()
     assert created[0].close_count == 1
     assert service.paperclip_adapter is None
+
+
+@pytest.mark.asyncio
+async def test_user_paperclip_key_gets_its_own_adapter_without_mcp_fallback(monkeypatch):
+    created = []
+
+    class Adapter:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+            self.close_count = 0
+            created.append(self)
+
+        async def aclose(self):
+            self.close_count += 1
+
+    class Graph:
+        async def ainvoke(self, state):
+            return {"final_answer": "ok", "warnings": []}
+
+    module = "crossbar_llm.api.services.literature_service"
+    monkeypatch.setattr(f"{module}.PaperclipAdapter", Adapter)
+    monkeypatch.setattr(f"{module}.build_paperclip_model", lambda **kwargs: object())
+    monkeypatch.setattr(f"{module}.build_paperclip_graph", lambda **kwargs: Graph())
+    settings = _settings()
+    settings.env_settings = SimpleNamespace(
+        app_env="production",
+        paperclip_api_key=SecretStr("server-key"),
+        paperclip_disable_rest=None,
+    )
+    service = LiteratureService(settings)
+    payload = _payload().model_copy(update={"paperclip_api_key": SecretStr("user-key")})
+
+    await service._run_paperclip(
+        question="q", payload=payload,
+        callback=UsageMetricsCallback("session", strict=False),
+    )
+
+    assert len(created) == 1
+    assert created[0].kwargs["api_key"] == "user-key"
+    assert created[0].kwargs["allow_mcp_fallback"] is False
+    assert created[0].close_count == 1
+    # The shared, server-key adapter is never built for a user's request.
+    assert service.paperclip_adapter is None
+
+
+def test_production_never_uses_the_server_paperclip_key():
+    settings = _settings()
+    settings.env_settings = SimpleNamespace(
+        app_env="production",
+        paperclip_api_key=SecretStr("server-key"),
+        paperclip_disable_rest=None,
+    )
+    service = LiteratureService(settings)
+
+    with pytest.raises(PaperclipConfigError):
+        service._get_paperclip_adapter()
+
+
+@pytest.mark.asyncio
+async def test_rejected_user_key_is_reported_plainly(monkeypatch):
+    service = LiteratureService(_settings())
+
+    async def unauthorized(*args, **kwargs):
+        raise PaperclipError('HTTP 401: {"detail": "bad key"}')
+
+    monkeypatch.setattr(service, "_run_paperclip", unauthorized)
+
+    result = await service.run(
+        question="test",
+        tools=["paperclip"], payload=_payload(),
+        callback=UsageMetricsCallback("session", strict=False),
+    )
+
+    assert "rejected the API key" in result["paperclip"].warnings[0]
 
 
 @pytest.mark.asyncio

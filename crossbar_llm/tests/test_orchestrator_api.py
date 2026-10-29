@@ -422,6 +422,9 @@ def test_agents_catalog_lists_every_agent(client, monkeypatch):
     # An unconfigured Paperclip is listed, so the UI can say why it is off.
     assert by_id["paperclip"]["available"] is False
     assert "API key" in by_id["paperclip"]["unavailable_reason"]
+    # ...and the UI knows a key of the user's own unlocks it.
+    assert by_id["paperclip"]["requires_user_key"] is True
+    assert by_id["pubtator3"]["requires_user_key"] is False
 
 
 def test_api_contract_round_trips_agent_configuration():

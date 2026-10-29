@@ -1091,3 +1091,20 @@ def test_uniprot_accession_must_match_whole_string():
     assert infer_source_from_doc_id("P04637") == "proteins"
     assert infer_source_from_doc_id("A0A023GPI8") == "proteins"
     assert infer_source_from_doc_id("P12345 and more") != "proteins"
+
+
+def test_mcp_fallback_off_never_touches_the_shared_mcp_tool(monkeypatch):
+    import asyncio
+
+    from crossbar_llm.paperclip_tools import adapter as adapter_module
+
+    async def shared_tool(**kwargs):
+        raise AssertionError("a user's key must not reach the per-loop MCP cache")
+
+    monkeypatch.setattr(adapter_module, "_paperclip_tool", shared_tool)
+    adapter = adapter_module.PaperclipAdapter(
+        api_key="user-key", disable_rest=True, allow_mcp_fallback=False
+    )
+
+    with pytest.raises(adapter_module.PaperclipError, match="MCP fallback is off"):
+        asyncio.run(adapter._execute("ls", "/papers"))

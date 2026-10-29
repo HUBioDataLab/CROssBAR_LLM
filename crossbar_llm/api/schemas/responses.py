@@ -101,6 +101,8 @@ class AgentInfo(BaseModel):
     available: bool
     unavailable_reason: str | None = None
     supports_vector_search: bool
+    # True when the agent runs only with an API key the user sends per request.
+    requires_user_key: bool = False
 
 
 class AgentCatalogResponse(BaseModel):

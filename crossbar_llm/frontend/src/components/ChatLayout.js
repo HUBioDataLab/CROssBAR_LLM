@@ -76,6 +76,7 @@ import {
   AGENT_ORDER,
   DEFAULT_ENABLED_AGENTS,
   FALLBACK_CATALOG,
+  agentMeta,
   agentName,
   effectiveAgents,
   enabledCount,
@@ -84,11 +85,21 @@ import { initialProgress, reduceProgress } from '../utils/orchestrationProgress'
 import axios from 'axios';
 import Fuse from 'fuse.js';
 import { loadSuggestions } from '../utils/loadSuggestions';
-import ReactMarkdown from 'react-markdown';
+import CitationMarkdown from './CitationMarkdown';
+import AgentAvatar from './agents/AgentAvatar';
 import { markdownSx } from '../utils/markdownStyles';
 
 const DRAWER_WIDTH = 420;
 const ENABLED_AGENTS_STORAGE_KEY = 'crossbar_enabled_agents';
+const PAPERCLIP_KEY_STORAGE_KEY = 'crossbar_paperclip_api_key';
+
+const loadPaperclipKey = () => {
+  try {
+    return localStorage.getItem(PAPERCLIP_KEY_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+};
 
 /** The user's agent switches from the last visit; every agent on by default. */
 const loadEnabledAgents = () => {
@@ -150,7 +161,17 @@ function ChatLayout({
   const [reasoningEnabled, setReasoningEnabled] = useState(false);
   const [reasoningEffort, setReasoningEffort] = useState('medium');
   const [enabledAgents, setEnabledAgents] = useState(loadEnabledAgents);
-  const [agentCatalog, setAgentCatalog] = useState(FALLBACK_CATALOG);
+  const [serverAgentCatalog, setAgentCatalog] = useState(FALLBACK_CATALOG);
+  const [paperclipKey, setPaperclipKey] = useState(loadPaperclipKey);
+  const trimmedPaperclipKey = paperclipKey.trim();
+  // An agent that needs the user's own key is available once one is entered.
+  const agentCatalog = useMemo(
+    () => serverAgentCatalog.map((agent) => (
+      agent.requires_user_key && trimmedPaperclipKey ? { ...agent, available: true } : agent
+    )),
+    [serverAgentCatalog, trimmedPaperclipKey],
+  );
+  const needsPaperclipKey = serverAgentCatalog.some((agent) => agent.id === 'paperclip' && agent.requires_user_key);
   const [pendingPlan, setPendingPlan] = useState(null); // selection for a question awaiting Cypher review
   const [lastOrchestration, setLastOrchestration] = useState(null);
   const [copySnackbar, setCopySnackbar] = useState(false);
@@ -338,6 +359,15 @@ function ChatLayout({
       // Remembering the switches is a convenience; nothing breaks without it.
     }
   }, [enabledAgents]);
+
+  useEffect(() => {
+    try {
+      if (trimmedPaperclipKey) localStorage.setItem(PAPERCLIP_KEY_STORAGE_KEY, trimmedPaperclipKey);
+      else localStorage.removeItem(PAPERCLIP_KEY_STORAGE_KEY);
+    } catch {
+      // Without storage the key lasts only for this page load.
+    }
+  }, [trimmedPaperclipKey]);
 
   // Database search runs every selected agent. Vector search is KG-only.
   const requestAgents = useMemo(() => (
@@ -613,8 +643,12 @@ function ChatLayout({
     reasoning_enabled: reasoningEnabled,
     ...(reasoningEnabled ? { reasoning_effort: reasoningEffort } : {}),
     agents: requestAgents,
+    // Sent only when the server needs it and Paperclip is actually on.
+    ...(needsPaperclipKey && trimmedPaperclipKey && requestAgents.paperclip
+      ? { paperclip_api_key: trimmedPaperclipKey }
+      : {}),
     ...overrides,
-  }), [provider, llmType, topK, reasoningEnabled, reasoningEffort, requestAgents]);
+  }), [provider, llmType, topK, reasoningEnabled, reasoningEffort, requestAgents, needsPaperclipKey, trimmedPaperclipKey]);
 
   // Run the right streaming endpoint for the current mode + optional uploaded
   // vector file. Progress events go to `onEvent`; resolves with the response.
@@ -1351,7 +1385,7 @@ function ChatLayout({
               }}
             >
               <Box sx={markdownSx(theme)}>
-                <ReactMarkdown>{turn.response}</ReactMarkdown>
+                <CitationMarkdown>{turn.response}</CitationMarkdown>
               </Box>
             </Paper>
 
@@ -1491,7 +1525,7 @@ function ChatLayout({
   );
 
   // Right panel section header
-  const SectionHeader = ({ title, icon, section, badge }) => (
+  const SectionHeader = ({ title, icon, section, badge, sourceAgent }) => (
     <Box
       onClick={() => toggleSection(section)}
       sx={{
@@ -1508,6 +1542,23 @@ function ChatLayout({
         {icon}
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{title}</Typography>
         {badge && <Chip label={badge} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />}
+        {sourceAgent && (
+          <Tooltip title={`From the ${agentName(sourceAgent, agentCatalog)} agent`}>
+            <Chip
+              avatar={<AgentAvatar agentId={sourceAgent} size={16} />}
+              label={agentMeta(sourceAgent).tag}
+              size="small"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                color: agentMeta(sourceAgent).color,
+                borderColor: alpha(agentMeta(sourceAgent).color, 0.5),
+              }}
+            />
+          </Tooltip>
+        )}
       </Box>
       {expandedSections[section] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
     </Box>
@@ -2171,6 +2222,8 @@ function ChatLayout({
                   disabled={isLoading}
                   lockedOn={semanticSearchEnabled ? ['knowledge_graph'] : []}
                   lockedOff={semanticSearchEnabled ? ['paperclip', 'pubtator3'] : []}
+                  userKeys={{ paperclip: paperclipKey }}
+                  onUserKeyChange={(id, value) => id === 'paperclip' && setPaperclipKey(value)}
                 />
               </Box>
             </Collapse>
@@ -2461,13 +2514,18 @@ function ChatLayout({
           {hasValidResults(executionResult?.result) && (
             <Paper elevation={0} sx={{ mb: 2, borderRadius: '16px', border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
               <SectionHeader
-                title="Node Information"
+                title="Knowledge Graph Nodes"
                 icon={<BubbleChartIcon fontSize="small" color="success" />}
                 section="visualization"
                 badge={executionResult.result.length}
+                sourceAgent="knowledge_graph"
               />
               <Collapse in={expandedSections.visualization}>
                 <Box sx={{ p: 2, pt: 0 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, lineHeight: 1.5 }}>
+                    Entities returned by the Knowledge Graph agent&apos;s Cypher query over the CROssBARv2 knowledge graph.
+                    Literature sources (Paperclip, PubTator3) are linked inside each answer instead.
+                  </Typography>
                   <NodeVisualization executionResult={executionResult} />
                 </Box>
               </Collapse>
@@ -2480,6 +2538,7 @@ function ChatLayout({
               <SectionHeader
                 title="Structured Query Results"
                 icon={<DataObjectIcon fontSize="small" color="warning" />}
+                sourceAgent="knowledge_graph"
                 section="results"
                 badge={hasValidResults(executionResult?.result) ? executionResult.result.length : null}
               />
