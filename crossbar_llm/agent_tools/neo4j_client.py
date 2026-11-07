@@ -1,4 +1,4 @@
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, Query
 from .config import Neo4jConfig, VectorMappings, FullTextIndexMappings
 from pydantic import validate_call
 from typing_extensions import Self
@@ -548,15 +548,19 @@ class Neo4jClient:
         else:
             query = query.strip() + f" LIMIT {top_k}"
 
+        timed_query = Query(
+            query=query,
+            timeout=self.cfg.neo4j_query_timeout
+        )
         with self.driver.session(
             database=self.cfg.neo4j_db_name,
             default_access_mode=neo4j.READ_ACCESS,
             ) as session:
             try:
                 if parameters is None:
-                    records = session.run(query)
+                    records = session.run(timed_query)
                 else:
-                    records = session.run(query, parameters)
+                    records = session.run(timed_query, parameters)
 
                 # Remove embedding attributes from the results that confuse LLMs
                 results = []
@@ -614,6 +618,34 @@ class Neo4jClient:
                     error_message=str(e)
                 )
                 return f"The database failed to service the request: {str(e)}"
+
+            except neo4j.exceptions.Neo4jError as e:
+                if e.code in {
+                    "Neo.ClientError.Transaction.TransactionTimedOut",
+                    "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration",
+                }:
+                    logger.warning(
+                        "Cypher query exceeded its execution timeout",
+                        event_type="query_execution_timeout",
+                        component="Neo4jClient.execute_query",
+                        query=query,
+                        timeout_seconds=self.cfg.neo4j_query_timeout_seconds,
+                        error_code=e.code,
+                    )
+                    return (
+                        "Query execution timed out after "
+                        f"{self.cfg.neo4j_query_timeout_seconds:g} seconds. Please consider optimizing your query."
+                    )
+
+                logger.error(
+                    "Neo4j error during query execution",
+                    event_type="query_execution_error",
+                    component="Neo4jClient.execute_query",
+                    query=query,
+                    error_code=e.code,
+                    error_message=str(e),
+                )
+                return f"Neo4j query error: {str(e)}"
 
             except Exception as e:
                 logger.error(

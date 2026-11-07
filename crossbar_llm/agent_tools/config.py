@@ -104,6 +104,12 @@ class Neo4jConfig(BaseSettings):
     neo4j_password: str = Field(alias="NEO4J_PASSWORD")
     neo4j_db_name: str = Field(alias="NEO4J_DB_NAME")
     neo4j_uri: str = Field(alias="NEO4J_URI")
+    neo4j_query_timeout: float = Field(
+        default=20 * 60,
+        gt=0,
+        alias="NEO4J_QUERY_TIMEOUT",
+        description="Timeout for Neo4j queries in seconds"
+    )
 
 class ReasoningConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
