@@ -10,8 +10,8 @@ RUN apt upgrade -y
 # Install node
 RUN apt install -y nodejs wget curl
 
-# Install pnpm
-RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
+# Install pnpm (pinned: newer releases install to a different path)
+RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" PNPM_VERSION=10.33.4 bash -
 
 # Install static-web-server
 RUN curl -L -o sws.tar.gz https://github.com/static-web-server/static-web-server/releases/download/v2.34.0/static-web-server-v2.34.0-x86_64-unknown-linux-gnu.tar.gz
