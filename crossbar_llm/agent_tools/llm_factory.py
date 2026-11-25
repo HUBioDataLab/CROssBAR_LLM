@@ -135,10 +135,31 @@ class LLMFactory:
         ) 
         
         return init_chat_model(**kwargs)
+
+    def get_with_structured_output_model(
+            self,
+            model: BaseChatModel,
+            schema: type[BaseModel],
+            *,
+            include_raw: bool = True,
+            overridden_provider: str | None = None
+        ) -> BaseChatModel:
+
+        structured_provider = overridden_provider or self.cfg.provider
+        kwargs = {
+            "method": "json_schema",
+            "include_raw": include_raw,
+        }
+
+        if structured_provider in {"openai", "openrouter"}:
+            kwargs["strict"] = True
+        
+
+        return model.with_structured_output(schema, **kwargs)
     
     def create_cypher_llm(self) -> BaseChatModel:
         model = self.get_base_model()
-        model = model.with_structured_output(CypherStrategy, include_raw=True)
+        model = self.get_with_structured_output_model(model=model, schema=CypherStrategy)
 
         logger.debug("Created Cypher LLM with structured output", event_type="llm_creation", component="LLMFactory.create_cypher_llm")
         
@@ -146,7 +167,7 @@ class LLMFactory:
     
     def create_output_parser_llm(self) -> BaseChatModel:
         model = self.get_base_model()
-        model = model.with_structured_output(OutputParserStrategy, include_raw=True)
+        model = self.get_with_structured_output_model(model=model, schema=OutputParserStrategy)
         
         logger.debug("Created OutputParser LLM with structured output", event_type="llm_creation", component="LLMFactory.create_output_parser_llm")
         
@@ -185,7 +206,7 @@ class LLMFactory:
         
     def create_entity_resolution_llm(self) -> BaseChatModel:
         model = self.get_base_model()
-        model = model.with_structured_output(EntityResolutionStrategy, method="function_calling")
+        model = self.get_with_structured_output_model(model=model, schema=EntityResolutionStrategy, include_raw=False)
         
         logger.debug("Created Entity Resolution LLM with structured output", event_type="llm_creation", component="LLMFactory.create_entity_resolution_llm")
         return model.with_retry(stop_after_attempt=self.cfg.max_retries)
@@ -208,7 +229,7 @@ class LLMFactory:
     
     def create_follow_up_question_llm(self) -> BaseChatModel:
         model = self.get_base_model()
-        model = model.with_structured_output(FollowUpQuestionStrategy, include_raw=True)
+        model = self.get_with_structured_output_model(model=model, schema=FollowUpQuestionStrategy)
         
         logger.debug("Created Follow Up Question LLM with structured output", event_type="llm_creation", component="LLMFactory.create_follow_up_question_llm")
         return model.with_retry(stop_after_attempt=self.cfg.max_retries)
@@ -216,7 +237,11 @@ class LLMFactory:
     @validate_call
     def create_biological_relevance_validator_llm(self, model_name: str = AgentConfig().biological_relevance_validation_model) -> BaseChatModel:
         model = self.get_base_model(model_override=model_name)
-        model = model.with_structured_output(BiologicalRelevanceValidatorStrategy, include_raw=True)
+        model = self.get_with_structured_output_model(
+            model=model, 
+            schema=BiologicalRelevanceValidatorStrategy, 
+            overridden_provider=AgentConfig().biological_relevance_validation_provider
+        )
         
         logger.debug("Created Biological Relevance Validator LLM with structured output", event_type="llm_creation", component="LLMFactory.create_biological_relevance_validator_llm")
         return model.with_retry(stop_after_attempt=self.cfg.max_retries)
