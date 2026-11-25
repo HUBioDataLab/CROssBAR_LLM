@@ -549,7 +549,7 @@ class Neo4jClient:
             query = query.strip() + f" LIMIT {top_k}"
 
         timed_query = Query(
-            query=query,
+            text=query,
             timeout=self.cfg.neo4j_query_timeout
         )
         with self.driver.session(
@@ -629,12 +629,12 @@ class Neo4jClient:
                         event_type="query_execution_timeout",
                         component="Neo4jClient.execute_query",
                         query=query,
-                        timeout_seconds=self.cfg.neo4j_query_timeout_seconds,
+                        timeout_seconds=self.cfg.neo4j_query_timeout,
                         error_code=e.code,
                     )
                     return (
                         "Query execution timed out after "
-                        f"{self.cfg.neo4j_query_timeout_seconds:g} seconds. Please consider optimizing your query."
+                        f"{self.cfg.neo4j_query_timeout:g} seconds. Please consider optimizing your query."
                     )
 
                 logger.error(
