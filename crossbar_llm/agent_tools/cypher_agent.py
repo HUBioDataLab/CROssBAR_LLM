@@ -458,7 +458,7 @@ class CypherAgent:
                 component="CypherAgent.entity_resolution_node",
                 question=state["question"],
                 tool_call_results=tool_call_results,
-                resolution_result=resolution_result.model_dump()
+                resolution_result=resolution_result
              )
         
         logger.info(
