@@ -59,6 +59,7 @@ OpenRouter:
     - x-ai/grok-4.1-fast
     - x-ai/grok-4
     - minimax/minimax-m2.5
+    - minimax/minimax-m3.1-flash
     - google/gemma-4-26b-a4b-it
     - z-ai/glm-5.2
     - meta-llama/llama-3.3-70b-instruct
